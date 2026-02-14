@@ -17,12 +17,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "/index.html"
     }
-    {
-      "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-  ]
-}
   ]
 }
