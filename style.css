@@ -1,0 +1,177 @@
+:root {
+    --bg-color: #020418;
+    --primary-blue: #3b82f6;
+    --text-main: #ffffff;
+    --text-dim: #a0a0ba;
+    --nav-bg: rgba(255, 255, 255, 0.03);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    overflow-x: hidden;
+    /* แสงฟุ้งด้านหลังแบบ Dynamic */
+    background: radial-gradient(circle at 50% -10%, #1e1b4b 0%, #020418 50%);
+}
+
+/* --- Navigation --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 5%;
+    background: var(--nav-bg);
+    backdrop-filter: blur(15px);
+    border-radius: 100px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 1100px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 20px;
+    z-index: 1000;
+}
+
+.nav-links {
+    display: none; /* ซ่อนในมือถือ (ทำเป็น Hamburger ต่อได้) */
+    list-style: none;
+    gap: 25px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.nav-links a:hover { color: #fff; }
+
+.btn-login {
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* --- Hero Section --- */
+.container {
+    padding: 0 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hero {
+    text-align: center;
+    padding: 80px 0 40px;
+}
+
+.hero h1 {
+    font-size: clamp(1.8rem, 5vw, 3.2rem); /* ปรับขนาดตามหน้าจออัตโนมัติ */
+    line-height: 1.2;
+    margin-bottom: 25px;
+}
+
+.highlight {
+    color: var(--primary-blue);
+}
+
+.hero-desc {
+    color: var(--text-dim);
+    max-width: 700px;
+    margin: 0 auto 35px;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+    padding: 14px 32px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+/* --- Feature Grid (Responsive) --- */
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* มือถือเป็นแถวเดียว */
+    gap: 40px;
+    align-items: center;
+    padding: 60px 0;
+}
+
+.feature-text h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    line-height: 1.4;
+}
+
+/* Mockup Window */
+.window-mockup {
+    background: #0a0c21;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.window-header {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    display: flex;
+    gap: 6px;
+}
+
+.window-header span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Divider */
+.glow-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-blue), transparent);
+    box-shadow: 0 0 15px var(--primary-blue);
+    margin: 40px 0;
+}
+
+/* --- Media Queries --- */
+
+/* สำหรับ Tablet และ Desktop */
+@media (min-width: 768px) {
+    .nav-links { display: flex; }
+    
+    .feature-grid {
+        grid-template-columns: 1fr 1.2fr; /* แบ่งครึ่งหน้าจอ */
+        text-align: left;
+    }
+
+    .feature-grid.reverse {
+        direction: rtl; /* สลับฝั่งภาพกับข้อความ */
+    }
+
+    .feature-grid.reverse .feature-text {
+        direction: ltr;
+    }
+}
+
+@media (max-width: 767px) {
+    .hero { padding-top: 40px; }
+    .feature-text { text-align: center; }
+}

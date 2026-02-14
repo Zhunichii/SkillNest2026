@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Navigation --- */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 5%; background: var(--nav-bg);
+            backdrop-filter: blur(15px); border-radius: 100px;
+            margin: 20px auto; width: 90%; max-width: 1100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky; top: 20px; z-index: 1000;
+        }
+
+        .logo { font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .logo span { background: var(--primary-blue); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+
+        .nav-links { display: flex; list-style: none; gap: 25px; }
+        .nav-links a { text-decoration: none; color: var(--text-dim); font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { color: #fff; }
+
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-login {
+            background: var(--primary-blue); color: white; border: none;
+            padding: 8px 25px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            transition: box-shadow 0.3s ease;
+        }
+        .btn-login:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+
+        /* User Profile Button */
+        .user-profile {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .user-profile.show {
+            display: flex;
+        }
+
+        .user-name {
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .profile-dropdown-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .profile-dropdown-btn:hover {
+            opacity: 0.9;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: rgba(10, 12, 33, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            min-width: 180px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            color: var(--text-dim);
+            text-decoration: none;
+            display: block;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        /* --- Global Layout --- */
+        .container { padding: 0 5%; max-width: 1200px; margin: 0 auto; }
+        
+        /* Highlight Text */
+        .highlight { color: var(--primary-blue); font-weight: 600; }
+
+        /* --- Hero Section --- */
+        .hero { text-align: center; padding: 80px 0 60px; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.2; margin-bottom: 25px; }
+        .hero p { color: var(--text-dim); max-width: 700px; margin: 0 auto 35px; font-size: 1rem; line-height: 1.6; }
+        
+        .btn-cta {
+            background: var(--primary-blue); color: white; border: none;
+            padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 1rem;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            transition: 0.3s;
+        }
+
+        .btn-cta:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* --- Glow Divider --- */
+        .glow-divider {
+            width: 70%; height: 2px; margin: 60px auto;
+            background: linear-gradient(90deg, transparent, var(--primary-blue), transparent);
+            box-shadow: 0 0 20px 2px var(--primary-blue);
+            opacity: 0.8;
+            border-radius: 50%;
+        }
+
+        /* --- Feature Sections --- */
+        .feature-section {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 50px; padding: 40px 0;
+        }
+
+        .feature-content { flex: 1; }
+        .feature-content h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1.4; margin-bottom: 20px; }
+        
+        .feature-visual { flex: 1.2; display: flex; justify-content: center; }
+
+        .feature-section.reverse { flex-direction: row-reverse; }
+
+        /* --- Mockup Window --- */
+        .mockup-window {
+            width: 100%; max-width: 550px; aspect-ratio: 16/10;
+            background: linear-gradient(135deg, #0f1126 0%, #050511 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+            display: flex; flex-direction: column; overflow: hidden;
+            position: relative;
+        }
+        
+        .window-header {
+            height: 30px; background: rgba(255, 255, 255, 0.05);
+            display: flex; align-items: center; padding-left: 10px; gap: 6px;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); }
+        
+        .window-body { flex: 1; padding: 20px; display: flex; gap: 15px; }
+        .sidebar { width: 20%; background: rgba(255,255,255,0.03); border-radius: 6px; }
+        .content-area { flex: 1; background: rgba(255,255,255,0.03); border-radius: 6px; position: relative; }
+        
+        .chat-bar {
+            position: absolute; bottom: 15px; left: 15px; right: 15px;
+            height: 30px; background: rgba(255,255,255,0.1); border-radius: 15px;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .feature-section, .feature-section.reverse { flex-direction: column; text-align: center; }
+            .glow-divider { width: 90%; }
+            .user-name { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><span>W</span> SkillNest</div>
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Features</a></li>
+            <li><a href="#">About us</a></li>
+            <li><a href="#">Blog</a></li>
+        </ul>
+        
+        <div class="nav-auth">
+            <!-- Show when not logged in -->
+            <button class="btn-login" id="loginBtn" style="display: none;">Log in</button>
+            
+            <!-- Show when logged in -->
+            <div class="user-profile" id="userProfile">
+                <span class="user-name" id="displayName">Loading...</span>
+                <button class="profile-dropdown-btn" id="profileDropdownBtn">
+                    👤 <span id="userInitial"></span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a class="dropdown-item" id="dashboardItem">Dashboard</a>
+                    <a class="dropdown-item" id="profileItem">โปรไฟล์</a>
+                    <a class="dropdown-item" id="settingsItem">การตั้งค่า</a>
+                    <a class="dropdown-item" id="logoutItem">ออกจากระบบ</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <header class="hero">
+            <h1>Development of Course Management <br> <span class="highlight">Platform</span> with Intelligent Teaching <br> Assistant System</h1>
+            <p>The only platform that automatically analyzes learning content, creates an optimal learning sequence, and includes an AI assistant to teach and answer questions throughout.</p>
+            <button class="btn-cta" id="freetrialBtn">Start free trial</button>
+        </header>
+
+        <div class="glow-divider"></div>
+
+        <section class="feature-section">
+            <div class="feature-content">
+                <h2><span class="highlight">Platform</span> that assist in creating courses, where AI enables convenient and efficient management of various courses</h2>
+            </div>
+            <div class="feature-visual">
+                <div class="mockup-window">
+                    <div class="window-header"><div class="dot"></div><div class="dot"></div></div>
+                    <div class="window-body">
+                        <div class="sidebar"></div>
+                        <div class="content-area">
+                             <div style="width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(59,130,246,0.1), transparent);"></div>
+                             <div class="chat-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+        <section class="feature-section reverse">
+            <div class="feature-visual">
+                <div class="mockup-window">
+                    <div class="window-header"><div class="dot"></div><div class="dot"></div></div>
+                    <div class="window-body">
+                        <div class="sidebar"></div>
+                        <div class="content-area">
+                            <div style="position: absolute; top: 10px; left: 10px; color: #555; font-size: 0.8rem;">Front-End</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-content">
+                <h2>Users can learn from existing courses on the <span class="highlight">platform</span> as well as from self-uploaded courses</h2>
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+            authDomain: "skillnest-2026.firebaseapp.com",
+            projectId: "skillnest-2026",
+            storageBucket: "skillnest-2026.firebasestorage.app",
+            messagingSenderId: "416822065212",
+            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const loginBtn = document.getElementById('loginBtn');
+        const userProfile = document.getElementById('userProfile');
+        const displayName = document.getElementById('displayName');
+        const userInitial = document.getElementById('userInitial');
+        const freetrialBtn = document.getElementById('freetrialBtn');
+        const profileDropdownBtn = document.getElementById('profileDropdownBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        // Check authentication state
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is logged in
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const firstName = userData.firstName || 'User';
+                        
+                        // Show user profile, hide login button
+                        loginBtn.style.display = 'none';
+                        userProfile.classList.add('show');
+                        
+                        // Update user info
+                        displayName.textContent = `Hello, ${firstName}`;
+                        userInitial.textContent = firstName.charAt(0).toUpperCase();
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            } else {
+                // User is not logged in
+                loginBtn.style.display = 'block';
+                userProfile.classList.remove('show');
+            }
+        });
+
+        // Login button click
+        loginBtn.addEventListener('click', function() {
+            window.location.href = 'login-page/login.html';
+        });
+
+        // Free trial button click
+        freetrialBtn.addEventListener('click', function() {
+            const user = auth.currentUser;
+            if (user) {
+                // User is logged in, go to dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                // User not logged in, go to login page
+                window.location.href = 'login-page/login.html';
+            }
+        });
+
+        // Profile dropdown toggle
+        profileDropdownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            dropdownMenu.classList.remove('show');
+        });
+
+        // Prevent dropdown from closing when clicking inside
+        dropdownMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Dashboard item click
+        document.getElementById('dashboardItem').addEventListener('click', function() {
+            window.location.href = 'dashboard.html';
+        });
+
+        // Logout functionality
+        document.getElementById('logoutItem').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('เกิดข้อผิดพลาดในการออกจากระบบ');
+            }
+        });
+    </script>
+</body>
+</html>

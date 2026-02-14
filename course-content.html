@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กำลังโหลด... - SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --active-lesson: rgba(59, 130, 246, 0.15);
+            --chat-bg: #020617;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--nav-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 600; color: var(--text-main); text-decoration: none; }
+        .logo span { color: var(--primary-blue); }
+
+        .btn-back {
+            color: var(--text-dim);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-back:hover { color: white; }
+
+        .content-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            flex: 1;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+
+        .lesson-section {
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lesson-wrapper {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lesson-wrapper iframe, 
+        .lesson-wrapper video, 
+        .lesson-wrapper img {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .lesson-wrapper img {
+            object-fit: contain;
+        }
+
+        .course-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-meta {
+            color: var(--text-dim);
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .playlist-section {
+            background: var(--nav-bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .playlist-header h3 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+        .playlist-header p { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+
+        .lesson-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .lesson-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            align-items: center;
+        }
+
+        .lesson-item:hover { background: rgba(255,255,255,0.03); }
+
+        .lesson-item.active {
+            background: var(--active-lesson);
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .lesson-number {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            min-width: 20px;
+        }
+
+        .lesson-details { flex: 1; }
+        .lesson-title { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .lesson-duration { 
+            display: block; 
+            font-size: 0.8rem; 
+            color: var(--text-dim); 
+        }
+        .lesson-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .chat-section {
+            background: var(--chat-bg);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            font-weight: 600;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: #0ea5e9;
+            color: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px 10px 0 10px;
+            max-width: 80%;
+            font-size: 0.9rem;
+        }
+
+        .msg-bot {
+            align-self: flex-start;
+            background: #1e293b;
+            color: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px 10px 10px 0;
+            max-width: 80%;
+            font-size: 0.9rem;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            background: #0f172a;
+            color: white;
+        }
+
+        .chat-input button {
+            padding: 0.6rem 1rem;
+            background: #06b6d4;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: white;
+        }
+
+        .chat-input button:hover {
+            background: #0891b2;
+        }
+
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            color: var(--text-dim);
+            gap: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            display: none;
+        }
+
+        .error-modal.show { display: block; }
+
+        .error-modal h3 {
+            color: #ef4444;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .error-modal p {
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .error-modal button {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .error-modal button:hover { background: #2563eb; }
+
+        .pdf-viewer-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+
+        .pdf-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #2d2d2d;
+            border-bottom: 1px solid #444;
+            flex-wrap: wrap;
+        }
+
+        .pdf-btn {
+            padding: 0.5rem 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .pdf-btn:hover { background: #2563eb; }
+        .pdf-btn.download { background: #10b981; }
+        .pdf-btn.download:hover { background: #059669; }
+
+        .pdf-fallback {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        .document-viewer {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            color: var(--text-dim);
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .document-icon { font-size: 64px; }
+
+        .document-info { text-align: center; }
+        .document-info h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover { background: #2563eb; }
+
+        .image-viewer {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .image-viewer img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        @media (max-width: 968px) {
+            .content-container {
+                grid-template-columns: 1fr;
+            }
+            .chat-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="#" class="logo">Skill<span>Nest</span></a>
+    <a href="dashboard.html" class="btn-back">← กลับสู่ Dashboard</a>
+</nav>
+
+<div class="content-container">
+    <div class="lesson-section">
+        <div class="lesson-wrapper" id="lessonPlayer">
+            <div class="loading-screen">
+                <div class="spinner"></div>
+                <div>กำลังโหลดบทเรียน...</div>
+            </div>
+        </div>
+
+        <div class="course-info">
+            <h1 id="courseTitle">กำลังโหลด...</h1>
+            <div class="course-meta">
+                <span id="courseInstructor">👤 กำลังโหลด...</span>
+                <span id="courseCategory">📚 กำลังโหลด...</span>
+            </div>
+        </div>
+
+        <div class="playlist-section">
+            <div class="playlist-header">
+                <div>
+                    <h3>บทเรียนทั้งหมด</h3>
+                    <p id="lessonCount">0 บทเรียน</p>
+                </div>
+            </div>
+            <div class="lesson-list" id="lessonList">
+                <div class="loading-screen">
+                    <div>กำลังโหลดรายการบทเรียน...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-section">
+        <div class="chat-header">💬 แชทกับ AI Assistant</div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg-bot">สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ? 😊</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="พิมพ์ข้อความ...">
+            <button id="sendBtn">ส่ง</button>
+        </div>
+    </div>
+</div>
+
+<div class="error-modal" id="errorModal">
+    <h3>⚠️ เกิดข้อผิดพลาด</h3>
+    <p id="errorMessage">ไม่พบข้อมูลที่ต้องการ กรุณาตรวจสอบ Course ID</p>
+    <button onclick="window.location.href='dashboard.html'">กลับสู่ Dashboard</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBQw8u_eXs6SLAdyBwIGnDtZqmE7aWpxeo",
+    authDomain: "skillnest-7a0bc.firebaseapp.com",
+    projectId: "skillnest-7a0bc",
+    storageBucket: "skillnest-7a0bc.firebasestorage.app",
+    messagingSenderId: "730194530497",
+    appId: "1:730194530497:web:ffe9ae8f23f2c2a48ed03d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Enable offline persistence (optional but helps with network issues)
+import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+try {
+    await enableIndexedDbPersistence(db);
+    console.log("Firestore offline persistence enabled");
+} catch (err) {
+    if (err.code === 'failed-precondition') {
+        console.warn("Persistence failed: Multiple tabs open");
+    } else if (err.code === 'unimplemented') {
+        console.warn("Persistence not supported by browser");
+    }
+}
+
+let currentCourse = null;
+let currentLessonIndex = 0;
+
+async function loadCourseData(retryCount = 0) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+
+    console.log("Loading course with ID:", courseId, "Retry:", retryCount);
+
+    if (!courseId) {
+        showError("ไม่พบ Course ID ใน URL กรุณาเพิ่ม ?id=COURSE_ID ใน URL");
+        return;
+    }
+
+    try {
+        console.log("Attempting to fetch course from Firestore...");
+        const courseRef = doc(db, "courses", courseId);
+        
+        // Add timeout to detect connection issues
+        const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Connection timeout after 10 seconds')), 10000)
+        );
+        
+        const courseSnap = await Promise.race([
+            getDoc(courseRef),
+            timeout
+        ]);
+
+        if (!courseSnap.exists()) {
+            showError("ไม่พบข้อมูลคอร์สนี้ในระบบ<br><br>Course ID: <code>" + courseId + "</code><br><br>กรุณาตรวจสอบว่า Course ID ถูกต้อง");
+            return;
+        }
+
+        currentCourse = courseSnap.data();
+        console.log("Course data loaded successfully:", currentCourse);
+
+        document.getElementById("courseTitle").innerText = currentCourse.title || "ไม่มีชื่อคอร์ส";
+        document.title = (currentCourse.title || "คอร์สเรียน") + " - SkillNest";
+        document.getElementById("courseInstructor").innerText = "👤 " + (currentCourse.instructor || currentCourse.creatorId || "ไม่ระบุผู้สอน");
+        document.getElementById("courseCategory").innerText = "📚 " + (currentCourse.category || "ทั่วไป");
+
+        if (currentCourse.lessons && Array.isArray(currentCourse.lessons) && currentCourse.lessons.length > 0) {
+            renderLessonList(currentCourse.lessons);
+            playLesson(0);
+        } else {
+            showError("ไม่มีบทเรียนในคอร์สนี้<br><br>กรุณาเพิ่มบทเรียนผ่าน Firebase Console");
+        }
+
+    } catch (error) {
+        console.error("Error loading course:", error);
+        
+        // Retry logic for network errors
+        if ((error.message.includes('offline') || error.message.includes('timeout')) && retryCount < 2) {
+            console.log(`Retrying... (${retryCount + 1}/2)`);
+            setTimeout(() => loadCourseData(retryCount + 1), 2000);
+            return;
+        }
+        
+        let errorMsg = "เกิดข้อผิดพลาดในการโหลดข้อมูล:<br><br>";
+        
+        if (error.message.includes('offline') || error.message.includes('client is offline')) {
+            errorMsg += `
+                <strong>❌ ไม่สามารถเชื่อมต่อกับ Firebase</strong><br><br>
+                กรุณาตรวจสอบ:<br>
+                • เชื่อมต่ออินเทอร์เน็ตแล้วหรือยัง?<br>
+                • Firebase configuration ถูกต้องหรือไม่?<br>
+                • Firestore Rules อนุญาตให้อ่านข้อมูลได้หรือไม่?<br>
+                • เปิด Developer Console (F12) เพื่อดูรายละเอียด error<br><br>
+                <small>Error: ${error.message}</small>
+            `;
+        } else if (error.message.includes('timeout')) {
+            errorMsg += `
+                <strong>⏱️ การเชื่อมต่อใช้เวลานานเกินไป</strong><br><br>
+                กรุณาลองอีกครั้ง หรือตรวจสอบความเร็วอินเทอร์เน็ต<br><br>
+                <small>Error: ${error.message}</small>
+            `;
+        } else if (error.code === 'permission-denied') {
+            errorMsg += `
+                <strong>🔒 ไม่มีสิทธิ์เข้าถึงข้อมูล</strong><br><br>
+                กรุณาตรวจสอบ Firebase Security Rules<br><br>
+                <small>Error: ${error.message}</small>
+            `;
+        } else {
+            errorMsg += error.message;
+        }
+        
+        showError(errorMsg);
+    }
+}
+
+function showError(message) {
+    const modal = document.getElementById("errorModal");
+    const errorMessage = document.getElementById("errorMessage");
+    errorMessage.innerHTML = message;
+    modal.classList.add("show");
+}
+
+function renderLessonList(lessons) {
+    const listContainer = document.getElementById("lessonList");
+    document.getElementById("lessonCount").innerText = `${lessons.length} บทเรียน`;
+
+    listContainer.innerHTML = lessons.map((lesson, index) => {
+        const fileType = detectFileType(lesson.fileUrl);
+        const typeLabel = getFileTypeLabel(fileType);
+        
+        return `
+            <div class="lesson-item ${index === 0 ? 'active' : ''}" 
+                 data-index="${index}" 
+                 onclick="playLesson(${index})">
+                <div class="lesson-number">${index + 1}</div>
+                <div class="lesson-details">
+                    <span class="lesson-title">
+                        ${lesson.title || 'บทเรียนที่ ' + (index + 1)}
+                        <span class="lesson-type-badge">${typeLabel}</span>
+                    </span>
+                    <span class="lesson-duration">${lesson.duration || 'ไม่ระบุเวลา'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getFileTypeLabel(type) {
+    const labels = {
+        'pdf': 'PDF',
+        'youtube': 'YouTube',
+        'video': 'วิดีโอ',
+        'image': 'รูปภาพ',
+        'ppt': 'PowerPoint',
+        'doc': 'Word',
+        'excel': 'Excel',
+        'unknown': 'ไฟล์'
+    };
+    return labels[type] || 'ไฟล์';
+}
+
+window.playLesson = function(index) {
+    currentLessonIndex = index;
+    
+    document.querySelectorAll('.lesson-item').forEach((item, i) => {
+        if (i === index) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
+    const container = document.getElementById("lessonPlayer");
+    const lesson = currentCourse.lessons[index];
+
+    if (!lesson || !lesson.fileUrl) {
+        container.innerHTML = '<div class="loading-screen"><div>❌ ไม่พบไฟล์บทเรียน</div></div>';
+        return;
+    }
+
+    const fileUrl = lesson.fileUrl;
+    const fileType = lesson.type || detectFileType(fileUrl);
+
+    console.log("Playing lesson:", { 
+        title: lesson.title, 
+        type: fileType, 
+        url: fileUrl,
+        detectedType: detectFileType(fileUrl)
+    });
+
+    if (fileType === 'pdf') {
+        renderPDFViewer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'youtube') {
+        renderYouTubePlayer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'video') {
+        renderVideoPlayer(container, fileUrl);
+    }
+    else if (fileType === 'image') {
+        renderImageViewer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'ppt' || fileType === 'doc' || fileType === 'excel') {
+        renderDocumentViewer(container, fileUrl, lesson.title, fileType);
+    }
+    else {
+        renderUnsupportedFile(container, fileUrl, lesson.title, fileType);
+    }
+}
+
+function detectFileType(url) {
+    if (!url) return 'unknown';
+    const lowerUrl = url.toLowerCase();
+
+    if (lowerUrl.endsWith('.pdf') || lowerUrl.includes('/pdf/') || lowerUrl.includes('pdf')) return 'pdf';
+    if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) return 'youtube';
+    if (lowerUrl.match(/\.(mp4|webm|mov|avi|mkv|flv|wmv)$/)) return 'video';
+    if (lowerUrl.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/)) return 'image';
+    if (lowerUrl.match(/\.(ppt|pptx)$/)) return 'ppt';
+    if (lowerUrl.match(/\.(doc|docx)$/)) return 'doc';
+    if (lowerUrl.match(/\.(xls|xlsx|csv)$/)) return 'excel';
+
+    return 'unknown';
+}
+
+function renderYouTubePlayer(container, fileUrl, title) {
+    let embedUrl = fileUrl;
+    if (fileUrl.includes('watch?v=')) {
+        const videoId = fileUrl.split('v=')[1].split('&')[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    } else if (fileUrl.includes('youtu.be/')) {
+        const videoId = fileUrl.split('youtu.be/')[1].split('?')[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    container.innerHTML = `
+        <iframe 
+            src="${embedUrl}" 
+            title="${title}" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen
+            style="width:100%; height:100%;">
+        </iframe>
+    `;
+}
+
+function renderVideoPlayer(container, fileUrl) {
+    container.innerHTML = `
+        <video controls autoplay style="width:100%; height:100%;">
+            <source src="${fileUrl}">
+            เบราว์เซอร์ของคุณไม่รองรับวิดีโอ
+        </video>
+    `;
+}
+
+function renderImageViewer(container, fileUrl, title) {
+    container.innerHTML = `
+        <div class="image-viewer">
+            <img src="${fileUrl}" alt="${title}" onerror="this.parentElement.innerHTML='<div class=\\'loading-screen\\'><div>❌ ไม่สามารถโหลดรูปภาพได้</div></div>';" />
+        </div>
+    `;
+}
+
+function renderPDFViewer(container, fileUrl, title) {
+    const viewerId = 'pdf-viewer-' + Date.now();
+    
+    container.innerHTML = `
+        <div class="pdf-viewer-container">
+            <div class="pdf-toolbar">
+                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">
+                    📄 เปิดในแท็บใหม่
+                </button>
+                <a href="${fileUrl}" download class="pdf-btn download">
+                    ⬇️ ดาวน์โหลด
+                </a>
+                <select id="viewerMethod" class="pdf-btn" onchange="switchPDFViewer('${fileUrl.replace(/'/g, "\\'")}', '${viewerId}', this.value)">
+                    <option value="direct">แสดงโดยตรง</option>
+                    <option value="google">Google Docs Viewer</option>
+                    <option value="mozilla">Mozilla PDF.js</option>
+                </select>
+            </div>
+            <div id="${viewerId}" style="flex: 1; width: 100%; background: #1e1e1e;"></div>
+            <div class="pdf-fallback" id="fallback-${viewerId}">
+                <div style="font-size:48px;">📄</div>
+                <div style="font-size:18px;">ไม่สามารถแสดงตัวอย่าง PDF ได้</div>
+                <div style="font-size:14px; max-width:400px;">
+                    ไฟล์นี้อาจมีข้อจำกัดในการแสดงผล กรุณาเปิดในแท็บใหม่หรือดาวน์โหลด
+                </div>
+                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">
+                    เปิดไฟล์
+                </button>
+            </div>
+        </div>
+    `;
+    
+    switchPDFViewer(fileUrl, viewerId, 'direct');
+}
+
+function renderDocumentViewer(container, fileUrl, title, fileType) {
+    const icons = { 'ppt': '📊', 'doc': '📝', 'excel': '📈' };
+    const typeNames = { 'ppt': 'PowerPoint', 'doc': 'Word Document', 'excel': 'Excel Spreadsheet' };
+
+    container.innerHTML = `
+        <div class="document-viewer">
+            <div class="document-icon">${icons[fileType] || '📄'}</div>
+            <div class="document-info">
+                <h3>${title}</h3>
+                <p>${typeNames[fileType] || 'Document'}</p>
+            </div>
+            <a href="${fileUrl}" target="_blank" class="download-btn">
+                เปิดไฟล์
+            </a>
+            <a href="${fileUrl}" download class="download-btn" style="background:#10b981; margin-left:1rem;">
+                ดาวน์โหลด
+            </a>
+        </div>
+    `;
+}
+
+function renderUnsupportedFile(container, fileUrl, title, fileType) {
+    container.innerHTML = `
+        <div class="document-viewer">
+            <div class="document-icon">📎</div>
+            <div class="document-info">
+                <h3>${title}</h3>
+                <p>ไฟล์ประเภท: ${fileType}</p>
+                <p style="font-size:0.8rem; color:#666;">URL: ${fileUrl.substring(0, 60)}...</p>
+            </div>
+            <a href="${fileUrl}" target="_blank" class="download-btn">
+                เปิดไฟล์
+            </a>
+            <a href="${fileUrl}" download class="download-btn" style="background:#10b981; margin-left:1rem;">
+                ดาวน์โหลด
+            </a>
+        </div>
+    `;
+}
+
+window.switchPDFViewer = function(fileUrl, viewerId, method) {
+    const viewer = document.getElementById(viewerId);
+    const fallback = document.getElementById('fallback-' + viewerId);
+    
+    if (!viewer) return;
+    
+    viewer.innerHTML = '';
+    viewer.style.display = 'block';
+    if (fallback) fallback.style.display = 'none';
+    
+    if (method === 'direct') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.src = fileUrl;
+        
+        iframe.onerror = () => {
+            console.error("Direct PDF load failed");
+            viewer.style.display = 'none';
+            if (fallback) fallback.style.display = 'flex';
+        };
+        
+        viewer.appendChild(iframe);
+    } 
+    else if (method === 'google') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+        
+        iframe.onerror = () => {
+            console.error("Google Docs viewer failed");
+            viewer.style.display = 'none';
+            if (fallback) fallback.style.display = 'flex';
+        };
+        
+        viewer.appendChild(iframe);
+    }
+    else if (method === 'mozilla') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(fileUrl)}`;
+        
+        iframe.onerror = () => {
+            console.error("Mozilla PDF.js failed");
+            viewer.style.display = 'none';
+            if (fallback) fallback.style.display = 'flex';
+        };
+        
+        viewer.appendChild(iframe);
+    }
+}
+
+window.openPDFInNewTab = function(url) {
+    window.open(url, '_blank');
+}
+
+const chatMessages = document.getElementById("chatMessages");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+
+sendBtn.addEventListener("click", sendMessage);
+chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
+
+async function sendMessage() {
+    const userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    addUserMessage(userMessage);
+    chatInput.value = "";
+
+    const botReply = await sendMessageToGemini(userMessage);
+    addBotMessage(botReply);
+}
+
+function addUserMessage(text) {
+    const div = document.createElement("div");
+    div.className = "msg-user";
+    div.innerText = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addBotMessage(text) {
+    const div = document.createElement("div");
+    div.className = "msg-bot";
+    div.innerText = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+const GEMINI_API_KEY = "AIzaSyAfiDvTFx11fwmcKuMlxW8Uh7ceYRcEFWM"; 
+
+async function sendMessageToGemini(userMessage, retryCount = 0) {
+  try {
+    const MODEL_ID = "gemini-2.0-flash-exp";
+    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: userMessage }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Gemini API Error:", errorText);
+      
+      if (response.status === 429) {
+        if (retryCount < 3) {
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          return sendMessageToGemini(userMessage, retryCount + 1);
+        }
+        return "API หมด quota แล้ว กรุณารอสักครู่แล้วลองใหม่อีกครั้ง 🔑";
+      }
+      
+      if (response.status === 404) return `ไม่พบโมเดล AI กรุณาตรวจสอบการตั้งค่า`;
+      if (response.status === 403) return "API Key ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า 🔑";
+      
+      return "ขออภัย เกิดข้อผิดพลาดในการติดต่อ AI";
+    }
+
+    const data = await response.json();
+    if (data.candidates && data.candidates.length > 0) {
+        return data.candidates[0].content.parts[0].text;
+    } else {
+        return "🤔 AI ไม่สามารถตอบกลับได้ในขณะนี้";
+    }
+
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return `❌ เกิดข้อผิดพลาด: ${error.message}`;
+  }
+}
+
+loadCourseData();
+
+</script>
+
+</body>
+</html>

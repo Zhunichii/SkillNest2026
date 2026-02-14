@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรไฟล์ของฉัน - SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --input-bg: rgba(255, 255, 255, 0.08);
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            min-height: 100vh;
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 1000;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            background: var(--primary-blue);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn-back {
+            color: var(--text-dim);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 100px auto 40px;
+            padding: 0 30px;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            height: fit-content;
+        }
+
+        .profile-picture-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-picture-wrapper {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .profile-picture {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            overflow: hidden;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-picture-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .profile-picture-wrapper:hover .profile-picture-overlay {
+            opacity: 1;
+        }
+
+        .btn-upload {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-remove {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .btn-remove:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .user-type-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary-blue);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .user-type-badge.teacher {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        .form-input {
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .email-note {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-save {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: 0.3s;
+            flex: 1;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .message {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 4, 24, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 20px;
+                margin-top: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo-section" onclick="window.location.href='dashboard.html'">
+            <span class="logo-icon">W</span>
+            <span>SkillNest</span>
+        </div>
+        <a href="dashboard.html" class="btn-back">
+            ← กลับไปหน้าหลัก
+        </a>
+    </nav>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>👤 โปรไฟล์ของฉัน</h1>
+            <p>จัดการข้อมูลส่วนตัวและรูปโปรไฟล์ของคุณ</p>
+        </div>
+
+        <div id="messageBox" class="message"></div>
+
+        <div class="profile-container">
+            <!-- Left Column: Profile Picture -->
+            <div class="profile-card">
+                <div class="profile-picture-section">
+                    <div class="profile-picture-wrapper">
+                        <div class="profile-picture" id="profilePicture">
+                            <img id="profileImage" style="display: none;">
+                            <span id="profileInitials">U</span>
+                        </div>
+                        <div class="profile-picture-overlay" onclick="document.getElementById('profilePictureInput').click()">
+                            📷 เปลี่ยนรูป
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="profilePictureInput" accept="image/*">
+                    
+                    <button class="btn-upload" onclick="document.getElementById('profilePictureInput').click()">
+                        📁 เลือกรูปภาพ
+                    </button>
+                    
+                    <button class="btn-remove" id="removePhotoBtn" style="display: none;">
+                        🗑️ ลบรูปภาพ
+                    </button>
+
+                    <div class="user-type-badge" id="userTypeBadge">
+                        📚 นักเรียน
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Profile Form -->
+            <div class="profile-card">
+                <form id="profileForm" class="form-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">ชื่อ</label>
+                            <input type="text" class="form-input" id="firstName" placeholder="ชื่อของคุณ" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">นามสกุล</label>
+                            <input type="text" class="form-input" id="lastName" placeholder="นามสกุลของคุณ" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">อีเมล</label>
+                        <input type="email" class="form-input" id="email" disabled>
+                        <span class="email-note">* ไม่สามารถเปลี่ยนอีเมลได้ในขณะนี้</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save" id="saveBtn">
+                            💾 บันทึกการเปลี่ยนแปลง
+                        </button>
+                        <button type="button" class="btn-cancel" onclick="window.location.href='dashboard.html'">
+                            ยกเลิก
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+            authDomain: "skillnest-2026.firebaseapp.com",
+            projectId: "skillnest-2026",
+            storageBucket: "skillnest-2026.firebasestorage.app",
+            messagingSenderId: "416822065212",
+            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Cloudinary Configuration
+        const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';  // เช่น 'dxxxxxxxx'
+        const CLOUDINARY_UPLOAD_PRESET = 'skillnest_courses';  // ชื่อ Upload Preset ที่สร้างไว้
+        const CLOUDINARY_API_KEY = '346538585181618Y'; // ⚠️ แทนที่ด้วย API Key ของคุณ (optional สำหรับการลบ)
+
+        let currentUser = null;
+        let originalData = {};
+        let selectedProfilePicture = null;
+
+        // Cloudinary Upload Function
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            formData.append('folder', 'skillnest/profile-pictures'); // จัดเก็บในโฟลเดอร์
+            formData.append('public_id', `user_${currentUser.uid}`); // ใช้ user ID เป็นชื่อไฟล์
+            
+            try {
+                const response = await fetch(
+                    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                    {
+                        method: 'POST',
+                        body: formData
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const data = await response.json();
+                return data.secure_url; // URL ของรูปที่อัพโหลด
+            } catch (error) {
+                console.error('Cloudinary upload error:', error);
+                throw error;
+            }
+        }
+
+        // Cloudinary Delete Function (Optional - ใช้ API ต้องมี signature)
+        async function deleteFromCloudinary(publicId) {
+            // หมายเหตุ: การลบจาก Cloudinary ต้องใช้ signed request
+            // วิธีที่ง่ายกว่าคือปล่อยให้รูปเก่าอยู่ และแค่อัพเดท URL ใหม่
+            // หรือใช้ Cloudinary Admin API จาก backend
+            console.log('Image will be overwritten on next upload');
+        }
+
+        // Elements
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const messageBox = document.getElementById('messageBox');
+        const profileForm = document.getElementById('profileForm');
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput = document.getElementById('lastName');
+        const emailInput = document.getElementById('email');
+        const profilePictureInput = document.getElementById('profilePictureInput');
+        const profileImage = document.getElementById('profileImage');
+        const profileInitials = document.getElementById('profileInitials');
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        const userTypeBadge = document.getElementById('userTypeBadge');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // Show/Hide Loading
+        function showLoading(show = true) {
+            loadingOverlay.classList.toggle('show', show);
+        }
+
+        // Show Message
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.className = `message ${type}`;
+            messageBox.style.display = 'block';
+            
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Get Initials
+        function getInitials(firstName, lastName) {
+            const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+            const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+            return first + last || 'U';
+        }
+
+        // Update Profile Picture Display
+        function updateProfilePictureDisplay(url) {
+            if (url) {
+                profileImage.src = url;
+                profileImage.style.display = 'block';
+                profileInitials.style.display = 'none';
+                removePhotoBtn.style.display = 'flex';
+            } else {
+                profileImage.style.display = 'none';
+                profileInitials.style.display = 'block';
+                removePhotoBtn.style.display = 'none';
+            }
+        }
+
+        // Load User Data
+        async function loadUserData(user) {
+            try {
+                showLoading(true);
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    originalData = userData;
+
+                    // Set form values
+                    firstNameInput.value = userData.firstName || '';
+                    lastNameInput.value = userData.lastName || '';
+                    emailInput.value = userData.email || '';
+
+                    // Set profile initials
+                    profileInitials.textContent = getInitials(userData.firstName, userData.lastName);
+
+                    // Set profile picture
+                    if (userData.profilePicture) {
+                        updateProfilePictureDisplay(userData.profilePicture);
+                    }
+
+                    // Set user type badge
+                    if (userData.userType === 'teacher') {
+                        userTypeBadge.textContent = '👨‍🏫 ครู';
+                        userTypeBadge.classList.add('teacher');
+                    } else {
+                        userTypeBadge.textContent = '📚 นักเรียน';
+                    }
+                }
+                
+                showLoading(false);
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showMessage('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+                showLoading(false);
+            }
+        }
+
+        // Handle Profile Picture Selection
+        profilePictureInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showMessage('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+                    return;
+                }
+
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 5MB', 'error');
+                    return;
+                }
+
+                selectedProfilePicture = file;
+
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    updateProfilePictureDisplay(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Remove Profile Picture
+        removePhotoBtn.addEventListener('click', async () => {
+            if (!confirm('คุณต้องการลบรูปโปรไฟล์ใช่หรือไม่?')) return;
+
+            try {
+                showLoading(true);
+
+                // Note: Cloudinary ไม่ต้องลบไฟล์จริง เพราะจะ overwrite เมื่ออัพโหลดใหม่
+                // หรือถ้าต้องการลบจริงๆ ต้องใช้ backend API
+                
+                // Update Firestore - ลบ URL
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    profilePicture: null
+                });
+
+                // Update UI
+                updateProfilePictureDisplay(null);
+                selectedProfilePicture = null;
+                originalData.profilePicture = null;
+                
+                showMessage('ลบรูปโปรไฟล์เรียบร้อยแล้ว', 'success');
+                showLoading(false);
+            } catch (error) {
+                console.error('Error removing profile picture:', error);
+                showMessage('เกิดข้อผิดพลาดในการลบรูปภาพ', 'error');
+                showLoading(false);
+            }
+        });
+
+        // Handle Form Submit
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const firstName = firstNameInput.value.trim();
+            const lastName = lastNameInput.value.trim();
+
+            if (!firstName || !lastName) {
+                showMessage('กรุณากรอกชื่อและนามสกุล', 'error');
+                return;
+            }
+
+            try {
+                showLoading(true);
+                saveBtn.disabled = true;
+
+                const updates = {
+                    firstName: firstName,
+                    lastName: lastName
+                };
+
+                // Upload profile picture to Cloudinary if selected
+                if (selectedProfilePicture) {
+                    try {
+                        const photoURL = await uploadToCloudinary(selectedProfilePicture);
+                        updates.profilePicture = photoURL;
+                        
+                        // Update UI with new photo
+                        updateProfilePictureDisplay(photoURL);
+                    } catch (error) {
+                        console.error('Error uploading to Cloudinary:', error);
+                        showMessage('เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ กรุณาลองใหม่', 'error');
+                        showLoading(false);
+                        saveBtn.disabled = false;
+                        return;
+                    }
+                }
+
+                // Update Firestore
+                await updateDoc(doc(db, 'users', currentUser.uid), updates);
+
+                // Update initials
+                profileInitials.textContent = getInitials(firstName, lastName);
+
+                // Update original data
+                originalData = { ...originalData, ...updates };
+                selectedProfilePicture = null;
+
+                showMessage('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+                showLoading(false);
+                saveBtn.disabled = false;
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                showMessage('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + error.message, 'error');
+                showLoading(false);
+                saveBtn.disabled = false;
+            }
+        });
+
+        // Auth State Observer
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user);
+            } else {
+                window.location.href = '../login-page/login.html';
+            }
+        });
+    </script>
+</body>
+</html>
