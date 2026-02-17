@@ -1,23 +1,12 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/login", "destination": "/login-page/login.html" },
+    { "source": "/signup", "destination": "/login-page/signup.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/course-content", "destination": "/course-content.html" },
+    { "source": "/create-course", "destination": "/create-course.html" },
+    { "source": "/manage-courses", "destination": "/manage-courses.html" },
+    { "source": "/check-model", "destination": "/check_model.html" }
   ]
 }
