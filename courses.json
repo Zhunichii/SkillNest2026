@@ -1,0 +1,22 @@
+[
+  {
+    "id": "course-1771347907123",
+    "title": "Python",
+    "description": "Python Lesson",
+    "category": "programming",
+    "level": "beginner",
+    "instructor": "Nest",
+    "thumbnail": "https://res.cloudinary.com/dtuvwwmm0/image/upload/v1771347908/skillnest/thumbnails/wmnx67x5wdaunimpvnlh.jpg",
+    "enrolledCount": 0,
+    "createdAt": "2026-02-17T17:05:10.077Z",
+    "lessons": [
+      {
+        "title": "Python",
+        "fileUrl": "https://raw.githubusercontent.com/Zhunichii/SkillNest2026/main/courses/course-1771347907123/Python.pdf",
+        "type": "pdf",
+        "duration": null,
+        "order": 0
+      }
+    ]
+  }
+]
