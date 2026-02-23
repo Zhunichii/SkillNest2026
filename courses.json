@@ -38,5 +38,25 @@
         "order": 0
       }
     ]
+  },
+  {
+    "id": "course-1771862831633",
+    "title": "Python",
+    "description": "Python Lesson",
+    "category": "programming",
+    "level": "beginner",
+    "instructor": "Nestle",
+    "thumbnail": "https://res.cloudinary.com/dtuvwwmm0/image/upload/v1771862833/skillnest/thumbnails/ngadfwaj6efhalzgrmle.jpg",
+    "enrolledCount": 0,
+    "createdAt": "2026-02-23T16:07:14.314Z",
+    "lessons": [
+      {
+        "title": "Python 1",
+        "fileUrl": "https://raw.githubusercontent.com/Zhunichii/SkillNest2026/main/courses/course-1771862831633/Python.pdf",
+        "type": "pdf",
+        "duration": null,
+        "order": 0
+      }
+    ]
   }
 ]
