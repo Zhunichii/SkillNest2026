@@ -273,8 +273,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            flex-direction: column;
+            z-index: 9999;
         }
 
         .loading-overlay.show {
@@ -283,7 +282,7 @@
 
         .loading-content {
             text-align: center;
-            color: white;
+            padding: 2rem;
         }
 
         .spinner {
@@ -301,52 +300,24 @@
             100% { transform: rotate(360deg); }
         }
 
-        input[type="file"] {
+        .progress-container {
+            margin-top: 1.5rem;
             display: none;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-
-        .badge-github {
-            background: rgba(88, 166, 255, 0.2);
-            color: #58a6ff;
-        }
-
-        .badge-youtube {
-            background: rgba(255, 0, 0, 0.2);
-            color: #ff0000;
-        }
-
-        .badge-cloudinary {
-            background: rgba(52, 168, 255, 0.2);
-            color: #34a8ff;
-        }
-
-        .progress-container {
-            margin-top: 1rem;
-            background: rgba(0,0,0,0.3);
-            padding: 1rem;
-            border-radius: 8px;
-        }
-
         .progress-item {
-            margin-bottom: 0.75rem;
+            background: var(--input-bg);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
         }
 
         .progress-bar {
-            width: 100%;
             height: 6px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
             overflow: hidden;
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
         }
 
         .progress-fill {
@@ -355,28 +326,34 @@
             transition: width 0.3s;
         }
 
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            
-            body {
-                padding: 1rem;
-            }
+        .btn-back {
+            color: var(--text-dim);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            transition: 0.2s;
+        }
+
+        .btn-back:hover {
+            color: white;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <a href="dashboard.html" class="btn-back">← กลับหน้าหลัก</a>
+
     <div class="header">
-        <h1 class="logo">Skill<span>Nest</span></h1>
-        <p style="color: var(--text-dim);">สร้างคอร์สใหม่</p>
+        <h1 class="logo">Skill<span>Nest</span> 📚</h1>
+        <p style="color: var(--text-dim);">สร้างคอร์สของคุณ</p>
     </div>
 
-    <!-- ข้อมูลคอร์ส -->
+    <!-- Section 1: ข้อมูลคอร์ส -->
     <div class="section">
-        <div class="section-title">📚 ข้อมูลคอร์ส</div>
+        <h2 class="section-title">📝 ข้อมูลคอร์ส</h2>
         
         <div class="form-group">
             <label>ชื่อคอร์ส <span class="required">*</span></label>
@@ -384,20 +361,20 @@
         </div>
 
         <div class="form-group">
-            <label>คำอธิบาย <span class="required">*</span></label>
-            <textarea id="courseDescription" class="form-control" placeholder="อธิบายเกี่ยวกับคอร์ส..."></textarea>
+            <label>คำอธิบายคอร์ส <span class="required">*</span></label>
+            <textarea id="courseDescription" class="form-control" placeholder="อธิบายสิ่งที่ผู้เรียนจะได้เรียนรู้..."></textarea>
         </div>
 
         <div class="grid">
             <div class="form-group">
                 <label>หมวดหมู่ <span class="required">*</span></label>
                 <select id="courseCategory" class="form-control">
-                    <option value="">เลือกหมวดหมู่</option>
-                    <option value="programming">โปรแกรมมิ่ง</option>
-                    <option value="design">ดีไซน์</option>
+                    <option value="">-- เลือกหมวดหมู่ --</option>
+                    <option value="programming">การเขียนโปรแกรม</option>
+                    <option value="design">ดิไซน์</option>
                     <option value="business">ธุรกิจ</option>
                     <option value="marketing">การตลาด</option>
-                    <option value="data-science">Data Science</option>
+                    <option value="data-science">วิทยาศาสตร์ข้อมูล</option>
                     <option value="other">อื่นๆ</option>
                 </select>
             </div>
@@ -405,236 +382,254 @@
             <div class="form-group">
                 <label>ระดับความยาก <span class="required">*</span></label>
                 <select id="courseLevel" class="form-control">
-                    <option value="">เลือกระดับ</option>
-                    <option value="beginner">ผู้เริ่มต้น</option>
+                    <option value="">-- เลือกระดับ --</option>
+                    <option value="beginner">เริ่มต้น</option>
                     <option value="intermediate">ปานกลาง</option>
-                    <option value="advanced">ขั้นสูง</option>
+                    <option value="advanced">สูง</option>
                 </select>
             </div>
         </div>
 
         <div class="form-group">
             <label>ชื่อผู้สอน</label>
-            <input type="text" id="courseInstructor" class="form-control" placeholder="เช่น อาจารย์สมชาย">
-        </div>
-
-        <!-- รูปภาพปก -->
-        <div class="form-group">
-            <label>🖼️ รูปภาพปกคอร์ส <span class="badge-cloudinary">Cloudinary</span></label>
-            <small>JPG, PNG (แนะนำ 1920x1080px)</small>
-            
-            <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
-                <div class="file-upload-icon">📷</div>
-                <div>คลิกเพื่อเลือกรูปภาพ</div>
-            </div>
-            <input type="file" id="thumbnailInput" accept="image/*" onchange="handleThumbnailSelect(event)">
-            
-            <div id="thumbnailPreview"></div>
+            <input type="text" id="courseInstructor" class="form-control" placeholder="ชื่อของคุณ (ถ้ามี)">
         </div>
     </div>
 
-    <!-- บทเรียน -->
+    <!-- Section 2: รูปปก -->
     <div class="section">
-        <div class="section-title">
-            📖 บทเรียน
-            <button class="btn btn-primary" style="margin-left: auto;" onclick="addLesson()">
-                ➕ เพิ่มบทเรียน
-            </button>
+        <h2 class="section-title">🖼️ รูปปกคอร์ส</h2>
+        
+        <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
+            <div class="file-upload-icon">📷</div>
+            <p>คลิกเพื่ออัพโหลดรูปปก</p>
+            <small style="color: var(--text-dim);">รองรับ JPG, PNG, WEBP (แนะนำ 16:9)</small>
         </div>
-
-        <div id="lessonsList"></div>
+        <input type="file" id="thumbnailInput" accept="image/*" style="display:none;">
+        <div id="thumbnailPreview"></div>
     </div>
 
-    <!-- ปุ่มสร้างคอร์ส -->
+    <!-- Section 3: บทเรียน -->
+    <div class="section">
+        <h2 class="section-title">📚 บทเรียน</h2>
+        
+        <div id="lessonsList"></div>
+        
+        <button class="btn btn-primary" onclick="addLesson()">+ เพิ่มบทเรียน</button>
+    </div>
+
+    <!-- Submit -->
     <div style="text-align: center; margin-top: 2rem;">
-        <button class="btn btn-success" style="font-size: 1.2rem; padding: 1rem 3rem;" onclick="createCourse()">
-            ✨ สร้างคอร์สและอัพโหลด
+        <button class="btn btn-success" onclick="createCourse()" style="font-size: 1.1rem; padding: 1rem 3rem;">
+            ✅ สร้างคอร์ส
         </button>
     </div>
 </div>
 
 <!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay">
+<div id="loadingOverlay" class="loading-overlay">
     <div class="loading-content">
         <div class="spinner"></div>
-        <div id="loadingText">กำลังประมวลผล...</div>
-        <div id="progressContainer" class="progress-container" style="display:none; width: 400px; max-width: 90vw;"></div>
+        <h3 id="loadingText">กำลังประมวลผล...</h3>
+        <div id="progressContainer" class="progress-container"></div>
     </div>
 </div>
 
-<script>
-// === Configuration ===
-const API_URL = '/api/upload'; // Vercel API endpoint
-const CLOUDINARY_UPLOAD_PRESET = 'skillnest'; // ⚠️ เปลี่ยนเป็นของคุณ
-const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0'; // ⚠️ เปลี่ยนเป็นของคุณ
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-// === Global State ===
+// Firebase Config
+const firebaseConfig = {
+    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+    authDomain: "skillnest-2026.firebaseapp.com",
+    projectId: "skillnest-2026",
+    storageBucket: "skillnest-2026.firebasestorage.app",
+    messagingSenderId: "416822065212",
+    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Cloudinary Config
+const CLOUDINARY_CLOUD_NAME = 'dtuwwmmO';
+const CLOUDINARY_UPLOAD_PRESET = 'skillnest_uploads';
+
+// Global State
 let thumbnailFile = null;
 let thumbnailUrl = '';
 let lessons = [];
 let lessonCounter = 0;
+let currentUser = null;
 
-// === Handle Thumbnail ===
-window.handleThumbnailSelect = function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate
-    if (!file.type.startsWith('image/')) {
-        alert('❌ กรุณาเลือกไฟล์รูปภาพเท่านั้น');
-        return;
+// ตรวจสอบ Login และสิทธิ์
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        try {
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const userType = userData.userType || 'student';
+                
+                if (userType !== 'teacher') {
+                    alert('คุณไม่มีสิทธิ์สร้างคอร์ส เฉพาะครูเท่านั้น');
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+                
+                currentUser = user;
+            }
+        } catch (error) {
+            console.error('Error checking permissions:', error);
+            alert('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์');
+            window.location.href = 'dashboard.html';
+        }
+    } else {
+        window.location.href = '../login-page/login.html';
     }
+});
 
-    if (file.size > 10 * 1024 * 1024) {
-        alert('❌ ไฟล์ใหญ่เกิน 10MB');
-        return;
-    }
-
-    thumbnailFile = file;
-
-    // Preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('thumbnailPreview').innerHTML = `
-            <div class="file-preview">
-                <img src="${e.target.result}" alt="Preview">
-                <div style="flex:1">
-                    <div style="font-weight:600">${file.name}</div>
-                    <div style="color:var(--text-dim);font-size:0.85rem">${(file.size / 1024).toFixed(2)} KB</div>
+// === Thumbnail Upload ===
+document.getElementById('thumbnailInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        thumbnailFile = file;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('thumbnailPreview').innerHTML = `
+                <div class="file-preview">
+                    <img src="${event.target.result}" alt="Thumbnail">
+                    <div style="flex:1;">
+                        <strong>${file.name}</strong><br>
+                        <small>${(file.size / 1024).toFixed(1)} KB</small>
+                    </div>
+                    <button class="btn btn-danger" onclick="removeThumbnail()">✕</button>
                 </div>
-                <button class="btn btn-danger" onclick="removeThumbnail()">ลบ</button>
-            </div>
-        `;
-    };
-    reader.readAsDataURL(file);
-};
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+});
 
 window.removeThumbnail = function() {
     thumbnailFile = null;
-    thumbnailUrl = '';
-    document.getElementById('thumbnailPreview').innerHTML = '';
     document.getElementById('thumbnailInput').value = '';
+    document.getElementById('thumbnailPreview').innerHTML = '';
 };
 
 // === Add Lesson ===
 window.addLesson = function() {
-    const lessonId = lessonCounter++;
-    const lessonHtml = `
-        <div class="lesson-item" id="lesson-${lessonId}">
+    lessonCounter++;
+    const lessonId = 'lesson-' + lessonCounter;
+    
+    lessons.push({ id: lessonId, method: 'file', file: null });
+    
+    const lessonHTML = `
+        <div class="lesson-item" id="${lessonId}">
             <div class="lesson-header">
                 <span class="lesson-number">บทที่ ${lessonCounter}</span>
-                <button class="btn btn-danger" onclick="removeLesson(${lessonId})">ลบ</button>
+                <button class="btn btn-danger" onclick="removeLesson('${lessonId}')">ลบบทเรียน</button>
             </div>
-
+            
             <div class="form-group">
                 <label>ชื่อบทเรียน <span class="required">*</span></label>
-                <input type="text" class="form-control lesson-title" placeholder="เช่น บทที่ 1: แนะนำ Python">
+                <input type="text" class="form-control lesson-title" placeholder="เช่น ติดตั้ง Python">
             </div>
-
+            
+            <div class="form-group">
+                <label>ระยะเวลา (นาที)</label>
+                <input type="number" class="form-control lesson-duration" placeholder="เช่น 15">
+            </div>
+            
             <div class="form-group">
                 <label>เลือกวิธีอัพโหลด</label>
                 <div class="upload-method">
-                    <div class="method-option active" onclick="selectMethod(${lessonId}, 'file')">
+                    <div class="method-option active" onclick="selectMethod('${lessonId}', 'file')">
                         <div class="method-icon">📁</div>
                         <div>อัพโหลดไฟล์</div>
-                        <small>(PDF, PPT, Word)</small>
                     </div>
-                    <div class="method-option" onclick="selectMethod(${lessonId}, 'youtube')">
-                        <div class="method-icon">📹</div>
+                    <div class="method-option" onclick="selectMethod('${lessonId}', 'youtube')">
+                        <div class="method-icon">▶️</div>
                         <div>YouTube URL</div>
-                        <small>(สำหรับวิดีโอ)</small>
                     </div>
                 </div>
             </div>
-
-            <div class="upload-content-file" id="upload-file-${lessonId}">
-                <div class="form-group">
-                    <label>เลือกไฟล์ <span class="badge-github">→ GitHub</span></label>
-                    <small>รองรับ: PDF, PowerPoint, Word, Excel, รูปภาพ (ไฟล์ < 100MB)</small>
-                    <div class="file-upload-area" onclick="document.getElementById('lessonFile-${lessonId}').click()">
-                        <div class="file-upload-icon">📄</div>
-                        <div>คลิกเพื่อเลือกไฟล์</div>
-                    </div>
-                    <input type="file" id="lessonFile-${lessonId}" onchange="handleLessonFileSelect(${lessonId}, event)">
-                    <div id="lessonFilePreview-${lessonId}"></div>
+            
+            <div id="uploadArea-${lessonId}">
+                <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lessonId}').click()">
+                    <div class="file-upload-icon">📤</div>
+                    <p>คลิกเพื่ออัพโหลดไฟล์</p>
+                    <small style="color: var(--text-dim);">รองรับ PDF, PPT, DOC, รูปภาพ</small>
                 </div>
+                <input type="file" id="lessonFileInput-${lessonId}" style="display:none;">
+                <div id="lessonFilePreview-${lessonId}"></div>
             </div>
-
-            <div class="upload-content-youtube" id="upload-youtube-${lessonId}" style="display:none">
-                <div class="form-group">
-                    <label>YouTube URL <span class="badge-youtube">YouTube</span></label>
-                    <input type="text" class="form-control lesson-youtube-url" placeholder="https://www.youtube.com/watch?v=...">
-                    <small>อัพโหลดวิดีโอไป YouTube (Unlisted) แล้วใส่ URL ที่นี่</small>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>ระยะเวลา (ถ้ามี)</label>
-                <input type="text" class="form-control lesson-duration" placeholder="เช่น 15:30 หรือ 30 min อ่าน">
+            
+            <div id="youtubeArea-${lessonId}" style="display:none;">
+                <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
             </div>
         </div>
     `;
-
-    document.getElementById('lessonsList').insertAdjacentHTML('beforeend', lessonHtml);
-    lessons.push({ id: lessonId, file: null, method: 'file' });
+    
+    document.getElementById('lessonsList').insertAdjacentHTML('beforeend', lessonHTML);
+    
+    // Event listener for file input
+    document.getElementById(`lessonFileInput-${lessonId}`).addEventListener('change', function(e) {
+        handleLessonFileUpload(lessonId, e.target.files[0]);
+    });
 };
 
 window.selectMethod = function(lessonId, method) {
-    const lesson = document.getElementById(`lesson-${lessonId}`);
-    
-    // Update active state
-    lesson.querySelectorAll('.method-option').forEach(opt => opt.classList.remove('active'));
-    lesson.querySelector(`.method-option:${method === 'file' ? 'first' : 'last'}-child`).classList.add('active');
-    
-    // Show/hide content
-    document.getElementById(`upload-file-${lessonId}`).style.display = method === 'file' ? 'block' : 'none';
-    document.getElementById(`upload-youtube-${lessonId}`).style.display = method === 'youtube' ? 'block' : 'none';
-    
-    // Update lesson data
     const lessonData = lessons.find(l => l.id === lessonId);
     if (lessonData) lessonData.method = method;
+    
+    const lessonItem = document.getElementById(lessonId);
+    lessonItem.querySelectorAll('.method-option').forEach(opt => opt.classList.remove('active'));
+    
+    if (method === 'file') {
+        lessonItem.querySelectorAll('.method-option')[0].classList.add('active');
+        document.getElementById(`uploadArea-${lessonId}`).style.display = 'block';
+        document.getElementById(`youtubeArea-${lessonId}`).style.display = 'none';
+    } else {
+        lessonItem.querySelectorAll('.method-option')[1].classList.add('active');
+        document.getElementById(`uploadArea-${lessonId}`).style.display = 'none';
+        document.getElementById(`youtubeArea-${lessonId}`).style.display = 'block';
+    }
 };
 
-window.handleLessonFileSelect = function(lessonId, event) {
-    const file = event.target.files[0];
+function handleLessonFileUpload(lessonId, file) {
     if (!file) return;
-
-    // Validate size
-    const sizeInMB = file.size / (1024 * 1024);
-    if (sizeInMB > 100) {
-        alert('❌ ไฟล์ใหญ่เกิน 100MB\nกรุณาอัพโหลดวิดีโอไป YouTube แล้วใส่ URL แทน');
-        event.target.value = '';
-        return;
-    }
-
-    // Store file
+    
     const lessonData = lessons.find(l => l.id === lessonId);
     if (lessonData) lessonData.file = file;
-
-    // Preview
+    
     const icon = getFileIcon(file.name);
     document.getElementById(`lessonFilePreview-${lessonId}`).innerHTML = `
         <div class="file-preview">
-            <div style="font-size:2rem">${icon}</div>
-            <div style="flex:1">
-                <div style="font-weight:600">${file.name}</div>
-                <div style="color:var(--text-dim);font-size:0.85rem">${(file.size / 1024).toFixed(2)} KB</div>
+            <div style="font-size:2rem;">${icon}</div>
+            <div style="flex:1;">
+                <strong>${file.name}</strong><br>
+                <small>${(file.size / 1024).toFixed(1)} KB</small>
             </div>
-            <button class="btn btn-danger" onclick="removeLessonFile(${lessonId})">ลบ</button>
+            <button class="btn btn-danger" onclick="removeLessonFile('${lessonId}')">✕</button>
         </div>
     `;
-};
+}
 
 window.removeLessonFile = function(lessonId) {
     const lessonData = lessons.find(l => l.id === lessonId);
     if (lessonData) lessonData.file = null;
     
-    document.getElementById(`lessonFile-${lessonId}`).value = '';
+    document.getElementById(`lessonFileInput-${lessonId}`).value = '';
     document.getElementById(`lessonFilePreview-${lessonId}`).innerHTML = '';
 };
 
 window.removeLesson = function(lessonId) {
-    document.getElementById(`lesson-${lessonId}`).remove();
+    document.getElementById(lessonId).remove();
     lessons = lessons.filter(l => l.id !== lessonId);
 };
 
@@ -687,14 +682,26 @@ function updateProgress(items) {
 }
 
 // === Upload to Cloudinary ===
-async function uploadToCloudinary(file) {
+async function uploadToCloudinary(file, folder = 'skillnest') {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'skillnest/thumbnails');
+    formData.append('folder', folder);
+
+    // ตรวจสอบประเภทไฟล์
+    const fileType = detectFileType(file.name);
+    let resourceType = 'auto';
+    
+    if (file.type.startsWith('image/')) {
+        resourceType = 'image';
+    } else if (file.type.startsWith('video/')) {
+        resourceType = 'video';
+    } else {
+        resourceType = 'raw'; // สำหรับ PDF, documents
+    }
 
     const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
         {
             method: 'POST',
             body: formData
@@ -707,65 +714,15 @@ async function uploadToCloudinary(file) {
     return data.secure_url;
 }
 
-// === Upload to GitHub via API ===
-async function uploadToGitHub(file, path) {
-    // Read file as base64
-    const reader = new FileReader();
-    const base64 = await new Promise((resolve, reject) => {
-        reader.onload = () => {
-            const base64String = reader.result.split(',')[1];
-            resolve(base64String);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-
-    // Upload via Backend API
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'upload-file',
-            path: path,
-            content: base64,
-            message: `Upload ${file.name}`
-        })
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
-    }
-
-    const data = await response.json();
-    return data.url; // Raw GitHub URL
-}
-
-// === Update courses.json via API ===
-async function updateCoursesJSON(courseData) {
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'update-courses',
-            courseData: courseData
-        })
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update courses');
-    }
-
-    return await response.json();
-}
-
 // === Create Course ===
 window.createCourse = async function() {
+    // ตรวจสอบว่า login แล้วหรือยัง
+    if (!currentUser) {
+        alert('❌ กรุณา login ก่อนสร้างคอร์ส');
+        window.location.href = '../login-page/login.html';
+        return;
+    }
+
     // Validate
     const title = document.getElementById('courseTitle').value.trim();
     const description = document.getElementById('courseDescription').value.trim();
@@ -785,9 +742,6 @@ window.createCourse = async function() {
 
     try {
         showLoading('กำลังเตรียมข้อมูล...');
-
-        // Generate course ID
-        const courseId = 'course-' + Date.now();
         const progress = [];
 
         // 1. Upload thumbnail to Cloudinary
@@ -795,18 +749,18 @@ window.createCourse = async function() {
             progress.push({ name: 'รูปปกคอร์ส', status: 'กำลังอัพโหลด...', progress: 0 });
             updateProgress(progress);
             
-            thumbnailUrl = await uploadToCloudinary(thumbnailFile);
+            thumbnailUrl = await uploadToCloudinary(thumbnailFile, 'skillnest/thumbnails');
             
             progress[0].status = '✅ สำเร็จ';
             progress[0].progress = 100;
             updateProgress(progress);
         }
 
-        // 2. Upload lesson files to GitHub
+        // 2. Upload lesson files to Cloudinary
         const lessonsData = [];
         
         for (let i = 0; i < lessons.length; i++) {
-            const lessonItem = document.getElementById(`lesson-${lessons[i].id}`);
+            const lessonItem = document.getElementById(lessons[i].id);
             const lessonTitle = lessonItem.querySelector('.lesson-title').value.trim();
             const lessonDuration = lessonItem.querySelector('.lesson-duration').value.trim();
             
@@ -830,12 +784,9 @@ window.createCourse = async function() {
                     return;
                 }
 
-                // Upload to GitHub
-                const filename = lessonData.file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-                const path = `courses/${courseId}/${filename}`;
-                
-                fileUrl = await uploadToGitHub(lessonData.file, path);
-                fileType = detectFileType(filename);
+                // Upload to Cloudinary
+                fileUrl = await uploadToCloudinary(lessonData.file, 'skillnest/lessons');
+                fileType = detectFileType(lessonData.file.name);
 
                 progress[i + (thumbnailFile ? 1 : 0)].status = '✅ อัพโหลดแล้ว';
                 progress[i + (thumbnailFile ? 1 : 0)].progress = 100;
@@ -860,14 +811,15 @@ window.createCourse = async function() {
                 title: lessonTitle,
                 fileUrl: fileUrl,
                 type: fileType,
-                duration: lessonDuration || null,
+                duration: lessonDuration ? parseInt(lessonDuration) : null,
                 order: i
             });
         }
 
-        // 3. Create course object
+        // 3. บันทึกข้อมูลลง Firestore
+        showLoading('กำลังบันทึกข้อมูลคอร์ส...');
+        
         const courseData = {
-            id: courseId,
             title: title,
             description: description,
             category: category,
@@ -875,20 +827,22 @@ window.createCourse = async function() {
             instructor: instructor || 'ไม่ระบุ',
             thumbnail: thumbnailUrl || '',
             enrolledCount: 0,
-            createdAt: new Date().toISOString(),
+            createdAt: serverTimestamp(),
+            creatorId: currentUser.uid,
+            creatorEmail: currentUser.email,
             lessons: lessonsData
         };
 
-        // 4. Update courses.json
-        showLoading('กำลังบันทึกข้อมูลคอร์ส...');
-        await updateCoursesJSON(courseData);
+        const docRef = await addDoc(collection(db, 'courses'), courseData);
 
         hideLoading();
         
-        alert('🎉 สร้างคอร์สสำเร็จ!\n\nCourse ID: ' + courseId);
+        alert('🎉 สร้างคอร์สสำเร็จ!\n\nCourse ID: ' + docRef.id);
         
-        // Redirect or reset
-        if (confirm('ต้องการสร้างคอร์สใหม่อีกหรือไม่?')) {
+        // Redirect
+        if (confirm('ต้องการกลับไปหน้า Dashboard หรือไม่?')) {
+            window.location.href = 'dashboard.html';
+        } else {
             location.reload();
         }
 
