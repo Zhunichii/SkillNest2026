@@ -58,5 +58,25 @@
         "order": 0
       }
     ]
+  },
+  {
+    "id": "course-1771862952067",
+    "title": "Python I",
+    "description": "Test",
+    "category": "programming",
+    "level": "beginner",
+    "instructor": "Nest",
+    "thumbnail": "https://res.cloudinary.com/dtuvwwmm0/image/upload/v1771862954/skillnest/thumbnails/xsladz7pu2gxhb9wbowr.jpg",
+    "enrolledCount": 0,
+    "createdAt": "2026-02-23T16:09:15.257Z",
+    "lessons": [
+      {
+        "title": "Python",
+        "fileUrl": "https://raw.githubusercontent.com/Zhunichii/SkillNest2026/main/courses/course-1771862952067/Python.pdf",
+        "type": "pdf",
+        "duration": null,
+        "order": 0
+      }
+    ]
   }
 ]
