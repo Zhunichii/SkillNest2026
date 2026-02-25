@@ -894,11 +894,11 @@ function addBotMessage(text) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-const GEMINI_API_KEY = "AIzaSyAfiDvTFx11fwmcKuMlxW8Uh7ceYRcEFWM"; 
+const GEMINI_API_KEY = "AIzaSyChrGSvl3D-8ffd5kgRSRs2gxEzXOoMWqM"; 
 
 async function sendMessageToGemini(userMessage, retryCount = 0) {
   try {
-    const MODEL_ID = "gemini-2.5-flash-lite";
+    const MODEL_ID = "gemini-2.5-flash";
     
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`,
