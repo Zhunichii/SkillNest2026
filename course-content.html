@@ -468,34 +468,20 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBQw8u_eXs6SLAdyBwIGnDtZqmE7aWpxeo",
-    authDomain: "skillnest-7a0bc.firebaseapp.com",
-    projectId: "skillnest-7a0bc",
-    storageBucket: "skillnest-7a0bc.firebasestorage.app",
-    messagingSenderId: "730194530497",
-    appId: "1:730194530497:web:ffe9ae8f23f2c2a48ed03d"
+    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+    authDomain: "skillnest-2026.firebaseapp.com",
+    projectId: "skillnest-2026",
+    storageBucket: "skillnest-2026.firebasestorage.app",
+    messagingSenderId: "416822065212",
+    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-// Enable offline persistence (optional but helps with network issues)
-import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-try {
-    await enableIndexedDbPersistence(db);
-    console.log("Firestore offline persistence enabled");
-} catch (err) {
-    if (err.code === 'failed-precondition') {
-        console.warn("Persistence failed: Multiple tabs open");
-    } else if (err.code === 'unimplemented') {
-        console.warn("Persistence not supported by browser");
-    }
-}
 
 let currentCourse = null;
 let currentLessonIndex = 0;
