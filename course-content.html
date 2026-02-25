@@ -44,13 +44,25 @@
         .btn-back {
             color: var(--text-dim);
             text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            transition: 0.2s;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
             font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .btn-back:hover { color: white; }
+        .btn-back:hover {
+            color: #ffffff;
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            transform: translateX(-3px);
+        }
+        .btn-back:active {
+            transform: translateX(-3px) scale(0.98);
+        }
 
         .content-container {
             display: grid;
