@@ -617,6 +617,89 @@
             font-weight: 600;
         }
 
+        /* === Homework Tab === */
+        .hw-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .hw-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            gap: 0.75rem;
+        }
+        .hw-card-title { font-weight: 600; font-size: 1rem; }
+        .hw-status-badge {
+            padding: 0.2rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .hw-status-badge.pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .hw-status-badge.submitted { background: rgba(59,130,246,0.2); color: #60a5fa; }
+        .hw-status-badge.graded { background: rgba(16,185,129,0.2); color: #34d399; }
+        .hw-deadline { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+        .hw-desc-text { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 1rem; line-height: 1.6; }
+        .hw-score-display {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .hw-comment-display {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+        .hw-submit-area textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 90px;
+            font-family: inherit;
+        }
+        .hw-submit-area textarea:focus { outline: none; border-color: #f59e0b; }
+        .hw-file-upload {
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            transition: 0.2s;
+            margin-top: 0.5rem;
+        }
+        .hw-file-upload:hover { border-color: #f59e0b; color: white; }
+        .btn-submit-hw {
+            margin-top: 0.75rem;
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-submit-hw:hover { opacity: 0.9; }
+        .btn-submit-hw:disabled { opacity: 0.4; cursor: not-allowed; }
+
         /* Not enrolled gate */
         .not-enrolled-gate {
             display: none;
@@ -682,6 +765,7 @@
             <div class="lesson-tabs">
                 <div class="lesson-tab active" onclick="switchTab('lessons', this)">📚 บทเรียน</div>
                 <div class="lesson-tab" id="quizTabBtn" onclick="switchTab('quiz', this)" style="display:none;">📝 แบบทดสอบ</div>
+                <div class="lesson-tab" id="hwTabBtn" onclick="switchTab('homework', this)" style="display:none;">📋 การบ้าน</div>
             </div>
 
             <!-- Lesson list panel -->
@@ -711,6 +795,15 @@
                         <button class="btn-start-quiz-inline" id="btnStartQuiz" onclick="startCourseQuiz()">
                             ▶️ เริ่มทำแบบทดสอบ
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Homework panel -->
+            <div id="tabHomework" class="tab-panel">
+                <div style="padding:0.5rem 0;">
+                    <div id="hwPanelList">
+                        <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
                     </div>
                 </div>
             </div>
@@ -753,7 +846,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
@@ -881,6 +974,12 @@ async function loadCourseData(retryCount = 0) {
             }
         }
 
+        // แสดง homework tab ถ้ามีการบ้าน
+        if (currentCourse.homework && currentCourse.homework.length > 0) {
+            document.getElementById('hwTabBtn').style.display = 'inline-block';
+            await loadHomeworkPanel();
+        }
+
     } catch (error) {
         console.error("Error loading course:", error);
         
@@ -989,7 +1088,10 @@ window.playLesson = function(index) {
     }
 
     const fileUrl = lesson.fileUrl;
-    const fileType = lesson.type || detectFileType(fileUrl);
+    // ถ้า type ที่บันทึกไว้เป็น unknown ให้ detect ใหม่จาก URL
+    const fileType = (lesson.type && lesson.type !== 'unknown')
+        ? lesson.type
+        : detectFileType(fileUrl);
 
     console.log("Playing lesson:", { 
         title: lesson.title, 
@@ -1022,13 +1124,29 @@ function detectFileType(url) {
     if (!url) return 'unknown';
     const lowerUrl = url.toLowerCase();
 
-    if (lowerUrl.endsWith('.pdf') || lowerUrl.includes('/pdf/') || lowerUrl.includes('pdf')) return 'pdf';
     if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) return 'youtube';
-    if (lowerUrl.match(/\.(mp4|webm|mov|avi|mkv|flv|wmv)$/)) return 'video';
-    if (lowerUrl.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/)) return 'image';
-    if (lowerUrl.match(/\.(ppt|pptx)$/)) return 'ppt';
-    if (lowerUrl.match(/\.(doc|docx)$/)) return 'doc';
-    if (lowerUrl.match(/\.(xls|xlsx|csv)$/)) return 'excel';
+    if (lowerUrl.endsWith('.pdf') || lowerUrl.includes('/pdf/upload/')) return 'pdf';
+    if (lowerUrl.match(/\.(mp4|webm|mov|avi|mkv|flv|wmv)(\?|$)/)) return 'video';
+    if (lowerUrl.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?|$)/)) return 'image';
+    if (lowerUrl.match(/\.(ppt|pptx)(\?|$)/)) return 'ppt';
+    if (lowerUrl.match(/\.(doc|docx)(\?|$)/)) return 'doc';
+    if (lowerUrl.match(/\.(xls|xlsx|csv)(\?|$)/)) return 'excel';
+
+    // Cloudinary: ตรวจจาก resource type ใน URL path
+    // เช่น /video/upload/ = วิดีโอ, /image/upload/ = รูป, /raw/upload/ = ไฟล์อื่น
+    if (lowerUrl.includes('cloudinary.com')) {
+        if (lowerUrl.includes('/video/upload/')) return 'video';
+        if (lowerUrl.includes('/image/upload/')) return 'image';
+        if (lowerUrl.includes('/raw/upload/')) {
+            // ดูนามสกุลหลัง /raw/upload/
+            const parts = lowerUrl.split('/raw/upload/');
+            const filename = parts[parts.length - 1].split('?')[0];
+            if (filename.endsWith('.pdf')) return 'pdf';
+            if (filename.match(/\.(ppt|pptx)$/)) return 'ppt';
+            if (filename.match(/\.(doc|docx)$/)) return 'doc';
+            if (filename.match(/\.(xls|xlsx|csv)$/)) return 'excel';
+        }
+    }
 
     return 'unknown';
 }
@@ -1244,7 +1362,7 @@ function addBotMessage(text) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-const GEMINI_API_KEY = "AIzaSyCkz9e6eOE2NJG0A55cyRDiV5VHNNLP0Io"; 
+const GEMINI_API_KEY = "AIzaSyChrGSvl3D-8ffd5kgRSRs2gxEzXOoMWqM"; 
 
 async function sendMessageToGemini(userMessage, retryCount = 0) {
   try {
@@ -1298,7 +1416,167 @@ window.switchTab = function(tab, btn) {
     document.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    const panelId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+    document.getElementById(panelId).classList.add('active');
+};
+
+// === Homework Panel ===
+async function loadHomeworkPanel() {
+    const container = document.getElementById('hwPanelList');
+    if (!container || !currentCourse.homework) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+
+    // โหลด submissions ของ user นี้
+    const submissionsMap = {};
+    if (currentUser) {
+        try {
+            const subSnap = await getDocs(query(
+                collection(db, 'submissions'),
+                where('userId', '==', currentUser.uid),
+                where('courseId', '==', courseId)
+            ));
+            subSnap.forEach(d => {
+                const s = d.data();
+                submissionsMap[s.homeworkIndex] = { id: d.id, ...s };
+            });
+        } catch(e) {}
+    }
+
+    const now = new Date();
+    container.innerHTML = '';
+
+    currentCourse.homework.forEach((hw, idx) => {
+        const sub = submissionsMap[idx];
+        const isGraded = sub && sub.status === 'graded';
+        const isSubmitted = sub && (sub.status === 'submitted' || isGraded);
+        const isOverdue = hw.deadline && new Date(hw.deadline) < now && !isSubmitted;
+
+        let statusBadge = `<span class="hw-status-badge pending">⏳ ยังไม่ส่ง${isOverdue ? ' (เกินกำหนด)' : ''}</span>`;
+        if (isGraded) statusBadge = `<span class="hw-status-badge graded">✅ ตรวจแล้ว</span>`;
+        else if (isSubmitted) statusBadge = `<span class="hw-status-badge submitted">📤 ส่งแล้ว รอตรวจ</span>`;
+
+        const deadlineText = hw.deadline
+            ? `📅 กำหนดส่ง: ${new Date(hw.deadline).toLocaleString('th-TH')}`
+            : '📅 ไม่มีกำหนดส่ง';
+
+        const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
+        const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
+
+        let scoreHtml = '';
+        if (isGraded) {
+            scoreHtml = `
+                <div class="hw-score-display">
+                    🎯 คะแนนที่ได้: <strong>${sub.grade} / ${hw.maxScore || 100}</strong>
+                    ${sub.comment ? `<div class="hw-comment-display" style="margin-top:0.5rem;">💬 ความคิดเห็นครู: ${sub.comment}</div>` : ''}
+                </div>`;
+        }
+
+        let submittedHtml = '';
+        if (isSubmitted && sub.content) {
+            submittedHtml = `<div class="hw-comment-display">📝 งานที่ส่ง: ${sub.content}</div>`;
+        }
+        if (isSubmitted && sub.fileUrl) {
+            submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.fileUrl}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
+        }
+
+        let submitFormHtml = '';
+        if (!isSubmitted) {
+            submitFormHtml = `
+                <div class="hw-submit-area" id="hw-form-${idx}">
+                    ${canSubmit ? `<textarea placeholder="พิมพ์คำตอบ / งานของคุณที่นี่..." id="hw-text-${idx}"></textarea>` : ''}
+                    ${canFile ? `
+                        <div class="hw-file-upload" onclick="document.getElementById('hw-file-input-${idx}').click()">
+                            📎 คลิกเพื่อแนบไฟล์ (PDF, Word, รูปภาพ)
+                        </div>
+                        <input type="file" id="hw-file-input-${idx}" style="display:none;" onchange="previewHwFile(${idx}, this)">
+                        <div id="hw-file-preview-${idx}" style="font-size:0.85rem; color:#60a5fa; margin-top:0.4rem;"></div>
+                    ` : ''}
+                    <button class="btn-submit-hw" onclick="submitHomework(${idx}, '${courseId}')">
+                        📤 ส่งการบ้าน
+                    </button>
+                </div>`;
+        } else if (!isGraded) {
+            submitFormHtml = `<p style="font-size:0.85rem;color:var(--text-dim);margin-top:0.5rem;">รอครูตรวจงาน...</p>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'hw-card';
+        card.innerHTML = `
+            <div class="hw-card-header">
+                <div class="hw-card-title">${idx + 1}. ${hw.title}</div>
+                ${statusBadge}
+            </div>
+            <div class="hw-deadline">${deadlineText} • คะแนนเต็ม ${hw.maxScore || 100} คะแนน</div>
+            ${hw.description ? `<div class="hw-desc-text">${hw.description}</div>` : ''}
+            ${scoreHtml}
+            ${submittedHtml}
+            ${submitFormHtml}
+        `;
+        container.appendChild(card);
+    });
+}
+
+window.previewHwFile = function(idx, input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById(`hw-file-preview-${idx}`).textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+};
+
+window.submitHomework = async function(hwIdx, courseId) {
+    const hw = currentCourse.homework[hwIdx];
+    const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
+    const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
+
+    const textEl = document.getElementById(`hw-text-${hwIdx}`);
+    const fileInput = document.getElementById(`hw-file-input-${hwIdx}`);
+
+    const textContent = textEl ? textEl.value.trim() : '';
+    const file = fileInput ? fileInput.files[0] : null;
+
+    if (canSubmit && !textContent && !file) {
+        alert('❌ กรุณากรอกคำตอบหรือแนบไฟล์ก่อนส่ง');
+        return;
+    }
+
+    const btn = document.querySelector(`#hw-form-${hwIdx} .btn-submit-hw`);
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังส่ง...'; }
+
+    try {
+        let fileUrl = '';
+        if (file) {
+            // Upload to Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'skillnest');
+            formData.append('folder', 'skillnest/homework');
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dtuvwwmm0/auto/upload`, { method: 'POST', body: formData });
+            const data = await res.json();
+            fileUrl = data.secure_url || '';
+        }
+
+        const subId = `${currentUser.uid}_${courseId}_${hwIdx}`;
+        await setDoc(doc(db, 'submissions', subId), {
+            userId: currentUser.uid,
+            courseId,
+            homeworkIndex: hwIdx,
+            homeworkTitle: hw.title,
+            content: textContent,
+            fileUrl,
+            submittedAt: serverTimestamp(),
+            status: 'submitted',
+            grade: null,
+            comment: ''
+        });
+
+        alert('✅ ส่งการบ้านสำเร็จ!');
+        await loadHomeworkPanel(); // refresh
+    } catch(e) {
+        console.error('Submit homework error:', e);
+        alert('❌ เกิดข้อผิดพลาด: ' + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = '📤 ส่งการบ้าน'; }
+    }
 };
 
 // === Quiz Logic (inline in course-content) ===

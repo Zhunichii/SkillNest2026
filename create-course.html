@@ -492,6 +492,51 @@
         .ai-loading-text.show {
             display: block;
         }
+
+        /* === Homework Section === */
+        .hw-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .hw-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .hw-number-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .hw-type-selector {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+        .hw-type-btn {
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .hw-type-btn.active {
+            border-color: #f59e0b;
+            background: rgba(245,158,11,0.15);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -577,7 +622,7 @@
         
         <!-- AI Generator Area -->
         <div class="ai-gen-area">
-            <div class="ai-gen-title">✨ สร้าง Quiz</div>
+            <div class="ai-gen-title">✨ สร้าง Quiz ด้วย AI</div>
             <div class="ai-gen-row">
                 <div class="form-group">
                     <label>หัวข้อหรือเนื้อหาที่ต้องการสร้าง Quiz</label>
@@ -603,6 +648,7 @@
                 <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()">
                     ✨ สร้างด้วย AI
                 </button>
+                <small style="color: var(--text-dim);">ใช้ Claude AI สร้างโจทย์อัตโนมัติ</small>
             </div>
             <div id="aiLoadingText" class="ai-loading-text">⏳ AI กำลังสร้างแบบทดสอบ กรุณารอสักครู่...</div>
         </div>
@@ -611,6 +657,18 @@
         
         <button class="btn btn-outline" onclick="addQuizQuestion()" style="display:flex; align-items:center; gap:0.5rem;">
             + เพิ่มคำถามด้วยตนเอง
+        </button>
+    </div>
+
+    <!-- Section 5: การบ้าน (Homework) -->
+    <div class="section">
+        <h2 class="section-title">📋 การบ้าน (Homework)</h2>
+        <div class="alert alert-info" style="margin-bottom:1.5rem;">
+            💡 เพิ่มการบ้านให้นักเรียนส่งหลังเรียนจบ สามารถรับเป็นข้อความหรือไฟล์แนบ
+        </div>
+        <div id="homeworkList"></div>
+        <button class="btn btn-outline" onclick="addHomework()" style="display:flex;align-items:center;gap:0.5rem;">
+            + เพิ่มการบ้าน
         </button>
     </div>
 
@@ -1007,6 +1065,81 @@ function collectQuizData() {
     return result;
 }
 
+// === Homework Functions ===
+let homeworks = [];
+let hwCounter = 0;
+
+window.addHomework = function() {
+    hwCounter++;
+    const hwId = 'hw-' + hwCounter;
+    homeworks.push({ id: hwId, type: 'text' });
+
+    const html = `
+        <div class="hw-item" id="${hwId}">
+            <div class="hw-item-header">
+                <span class="hw-number-badge">การบ้านที่ ${hwCounter}</span>
+                <button class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
+            </div>
+            <div class="form-group">
+                <label>ชื่อการบ้าน <span class="required">*</span></label>
+                <input type="text" class="form-control hw-title" placeholder="เช่น ส่งโปรเจกต์ Python เบื้องต้น">
+            </div>
+            <div class="form-group">
+                <label>คำอธิบาย / โจทย์</label>
+                <textarea class="form-control hw-desc" rows="3" placeholder="อธิบายสิ่งที่นักเรียนต้องทำ..."></textarea>
+            </div>
+            <div class="grid">
+                <div class="form-group">
+                    <label>วันกำหนดส่ง (Deadline)</label>
+                    <input type="datetime-local" class="form-control hw-deadline">
+                </div>
+                <div class="form-group">
+                    <label>คะแนนเต็ม</label>
+                    <input type="number" class="form-control hw-maxscore" placeholder="เช่น 100" min="1">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ประเภทการส่งงาน</label>
+                <div class="hw-type-selector">
+                    <div class="hw-type-btn active" onclick="setHwType('${hwId}','text',this)">✍️ พิมพ์ข้อความ</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','file',this)">📎 อัปโหลดไฟล์</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','both',this)">✍️📎 ทั้งสองแบบ</div>
+                </div>
+            </div>
+        </div>`;
+    document.getElementById('homeworkList').insertAdjacentHTML('beforeend', html);
+};
+
+window.removeHomework = function(hwId) {
+    document.getElementById(hwId).remove();
+    homeworks = homeworks.filter(h => h.id !== hwId);
+};
+
+window.setHwType = function(hwId, type, btn) {
+    const hw = homeworks.find(h => h.id === hwId);
+    if (hw) hw.type = type;
+    btn.closest('.hw-type-selector').querySelectorAll('.hw-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+};
+
+function collectHomeworkData() {
+    const items = document.querySelectorAll('.hw-item');
+    const result = [];
+    items.forEach((item, i) => {
+        const title = item.querySelector('.hw-title').value.trim();
+        if (!title) return;
+        const hw = homeworks[i] || {};
+        result.push({
+            title,
+            description: item.querySelector('.hw-desc').value.trim(),
+            deadline: item.querySelector('.hw-deadline').value || null,
+            maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,
+            submissionType: hw.type || 'text',
+            order: i
+        });
+    });
+    return result;
+}
 
 function showLoading(text) {
     document.getElementById('loadingText').textContent = text;
@@ -1181,6 +1314,7 @@ window.createCourse = async function() {
         showLoading('กำลังบันทึกข้อมูลคอร์ส...');
         
         const quizData = collectQuizData();
+        const homeworkData = collectHomeworkData();
 
         const courseData = {
             title: title,
@@ -1194,7 +1328,8 @@ window.createCourse = async function() {
             creatorId: currentUser.uid,
             creatorEmail: currentUser.email,
             lessons: lessonsData,
-            quiz: quizData
+            quiz: quizData,
+            homework: homeworkData
         };
 
         const docRef = await addDoc(collection(db, 'courses'), courseData);

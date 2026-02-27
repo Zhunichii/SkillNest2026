@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตรวจการบ้าน - SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --nav-bg: rgba(255,255,255,0.03);
+            --card-bg: rgba(255,255,255,0.05);
+            --border-color: rgba(255,255,255,0.1);
+            --input-bg: rgba(255,255,255,0.03);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        body {
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* Top Nav */
+        .top-nav {
+            position: fixed; top:0; left:0; right:0; height:70px;
+            background: var(--nav-bg); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; padding: 0 30px; gap: 16px; z-index:1000;
+        }
+        .logo { font-weight:700; font-size:1.2rem; text-decoration:none; color:var(--text-main); }
+        .logo span { color: var(--primary-blue); }
+        .nav-title { color: var(--text-dim); font-size:0.95rem; }
+
+        /* Layout */
+        .app-container { display:flex; min-height:100vh; }
+        .sidebar {
+            position:fixed; left:0; top:70px; width:250px;
+            height:calc(100vh - 70px);
+            background: var(--nav-bg); backdrop-filter:blur(15px);
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
+        }
+        .sidebar-item {
+            display:flex; align-items:center; gap:12px;
+            padding:12px 15px; color:var(--text-dim); text-decoration:none;
+            border-radius:8px; margin-bottom:8px; cursor:pointer; transition:0.3s;
+        }
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(59,130,246,0.1); color:var(--text-main);
+        }
+        .main-content {
+            margin-left:250px; margin-top:70px;
+            padding: 40px; width:calc(100% - 250px);
+        }
+        .page-header { margin-bottom:2rem; }
+        .page-header h1 { font-size:2rem; margin-bottom:0.4rem; }
+        .page-header p { color:var(--text-dim); }
+
+        /* Course selector */
+        .course-tabs {
+            display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:2rem;
+        }
+        .course-tab-btn {
+            padding:0.5rem 1.1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius:20px; color:var(--text-dim);
+            cursor:pointer; font-size:0.88rem; transition:0.2s;
+        }
+        .course-tab-btn:hover, .course-tab-btn.active {
+            background: rgba(245,158,11,0.15);
+            border-color: #f59e0b; color:white;
+        }
+
+        /* Homework assignment cards */
+        .hw-assignment-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius:16px; margin-bottom:1.5rem; overflow:hidden;
+        }
+        .hw-assignment-header {
+            padding:1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display:flex; justify-content:space-between; align-items:center; gap:1rem;
+        }
+        .hw-assignment-title { font-size:1.05rem; font-weight:600; }
+        .hw-stats { display:flex; gap:1rem; }
+        .hw-stat {
+            background: rgba(255,255,255,0.05); padding:0.3rem 0.8rem;
+            border-radius:20px; font-size:0.8rem; color:var(--text-dim);
+        }
+        .hw-stat span { color:white; font-weight:600; }
+
+        /* Submissions table */
+        .submissions-table { width:100%; border-collapse:collapse; }
+        .submissions-table th, .submissions-table td {
+            padding:0.9rem 1.25rem; text-align:left; font-size:0.88rem;
+        }
+        .submissions-table th {
+            color:var(--text-dim); border-bottom:1px solid var(--border-color);
+            font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em;
+        }
+        .submissions-table td { border-bottom:1px solid rgba(255,255,255,0.04); }
+        .submissions-table tr:last-child td { border-bottom:none; }
+        .submissions-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+        .status-badge {
+            padding:0.2rem 0.65rem; border-radius:20px; font-size:0.75rem; font-weight:600;
+        }
+        .status-badge.submitted { background:rgba(59,130,246,0.2); color:#60a5fa; }
+        .status-badge.graded { background:rgba(16,185,129,0.2); color:#34d399; }
+
+        .btn-grade {
+            padding:0.4rem 1rem;
+            background: linear-gradient(135deg,#f59e0b,#d97706);
+            color:white; border:none; border-radius:8px;
+            font-size:0.82rem; font-weight:600; cursor:pointer; transition:0.2s;
+        }
+        .btn-grade:hover { opacity:0.9; }
+
+        .view-link {
+            color:#60a5fa; text-decoration:none; font-size:0.85rem;
+        }
+        .view-link:hover { text-decoration:underline; }
+
+        /* Grade Modal */
+        .modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.85);
+            backdrop-filter:blur(8px); z-index:3000;
+            display:none; align-items:center; justify-content:center; padding:1rem;
+        }
+        .modal-overlay.show { display:flex; }
+        .grade-modal {
+            background: #0f1035;
+            border:1px solid var(--border-color);
+            border-radius:20px; width:100%; max-width:560px;
+            padding:2rem; max-height:90vh; overflow-y:auto;
+        }
+        .grade-modal h3 { font-size:1.2rem; margin-bottom:1.5rem; }
+        .form-group { margin-bottom:1.25rem; }
+        .form-group label { display:block; margin-bottom:0.4rem; font-size:0.9rem; color:var(--text-dim); }
+        .form-control {
+            width:100%; padding:0.7rem 1rem;
+            background: var(--input-bg); border:1px solid var(--border-color);
+            border-radius:8px; color:white; font-size:0.95rem;
+        }
+        .form-control:focus { outline:none; border-color:#f59e0b; }
+        textarea.form-control { resize:vertical; min-height:80px; font-family:inherit; }
+        .submission-preview {
+            background: rgba(255,255,255,0.03);
+            border-radius:8px; padding:1rem; margin-bottom:1.25rem;
+            font-size:0.88rem; color:var(--text-dim); line-height:1.6;
+        }
+        .modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; }
+        .btn-confirm-grade {
+            flex:1; padding:0.85rem;
+            background: linear-gradient(135deg,#10b981,#059669);
+            color:white; border:none; border-radius:10px;
+            font-weight:700; font-size:1rem; cursor:pointer; transition:0.2s;
+        }
+        .btn-confirm-grade:hover { opacity:0.9; }
+        .btn-cancel-grade {
+            padding:0.85rem 1.5rem;
+            background:rgba(255,255,255,0.05);
+            border:1px solid var(--border-color);
+            color:var(--text-dim); border-radius:10px; cursor:pointer;
+        }
+
+        /* Empty & Loading */
+        .empty-state { text-align:center; padding:60px 20px; color:var(--text-dim); }
+        .empty-icon { font-size:3.5rem; margin-bottom:1rem; }
+        .empty-state h3 { color:var(--text-main); margin-bottom:0.5rem; }
+        .spinner-wrap { display:flex; justify-content:center; padding:60px; }
+        .spinner {
+            width:46px; height:46px;
+            border:4px solid rgba(255,255,255,0.1);
+            border-top:4px solid #f59e0b;
+            border-radius:50%; animation:spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform:rotate(360deg); } }
+        @media (max-width:768px) {
+            .sidebar { width:70px; }
+            .sidebar-item span { display:none; }
+            .main-content { margin-left:70px; width:calc(100% - 70px); padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+
+    <nav class="top-nav">
+        <a href="dashboard.html" class="logo">Skill<span>Nest</span></a>
+        <span class="nav-title">/ 📋 ตรวจการบ้าน</span>
+    </nav>
+
+    <aside class="sidebar">
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html'">🔍 <span>ค้นหาคอร์สใหม่</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=my-courses'">📚 <span>คอร์สของฉัน</span></div>
+        <div class="sidebar-item" onclick="window.location.href='create-course.html'">💡 <span>เพิ่มคอร์ส</span></div>
+        <div class="sidebar-item active">📋 <span>ตรวจการบ้าน</span></div>
+        <div class="sidebar-item">📊 <span>ผลการเรียนรู้</span></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>📋 ตรวจการบ้าน</h1>
+            <p>ดูงานที่นักเรียนส่งมา ให้คะแนนและ comment กลับ</p>
+        </div>
+
+        <div id="courseTabs" class="course-tabs">
+            <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+
+        <div id="hwContent">
+            <div class="empty-state">
+                <div class="empty-icon">📂</div>
+                <h3>เลือกคอร์สเพื่อดูการบ้าน</h3>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Grade Modal -->
+<div class="modal-overlay" id="gradeModalOverlay">
+    <div class="grade-modal">
+        <h3>✏️ ให้คะแนนการบ้าน</h3>
+        <div id="gradeStudentInfo" style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1rem;"></div>
+        <div class="submission-preview" id="gradeSubmissionPreview"></div>
+        <div class="form-group">
+            <label>คะแนน (เต็ม <span id="gradeMaxScore">100</span>)</label>
+            <input type="number" class="form-control" id="gradeScore" min="0" placeholder="ใส่คะแนน">
+        </div>
+        <div class="form-group">
+            <label>ความคิดเห็น / Feedback</label>
+            <textarea class="form-control" id="gradeComment" placeholder="ให้ feedback กับนักเรียน..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-confirm-grade" onclick="confirmGrade()">✅ บันทึกคะแนน</button>
+            <button class="btn-cancel-grade" onclick="closeGradeModal()">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+    authDomain: "skillnest-2026.firebaseapp.com",
+    projectId: "skillnest-2026",
+    storageBucket: "skillnest-2026.firebasestorage.app",
+    messagingSenderId: "416822065212",
+    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let myCourses = [];
+let pendingGrade = null; // { submissionId, maxScore }
+
+// Auth check — teacher only
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '../login-page/login.html'; return; }
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists() && userDoc.data().userType !== 'teacher') {
+        alert('หน้านี้สำหรับครูเท่านั้น');
+        window.location.href = 'dashboard.html';
+        return;
+    }
+    currentUser = user;
+    await loadMyCourses();
+});
+
+async function loadMyCourses() {
+    const tabsEl = document.getElementById('courseTabs');
+    try {
+        const snap = await getDocs(query(
+            collection(db, 'courses'),
+            where('creatorId', '==', currentUser.uid)
+        ));
+
+        myCourses = [];
+        snap.forEach(d => {
+            const data = d.data();
+            if (data.homework && data.homework.length > 0) {
+                myCourses.push({ id: d.id, ...data });
+            }
+        });
+
+        if (myCourses.length === 0) {
+            tabsEl.innerHTML = '';
+            document.getElementById('hwContent').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h3>ยังไม่มีคอร์สที่มีการบ้าน</h3>
+                    <p>ไปที่ "เพิ่มคอร์ส" เพื่อสร้างการบ้านในคอร์สของคุณ</p>
+                </div>`;
+            return;
+        }
+
+        tabsEl.innerHTML = myCourses.map((c, i) =>
+            `<div class="course-tab-btn ${i===0?'active':''}" onclick="selectCourse('${c.id}', this)">${c.title}</div>`
+        ).join('');
+
+        // โหลดคอร์สแรกอัตโนมัติ
+        await loadHomeworksByCourse(myCourses[0].id);
+
+    } catch(e) {
+        console.error(e);
+        tabsEl.innerHTML = `<p style="color:var(--text-dim);">เกิดข้อผิดพลาด: ${e.message}</p>`;
+    }
+}
+
+window.selectCourse = async function(courseId, btn) {
+    document.querySelectorAll('.course-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    await loadHomeworksByCourse(courseId);
+};
+
+async function loadHomeworksByCourse(courseId) {
+    const contentEl = document.getElementById('hwContent');
+    contentEl.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+
+    const course = myCourses.find(c => c.id === courseId);
+    if (!course || !course.homework) { contentEl.innerHTML = ''; return; }
+
+    // โหลด submissions ทั้งหมดของคอร์สนี้
+    let submissions = [];
+    try {
+        const subSnap = await getDocs(query(
+            collection(db, 'submissions'),
+            where('courseId', '==', courseId)
+        ));
+        subSnap.forEach(d => submissions.push({ id: d.id, ...d.data() }));
+    } catch(e) {}
+
+    // โหลดชื่อนักเรียน
+    const studentNames = {};
+    const userIds = [...new Set(submissions.map(s => s.userId))];
+    for (const uid of userIds) {
+        try {
+            const uDoc = await getDoc(doc(db, 'users', uid));
+            if (uDoc.exists()) {
+                const u = uDoc.data();
+                studentNames[uid] = `${u.firstName||''} ${u.lastName||''}`.trim() || u.email;
+            }
+        } catch(e) {}
+    }
+
+    contentEl.innerHTML = '';
+
+    course.homework.forEach((hw, idx) => {
+        const hwSubs = submissions.filter(s => s.homeworkIndex === idx);
+        const gradedCount = hwSubs.filter(s => s.status === 'graded').length;
+        const pendingCount = hwSubs.filter(s => s.status === 'submitted').length;
+
+        const deadlineText = hw.deadline
+            ? new Date(hw.deadline).toLocaleString('th-TH')
+            : 'ไม่มีกำหนด';
+
+        let rowsHtml = '';
+        if (hwSubs.length === 0) {
+            rowsHtml = `<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:2rem;">ยังไม่มีนักเรียนส่งงาน</td></tr>`;
+        } else {
+            rowsHtml = hwSubs.map(sub => {
+                const name = studentNames[sub.userId] || sub.userId;
+                const submittedAt = sub.submittedAt?.toDate
+                    ? sub.submittedAt.toDate().toLocaleString('th-TH')
+                    : 'ไม่ระบุ';
+                const statusBadge = sub.status === 'graded'
+                    ? `<span class="status-badge graded">✅ ตรวจแล้ว (${sub.grade}/${hw.maxScore||100})</span>`
+                    : `<span class="status-badge submitted">📤 รอตรวจ</span>`;
+
+                const workHtml = sub.content
+                    ? `<span title="${sub.content.substring(0,200)}" style="cursor:help;">📝 ดูงาน</span>`
+                    : '';
+                const fileHtml = sub.fileUrl
+                    ? `<a href="${sub.fileUrl}" target="_blank" class="view-link">📎 ไฟล์</a>`
+                    : '';
+
+                return `<tr>
+                    <td>${name}</td>
+                    <td>${submittedAt}</td>
+                    <td>${workHtml} ${fileHtml}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.fileUrl||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}')">
+                            ✏️ ${sub.status==='graded'?'แก้คะแนน':'ให้คะแนน'}
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        const card = document.createElement('div');
+        card.className = 'hw-assignment-card';
+        card.innerHTML = `
+            <div class="hw-assignment-header">
+                <div>
+                    <div class="hw-assignment-title">${idx+1}. ${hw.title}</div>
+                    <div style="color:var(--text-dim);font-size:0.82rem;margin-top:0.25rem;">📅 ${deadlineText} • คะแนนเต็ม ${hw.maxScore||100}</div>
+                </div>
+                <div class="hw-stats">
+                    <div class="hw-stat">ส่งแล้ว <span>${hwSubs.length}</span></div>
+                    <div class="hw-stat">รอตรวจ <span>${pendingCount}</span></div>
+                    <div class="hw-stat">ตรวจแล้ว <span>${gradedCount}</span></div>
+                </div>
+            </div>
+            <table class="submissions-table">
+                <thead>
+                    <tr>
+                        <th>นักเรียน</th>
+                        <th>เวลาส่ง</th>
+                        <th>งาน</th>
+                        <th>สถานะ</th>
+                        <th>ดำเนินการ</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        `;
+        contentEl.appendChild(card);
+    });
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+}
+
+window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore, currentGrade, currentComment) {
+    pendingGrade = { subId, maxScore };
+    document.getElementById('gradeStudentInfo').textContent = `นักเรียน: ${studentName}`;
+    document.getElementById('gradeMaxScore').textContent = maxScore;
+    document.getElementById('gradeScore').max = maxScore;
+    document.getElementById('gradeScore').value = currentGrade || '';
+    document.getElementById('gradeComment').value = currentComment || '';
+
+    let previewHtml = '';
+    if (content) previewHtml += `<div>📝 งานที่ส่ง:<br><br>${content}</div>`;
+    if (fileUrl) previewHtml += `${content?'<br>':''}📎 ไฟล์แนบ: <a href="${fileUrl}" target="_blank" style="color:#60a5fa;">เปิดไฟล์</a>`;
+    if (!content && !fileUrl) previewHtml = '<em>ไม่มีเนื้อหางาน</em>';
+    document.getElementById('gradeSubmissionPreview').innerHTML = previewHtml;
+
+    document.getElementById('gradeModalOverlay').classList.add('show');
+};
+
+window.closeGradeModal = function() {
+    document.getElementById('gradeModalOverlay').classList.remove('show');
+    pendingGrade = null;
+};
+
+window.confirmGrade = async function() {
+    if (!pendingGrade) return;
+    const score = parseInt(document.getElementById('gradeScore').value);
+    const comment = document.getElementById('gradeComment').value.trim();
+
+    if (isNaN(score) || score < 0 || score > pendingGrade.maxScore) {
+        alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingGrade.maxScore}`);
+        return;
+    }
+
+    try {
+        await updateDoc(doc(db, 'submissions', pendingGrade.subId), {
+            grade: score,
+            comment,
+            status: 'graded',
+            gradedAt: serverTimestamp()
+        });
+        closeGradeModal();
+        // Reload current course tab
+        const activeTab = document.querySelector('.course-tab-btn.active');
+        if (activeTab) activeTab.click();
+    } catch(e) {
+        alert('❌ เกิดข้อผิดพลาด: ' + e.message);
+    }
+};
+
+document.getElementById('gradeModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeGradeModal();
+});
+</script>
+</body>
+</html>

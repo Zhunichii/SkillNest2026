@@ -613,6 +613,9 @@
             <div class="sidebar-item teacher-only" id="sidebarCreateCourse" data-page="create" onclick="window.location.href='create-course.html'" style="display: none;">
                 💡 <span>เพิ่มคอร์ส</span>
             </div>
+            <div class="sidebar-item teacher-only" id="sidebarHomework" onclick="window.location.href='homework.html'" style="display: none;">
+                📋 <span>ตรวจการบ้าน</span>
+            </div>
             <div class="sidebar-item student-only" id="sidebarMyQuizzes" data-page="my-quizzes" onclick="window.location.href='my-quizzes.html'" style="display: none;">
                 📝 <span>แบบฝึกหัดของฉัน</span>
             </div>
@@ -855,14 +858,15 @@
                             // แสดงเมนูจัดการคอร์สใน dropdown
                             const manageCourseItem = document.getElementById('manageCourseItem');
                             if (manageCourseItem) manageCourseItem.style.display = 'block';
-                            
                             // แสดงเมนูเพิ่มคอร์สใน sidebar
                             const sidebarCreateCourse = document.getElementById('sidebarCreateCourse');
                             if (sidebarCreateCourse) sidebarCreateCourse.style.display = 'flex';
-                            
                             // แสดงปุ่มสร้างคอร์สใหม่ใน header
                             const headerCreateCourseBtn = document.getElementById('headerCreateCourseBtn');
                             if (headerCreateCourseBtn) headerCreateCourseBtn.style.display = 'flex';
+                            // แสดงปุ่มตรวจการบ้าน
+                            const sidebarHomework = document.getElementById('sidebarHomework');
+                            if (sidebarHomework) sidebarHomework.style.display = 'flex';
                         }
 
                         // แสดงปุ่มแบบฝึกหัดถ้าเป็นนักเรียน
