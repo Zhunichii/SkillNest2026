@@ -419,6 +419,142 @@
                 width: 200px;
             }
         }
+
+        /* === Enrollment Modal === */
+        .enroll-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .enroll-modal-overlay.show { display: flex; }
+
+        .enroll-modal {
+            background: #0f1035;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+        }
+
+        .enroll-modal-thumb {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .enroll-modal-body {
+            padding: 1.75rem;
+        }
+
+        .enroll-modal-body h2 {
+            font-size: 1.35rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .enroll-modal-meta {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .enroll-badge {
+            background: rgba(59,130,246,0.15);
+            color: #60a5fa;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .enroll-modal-desc {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .enroll-modal-lessons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .enroll-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-enroll {
+            flex: 1;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #3b82f6, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-enroll:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-go-course {
+            flex: 1;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-go-course:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-cancel-enroll {
+            padding: 0.9rem 1.25rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-dim);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-cancel-enroll:hover { color: white; }
+
+        .enrolled-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(16,185,129,0.85);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -505,10 +641,30 @@
         </main>
     </div>
 
+    <!-- Enrollment Modal -->
+    <div id="enrollModalOverlay" class="enroll-modal-overlay">
+        <div class="enroll-modal">
+            <div id="enrollModalThumb" class="enroll-modal-thumb">📚</div>
+            <div class="enroll-modal-body">
+                <h2 id="enrollModalTitle">ชื่อคอร์ส</h2>
+                <div class="enroll-modal-meta">
+                    <span class="enroll-badge" id="enrollModalCategory">หมวดหมู่</span>
+                    <span class="enroll-badge" id="enrollModalLevel">ระดับ</span>
+                    <span class="enroll-badge" id="enrollModalInstructor">👤 ผู้สอน</span>
+                </div>
+                <div class="enroll-modal-desc" id="enrollModalDesc"></div>
+                <div class="enroll-modal-lessons" id="enrollModalLessons">📖 0 บทเรียน</div>
+                <div class="enroll-modal-actions" id="enrollModalActions">
+                    <!-- filled dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, query, where, getDocs, doc, getDoc, orderBy, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, orderBy, deleteDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
@@ -611,7 +767,7 @@
                         : `background: ${randomColor};`;
                     
                     courseCard.innerHTML = `
-                        <div class="course-image" style="${thumbnailStyle}">
+                        <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
                             ${!course.thumbnail ? course.title.substring(0, 15) : ''}
                             <div class="course-duration">⏱ ${lessonCount} บท</div>
                         </div>
@@ -630,9 +786,7 @@
                             </div>
                         </div>
                     `;
-                    courseCard.addEventListener('click', () => {
-    window.location.href = `course-content.html?id=${courseId}`;
-});
+                    courseCard.addEventListener('click', () => openCourseModal(courseId, course, randomColor, creatorName));
                     courseGrid.appendChild(courseCard);
                 }
                 
@@ -710,6 +864,8 @@
                 
                 // โหลดคอร์สทั้งหมด
                 await loadCourses();
+                // โหลดรายการที่สมัครแล้ว
+                await loadEnrollments();
             } else {
                 window.location.href = '../login-page/login.html';
             }
@@ -793,6 +949,119 @@
             courseGrid.appendChild(noResultDiv);
         }
     });
+
+    // ------------------------------------------------
+    // Enrollment Modal Logic
+    // ------------------------------------------------
+    let enrolledCourseIds = new Set();
+    let pendingCourseData = null; // { courseId, course }
+
+    // ดึง enrollment ของ user คนนี้
+    async function loadEnrollments() {
+        if (!currentUser) return;
+        try {
+            const snap = await getDocs(query(
+                collection(db, 'enrollments'),
+                where('userId', '==', currentUser.uid)
+            ));
+            snap.forEach(d => enrolledCourseIds.add(d.data().courseId));
+
+            // อัพเดต badge บน card ที่มีอยู่แล้ว
+            enrolledCourseIds.forEach(cid => markCardAsEnrolled(cid));
+        } catch(e) { console.error('loadEnrollments error:', e); }
+    }
+
+    function markCardAsEnrolled(courseId) {
+        const img = document.getElementById('course-img-' + courseId);
+        if (img && !img.querySelector('.enrolled-tag')) {
+            const tag = document.createElement('div');
+            tag.className = 'enrolled-tag';
+            tag.textContent = '✅ สมัครแล้ว';
+            img.appendChild(tag);
+        }
+    }
+
+    window.openCourseModal = function(courseId, course, color, creatorName) {
+        pendingCourseData = { courseId, course };
+        const isEnrolled = enrolledCourseIds.has(courseId);
+
+        // Fill modal content
+        const thumbEl = document.getElementById('enrollModalThumb');
+        if (course.thumbnail) {
+            thumbEl.style.backgroundImage = `url('${course.thumbnail}')`;
+            thumbEl.style.backgroundSize = 'cover';
+            thumbEl.style.backgroundPosition = 'center';
+            thumbEl.innerHTML = '';
+        } else {
+            thumbEl.style.backgroundImage = 'none';
+            thumbEl.style.background = color;
+            thumbEl.innerHTML = course.title.substring(0,15);
+        }
+
+        document.getElementById('enrollModalTitle').textContent = course.title;
+        document.getElementById('enrollModalCategory').textContent = categoryMap[course.category] || course.category || 'ทั่วไป';
+        document.getElementById('enrollModalLevel').textContent = levelMap[course.level] || course.level || '';
+        document.getElementById('enrollModalInstructor').textContent = '👤 ' + (creatorName || 'ไม่ระบุ');
+        document.getElementById('enrollModalDesc').textContent = course.description || '';
+        const lessonCount = course.lessons ? course.lessons.length : 0;
+        document.getElementById('enrollModalLessons').innerHTML = `📖 ${lessonCount} บทเรียน${course.quiz && course.quiz.length > 0 ? ` &nbsp;•&nbsp; 📝 ${course.quiz.length} แบบทดสอบ` : ''}`;
+
+        const actionsEl = document.getElementById('enrollModalActions');
+        if (isEnrolled) {
+            actionsEl.innerHTML = `
+                <button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button>
+                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
+            `;
+        } else {
+            actionsEl.innerHTML = `
+                <button class="btn-enroll" onclick="enrollCourse('${courseId}')">🎓 สมัครเข้าเรียน</button>
+                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
+            `;
+        }
+
+        document.getElementById('enrollModalOverlay').classList.add('show');
+    };
+
+    window.closeEnrollModal = function() {
+        document.getElementById('enrollModalOverlay').classList.remove('show');
+        pendingCourseData = null;
+    };
+
+    window.enrollCourse = async function(courseId) {
+        if (!currentUser) { alert('กรุณาล็อกอินก่อน'); return; }
+        try {
+            const enrollId = `${currentUser.uid}_${courseId}`;
+            await setDoc(doc(db, 'enrollments', enrollId), {
+                userId: currentUser.uid,
+                courseId: courseId,
+                enrolledAt: serverTimestamp()
+            });
+            enrolledCourseIds.add(courseId);
+            markCardAsEnrolled(courseId);
+
+            // Update modal to show "go to course" button
+            const actionsEl = document.getElementById('enrollModalActions');
+            actionsEl.innerHTML = `
+                <button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button>
+                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
+            `;
+            document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend',
+                '<p style="color:#10b981; font-size:0.9rem; margin-top:0.3rem;">✅ สมัครเรียนสำเร็จแล้ว!</p>');
+        } catch(e) {
+            console.error('Enroll error:', e);
+            alert('❌ เกิดข้อผิดพลาดในการสมัคร: ' + e.message);
+        }
+    };
+
+    window.goToCourse = function(courseId) {
+        window.location.href = `course-content.html?id=${courseId}`;
+    };
+
+    // Close modal on backdrop click
+    document.getElementById('enrollModalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeEnrollModal();
+    });
+
     </script>
 </body>
 </html>

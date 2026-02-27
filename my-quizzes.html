@@ -503,28 +503,49 @@ onAuthStateChanged(auth, async (user) => {
     loadQuizzes();
 });
 
-// === Load Quizzes from enrolled/all courses ===
+// === Load Quizzes from enrolled courses only ===
 async function loadQuizzes() {
     const grid = document.getElementById('quizGrid');
 
     try {
-        // โหลดคอร์สทั้งหมดที่มี quiz
-        const coursesSnap = await getDocs(collection(db, 'courses'));
-        const coursesWithQuiz = [];
+        // โหลด enrollments ของ user คนนี้ก่อน
+        const enrollSnap = await getDocs(query(
+            collection(db, 'enrollments'),
+            where('userId', '==', currentUser.uid)
+        ));
+        const enrolledIds = new Set();
+        enrollSnap.forEach(d => enrolledIds.add(d.data().courseId));
 
-        coursesSnap.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data.quiz && data.quiz.length > 0) {
-                coursesWithQuiz.push({ id: docSnap.id, ...data });
-            }
-        });
+        if (enrolledIds.size === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1/-1;">
+                    <div class="empty-icon">📭</div>
+                    <h3>ยังไม่ได้สมัครเรียนคอร์สใด</h3>
+                    <p>กลับไปที่ <a href="dashboard.html" style="color:#3b82f6;">Dashboard</a> เพื่อสมัครเรียนคอร์สที่สนใจ</p>
+                </div>`;
+            return;
+        }
+
+        // โหลดคอร์สที่สมัครแล้วและมี quiz
+        const coursesWithQuiz = [];
+        for (const cid of enrolledIds) {
+            try {
+                const cdoc = await getDoc(doc(db, 'courses', cid));
+                if (cdoc.exists()) {
+                    const data = cdoc.data();
+                    if (data.quiz && data.quiz.length > 0) {
+                        coursesWithQuiz.push({ id: cid, ...data });
+                    }
+                }
+            } catch(e) {}
+        }
 
         if (coursesWithQuiz.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1/-1;">
                     <div class="empty-icon">📭</div>
                     <h3>ยังไม่มีแบบฝึกหัด</h3>
-                    <p>คอร์สที่คุณลงทะเบียนยังไม่มีแบบทดสอบ</p>
+                    <p>คอร์สที่คุณสมัครยังไม่มีแบบทดสอบ</p>
                 </div>`;
             return;
         }
@@ -565,10 +586,13 @@ async function loadQuizzes() {
                         <span>คะแนนล่าสุด</span>
                         <span>${scoreData.score}/${quizCount} (${pct}%)</span>
                     </div>
-                ` : `<p style="color:var(--text-dim); font-size:0.85rem;">ยังไม่เคยทำ</p>`}
-                <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">
-                    ${hasScore ? '🔁 ทำใหม่อีกครั้ง' : '▶️ เริ่มทำแบบทดสอบ'}
-                </button>
+                ` : `<p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.5rem;">ยังไม่เคยทำ</p>`}
+                <div style="display:flex; gap:0.6rem; margin-top:1rem;">
+                    <button class="btn-start-quiz" style="flex:1;" onclick="startQuiz('${course.id}')">
+                        ${hasScore ? '🔁 ทำใหม่' : '▶️ เริ่มทำ'}
+                    </button>
+                    <a href="course-content.html?id=${course.id}" style="display:flex;align-items:center;justify-content:center;padding:0 1rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text-dim);text-decoration:none;font-size:0.85rem;white-space:nowrap;" title="ดูบทเรียน">📚 บทเรียน</a>
+                </div>
             `;
             grid.appendChild(card);
         });
