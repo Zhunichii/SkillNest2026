@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แก้ไขคอร์ส - SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --card-bg: rgba(255,255,255,0.05);
+            --input-bg: rgba(255,255,255,0.03);
+            --border-color: rgba(255,255,255,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        body {
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            color: var(--text-main); min-height:100vh; padding:2rem;
+        }
+        .container { max-width:1000px; margin:0 auto; }
+
+        .top-bar {
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:2rem; padding-bottom:1rem;
+            border-bottom:1px solid var(--border-color);
+        }
+        .page-title { font-size:1.6rem; font-weight:700; }
+        .page-title span { color:var(--primary-blue); }
+        .btn-back {
+            color:var(--text-dim); text-decoration:none;
+            display:flex; align-items:center; gap:6px;
+            padding:0.5rem 1rem; border-radius:8px;
+            border:1px solid var(--border-color);
+            background:rgba(255,255,255,0.03); transition:0.2s;
+        }
+        .btn-back:hover { color:white; border-color:var(--primary-blue); }
+
+        .section {
+            background: var(--card-bg); border-radius:16px;
+            padding:2rem; margin-bottom:2rem;
+            border:1px solid var(--border-color);
+        }
+        .section-title {
+            font-size:1.2rem; font-weight:700; margin-bottom:1.5rem;
+            display:flex; align-items:center; gap:0.5rem;
+        }
+        .form-group { margin-bottom:1.5rem; }
+        .form-group label {
+            display:block; margin-bottom:0.5rem; font-weight:500;
+        }
+        .required { color:var(--danger-red); }
+        .form-control {
+            width:100%; padding:0.75rem 1rem;
+            background:var(--input-bg); border:1px solid var(--border-color);
+            border-radius:8px; color:var(--text-main); font-size:1rem; transition:0.3s;
+        }
+        .form-control:focus { outline:none; border-color:var(--primary-blue); background:rgba(59,130,246,0.05); }
+        textarea.form-control { resize:vertical; min-height:100px; }
+        .grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+        /* Thumbnail */
+        .file-upload-area {
+            border:2px dashed var(--border-color); border-radius:12px;
+            padding:2rem; text-align:center; background:var(--input-bg);
+            cursor:pointer; transition:0.3s;
+        }
+        .file-upload-area:hover { border-color:var(--primary-blue); background:rgba(59,130,246,0.05); }
+        .file-upload-icon { font-size:3rem; margin-bottom:0.5rem; }
+        .file-preview {
+            display:flex; align-items:center; gap:0.75rem;
+            padding:0.75rem; background:var(--input-bg); border-radius:8px; margin-top:0.5rem;
+        }
+        .file-preview img { width:80px; height:80px; object-fit:cover; border-radius:6px; }
+        .current-thumb {
+            width:100%; border-radius:10px; max-height:200px; object-fit:cover;
+            margin-bottom:1rem; border:1px solid var(--border-color);
+        }
+
+        /* Lessons */
+        .lesson-item {
+            background:var(--input-bg); border:1px solid var(--border-color);
+            border-radius:12px; padding:1.5rem; margin-bottom:1rem; position:relative;
+        }
+        .lesson-item.existing { border-left:3px solid var(--primary-blue); }
+        .lesson-item.new-lesson { border-left:3px solid var(--success-green); }
+        .lesson-header {
+            display:flex; justify-content:space-between;
+            align-items:center; margin-bottom:1rem;
+        }
+        .lesson-number {
+            background:var(--primary-blue); color:white;
+            padding:0.25rem 0.75rem; border-radius:20px; font-size:0.85rem; font-weight:600;
+        }
+        .lesson-number.new-badge { background:var(--success-green); }
+        .existing-file-badge {
+            display:inline-flex; align-items:center; gap:0.5rem;
+            background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.25);
+            color:#60a5fa; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.82rem;
+            margin-bottom:0.75rem;
+        }
+        .upload-method {
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:0.75rem; margin-top:0.5rem;
+        }
+        .method-option {
+            border:1px solid var(--border-color); border-radius:8px;
+            padding:0.75rem; text-align:center; cursor:pointer; transition:0.2s;
+            background:var(--input-bg); color:var(--text-dim); font-size:0.9rem;
+        }
+        .method-option:hover { border-color:var(--primary-blue); color:white; }
+        .method-option.active { border-color:var(--primary-blue); background:rgba(59,130,246,0.1); color:white; }
+        .method-icon { font-size:1.5rem; margin-bottom:0.25rem; }
+
+        /* Buttons */
+        .btn {
+            padding:0.75rem 1.5rem; border:none; border-radius:8px;
+            font-weight:600; cursor:pointer; transition:0.3s; font-size:1rem;
+            display:inline-flex; align-items:center; gap:0.5rem;
+        }
+        .btn-primary { background:var(--primary-blue); color:white; }
+        .btn-primary:hover { background:#2563eb; }
+        .btn-success { background:var(--success-green); color:white; }
+        .btn-success:hover { background:#059669; }
+        .btn-danger {
+            background:rgba(239,68,68,0.15); color:#ef4444;
+            border:1px solid rgba(239,68,68,0.3); padding:0.4rem 0.8rem;
+            font-size:0.85rem; border-radius:6px; font-weight:500;
+        }
+        .btn-danger:hover { background:#ef4444; color:white; }
+        .btn-outline {
+            background:transparent; color:var(--text-dim);
+            border:1px dashed var(--border-color);
+        }
+        .btn-outline:hover { border-color:var(--primary-blue); color:white; }
+        .btn-warning { background:var(--warning); color:white; }
+        .btn-warning:hover { background:#d97706; }
+        .btn-save {
+            background:linear-gradient(135deg,#3b82f6,#6d28d9);
+            color:white; font-size:1.1rem; padding:1rem 3rem;
+        }
+
+        /* Quiz */
+        .quiz-item {
+            background:var(--input-bg); border:1px solid var(--border-color);
+            border-radius:12px; padding:1.5rem; margin-bottom:1rem;
+        }
+        .quiz-question-header {
+            display:flex; justify-content:space-between;
+            align-items:center; margin-bottom:1rem;
+        }
+        .quiz-question-number {
+            background:#8b5cf6; color:white;
+            padding:0.25rem 0.75rem; border-radius:20px; font-size:0.85rem; font-weight:600;
+        }
+        .quiz-choices {
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:0.75rem; margin-bottom:0.75rem;
+        }
+        .quiz-choice-item {
+            display:flex; align-items:center; gap:0.5rem;
+        }
+        .choice-label {
+            background:rgba(255,255,255,0.1); border-radius:6px;
+            padding:0.3rem 0.6rem; font-weight:700; min-width:32px; text-align:center;
+        }
+
+        /* AI Quiz */
+        .ai-gen-area {
+            background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.2);
+            border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;
+        }
+        .ai-gen-title { font-weight:700; color:#a78bfa; margin-bottom:1rem; font-size:1rem; }
+        .ai-gen-row { display:grid; grid-template-columns:1fr auto auto; gap:0.75rem; align-items:end; }
+        .btn-ai { background:linear-gradient(135deg,#8b5cf6,#3b82f6); color:white; }
+        .ai-loading-text { display:none; color:var(--text-dim); font-size:0.9rem; margin-top:0.5rem; }
+        .ai-loading-text.show { display:block; }
+
+        /* Homework */
+        .hw-item {
+            background:var(--input-bg); border:1px solid var(--border-color);
+            border-radius:12px; padding:1.5rem; margin-bottom:1rem;
+        }
+        .hw-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+        .hw-number-badge {
+            background:linear-gradient(135deg,#f59e0b,#d97706);
+            color:white; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.85rem; font-weight:600;
+        }
+        .hw-type-selector { display:flex; gap:0.75rem; margin-top:0.75rem; }
+        .hw-type-btn {
+            flex:1; padding:0.6rem; border:1px solid var(--border-color);
+            border-radius:8px; background:var(--input-bg); color:var(--text-dim);
+            cursor:pointer; font-size:0.85rem; text-align:center; transition:0.2s;
+        }
+        .hw-type-btn.active { border-color:#f59e0b; background:rgba(245,158,11,0.15); color:white; }
+
+        /* Tabs */
+        .edit-tabs { display:flex; gap:0; border-bottom:2px solid var(--border-color); margin-bottom:1.5rem; }
+        .edit-tab {
+            padding:0.6rem 1.25rem; cursor:pointer; color:var(--text-dim);
+            border-bottom:2px solid transparent; margin-bottom:-2px; transition:0.2s; font-size:0.95rem;
+        }
+        .edit-tab:hover { color:white; }
+        .edit-tab.active { color:var(--primary-blue); border-bottom-color:var(--primary-blue); font-weight:600; }
+        .edit-tab-panel { display:none; }
+        .edit-tab-panel.active { display:block; }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position:fixed; inset:0; background:rgba(2,4,24,0.92);
+            backdrop-filter:blur(10px); z-index:9999;
+            display:none; align-items:center; justify-content:center;
+        }
+        .loading-overlay.show { display:flex; }
+        .loading-content { text-align:center; }
+        .spinner {
+            width:50px; height:50px;
+            border:4px solid rgba(255,255,255,0.1);
+            border-top:4px solid var(--primary-blue);
+            border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 1rem;
+        }
+        @keyframes spin { 100% { transform:rotate(360deg); } }
+
+        .alert-info {
+            background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25);
+            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#93c5fd;
+        }
+        .alert-warning {
+            background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
+            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#fcd34d;
+        }
+
+        @media (max-width:640px) { .grid { grid-template-columns:1fr; } .ai-gen-row { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="top-bar">
+        <div class="page-title">✏️ แก้ไขคอร์ส <span id="pageCourseTitle">...</span></div>
+        <a href="manage-courses.html" class="btn-back">← กลับ</a>
+    </div>
+
+    <!-- Tab nav -->
+    <div class="edit-tabs">
+        <div class="edit-tab active" onclick="switchEditTab('info',this)">📝 ข้อมูลคอร์ส</div>
+        <div class="edit-tab" onclick="switchEditTab('lessons',this)">📚 บทเรียน</div>
+        <div class="edit-tab" onclick="switchEditTab('quiz',this)">🧠 แบบทดสอบ</div>
+        <div class="edit-tab" onclick="switchEditTab('homework',this)">📋 การบ้าน</div>
+    </div>
+
+    <!-- TAB 1: ข้อมูลคอร์ส -->
+    <div id="editTabInfo" class="edit-tab-panel active">
+        <div class="section">
+            <h2 class="section-title">📝 ข้อมูลพื้นฐาน</h2>
+            <div class="form-group">
+                <label>ชื่อคอร์ส <span class="required">*</span></label>
+                <input type="text" id="courseTitle" class="form-control" placeholder="ชื่อคอร์ส">
+            </div>
+            <div class="form-group">
+                <label>คำอธิบายคอร์ส <span class="required">*</span></label>
+                <textarea id="courseDescription" class="form-control" placeholder="คำอธิบาย..."></textarea>
+            </div>
+            <div class="grid">
+                <div class="form-group">
+                    <label>หมวดหมู่ <span class="required">*</span></label>
+                    <select id="courseCategory" class="form-control">
+                        <option value="">-- เลือกหมวดหมู่ --</option>
+                        <option value="programming">การเขียนโปรแกรม</option>
+                        <option value="design">ดิไซน์</option>
+                        <option value="business">ธุรกิจ</option>
+                        <option value="marketing">การตลาด</option>
+                        <option value="data-science">วิทยาศาสตร์ข้อมูล</option>
+                        <option value="other">อื่นๆ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ระดับความยาก <span class="required">*</span></label>
+                    <select id="courseLevel" class="form-control">
+                        <option value="">-- เลือกระดับ --</option>
+                        <option value="beginner">เริ่มต้น</option>
+                        <option value="intermediate">ปานกลาง</option>
+                        <option value="advanced">สูง</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ชื่อผู้สอน</label>
+                <input type="text" id="courseInstructor" class="form-control" placeholder="ชื่อผู้สอน">
+            </div>
+        </div>
+        <div class="section">
+            <h2 class="section-title">🖼️ รูปปกคอร์ส</h2>
+            <div id="currentThumbWrap"></div>
+            <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
+                <div class="file-upload-icon">📷</div>
+                <p id="thumbUploadLabel">คลิกเพื่อเปลี่ยนรูปปก</p>
+                <small style="color:var(--text-dim);">รองรับ JPG, PNG, WEBP</small>
+            </div>
+            <input type="file" id="thumbnailInput" accept="image/*" style="display:none;">
+            <div id="thumbnailPreview"></div>
+        </div>
+    </div>
+
+    <!-- TAB 2: บทเรียน -->
+    <div id="editTabLessons" class="edit-tab-panel">
+        <div class="section">
+            <h2 class="section-title">📚 บทเรียนทั้งหมด</h2>
+            <div class="alert-info">
+                💡 บทเรียนที่มีอยู่แล้ว (สีน้ำเงิน) ไฟล์เดิมจะถูกเก็บไว้เว้นแต่คุณเลือกไฟล์ใหม่แทน
+            </div>
+            <div id="lessonsList"></div>
+            <button class="btn btn-outline" onclick="addLesson()" style="margin-top:0.5rem;">
+                + เพิ่มบทเรียนใหม่
+            </button>
+        </div>
+    </div>
+
+    <!-- TAB 3: Quiz -->
+    <div id="editTabQuiz" class="edit-tab-panel">
+        <div class="section">
+            <h2 class="section-title">🧠 แบบทดสอบ (Quiz)</h2>
+            <div class="ai-gen-area">
+                <div class="ai-gen-title">✨ สร้าง Quiz ด้วย AI</div>
+                <div class="ai-gen-row">
+                    <div class="form-group">
+                        <label>หัวข้อที่ต้องการสร้าง Quiz</label>
+                        <input type="text" id="aiQuizTopic" class="form-control" placeholder="เช่น Python loops, การตลาดออนไลน์">
+                    </div>
+                    <div class="form-group" style="min-width:110px;">
+                        <label>จำนวนข้อ</label>
+                        <select id="aiQuizCount" class="form-control">
+                            <option value="3">3 ข้อ</option>
+                            <option value="5" selected>5 ข้อ</option>
+                            <option value="10">10 ข้อ</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="min-width:150px;">
+                        <label>ประเภทคำถาม</label>
+                        <select id="aiQuizType" class="form-control">
+                            <option value="multiple_choice">ปรนัย 4 ตัวเลือก</option>
+                            <option value="true_false">ถูก/ผิด</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.75rem; align-items:center; margin-top:0.75rem;">
+                    <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()">✨ สร้างด้วย AI</button>
+                    <small style="color:var(--text-dim);">ใช้ Claude AI สร้างโจทย์อัตโนมัติ</small>
+                </div>
+                <div id="aiLoadingText" class="ai-loading-text">⏳ AI กำลังสร้างแบบทดสอบ...</div>
+            </div>
+            <div id="quizList"></div>
+            <button class="btn btn-outline" onclick="addQuizQuestion()">+ เพิ่มคำถามด้วยตนเอง</button>
+        </div>
+    </div>
+
+    <!-- TAB 4: Homework -->
+    <div id="editTabHomework" class="edit-tab-panel">
+        <div class="section">
+            <h2 class="section-title">📋 การบ้าน (Homework)</h2>
+            <div class="alert-warning">
+                ⚠️ การลบการบ้านที่นักเรียนส่งงานไปแล้วจะไม่ลบ submission ของนักเรียน แต่จะไม่แสดงในหน้าเรียนอีกต่อไป
+            </div>
+            <div id="homeworkList"></div>
+            <button class="btn btn-outline" onclick="addHomework()">+ เพิ่มการบ้าน</button>
+        </div>
+    </div>
+
+    <!-- Save button (always visible) -->
+    <div style="text-align:center; margin-top:1rem; margin-bottom:3rem;">
+        <button class="btn btn-save" onclick="saveCourse()">💾 บันทึกการแก้ไข</button>
+    </div>
+
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <h3 id="loadingText" style="margin-bottom:0.5rem;">กำลังบันทึก...</h3>
+        <p id="loadingSubText" style="color:var(--text-dim); font-size:0.9rem;"></p>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+    authDomain: "skillnest-2026.firebaseapp.com",
+    projectId: "skillnest-2026",
+    storageBucket: "skillnest-2026.firebasestorage.app",
+    messagingSenderId: "416822065212",
+    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';
+const CLOUDINARY_UPLOAD_PRESET = 'skillnest';
+
+let currentUser = null;
+let courseId = null;
+let originalCourse = null;
+let thumbnailFile = null;
+let thumbnailUrl = '';
+
+// Lesson/quiz/hw state
+let lessons = [];
+let lessonCounter = 0;
+let quizQuestions = [];
+let quizCounter = 0;
+let homeworks = [];
+let hwCounter = 0;
+
+// ─── Auth & Load ───────────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '../login-page/login.html'; return; }
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists() || userDoc.data().userType !== 'teacher') {
+        alert('เฉพาะครูเท่านั้น');
+        window.location.href = 'dashboard.html';
+        return;
+    }
+    currentUser = user;
+
+    courseId = new URLSearchParams(window.location.search).get('id');
+    if (!courseId) { alert('ไม่พบ course ID'); window.location.href = 'manage-courses.html'; return; }
+
+    await loadCourseForEdit();
+});
+
+async function loadCourseForEdit() {
+    showLoading('กำลังโหลดข้อมูลคอร์ส...');
+    try {
+        const snap = await getDoc(doc(db, 'courses', courseId));
+        if (!snap.exists()) { alert('ไม่พบคอร์สนี้'); window.location.href = 'manage-courses.html'; return; }
+        originalCourse = snap.data();
+
+        // ตรวจสอบ ownership
+        if (originalCourse.creatorId !== currentUser.uid) {
+            alert('คุณไม่มีสิทธิ์แก้ไขคอร์สนี้');
+            window.location.href = 'manage-courses.html';
+            return;
+        }
+
+        populateForm(originalCourse);
+        hideLoading();
+    } catch(e) {
+        hideLoading();
+        alert('เกิดข้อผิดพลาด: ' + e.message);
+    }
+}
+
+function populateForm(course) {
+    document.title = `แก้ไข: ${course.title} - SkillNest`;
+    document.getElementById('pageCourseTitle').textContent = course.title;
+
+    // ── ข้อมูลพื้นฐาน ──
+    document.getElementById('courseTitle').value = course.title || '';
+    document.getElementById('courseDescription').value = course.description || '';
+    document.getElementById('courseCategory').value = course.category || '';
+    document.getElementById('courseLevel').value = course.level || '';
+    document.getElementById('courseInstructor').value = course.instructor || '';
+
+    // ── รูปปก ──
+    if (course.thumbnail) {
+        thumbnailUrl = course.thumbnail;
+        document.getElementById('currentThumbWrap').innerHTML = `
+            <img src="${course.thumbnail}" alt="รูปปกปัจจุบัน" class="current-thumb">
+            <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.75rem;">รูปปกปัจจุบัน — เลือกไฟล์ใหม่เพื่อเปลี่ยน</p>`;
+    }
+
+    // ── บทเรียน ──
+    if (course.lessons && course.lessons.length > 0) {
+        course.lessons.forEach((lesson, idx) => addExistingLesson(lesson, idx));
+    }
+
+    // ── Quiz ──
+    if (course.quiz && course.quiz.length > 0) {
+        course.quiz.forEach(q => addQuizQuestion(q));
+    }
+
+    // ── Homework ──
+    if (course.homework && course.homework.length > 0) {
+        course.homework.forEach(hw => addHomework(hw));
+    }
+}
+
+// ─── Tab Switching ──────────────────────────────────────────────
+window.switchEditTab = function(tab, btn) {
+    document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.edit-tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('editTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+};
+
+// ─── Thumbnail ──────────────────────────────────────────────────
+document.getElementById('thumbnailInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    thumbnailFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        document.getElementById('thumbnailPreview').innerHTML = `
+            <div class="file-preview">
+                <img src="${ev.target.result}" alt="New thumbnail">
+                <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+                <button class="btn btn-danger" onclick="removeThumbnail()">✕</button>
+            </div>`;
+        document.getElementById('thumbUploadLabel').textContent = '✅ เลือกรูปปกใหม่แล้ว';
+    };
+    reader.readAsDataURL(file);
+});
+
+window.removeThumbnail = function() {
+    thumbnailFile = null;
+    document.getElementById('thumbnailInput').value = '';
+    document.getElementById('thumbnailPreview').innerHTML = '';
+    document.getElementById('thumbUploadLabel').textContent = 'คลิกเพื่อเปลี่ยนรูปปก';
+};
+
+// ─── Lessons ────────────────────────────────────────────────────
+function addExistingLesson(lesson, idx) {
+    lessonCounter++;
+    const lid = 'lesson-' + lessonCounter;
+    lessons.push({ id: lid, method: lesson.type === 'youtube' ? 'youtube' : 'file', file: null, existingUrl: lesson.fileUrl, existingType: lesson.type });
+
+    const isYoutube = lesson.type === 'youtube';
+    const fileLabel = isYoutube ? `▶️ YouTube: ${lesson.fileUrl.substring(0,50)}...` : `📎 ไฟล์เดิม: ${lesson.fileUrl ? lesson.fileUrl.split('/').pop().substring(0,40) : 'ไม่มีไฟล์'}`;
+
+    const html = `
+        <div class="lesson-item existing" id="${lid}">
+            <div class="lesson-header">
+                <span class="lesson-number">บทที่ ${idx + 1}</span>
+                <button class="btn btn-danger" onclick="removeLesson('${lid}')">ลบบทเรียน</button>
+            </div>
+            <div class="form-group">
+                <label>ชื่อบทเรียน <span class="required">*</span></label>
+                <input type="text" class="form-control lesson-title" value="${escapeAttr(lesson.title || '')}">
+            </div>
+            <div class="form-group">
+                <label>ระยะเวลา (นาที)</label>
+                <input type="number" class="form-control lesson-duration" value="${lesson.duration || ''}">
+            </div>
+            <div class="existing-file-badge">📂 ${fileLabel}</div>
+            <div class="form-group">
+                <label>เปลี่ยนไฟล์ / URL (ไม่บังคับ)</label>
+                <div class="upload-method">
+                    <div class="method-option ${!isYoutube ? 'active' : ''}" onclick="selectMethod('${lid}','file')">
+                        <div class="method-icon">📁</div><div>อัพโหลดไฟล์ใหม่</div>
+                    </div>
+                    <div class="method-option ${isYoutube ? 'active' : ''}" onclick="selectMethod('${lid}','youtube')">
+                        <div class="method-icon">▶️</div><div>YouTube URL</div>
+                    </div>
+                </div>
+            </div>
+            <div id="uploadArea-${lid}" style="${isYoutube ? 'display:none;' : ''}">
+                <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
+                    <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
+                    <p style="font-size:0.9rem;">คลิกเพื่ออัพโหลดไฟล์ใหม่</p>
+                </div>
+                <input type="file" id="lessonFileInput-${lid}" style="display:none;">
+                <div id="lessonFilePreview-${lid}"></div>
+            </div>
+            <div id="youtubeArea-${lid}" style="${isYoutube ? '' : 'display:none;'}">
+                <input type="text" class="form-control lesson-youtube-url" placeholder="YouTube URL" value="${isYoutube ? escapeAttr(lesson.fileUrl || '') : ''}">
+            </div>
+        </div>`;
+    document.getElementById('lessonsList').insertAdjacentHTML('beforeend', html);
+    bindLessonFileInput(lid);
+}
+
+window.addLesson = function() {
+    lessonCounter++;
+    const lid = 'lesson-' + lessonCounter;
+    lessons.push({ id: lid, method: 'file', file: null, existingUrl: '', existingType: '' });
+
+    const html = `
+        <div class="lesson-item new-lesson" id="${lid}">
+            <div class="lesson-header">
+                <span class="lesson-number new-badge">✨ บทเรียนใหม่</span>
+                <button class="btn btn-danger" onclick="removeLesson('${lid}')">ลบ</button>
+            </div>
+            <div class="form-group">
+                <label>ชื่อบทเรียน <span class="required">*</span></label>
+                <input type="text" class="form-control lesson-title" placeholder="ชื่อบทเรียน">
+            </div>
+            <div class="form-group">
+                <label>ระยะเวลา (นาที)</label>
+                <input type="number" class="form-control lesson-duration" placeholder="เช่น 15">
+            </div>
+            <div class="form-group">
+                <label>วิธีอัพโหลด</label>
+                <div class="upload-method">
+                    <div class="method-option active" onclick="selectMethod('${lid}','file')">
+                        <div class="method-icon">📁</div><div>อัพโหลดไฟล์</div>
+                    </div>
+                    <div class="method-option" onclick="selectMethod('${lid}','youtube')">
+                        <div class="method-icon">▶️</div><div>YouTube URL</div>
+                    </div>
+                </div>
+            </div>
+            <div id="uploadArea-${lid}">
+                <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
+                    <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
+                    <p style="font-size:0.9rem;">คลิกเพื่ออัพโหลดไฟล์</p>
+                    <small style="color:var(--text-dim);">รองรับ PDF, PPT, DOC, รูปภาพ, วิดีโอ</small>
+                </div>
+                <input type="file" id="lessonFileInput-${lid}" style="display:none;">
+                <div id="lessonFilePreview-${lid}"></div>
+            </div>
+            <div id="youtubeArea-${lid}" style="display:none;">
+                <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
+            </div>
+        </div>`;
+    document.getElementById('lessonsList').insertAdjacentHTML('beforeend', html);
+    bindLessonFileInput(lid);
+};
+
+function bindLessonFileInput(lid) {
+    const input = document.getElementById(`lessonFileInput-${lid}`);
+    if (!input) return;
+    input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const ld = lessons.find(l => l.id === lid);
+        if (ld) ld.file = file;
+        document.getElementById(`lessonFilePreview-${lid}`).innerHTML = `
+            <div class="file-preview">
+                <div style="font-size:1.5rem;">${getFileIcon(file.name)}</div>
+                <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+                <button class="btn btn-danger" onclick="removeLessonFile('${lid}')">✕</button>
+            </div>`;
+    });
+}
+
+window.selectMethod = function(lid, method) {
+    const ld = lessons.find(l => l.id === lid);
+    if (ld) ld.method = method;
+    const el = document.getElementById(lid);
+    el.querySelectorAll('.method-option').forEach(o => o.classList.remove('active'));
+    if (method === 'file') {
+        el.querySelectorAll('.method-option')[0].classList.add('active');
+        document.getElementById(`uploadArea-${lid}`).style.display = 'block';
+        document.getElementById(`youtubeArea-${lid}`).style.display = 'none';
+    } else {
+        el.querySelectorAll('.method-option')[1].classList.add('active');
+        document.getElementById(`uploadArea-${lid}`).style.display = 'none';
+        document.getElementById(`youtubeArea-${lid}`).style.display = 'block';
+    }
+};
+
+window.removeLessonFile = function(lid) {
+    const ld = lessons.find(l => l.id === lid);
+    if (ld) ld.file = null;
+    document.getElementById(`lessonFileInput-${lid}`).value = '';
+    document.getElementById(`lessonFilePreview-${lid}`).innerHTML = '';
+};
+
+window.removeLesson = function(lid) {
+    document.getElementById(lid).remove();
+    lessons = lessons.filter(l => l.id !== lid);
+};
+
+function getFileIcon(name) {
+    const ext = name.split('.').pop().toLowerCase();
+    return {'pdf':'📄','ppt':'📊','pptx':'📊','doc':'📝','docx':'📝','xls':'📈','xlsx':'📈','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','mp4':'🎬','mov':'🎬'}[ext] || '📎';
+}
+function detectFileType(name) {
+    const ext = name.split('.').pop().toLowerCase();
+    if (ext === 'pdf') return 'pdf';
+    if (['ppt','pptx'].includes(ext)) return 'ppt';
+    if (['doc','docx'].includes(ext)) return 'doc';
+    if (['xls','xlsx'].includes(ext)) return 'excel';
+    if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'image';
+    if (['mp4','webm','mov','avi'].includes(ext)) return 'video';
+    return 'unknown';
+}
+function escapeAttr(str) { return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ─── Quiz ────────────────────────────────────────────────────────
+window.addQuizQuestion = function(data = null) {
+    quizCounter++;
+    const qId = 'quiz-' + quizCounter;
+    const qType = data?.type || 'multiple_choice';
+    const qText = data?.question || '';
+    const choices = data?.choices || ['','','',''];
+    const correct = data?.correct || 'A';
+    quizQuestions.push({ id: qId });
+
+    const choicesHTML = qType === 'true_false' ? `
+        <div class="quiz-choices" style="grid-template-columns:1fr 1fr;">
+            <div class="quiz-choice-item"><span class="choice-label">A</span><input type="text" class="form-control choice-input" value="ถูก" readonly></div>
+            <div class="quiz-choice-item"><span class="choice-label">B</span><input type="text" class="form-control choice-input" value="ผิด" readonly></div>
+        </div>
+        <div class="form-group" style="margin-top:0.75rem;">
+            <label>เฉลย</label>
+            <select class="form-control quiz-correct">
+                <option value="A" ${correct==='A'?'selected':''}>A - ถูก</option>
+                <option value="B" ${correct==='B'?'selected':''}>B - ผิด</option>
+            </select>
+        </div>` : `
+        <div class="quiz-choices">
+            ${['A','B','C','D'].map((l,i) => `
+            <div class="quiz-choice-item">
+                <span class="choice-label">${l}</span>
+                <input type="text" class="form-control choice-input" placeholder="ตัวเลือก ${l}" value="${escapeAttr(choices[i]||'')}">
+            </div>`).join('')}
+        </div>
+        <div class="form-group" style="margin-top:0.75rem;">
+            <label>เฉลย</label>
+            <select class="form-control quiz-correct">
+                ${['A','B','C','D'].map(l=>`<option value="${l}" ${correct===l?'selected':''}>${l}</option>`).join('')}
+            </select>
+        </div>`;
+
+    document.getElementById('quizList').insertAdjacentHTML('beforeend', `
+        <div class="quiz-item" id="${qId}">
+            <div class="quiz-question-header">
+                <span class="quiz-question-number">ข้อที่ ${quizCounter}</span>
+                <button class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
+            </div>
+            <div class="form-group">
+                <label>คำถาม <span class="required">*</span></label>
+                <textarea class="form-control quiz-question-text" rows="2">${qText}</textarea>
+            </div>
+            ${choicesHTML}
+        </div>`);
+};
+
+window.removeQuizQuestion = function(qId) {
+    document.getElementById(qId).remove();
+    quizQuestions = quizQuestions.filter(q => q.id !== qId);
+};
+
+window.generateQuizWithAI = async function() {
+    const topic = document.getElementById('aiQuizTopic').value.trim();
+    const count = document.getElementById('aiQuizCount').value;
+    const type = document.getElementById('aiQuizType').value;
+    if (!topic) { alert('กรุณาระบุหัวข้อก่อน'); return; }
+
+    const btn = document.getElementById('btnGenQuiz');
+    const loadingText = document.getElementById('aiLoadingText');
+    btn.disabled = true; loadingText.classList.add('show');
+
+    const typeDesc = type === 'true_false' ? 'ถูก/ผิด (true/false)' : 'ปรนัย 4 ตัวเลือก (A B C D)';
+    const prompt = `สร้างข้อสอบ ${count} ข้อ เรื่อง "${topic}" ประเภท ${typeDesc}
+ตอบกลับเป็น JSON array เท่านั้น ไม่ต้องมีข้อความอื่น รูปแบบ:
+[{"question":"...","type":"${type}","choices":["...","...","...","..."],"correct":"A"}]
+สำหรับ true_false ให้ choices เป็น ["ถูก","ผิด"] และ correct เป็น "A" หรือ "B"`;
+
+    try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2000, messages:[{role:'user',content:prompt}] })
+        });
+        const data = await res.json();
+        let text = data.content[0].text.replace(/```json|```/g,'').trim();
+        const questions = JSON.parse(text);
+        questions.forEach(q => addQuizQuestion(q));
+    } catch(e) {
+        alert('❌ AI สร้างไม่สำเร็จ: ' + e.message);
+    } finally {
+        btn.disabled = false; loadingText.classList.remove('show');
+    }
+};
+
+function collectQuizData() {
+    return Array.from(document.querySelectorAll('.quiz-item')).map(item => {
+        const q = item.querySelector('.quiz-question-text').value.trim();
+        if (!q) return null;
+        const choices = Array.from(item.querySelectorAll('.choice-input')).map(i => i.value.trim());
+        const correct = item.querySelector('.quiz-correct').value;
+        return { question:q, type: choices.length===2?'true_false':'multiple_choice', choices, correct };
+    }).filter(Boolean);
+}
+
+// ─── Homework ────────────────────────────────────────────────────
+window.addHomework = function(data = null) {
+    hwCounter++;
+    const hwId = 'hw-' + hwCounter;
+    const initType = data?.submissionType || 'text';
+    homeworks.push({ id: hwId, type: initType });
+
+    const typeActive = t => initType === t ? 'active' : '';
+    document.getElementById('homeworkList').insertAdjacentHTML('beforeend', `
+        <div class="hw-item" id="${hwId}">
+            <div class="hw-item-header">
+                <span class="hw-number-badge">การบ้านที่ ${hwCounter}</span>
+                <button class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
+            </div>
+            <div class="form-group">
+                <label>ชื่อการบ้าน <span class="required">*</span></label>
+                <input type="text" class="form-control hw-title" placeholder="ชื่อการบ้าน" value="${escapeAttr(data?.title||'')}">
+            </div>
+            <div class="form-group">
+                <label>คำอธิบาย / โจทย์</label>
+                <textarea class="form-control hw-desc" rows="3">${data?.description||''}</textarea>
+            </div>
+            <div class="grid">
+                <div class="form-group">
+                    <label>วันกำหนดส่ง</label>
+                    <input type="datetime-local" class="form-control hw-deadline" value="${data?.deadline||''}">
+                </div>
+                <div class="form-group">
+                    <label>คะแนนเต็ม</label>
+                    <input type="number" class="form-control hw-maxscore" placeholder="100" min="1" value="${data?.maxScore||100}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ประเภทการส่งงาน</label>
+                <div class="hw-type-selector">
+                    <div class="hw-type-btn ${typeActive('text')}" onclick="setHwType('${hwId}','text',this)">✍️ พิมพ์ข้อความ</div>
+                    <div class="hw-type-btn ${typeActive('file')}" onclick="setHwType('${hwId}','file',this)">📎 อัปโหลดไฟล์</div>
+                    <div class="hw-type-btn ${typeActive('both')}" onclick="setHwType('${hwId}','both',this)">✍️📎 ทั้งสองแบบ</div>
+                </div>
+            </div>
+        </div>`);
+};
+
+window.removeHomework = function(hwId) {
+    document.getElementById(hwId).remove();
+    homeworks = homeworks.filter(h => h.id !== hwId);
+};
+window.setHwType = function(hwId, type, btn) {
+    const hw = homeworks.find(h => h.id === hwId);
+    if (hw) hw.type = type;
+    btn.closest('.hw-type-selector').querySelectorAll('.hw-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+};
+function collectHomeworkData() {
+    return Array.from(document.querySelectorAll('.hw-item')).map((item, i) => {
+        const title = item.querySelector('.hw-title').value.trim();
+        if (!title) return null;
+        const hw = homeworks[i] || {};
+        return {
+            title,
+            description: item.querySelector('.hw-desc').value.trim(),
+            deadline: item.querySelector('.hw-deadline').value || null,
+            maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,
+            submissionType: hw.type || 'text',
+            order: i
+        };
+    }).filter(Boolean);
+}
+
+// ─── Cloudinary Upload ───────────────────────────────────────────
+async function uploadToCloudinary(file, folder = 'skillnest') {
+    let resourceType = 'auto';
+    if (file.type.startsWith('image/')) resourceType = 'image';
+    else if (file.type.startsWith('video/')) resourceType = 'video';
+    else resourceType = 'raw';
+
+    const form = new FormData();
+    form.append('file', file);
+    form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    form.append('folder', folder);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`, { method:'POST', body:form });
+    if (!res.ok) throw new Error((await res.json()).error?.message || 'Upload failed');
+    return (await res.json()).secure_url;
+}
+
+// ─── Save Course ─────────────────────────────────────────────────
+window.saveCourse = async function() {
+    const title = document.getElementById('courseTitle').value.trim();
+    const description = document.getElementById('courseDescription').value.trim();
+    const category = document.getElementById('courseCategory').value;
+    const level = document.getElementById('courseLevel').value;
+    const instructor = document.getElementById('courseInstructor').value.trim();
+
+    if (!title || !description || !category || !level) {
+        alert('❌ กรุณากรอกข้อมูลคอร์สให้ครบ (ชื่อ, คำอธิบาย, หมวดหมู่, ระดับ)');
+        switchEditTab('info', document.querySelector('.edit-tab'));
+        return;
+    }
+
+    try {
+        showLoading('กำลังเตรียมข้อมูล...');
+
+        // 1. Upload thumbnail (ถ้าเลือกใหม่)
+        if (thumbnailFile) {
+            updateSubText('กำลังอัปโหลดรูปปก...');
+            thumbnailUrl = await uploadToCloudinary(thumbnailFile, 'skillnest/thumbnails');
+        }
+
+        // 2. Process lessons
+        const lessonItems = document.querySelectorAll('.lesson-item');
+        const lessonsData = [];
+
+        for (let i = 0; i < lessonItems.length; i++) {
+            const item = lessonItems[i];
+            const lid = item.id;
+            const ld = lessons.find(l => l.id === lid);
+            if (!ld) continue;
+
+            const lessonTitle = item.querySelector('.lesson-title').value.trim();
+            const lessonDuration = item.querySelector('.lesson-duration')?.value?.trim();
+
+            if (!lessonTitle) {
+                alert(`❌ กรุณากรอกชื่อบทเรียนที่ ${i + 1}`);
+                hideLoading();
+                switchEditTab('lessons', document.querySelectorAll('.edit-tab')[1]);
+                return;
+            }
+
+            let fileUrl = ld.existingUrl || '';
+            let fileType = ld.existingType || '';
+
+            if (ld.method === 'file' && ld.file) {
+                // มีไฟล์ใหม่ upload ขึ้น Cloudinary
+                updateSubText(`กำลังอัปโหลดบทที่ ${i + 1}: ${lessonTitle}`);
+                fileUrl = await uploadToCloudinary(ld.file, 'skillnest/lessons');
+                fileType = detectFileType(ld.file.name);
+            } else if (ld.method === 'youtube') {
+                fileUrl = item.querySelector('.lesson-youtube-url').value.trim();
+                if (!fileUrl) {
+                    alert(`❌ กรุณาใส่ YouTube URL สำหรับบทเรียนที่ ${i + 1}`);
+                    hideLoading();
+                    return;
+                }
+                fileType = 'youtube';
+            }
+            // else: ใช้ existingUrl เดิม
+
+            lessonsData.push({
+                title: lessonTitle,
+                fileUrl,
+                type: fileType,
+                duration: lessonDuration ? parseInt(lessonDuration) : null,
+                order: i
+            });
+        }
+
+        // 3. Collect quiz & homework
+        const quizData = collectQuizData();
+        const homeworkData = collectHomeworkData();
+
+        // 4. Update Firestore
+        updateSubText('กำลังบันทึกข้อมูล...');
+        await updateDoc(doc(db, 'courses', courseId), {
+            title,
+            description,
+            category,
+            level,
+            instructor: instructor || 'ไม่ระบุ',
+            thumbnail: thumbnailUrl || originalCourse.thumbnail || '',
+            lessons: lessonsData,
+            quiz: quizData,
+            homework: homeworkData,
+            updatedAt: serverTimestamp()
+        });
+
+        hideLoading();
+        alert('✅ บันทึกการแก้ไขสำเร็จ!');
+        window.location.href = 'manage-courses.html';
+
+    } catch(e) {
+        hideLoading();
+        console.error(e);
+        alert('❌ เกิดข้อผิดพลาด: ' + e.message);
+    }
+};
+
+// ─── Loading helpers ─────────────────────────────────────────────
+function showLoading(text) {
+    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingSubText').textContent = '';
+    document.getElementById('loadingOverlay').classList.add('show');
+}
+function updateSubText(text) {
+    document.getElementById('loadingSubText').textContent = text;
+}
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+}
+</script>
+</body>
+</html>
