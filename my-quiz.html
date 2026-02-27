@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบฝึกหัดของฉัน - SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(255, 255, 255, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* === Top Nav === */
+        .top-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 70px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo-icon {
+            background: var(--primary-blue);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .nav-title {
+            flex: 1;
+            font-size: 1rem;
+            color: var(--text-dim);
+        }
+
+        /* === Sidebar === */
+        .app-container { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed;
+            left: 0; top: 70px;
+            width: 250px;
+            height: calc(100vh - 70px);
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text-dim);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--text-main);
+        }
+
+        /* === Main Content === */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            width: calc(100% - 250px);
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-dim);
+        }
+
+        /* === Quiz Cards === */
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quiz-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .quiz-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-course-name {
+            font-size: 1rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .quiz-count-badge {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .quiz-meta {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-score-bar {
+            background: rgba(255,255,255,0.08);
+            border-radius: 6px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 0.4rem;
+        }
+
+        .quiz-score-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--purple), var(--primary-blue));
+            transition: width 0.5s ease;
+        }
+
+        .quiz-score-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .btn-start-quiz {
+            width: 100%;
+            margin-top: 1.25rem;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .btn-start-quiz:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* === Modal Quiz === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .quiz-modal {
+            background: #0f1035;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .quiz-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-progress-info {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .btn-close-modal {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .quiz-modal-progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .quiz-modal-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--purple), var(--primary-blue));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .choice-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .choice-option:hover { border-color: var(--purple); background: rgba(139, 92, 246, 0.08); }
+
+        .choice-option.selected { border-color: var(--primary-blue); background: rgba(59, 130, 246, 0.12); }
+
+        .choice-option.correct { border-color: var(--success-green) !important; background: rgba(16, 185, 129, 0.12) !important; }
+
+        .choice-option.wrong { border-color: var(--danger-red) !important; background: rgba(239, 68, 68, 0.12) !important; }
+
+        .choice-letter {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.3rem 0.65rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .btn-next {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 0.9rem;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-next:not(:disabled):hover { background: #2563eb; }
+
+        /* === Result Screen === */
+        .result-screen {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .result-emoji {
+            font-size: 4.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-sub {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+        }
+
+        .result-detail {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-stat {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .result-stat-num {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .result-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .btn-retry {
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white;
+            border: none;
+            padding: 0.9rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 0.75rem;
+        }
+
+        .btn-close-result {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.9rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* === Empty State === */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+
+        .empty-state h3 { color: var(--text-main); font-size: 1.3rem; margin-bottom: 0.5rem; }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid var(--purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar-item span { display: none; }
+            .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+
+    <nav class="top-nav">
+        <a href="dashboard.html" class="logo-section">
+            <span class="logo-icon">W</span>
+            <span>SkillNest</span>
+        </a>
+        <span class="nav-title">📝 แบบฝึกหัดของฉัน</span>
+    </nav>
+
+    <aside class="sidebar">
+        <a href="dashboard.html" class="sidebar-item">📚 <span>คอร์สของฉัน</span></a>
+        <div class="sidebar-item active">📝 <span>แบบฝึกหัดของฉัน</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html'">📊 <span>ผลการเรียนรู้</span></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>📝 แบบฝึกหัดของฉัน</h1>
+            <p>ทำแบบทดสอบเพื่อทดสอบความเข้าใจจากคอร์สที่คุณลงทะเบียน</p>
+        </div>
+
+        <div id="quizGrid" class="quiz-grid">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+    </main>
+</div>
+
+<!-- Quiz Modal -->
+<div id="quizModalOverlay" class="modal-overlay">
+    <div class="quiz-modal" id="quizModal">
+        <!-- Dynamic content here -->
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+    authDomain: "skillnest-2026.firebaseapp.com",
+    projectId: "skillnest-2026",
+    storageBucket: "skillnest-2026.firebasestorage.app",
+    messagingSenderId: "416822065212",
+    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+
+// === Auth Check ===
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '../login-page/login.html'; return; }
+
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.userType !== 'student') {
+            alert('หน้านี้สำหรับนักเรียนเท่านั้น');
+            window.location.href = 'dashboard.html';
+            return;
+        }
+    }
+
+    currentUser = user;
+    loadQuizzes();
+});
+
+// === Load Quizzes from enrolled/all courses ===
+async function loadQuizzes() {
+    const grid = document.getElementById('quizGrid');
+
+    try {
+        // โหลดคอร์สทั้งหมดที่มี quiz
+        const coursesSnap = await getDocs(collection(db, 'courses'));
+        const coursesWithQuiz = [];
+
+        coursesSnap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.quiz && data.quiz.length > 0) {
+                coursesWithQuiz.push({ id: docSnap.id, ...data });
+            }
+        });
+
+        if (coursesWithQuiz.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1/-1;">
+                    <div class="empty-icon">📭</div>
+                    <h3>ยังไม่มีแบบฝึกหัด</h3>
+                    <p>คอร์สที่คุณลงทะเบียนยังไม่มีแบบทดสอบ</p>
+                </div>`;
+            return;
+        }
+
+        // โหลดคะแนนที่เคยทำ
+        const scoresMap = {};
+        try {
+            const scoresSnap = await getDocs(query(
+                collection(db, 'quizScores'),
+                where('userId', '==', currentUser.uid)
+            ));
+            scoresSnap.forEach(d => {
+                const s = d.data();
+                scoresMap[s.courseId] = s;
+            });
+        } catch(e) { /* ยังไม่มีคะแนน */ }
+
+        grid.innerHTML = '';
+        coursesWithQuiz.forEach(course => {
+            const quizCount = course.quiz.length;
+            const scoreData = scoresMap[course.id];
+            const hasScore = !!scoreData;
+            const pct = hasScore ? Math.round((scoreData.score / quizCount) * 100) : 0;
+
+            const card = document.createElement('div');
+            card.className = 'quiz-card';
+            card.innerHTML = `
+                <div class="quiz-card-header">
+                    <div class="quiz-course-name">${course.title}</div>
+                    <span class="quiz-count-badge">${quizCount} ข้อ</span>
+                </div>
+                <div class="quiz-meta">${course.category || ''} • ${course.level || ''}</div>
+                ${hasScore ? `
+                    <div class="quiz-score-bar">
+                        <div class="quiz-score-fill" style="width:${pct}%"></div>
+                    </div>
+                    <div class="quiz-score-label">
+                        <span>คะแนนล่าสุด</span>
+                        <span>${scoreData.score}/${quizCount} (${pct}%)</span>
+                    </div>
+                ` : `<p style="color:var(--text-dim); font-size:0.85rem;">ยังไม่เคยทำ</p>`}
+                <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">
+                    ${hasScore ? '🔁 ทำใหม่อีกครั้ง' : '▶️ เริ่มทำแบบทดสอบ'}
+                </button>
+            `;
+            grid.appendChild(card);
+        });
+
+        // expose quiz data globally for startQuiz
+        window.__coursesWithQuiz = coursesWithQuiz;
+
+    } catch (err) {
+        console.error(err);
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3><p>${err.message}</p></div>`;
+    }
+}
+
+// === Quiz Logic ===
+let currentQuiz = null; // { courseId, courseName, questions, currentIndex, score, selected, answered }
+
+window.startQuiz = function(courseId) {
+    const course = window.__coursesWithQuiz.find(c => c.id === courseId);
+    if (!course) return;
+
+    currentQuiz = {
+        courseId,
+        courseName: course.title,
+        questions: course.quiz,
+        currentIndex: 0,
+        score: 0,
+        selected: null,
+        answered: false
+    };
+
+    renderQuestion();
+    document.getElementById('quizModalOverlay').classList.add('show');
+};
+
+function renderQuestion() {
+    const { questions, currentIndex, courseName } = currentQuiz;
+    const q = questions[currentIndex];
+    const total = questions.length;
+    const pct = Math.round((currentIndex / total) * 100);
+
+    const choices = q.type === 'true_false' ? ['ถูก', 'ผิด'] : (q.choices || []);
+    const labels = ['A', 'B', 'C', 'D'];
+
+    document.getElementById('quizModal').innerHTML = `
+        <div class="quiz-modal-header">
+            <div>
+                <div style="font-weight:600; margin-bottom:0.25rem;">${courseName}</div>
+                <div class="quiz-progress-info">ข้อที่ ${currentIndex + 1} / ${total}</div>
+            </div>
+            <button class="btn-close-modal" onclick="closeQuizModal()">✕ ออก</button>
+        </div>
+        <div class="quiz-modal-progress-bar">
+            <div class="quiz-modal-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="question-text">${currentIndex + 1}. ${q.question}</div>
+        <div id="choiceList">
+            ${choices.map((c, i) => `
+                <div class="choice-option" id="choice-${i}" onclick="selectChoice(${i})">
+                    <span class="choice-letter">${labels[i]}</span>
+                    <span>${c}</span>
+                </div>
+            `).join('')}
+        </div>
+        <button class="btn-next" id="btnNext" disabled onclick="nextQuestion()">
+            ${currentIndex + 1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯'}
+        </button>
+    `;
+
+    currentQuiz.selected = null;
+    currentQuiz.answered = false;
+}
+
+window.selectChoice = function(index) {
+    if (currentQuiz.answered) return;
+
+    const { questions, currentIndex } = currentQuiz;
+    const q = questions[currentIndex];
+    const labels = ['A', 'B', 'C', 'D'];
+    const correctLetter = q.correct; // 'A', 'B', etc.
+    const correctIndex = labels.indexOf(correctLetter);
+
+    currentQuiz.selected = index;
+    currentQuiz.answered = true;
+
+    // Mark selected
+    document.querySelectorAll('.choice-option').forEach((el, i) => {
+        if (i === index) el.classList.add('selected');
+    });
+
+    // Reveal correct / wrong
+    setTimeout(() => {
+        document.querySelectorAll('.choice-option').forEach((el, i) => {
+            if (i === correctIndex) el.classList.add('correct');
+            if (i === index && i !== correctIndex) el.classList.add('wrong');
+        });
+
+        if (index === correctIndex) currentQuiz.score++;
+
+        document.getElementById('btnNext').disabled = false;
+    }, 300);
+};
+
+window.nextQuestion = function() {
+    const { questions, currentIndex } = currentQuiz;
+    if (currentIndex + 1 < questions.length) {
+        currentQuiz.currentIndex++;
+        renderQuestion();
+    } else {
+        showResult();
+    }
+};
+
+async function showResult() {
+    const { questions, score, courseName, courseId } = currentQuiz;
+    const total = questions.length;
+    const pct = Math.round((score / total) * 100);
+    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+    const msg = pct >= 80 ? 'ยอดเยี่ยม!' : pct >= 60 ? 'ทำได้ดี!' : 'ลองทำใหม่อีกครั้งนะ';
+
+    // Save score to Firestore
+    try {
+        await setDoc(doc(db, 'quizScores', `${currentUser.uid}_${courseId}`), {
+            userId: currentUser.uid,
+            courseId,
+            score,
+            total,
+            pct,
+            updatedAt: new Date()
+        });
+    } catch(e) { console.error('Save score error:', e); }
+
+    document.getElementById('quizModal').innerHTML = `
+        <div class="result-screen">
+            <div class="result-emoji">${emoji}</div>
+            <div class="result-score">${score} / ${total}</div>
+            <div class="result-sub">${msg} — คะแนน ${pct}%</div>
+            <div class="result-detail">
+                <div class="result-stat">
+                    <div class="result-stat-num" style="color:var(--success-green);">${score}</div>
+                    <div class="result-stat-label">ถูก</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-num" style="color:var(--danger-red);">${total - score}</div>
+                    <div class="result-stat-label">ผิด</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-num" style="color:var(--primary-blue);">${pct}%</div>
+                    <div class="result-stat-label">คะแนน</div>
+                </div>
+            </div>
+            <button class="btn-retry" onclick="startQuiz('${courseId}')">🔁 ทำใหม่</button>
+            <button class="btn-close-result" onclick="closeQuizModal()">กลับหน้าหลัก</button>
+        </div>
+    `;
+
+    // Reload cards to update score
+    loadQuizzes();
+}
+
+window.closeQuizModal = function() {
+    document.getElementById('quizModalOverlay').classList.remove('show');
+    currentQuiz = null;
+};
+
+// Close on backdrop click
+document.getElementById('quizModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeQuizModal();
+});
+</script>
+</body>
+</html>

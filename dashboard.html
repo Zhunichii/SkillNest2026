@@ -477,6 +477,9 @@
             <div class="sidebar-item teacher-only" id="sidebarCreateCourse" data-page="create" onclick="window.location.href='create-course.html'" style="display: none;">
                 💡 <span>เพิ่มคอร์ส</span>
             </div>
+            <div class="sidebar-item student-only" id="sidebarMyQuizzes" data-page="my-quizzes" onclick="window.location.href='my-quizzes.html'" style="display: none;">
+                📝 <span>แบบฝึกหัดของฉัน</span>
+            </div>
             <div class="sidebar-item" data-page="progress">
                 📊 <span>ผลการเรียนรู้</span>
             </div>
@@ -693,6 +696,12 @@
                             // แสดงปุ่มสร้างคอร์สใหม่ใน header
                             const headerCreateCourseBtn = document.getElementById('headerCreateCourseBtn');
                             if (headerCreateCourseBtn) headerCreateCourseBtn.style.display = 'flex';
+                        }
+
+                        // แสดงปุ่มแบบฝึกหัดถ้าเป็นนักเรียน
+                        if (userType === 'student') {
+                            const sidebarMyQuizzes = document.getElementById('sidebarMyQuizzes');
+                            if (sidebarMyQuizzes) sidebarMyQuizzes.style.display = 'flex';
                         }
                     }
                 } catch (error) {
