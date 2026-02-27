@@ -441,9 +441,11 @@
     </nav>
 
     <aside class="sidebar">
-        <a href="dashboard.html" class="sidebar-item">📚 <span>คอร์สของฉัน</span></a>
-        <div class="sidebar-item active">📝 <span>แบบฝึกหัดของฉัน</span></div>
-        <div class="sidebar-item" onclick="window.location.href='dashboard.html'">📊 <span>ผลการเรียนรู้</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=explore'">🔍 <span>ค้นหาคอร์สใหม่</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=my-courses'">📚 <span>คอร์สของฉัน</span></div>
+        <div class="sidebar-item teacher-only" id="sidebarCreateCourse" onclick="window.location.href='create-course.html'" style="display:none;">💡 <span>เพิ่มคอร์ส</span></div>
+        <div class="sidebar-item active" id="sidebarMyQuizzes">📝 <span>แบบฝึกหัดของฉัน</span></div>
+        <div class="sidebar-item">📊 <span>ผลการเรียนรู้</span></div>
     </aside>
 
     <main class="main-content">

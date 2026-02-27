@@ -604,11 +604,11 @@
 </div>
 
         <aside class="sidebar">
-            <div class="sidebar-item active" data-page="my-courses">
-                📚 <span>คอร์สของฉัน</span>
-            </div>
-            <div class="sidebar-item" data-page="explore">
+            <div class="sidebar-item active" id="sidebarExplore" data-page="explore" onclick="switchPage('explore')">
                 🔍 <span>ค้นหาคอร์สใหม่</span>
+            </div>
+            <div class="sidebar-item" id="sidebarMyCourses" data-page="my-courses" onclick="switchPage('my-courses')">
+                📚 <span>คอร์สของฉัน</span>
             </div>
             <div class="sidebar-item teacher-only" id="sidebarCreateCourse" data-page="create" onclick="window.location.href='create-course.html'" style="display: none;">
                 💡 <span>เพิ่มคอร์ส</span>
@@ -628,7 +628,7 @@
             </div>
 
             <div class="section-header">
-                <span>📖 คอร์สเรียนทั้งหมด</span>
+                <span id="sectionHeaderText">🔍 ค้นหาคอร์สใหม่</span>
                 <button class="btn-create-course teacher-only" id="headerCreateCourseBtn" onclick="window.location.href='create-course.html'" style="display: none;">
                     ➕ สร้างคอร์สใหม่
                 </button>
@@ -733,10 +733,15 @@
                 }
 
                 courseGrid.innerHTML = '';
+                let visibleCount = 0;
                 
                 for (const docSnapshot of querySnapshot.docs) {
                     const course = docSnapshot.data();
                     const courseId = docSnapshot.id;
+
+                    // ข้ามคอร์สที่สมัครแล้ว (explore = เฉพาะยังไม่สมัคร)
+                    if (enrolledCourseIds.has(courseId)) continue;
+                    visibleCount++;
                     
                     // ดึงข้อมูลผู้สร้าง
                     let creatorName = 'ไม่ทราบชื่อ';
@@ -787,6 +792,15 @@
                     `;
                     courseCard.addEventListener('click', () => openCourseModal(courseId, course, randomColor, creatorName));
                     courseGrid.appendChild(courseCard);
+                }
+
+                if (visibleCount === 0) {
+                    courseGrid.innerHTML = `
+                        <div class="empty-state" style="grid-column:1/-1;">
+                            <div class="empty-state-icon">🎉</div>
+                            <h3>คุณสมัครเรียนครบทุกคอร์สแล้ว!</h3>
+                            <p>ไปที่ "คอร์สของฉัน" เพื่อเริ่มเรียน</p>
+                        </div>`;
                 }
                 
             } catch (error) {
@@ -861,10 +875,14 @@
                     console.error('Error fetching user data:', error);
                 }
                 
-                // โหลดคอร์สทั้งหมด
-                await loadCourses();
-                // โหลดรายการที่สมัครแล้ว
+                // โหลดคอร์สตาม URL param
                 await loadEnrollments();
+                const urlPage = new URLSearchParams(window.location.search).get('page');
+                if (urlPage === 'my-courses') {
+                    switchPage('my-courses');
+                } else {
+                    await loadCourses();
+                }
             } else {
                 window.location.href = '../login-page/login.html';
             }
@@ -898,7 +916,116 @@
             }
         });
 
-        // ------------------------------------------------
+    // ------------------------------------------------
+    // Page Switch: ค้นหาคอร์สใหม่ vs คอร์สของฉัน
+    // ------------------------------------------------
+    let currentPage = 'explore';
+
+    window.switchPage = async function(page) {
+        currentPage = page;
+
+        // update sidebar active state
+        document.querySelectorAll('.sidebar-item[data-page]').forEach(el => el.classList.remove('active'));
+        const activeId = page === 'explore' ? 'sidebarExplore' : 'sidebarMyCourses';
+        const activeEl = document.getElementById(activeId);
+        if (activeEl) activeEl.classList.add('active');
+
+        // update header text
+        const headerText = document.getElementById('sectionHeaderText');
+        if (headerText) {
+            headerText.textContent = page === 'explore' ? '🔍 ค้นหาคอร์สใหม่' : '📚 คอร์สของฉัน';
+        }
+
+        // clear search
+        const si = document.getElementById('searchInput');
+        if (si) si.value = '';
+
+        if (page === 'explore') {
+            await loadCourses();
+        } else {
+            await loadMyCourses();
+        }
+    };
+
+    async function loadMyCourses() {
+        const courseGrid = document.getElementById('courseGrid');
+        courseGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+        if (!currentUser) return;
+
+        try {
+            // ดึง enrollments ของ user
+            const enrollSnap = await getDocs(query(
+                collection(db, 'enrollments'),
+                where('userId', '==', currentUser.uid)
+            ));
+
+            if (enrollSnap.empty) {
+                courseGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column:1/-1;">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>ยังไม่มีคอร์สที่สมัคร</h3>
+                        <p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อเลือกสมัครเรียนคอร์สที่สนใจ</p>
+                    </div>`;
+                return;
+            }
+
+            courseGrid.innerHTML = '';
+
+            for (const enrollDoc of enrollSnap.docs) {
+                const courseId = enrollDoc.data().courseId;
+                try {
+                    const courseSnap = await getDoc(doc(db, 'courses', courseId));
+                    if (!courseSnap.exists()) continue;
+
+                    const course = courseSnap.data();
+                    const lessonCount = course.lessons ? course.lessons.length : 0;
+                    const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
+
+                    let creatorName = 'ไม่ทราบชื่อ';
+                    try {
+                        const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
+                        if (creatorDoc.exists()) {
+                            const cd = creatorDoc.data();
+                            creatorName = `${cd.firstName || ''} ${cd.lastName || ''}`.trim() || cd.email;
+                        }
+                    } catch(e) {}
+
+                    const thumbnailStyle = course.thumbnail
+                        ? `background-image: url('${course.thumbnail}'); background-size:cover; background-position:center;`
+                        : `background: ${randomColor};`;
+
+                    const courseCard = document.createElement('div');
+                    courseCard.className = 'course-card';
+                    courseCard.innerHTML = `
+                        <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
+                            ${!course.thumbnail ? course.title.substring(0, 15) : ''}
+                            <div class="course-duration">⏱ ${lessonCount} บท</div>
+                            <div class="enrolled-tag">✅ สมัครแล้ว</div>
+                        </div>
+                        <div class="course-info">
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-subtitle">${categoryMap[course.category] || course.category} • ${levelMap[course.level] || course.level}</div>
+                            <div class="course-author">${creatorName}</div>
+                            <div style="margin-top:0.75rem;">
+                                <button onclick="event.stopPropagation(); window.location.href='course-content.html?id=${courseId}'" style="width:100%;padding:0.6rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                                    ▶️ เข้าสู่บทเรียน
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    courseCard.addEventListener('click', () => window.location.href = `course-content.html?id=${courseId}`);
+                    courseGrid.appendChild(courseCard);
+                } catch(e) { console.error('Error loading enrolled course:', e); }
+            }
+
+        } catch(e) {
+            console.error('loadMyCourses error:', e);
+            courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3></div>`;
+        }
+    }
+
+    // ------------------------------------------------
     // ส่วนฟังก์ชันค้นหา (Search Logic)
     // ------------------------------------------------
     const searchInput = document.getElementById('searchInput');
