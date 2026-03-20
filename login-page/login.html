@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillNest - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #020418;
+            --card-bg: #000000;
+            --primary-blue: #007aff;
+            --text-blue: #3b82f6;
+            --text-grey: #a0a0ba;
+            --input-bg: #d9d9d9;
+            --green-link: #26a646;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at 50% 100%, #2a2a72 0%, #020418 60%);
+            overflow: hidden;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .logo-icon {
+            width: 35px; height: 35px;
+            background: var(--primary-blue);
+            color: white;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 6px; font-style: normal; font-weight: bold;
+        }
+
+        .header-title {
+            color: var(--text-blue);
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .header-subtitle {
+            color: var(--text-grey);
+            font-size: 0.95rem;
+            margin-bottom: 35px;
+            font-weight: 300;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-title {
+            color: var(--text-blue);
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 20px;
+            background-color: var(--input-bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #333;
+            font-weight: 600;
+            outline: none;
+        }
+        
+        .input-field::placeholder {
+            color: #444;
+            font-weight: 600;
+        }
+
+        .btn-login {
+            width: 40%;
+            padding: 10px 0;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .signup-text {
+            color: #666;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .signup-link {
+            color: var(--green-link);
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+        
+        .signup-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .bottom-glow {
+            position: fixed;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            filter: blur(80px);
+            z-index: -1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="brand-logo">
+            <div class="logo-icon">W</div>
+            SkillNest
+        </div>
+        
+        <h1 class="header-title">Login to your SkillNest account</h1>
+        <p class="header-subtitle">Start learning with us today</p>
+
+        <div class="login-card">
+            <h2 class="card-title">Login to SkillNest</h2>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="email" id="email" class="input-field" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" class="input-field" placeholder="Password" required>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+
+                <button type="submit" class="btn-login" id="loginBtn">Login</button>
+                
+                <p class="signup-text">
+                    Don't have an account? 
+                    <a href="signup.html" class="signup-link">Sign up</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <div class="bottom-glow"></div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // ⚠️ แทนที่ค่าด้านล่างด้วย Firebase Config ของคุณ (ต้องเหมือนกับ signup.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+            authDomain: "skillnest-2026.firebaseapp.com",
+            projectId: "skillnest-2026",
+            storageBucket: "skillnest-2026.firebasestorage.app",
+            messagingSenderId: "416822065212",
+            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Form Handler
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Reset error message
+            errorMessage.style.display = 'none';
+
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+
+            try {
+                // Sign in with Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                console.log('Login successful:', user.uid);
+
+                // Redirect to index page
+                window.location.href = '../index.html';
+
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                let errorMsg = 'An error occurred. Please try again.';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMsg = 'Invalid email or password!';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Invalid email address!';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Too many failed attempts. Please try again later.';
+                } else if (error.code === 'auth/invalid-credential') {
+                    errorMsg = 'Invalid email or password!';
+                }
+                
+                errorMessage.textContent = errorMsg;
+                errorMessage.style.display = 'block';
+                
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+    </script>
+
+</body>
+</html>

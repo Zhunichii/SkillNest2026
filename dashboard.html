@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillNest - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 1000;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .logo-icon {
+            background: var(--primary-blue);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 25px;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-bar input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 15px 8px 35px;
+            color: var(--text-main);
+            width: 100%;
+            max-width: 500px;
+            font-size: 0.9rem;
+        }
+
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+        }
+
+        .notification {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background: rgba(10, 12, 33, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            min-width: 180px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            color: var(--text-dim);
+            text-decoration: none;
+            display: block;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 70px;
+            width: 250px;
+            height: calc(100vh - 70px);
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 20px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text-dim);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--text-main);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            width: calc(100% - 250px);
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .welcome-banner h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-banner p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .btn-create-course {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-create-course:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .course-image {
+            width: 100%;
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: white;
+            position: relative;
+        }
+
+        .course-duration {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .course-info {
+            padding: 20px;
+        }
+
+        .course-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .course-subtitle {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .course-author {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        .progress-section {
+            margin-top: 15px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-blue);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-item span {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+                padding: 20px;
+            }
+            
+            .search-bar input {
+                width: 200px;
+            }
+        }
+
+        /* === Enrollment Modal === */
+        .enroll-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .enroll-modal-overlay.show { display: flex; }
+
+        .enroll-modal {
+            background: #0f1035;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+        }
+
+        .enroll-modal-thumb {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .enroll-modal-body {
+            padding: 1.75rem;
+        }
+
+        .enroll-modal-body h2 {
+            font-size: 1.35rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .enroll-modal-meta {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .enroll-badge {
+            background: rgba(59,130,246,0.15);
+            color: #60a5fa;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .enroll-modal-desc {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .enroll-modal-lessons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .enroll-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-enroll {
+            flex: 1;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #3b82f6, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-enroll:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-go-course {
+            flex: 1;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-go-course:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-cancel-enroll {
+            padding: 0.9rem 1.25rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-dim);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-cancel-enroll:hover { color: white; }
+
+        .enrolled-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(16,185,129,0.85);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="top-nav">
+            <div class="logo-section">
+                <span class="logo-icon">W</span>
+                <span>SkillNest</span>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="ค้นหาคอร์สเรียน...">
+            </div>
+            <div class="nav-right">
+                <div class="notification">
+                    🔔
+                    <span class="notification-badge"></span>
+                </div>
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="profileBtn">
+                        <div class="profile-icon" id="profileIconContainer">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                        <span id="userName">Loading...</span>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="profile.html" class="dropdown-item" id="profileItem">โปรไฟล์</a>
+                        <a class="dropdown-item" id="settingsItem">การตั้งค่า</a>
+                        <a href="manage-courses.html" class="dropdown-item teacher-only" id="manageCourseItem" style="display: none;">จัดการคอร์สของฉัน</a>
+                        <a class="dropdown-item" id="logoutItem">ออกจากระบบ</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div id="manageModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>คอร์สที่คุณอัพโหลด</h3>
+            <span class="close-modal" id="closeManageModal">&times;</span>
+        </div>
+        <div id="myCourseList" class="modal-body">
+            <p style="text-align:center; color: var(--text-dim);">กำลังโหลด...</p>
+        </div>
+    </div>
+</div>
+
+        <aside class="sidebar">
+            <div class="sidebar-item active" id="sidebarExplore" data-page="explore" onclick="switchPage('explore')">
+                🔍 <span>ค้นหาคอร์สใหม่</span>
+            </div>
+            <div class="sidebar-item" id="sidebarMyCourses" data-page="my-courses" onclick="switchPage('my-courses')">
+                📚 <span>คอร์สของฉัน</span>
+            </div>
+            <div class="sidebar-item teacher-only" id="sidebarCreateCourse" data-page="create" onclick="window.location.href='create-course.html'" style="display: none;">
+                💡 <span>เพิ่มคอร์ส</span>
+            </div>
+            <div class="sidebar-item teacher-only" id="sidebarHomework" onclick="window.location.href='homework.html'" style="display: none;">
+                📋 <span>ตรวจการบ้าน</span>
+            </div>
+            <div class="sidebar-item student-only" id="sidebarMyQuizzes" data-page="my-quizzes" onclick="window.location.href='my-quizzes.html'" style="display: none;">
+                📝 <span>แบบฝึกหัดของฉัน</span>
+            </div>
+            <div class="sidebar-item" data-page="progress">
+                📊 <span>ผลการเรียนรู้</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="welcome-banner">
+                <h1 id="welcomeMessage">ยินดีต้อนรับกลับ, นักเรียนรู้ 🚀</h1>
+                <p>AI Tutor ของเราพร้อมช่วยเหลือคุณเรียนรู้สิ่งใหม่ๆแล้ว</p>
+            </div>
+
+            <div class="section-header">
+                <span id="sectionHeaderText">🔍 ค้นหาคอร์สใหม่</span>
+                <button class="btn-create-course teacher-only" id="headerCreateCourseBtn" onclick="window.location.href='create-course.html'" style="display: none;">
+                    ➕ สร้างคอร์สใหม่
+                </button>
+            </div>
+            <div id="courseGrid" class="course-grid">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Enrollment Modal -->
+    <div id="enrollModalOverlay" class="enroll-modal-overlay">
+        <div class="enroll-modal">
+            <div id="enrollModalThumb" class="enroll-modal-thumb">📚</div>
+            <div class="enroll-modal-body">
+                <h2 id="enrollModalTitle">ชื่อคอร์ส</h2>
+                <div class="enroll-modal-meta">
+                    <span class="enroll-badge" id="enrollModalCategory">หมวดหมู่</span>
+                    <span class="enroll-badge" id="enrollModalLevel">ระดับ</span>
+                    <span class="enroll-badge" id="enrollModalInstructor">👤 ผู้สอน</span>
+                </div>
+                <div class="enroll-modal-desc" id="enrollModalDesc"></div>
+                <div class="enroll-modal-lessons" id="enrollModalLessons">📖 0 บทเรียน</div>
+                <div class="enroll-modal-actions" id="enrollModalActions">
+                    <!-- filled dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, orderBy, deleteDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+            authDomain: "skillnest-2026.firebaseapp.com",
+            projectId: "skillnest-2026",
+            storageBucket: "skillnest-2026.firebasestorage.app",
+            messagingSenderId: "416822065212",
+            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // สี gradient แบบสุ่มสำหรับคอร์ส
+        const courseColors = [
+            'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+            'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+            'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+            'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'
+        ];
+
+        // แปลงหมวดหมู่เป็นภาษาไทย
+        const categoryMap = {
+            'programming': 'การเขียนโปรแกรม',
+            'design': 'การออกแบบ',
+            'business': 'ธุรกิจ',
+            'marketing': 'การตลาด',
+            'data-science': 'Data Science',
+            'ai-ml': 'AI & Machine Learning',
+            'other': 'อื่นๆ'
+        };
+
+        // แปลงระดับเป็นภาษาไทย
+        const levelMap = {
+            'beginner': 'เริ่มต้น',
+            'intermediate': 'ปานกลาง',
+            'advanced': 'ขั้นสูง'
+        };
+
+        // ดึงข้อมูลคอร์สทั้งหมด
+        async function loadCourses() {
+            const courseGrid = document.getElementById('courseGrid');
+            
+            try {
+                const coursesQuery = query(
+                    collection(db, 'courses'),
+                    orderBy('createdAt', 'desc')
+                );
+                
+                const querySnapshot = await getDocs(coursesQuery);
+                
+                if (querySnapshot.empty) {
+                    courseGrid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📚</div>
+                            <h3>ยังไม่มีคอร์สเรียน</h3>
+                            <p>เริ่มต้นสร้างคอร์สแรกของคุณเลย!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                courseGrid.innerHTML = '';
+                let visibleCount = 0;
+                
+                for (const docSnapshot of querySnapshot.docs) {
+                    const course = docSnapshot.data();
+                    const courseId = docSnapshot.id;
+
+                    // ข้ามคอร์สที่สมัครแล้ว (explore = เฉพาะยังไม่สมัคร)
+                    if (enrolledCourseIds.has(courseId)) continue;
+                    visibleCount++;
+                    
+                    // ดึงข้อมูลผู้สร้าง
+                    let creatorName = 'ไม่ทราบชื่อ';
+                    try {
+                        const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
+                        if (creatorDoc.exists()) {
+                            const creatorData = creatorDoc.data();
+                            creatorName = `${creatorData.firstName || ''} ${creatorData.lastName || ''}`.trim() || creatorData.email;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching creator:', error);
+                    }
+
+                    // คำนวณจำนวนบทเรียน
+                    const lessonCount = course.lessons ? course.lessons.length : 0;
+                    
+                    // สุ่มสีพื้นหลัง
+                    const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
+                    
+                    // สร้างการ์ดคอร์ส
+                    const courseCard = document.createElement('div');
+                    courseCard.className = 'course-card';
+                    
+                    // ตรวจสอบว่ามี thumbnail หรือไม่
+                    const thumbnailStyle = course.thumbnail 
+                        ? `background-image: url('${course.thumbnail}');`
+                        : `background: ${randomColor};`;
+                    
+                    courseCard.innerHTML = `
+                        <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
+                            ${!course.thumbnail ? course.title.substring(0, 15) : ''}
+                            <div class="course-duration">⏱ ${lessonCount} บท</div>
+                        </div>
+                        <div class="course-info">
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-subtitle">${categoryMap[course.category] || course.category} • ${levelMap[course.level] || course.level}</div>
+                            <div class="course-author">${creatorName}</div>
+                            <div class="progress-section">
+                                <div class="progress-label">
+                                    <span>ความคืบหน้า</span>
+                                    <span>0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    courseCard.addEventListener('click', () => openCourseModal(courseId, course, randomColor, creatorName));
+                    courseGrid.appendChild(courseCard);
+                }
+
+                if (visibleCount === 0) {
+                    courseGrid.innerHTML = `
+                        <div class="empty-state" style="grid-column:1/-1;">
+                            <div class="empty-state-icon">🎉</div>
+                            <h3>คุณสมัครเรียนครบทุกคอร์สแล้ว!</h3>
+                            <p>ไปที่ "คอร์สของฉัน" เพื่อเริ่มเรียน</p>
+                        </div>`;
+                }
+                
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                courseGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>เกิดข้อผิดพลาด</h3>
+                        <p>ไม่สามารถโหลดคอร์สได้ กรุณาลองใหม่อีกครั้ง</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ตรวจสอบสถานะการเข้าสู่ระบบ
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const firstName = userData.firstName || 'User';
+                        const userType = userData.userType || 'student'; // ค่าเริ่มต้นเป็น student
+                        const profileImageUrl = userData.profilePicture || null; // ดึงรูปโปรไฟล์จาก Firebase
+                        
+                        document.getElementById('userName').textContent = firstName;
+                        document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName} 🚀`;
+                        
+                        // แสดงรูปโปรไฟล์ถ้ามี
+                        const profileIconContainer = document.getElementById('profileIconContainer');
+                        if (profileImageUrl && profileIconContainer) {
+                            const img = document.createElement('img');
+                            img.src = profileImageUrl;
+                            img.alt = 'Profile';
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'cover';
+                            
+                            img.onload = function() {
+                                profileIconContainer.innerHTML = '';
+                                profileIconContainer.appendChild(img);
+                            };
+                            
+                            img.onerror = function() {
+                                console.log('Failed to load profile image');
+                            };
+                        }
+                        
+                        // แสดงเมนูครูถ้าเป็นครู
+                        if (userType === 'teacher') {
+                            // แสดงเมนูจัดการคอร์สใน dropdown
+                            const manageCourseItem = document.getElementById('manageCourseItem');
+                            if (manageCourseItem) manageCourseItem.style.display = 'block';
+                            // แสดงเมนูเพิ่มคอร์สใน sidebar
+                            const sidebarCreateCourse = document.getElementById('sidebarCreateCourse');
+                            if (sidebarCreateCourse) sidebarCreateCourse.style.display = 'flex';
+                            // แสดงปุ่มสร้างคอร์สใหม่ใน header
+                            const headerCreateCourseBtn = document.getElementById('headerCreateCourseBtn');
+                            if (headerCreateCourseBtn) headerCreateCourseBtn.style.display = 'flex';
+                            // แสดงปุ่มตรวจการบ้าน
+                            const sidebarHomework = document.getElementById('sidebarHomework');
+                            if (sidebarHomework) sidebarHomework.style.display = 'flex';
+                        }
+
+                        // แสดงปุ่มแบบฝึกหัดถ้าเป็นนักเรียน
+                        if (userType === 'student') {
+                            const sidebarMyQuizzes = document.getElementById('sidebarMyQuizzes');
+                            if (sidebarMyQuizzes) sidebarMyQuizzes.style.display = 'flex';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+                
+                // โหลดคอร์สตาม URL param
+                await loadEnrollments();
+                const urlPage = new URLSearchParams(window.location.search).get('page');
+                if (urlPage === 'my-courses') {
+                    switchPage('my-courses');
+                } else {
+                    await loadCourses();
+                }
+            } else {
+                window.location.href = '../login-page/login.html';
+            }
+        });
+
+        // Dropdown menu
+        const profileBtn = document.getElementById('profileBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        profileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function() {
+            dropdownMenu.classList.remove('show');
+        });
+
+        dropdownMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Logout functionality
+        document.getElementById('logoutItem').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = '../login-page/login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('เกิดข้อผิดพลาดในการออกจากระบบ');
+            }
+        });
+
+    // ------------------------------------------------
+    // Page Switch: ค้นหาคอร์สใหม่ vs คอร์สของฉัน
+    // ------------------------------------------------
+    let currentPage = 'explore';
+
+    window.switchPage = async function(page) {
+        currentPage = page;
+
+        // update sidebar active state
+        document.querySelectorAll('.sidebar-item[data-page]').forEach(el => el.classList.remove('active'));
+        const activeId = page === 'explore' ? 'sidebarExplore' : 'sidebarMyCourses';
+        const activeEl = document.getElementById(activeId);
+        if (activeEl) activeEl.classList.add('active');
+
+        // update header text
+        const headerText = document.getElementById('sectionHeaderText');
+        if (headerText) {
+            headerText.textContent = page === 'explore' ? '🔍 ค้นหาคอร์สใหม่' : '📚 คอร์สของฉัน';
+        }
+
+        // clear search
+        const si = document.getElementById('searchInput');
+        if (si) si.value = '';
+
+        if (page === 'explore') {
+            await loadCourses();
+        } else {
+            await loadMyCourses();
+        }
+    };
+
+    async function loadMyCourses() {
+        const courseGrid = document.getElementById('courseGrid');
+        courseGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+        if (!currentUser) return;
+
+        try {
+            // ดึง enrollments ของ user
+            const enrollSnap = await getDocs(query(
+                collection(db, 'enrollments'),
+                where('userId', '==', currentUser.uid)
+            ));
+
+            if (enrollSnap.empty) {
+                courseGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column:1/-1;">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>ยังไม่มีคอร์สที่สมัคร</h3>
+                        <p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อเลือกสมัครเรียนคอร์สที่สนใจ</p>
+                    </div>`;
+                return;
+            }
+
+            courseGrid.innerHTML = '';
+
+            for (const enrollDoc of enrollSnap.docs) {
+                const courseId = enrollDoc.data().courseId;
+                try {
+                    const courseSnap = await getDoc(doc(db, 'courses', courseId));
+                    if (!courseSnap.exists()) continue;
+
+                    const course = courseSnap.data();
+                    const lessonCount = course.lessons ? course.lessons.length : 0;
+                    const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
+
+                    let creatorName = 'ไม่ทราบชื่อ';
+                    try {
+                        const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
+                        if (creatorDoc.exists()) {
+                            const cd = creatorDoc.data();
+                            creatorName = `${cd.firstName || ''} ${cd.lastName || ''}`.trim() || cd.email;
+                        }
+                    } catch(e) {}
+
+                    const thumbnailStyle = course.thumbnail
+                        ? `background-image: url('${course.thumbnail}'); background-size:cover; background-position:center;`
+                        : `background: ${randomColor};`;
+
+                    const courseCard = document.createElement('div');
+                    courseCard.className = 'course-card';
+                    courseCard.innerHTML = `
+                        <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
+                            ${!course.thumbnail ? course.title.substring(0, 15) : ''}
+                            <div class="course-duration">⏱ ${lessonCount} บท</div>
+                            <div class="enrolled-tag">✅ สมัครแล้ว</div>
+                        </div>
+                        <div class="course-info">
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-subtitle">${categoryMap[course.category] || course.category} • ${levelMap[course.level] || course.level}</div>
+                            <div class="course-author">${creatorName}</div>
+                            <div style="margin-top:0.75rem;">
+                                <button onclick="event.stopPropagation(); window.location.href='course-content.html?id=${courseId}'" style="width:100%;padding:0.6rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                                    ▶️ เข้าสู่บทเรียน
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    courseCard.addEventListener('click', () => window.location.href = `course-content.html?id=${courseId}`);
+                    courseGrid.appendChild(courseCard);
+                } catch(e) { console.error('Error loading enrolled course:', e); }
+            }
+
+        } catch(e) {
+            console.error('loadMyCourses error:', e);
+            courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3></div>`;
+        }
+    }
+
+    // ------------------------------------------------
+    // ส่วนฟังก์ชันค้นหา (Search Logic)
+    // ------------------------------------------------
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', function(e) {
+        const searchText = e.target.value.toLowerCase().trim();
+        const courses = document.querySelectorAll('.course-card');
+        const courseGrid = document.getElementById('courseGrid');
+        let hasVisibleCourses = false;
+
+        // ลบข้อความ "ไม่พบข้อมูล" เก่าออกก่อน (ถ้ามี)
+        const existingNoResult = document.getElementById('no-result-message');
+        if (existingNoResult) existingNoResult.remove();
+
+        courses.forEach(card => {
+            // ดึงชื่อคอร์ส
+            const titleElement = card.querySelector('.course-title');
+            const title = titleElement ? titleElement.textContent.toLowerCase() : '';
+            
+            // ดึงหมวดหมู่ (เผื่ออยากค้นหาด้วยหมวดหมู่)
+            const subtitleElement = card.querySelector('.course-subtitle');
+            const subtitle = subtitleElement ? subtitleElement.textContent.toLowerCase() : '';
+
+            // ตรวจสอบว่าตรงกับคำค้นหาหรือไม่
+            if (title.includes(searchText) || subtitle.includes(searchText)) {
+                card.style.display = 'block'; // แสดง
+                hasVisibleCourses = true;
+            } else {
+                card.style.display = 'none'; // ซ่อน
+            }
+        });
+
+        // แสดงข้อความเมื่อไม่พบคอร์สที่ค้นหา
+        if (!hasVisibleCourses && courses.length > 0) {
+            const noResultDiv = document.createElement('div');
+            noResultDiv.id = 'no-result-message';
+            noResultDiv.style.textAlign = 'center';
+            noResultDiv.style.width = '100%';
+            noResultDiv.style.padding = '40px';
+            noResultDiv.style.gridColumn = '1 / -1'; // ให้ข้อความอยู่ตรงกลางกินพื้นที่ทุกคอลัมน์
+            noResultDiv.style.color = 'var(--text-dim)';
+            noResultDiv.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
+                <h3>ไม่พบคอร์สที่ค้นหา</h3>
+                <p>ลองค้นหาด้วยคำสำคัญอื่น</p>
+            `;
+            courseGrid.appendChild(noResultDiv);
+        }
+    });
+
+    // ------------------------------------------------
+    // Enrollment Modal Logic
+    // ------------------------------------------------
+    let enrolledCourseIds = new Set();
+    let pendingCourseData = null; // { courseId, course }
+
+    // ดึง enrollment ของ user คนนี้
+    async function loadEnrollments() {
+        if (!currentUser) return;
+        try {
+            const snap = await getDocs(query(
+                collection(db, 'enrollments'),
+                where('userId', '==', currentUser.uid)
+            ));
+            snap.forEach(d => enrolledCourseIds.add(d.data().courseId));
+
+            // อัพเดต badge บน card ที่มีอยู่แล้ว
+            enrolledCourseIds.forEach(cid => markCardAsEnrolled(cid));
+        } catch(e) { console.error('loadEnrollments error:', e); }
+    }
+
+    function markCardAsEnrolled(courseId) {
+        const img = document.getElementById('course-img-' + courseId);
+        if (img && !img.querySelector('.enrolled-tag')) {
+            const tag = document.createElement('div');
+            tag.className = 'enrolled-tag';
+            tag.textContent = '✅ สมัครแล้ว';
+            img.appendChild(tag);
+        }
+    }
+
+    window.openCourseModal = function(courseId, course, color, creatorName) {
+        pendingCourseData = { courseId, course };
+        const isEnrolled = enrolledCourseIds.has(courseId);
+
+        // Fill modal content
+        const thumbEl = document.getElementById('enrollModalThumb');
+        if (course.thumbnail) {
+            thumbEl.style.backgroundImage = `url('${course.thumbnail}')`;
+            thumbEl.style.backgroundSize = 'cover';
+            thumbEl.style.backgroundPosition = 'center';
+            thumbEl.innerHTML = '';
+        } else {
+            thumbEl.style.backgroundImage = 'none';
+            thumbEl.style.background = color;
+            thumbEl.innerHTML = course.title.substring(0,15);
+        }
+
+        document.getElementById('enrollModalTitle').textContent = course.title;
+        document.getElementById('enrollModalCategory').textContent = categoryMap[course.category] || course.category || 'ทั่วไป';
+        document.getElementById('enrollModalLevel').textContent = levelMap[course.level] || course.level || '';
+        document.getElementById('enrollModalInstructor').textContent = '👤 ' + (creatorName || 'ไม่ระบุ');
+        document.getElementById('enrollModalDesc').textContent = course.description || '';
+        const lessonCount = course.lessons ? course.lessons.length : 0;
+        document.getElementById('enrollModalLessons').innerHTML = `📖 ${lessonCount} บทเรียน${course.quiz && course.quiz.length > 0 ? ` &nbsp;•&nbsp; 📝 ${course.quiz.length} แบบทดสอบ` : ''}`;
+
+        const actionsEl = document.getElementById('enrollModalActions');
+        if (isEnrolled) {
+            actionsEl.innerHTML = `
+                <button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button>
+                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
+            `;
+        } else {
+            actionsEl.innerHTML = `
+                <button class="btn-enroll" onclick="enrollCourse('${courseId}')">🎓 สมัครเข้าเรียน</button>
+                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
+            `;
+        }
+
+        document.getElementById('enrollModalOverlay').classList.add('show');
+    };
+
+    window.closeEnrollModal = function() {
+        document.getElementById('enrollModalOverlay').classList.remove('show');
+        pendingCourseData = null;
+    };
+
+    window.enrollCourse = async function(courseId) {
+        if (!currentUser) { alert('กรุณาล็อกอินก่อน'); return; }
+        try {
+            const enrollId = `${currentUser.uid}_${courseId}`;
+            await setDoc(doc(db, 'enrollments', enrollId), {
+                userId: currentUser.uid,
+                courseId: courseId,
+                enrolledAt: serverTimestamp()
+            });
+            enrolledCourseIds.add(courseId);
+            markCardAsEnrolled(courseId);
+
+            // Update modal to show "go to course" button
+            const actionsEl = document.getElementById('enrollModalActions');
+            actionsEl.innerHTML = `
+                <button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button>
+                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
+            `;
+            document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend',
+                '<p style="color:#10b981; font-size:0.9rem; margin-top:0.3rem;">✅ สมัครเรียนสำเร็จแล้ว!</p>');
+        } catch(e) {
+            console.error('Enroll error:', e);
+            alert('❌ เกิดข้อผิดพลาดในการสมัคร: ' + e.message);
+        }
+    };
+
+    window.goToCourse = function(courseId) {
+        window.location.href = `course-content.html?id=${courseId}`;
+    };
+
+    // Close modal on backdrop click
+    document.getElementById('enrollModalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeEnrollModal();
+    });
+
+    </script>
+</body>
+</html>

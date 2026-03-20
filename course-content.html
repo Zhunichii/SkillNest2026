@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กำลังโหลด... - SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020418;
+            --primary-blue: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #a0a0ba;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --active-lesson: rgba(59, 130, 246, 0.15);
+            --chat-bg: #020617;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--nav-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 600; color: var(--text-main); text-decoration: none; }
+        .logo span { color: var(--primary-blue); }
+
+        .btn-back {
+            color: var(--text-dim);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-back:hover {
+            color: #ffffff;
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            transform: translateX(-3px);
+        }
+        .btn-back:active {
+            transform: translateX(-3px) scale(0.98);
+        }
+
+        .content-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            flex: 1;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+
+        .lesson-section {
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lesson-wrapper {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lesson-wrapper iframe, 
+        .lesson-wrapper video, 
+        .lesson-wrapper img {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .lesson-wrapper img {
+            object-fit: contain;
+        }
+
+        .course-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-meta {
+            color: var(--text-dim);
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .playlist-section {
+            background: var(--nav-bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .playlist-header h3 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+        .playlist-header p { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+
+        .lesson-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .lesson-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            align-items: center;
+        }
+
+        .lesson-item:hover { background: rgba(255,255,255,0.03); }
+
+        .lesson-item.active {
+            background: var(--active-lesson);
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .lesson-number {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            min-width: 20px;
+        }
+
+        .lesson-details { flex: 1; }
+        .lesson-title { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .lesson-duration { 
+            display: block; 
+            font-size: 0.8rem; 
+            color: var(--text-dim); 
+        }
+        .lesson-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .chat-section {
+            background: var(--chat-bg);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            font-weight: 600;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: #0ea5e9;
+            color: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px 10px 0 10px;
+            max-width: 80%;
+            font-size: 0.9rem;
+        }
+
+        .msg-bot {
+            align-self: flex-start;
+            background: #1e293b;
+            color: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px 10px 10px 0;
+            max-width: 80%;
+            font-size: 0.9rem;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            background: #0f172a;
+            color: white;
+        }
+
+        .chat-input button {
+            padding: 0.6rem 1rem;
+            background: #06b6d4;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: white;
+        }
+
+        .chat-input button:hover {
+            background: #0891b2;
+        }
+
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            color: var(--text-dim);
+            gap: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            display: none;
+        }
+
+        .error-modal.show { display: block; }
+
+        .error-modal h3 {
+            color: #ef4444;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .error-modal p {
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .error-modal button {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .error-modal button:hover { background: #2563eb; }
+
+        .pdf-viewer-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+
+        .pdf-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #2d2d2d;
+            border-bottom: 1px solid #444;
+            flex-wrap: wrap;
+        }
+
+        .pdf-btn {
+            padding: 0.5rem 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .pdf-btn:hover { background: #2563eb; }
+        .pdf-btn.download { background: #10b981; }
+        .pdf-btn.download:hover { background: #059669; }
+
+        .pdf-fallback {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        .document-viewer {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            color: var(--text-dim);
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .document-icon { font-size: 64px; }
+
+        .document-info { text-align: center; }
+        .document-info h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover { background: #2563eb; }
+
+        .image-viewer {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .image-viewer img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        @media (max-width: 968px) {
+            .content-container {
+                grid-template-columns: 1fr;
+            }
+            .chat-section {
+                display: none;
+            }
+        }
+
+        /* === Tabs === */
+        .lesson-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(255,255,255,0.08);
+        }
+
+        .lesson-tab {
+            padding: 0.65rem 1.25rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: 0.2s;
+        }
+
+        .lesson-tab:hover { color: white; }
+
+        .lesson-tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* === Quiz In Course === */
+        .quiz-panel {
+            padding: 0.5rem 0;
+        }
+
+        .quiz-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-panel-header h3 { font-size: 1.1rem; }
+
+        .quiz-score-summary {
+            background: rgba(139,92,246,0.12);
+            border: 1px solid rgba(139,92,246,0.25);
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1.25rem;
+            display: none;
+        }
+
+        .quiz-score-summary.show { display: flex; align-items: center; gap: 1rem; }
+
+        .quiz-score-summary .score-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #a78bfa;
+        }
+
+        .quiz-score-summary .score-detail { color: var(--text-dim); font-size: 0.85rem; }
+
+        .btn-start-quiz-inline {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-start-quiz-inline:hover { opacity: 0.9; }
+
+        /* Quiz Modal (same as my-quizzes) */
+        .quiz-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(8px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .quiz-modal-overlay.show { display: flex; }
+
+        .quiz-modal-box {
+            background: #0f1035;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 640px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .qm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .qm-progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            margin-bottom: 1.75rem;
+            overflow: hidden;
+        }
+
+        .qm-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .qm-question { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; line-height: 1.6; }
+
+        .qm-choice {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1.1rem;
+            background: rgba(255,255,255,0.04);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            margin-bottom: 0.65rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .qm-choice:hover { border-color: #8b5cf6; background: rgba(139,92,246,0.08); }
+        .qm-choice.selected { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .qm-choice.correct { border-color: #10b981 !important; background: rgba(16,185,129,0.1) !important; }
+        .qm-choice.wrong { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
+
+        .qm-letter {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.3rem 0.65rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            min-width: 34px;
+            text-align: center;
+        }
+
+        .qm-btn-next {
+            width: 100%;
+            margin-top: 1.25rem;
+            padding: 0.85rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .qm-btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .qm-result { text-align: center; padding: 0.5rem 0; }
+        .qm-result-emoji { font-size: 4rem; margin-bottom: 1rem; }
+        .qm-result-score { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .qm-result-sub { color: var(--text-dim); margin-bottom: 1.75rem; }
+        .qm-result-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.75rem; margin-bottom: 1.75rem; }
+        .qm-result-stat { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 0.85rem; }
+        .qm-result-num { font-size: 1.5rem; font-weight: 700; }
+        .qm-result-label { font-size: 0.78rem; color: var(--text-dim); }
+
+        .btn-close-qm {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-right: 0.75rem;
+        }
+        .btn-retry-qm {
+            background: linear-gradient(135deg,#8b5cf6,#3b82f6);
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* === Homework Tab === */
+        .hw-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .hw-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            gap: 0.75rem;
+        }
+        .hw-card-title { font-weight: 600; font-size: 1rem; }
+        .hw-status-badge {
+            padding: 0.2rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .hw-status-badge.pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .hw-status-badge.submitted { background: rgba(59,130,246,0.2); color: #60a5fa; }
+        .hw-status-badge.graded { background: rgba(16,185,129,0.2); color: #34d399; }
+        .hw-deadline { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+        .hw-desc-text { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 1rem; line-height: 1.6; }
+        .hw-score-display {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .hw-comment-display {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+        .hw-submit-area textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 90px;
+            font-family: inherit;
+        }
+        .hw-submit-area textarea:focus { outline: none; border-color: #f59e0b; }
+        .hw-file-upload {
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            transition: 0.2s;
+            margin-top: 0.5rem;
+        }
+        .hw-file-upload:hover { border-color: #f59e0b; color: white; }
+        .btn-submit-hw {
+            margin-top: 0.75rem;
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-submit-hw:hover { opacity: 0.9; }
+        .btn-submit-hw:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Not enrolled gate */
+        .not-enrolled-gate {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2,4,24,0.97);
+            z-index: 4000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+            padding: 2rem;
+        }
+        .not-enrolled-gate.show { display: flex; }
+        .not-enrolled-gate h2 { font-size: 1.6rem; }
+        .not-enrolled-gate p { color: var(--text-dim); max-width: 400px; }
+        .btn-go-enroll {
+            padding: 0.9rem 2.5rem;
+            background: linear-gradient(135deg, #3b82f6, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="#" class="logo">Skill<span>Nest</span></a>
+    <a href="dashboard.html" class="btn-back">← กลับสู่ Dashboard</a>
+</nav>
+
+<div class="content-container">
+    <div class="lesson-section">
+        <div class="lesson-wrapper" id="lessonPlayer">
+            <div class="loading-screen">
+                <div class="spinner"></div>
+                <div>กำลังโหลดบทเรียน...</div>
+            </div>
+        </div>
+
+        <div class="course-info">
+            <h1 id="courseTitle">กำลังโหลด...</h1>
+            <div class="course-meta">
+                <span id="courseInstructor">👤 กำลังโหลด...</span>
+                <span id="courseCategory">📚 กำลังโหลด...</span>
+            </div>
+        </div>
+
+        <div class="playlist-section">
+            <div class="playlist-header">
+                <div>
+                    <h3>บทเรียนทั้งหมด</h3>
+                    <p id="lessonCount">0 บทเรียน</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="lesson-tabs">
+                <div class="lesson-tab active" onclick="switchTab('lessons', this)">📚 บทเรียน</div>
+                <div class="lesson-tab" id="quizTabBtn" onclick="switchTab('quiz', this)" style="display:none;">📝 แบบทดสอบ</div>
+                <div class="lesson-tab" id="hwTabBtn" onclick="switchTab('homework', this)" style="display:none;">📋 การบ้าน</div>
+            </div>
+
+            <!-- Lesson list panel -->
+            <div id="tabLessons" class="tab-panel active">
+                <div class="lesson-list" id="lessonList">
+                    <div class="loading-screen">
+                        <div>กำลังโหลดรายการบทเรียน...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz panel -->
+            <div id="tabQuiz" class="tab-panel">
+                <div class="quiz-panel">
+                    <div class="quiz-panel-header">
+                        <h3>📝 แบบทดสอบ</h3>
+                    </div>
+                    <div class="quiz-score-summary" id="quizScoreSummary">
+                        <div class="score-val" id="quizScoreVal">0/0</div>
+                        <div>
+                            <div style="font-weight:600;">คะแนนล่าสุด</div>
+                            <div class="score-detail" id="quizScoreDetail">ยังไม่เคยทำ</div>
+                        </div>
+                    </div>
+                    <div id="quizPanelContent">
+                        <p style="color:var(--text-dim); margin-bottom:1.25rem;" id="quizPanelDesc">กำลังโหลด...</p>
+                        <button class="btn-start-quiz-inline" id="btnStartQuiz" onclick="startCourseQuiz()">
+                            ▶️ เริ่มทำแบบทดสอบ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Homework panel -->
+            <div id="tabHomework" class="tab-panel">
+                <div style="padding:0.5rem 0;">
+                    <div id="hwPanelList">
+                        <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-section">
+        <div class="chat-header">💬 แชทกับ AI Assistant</div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg-bot">สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ? 😊</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="พิมพ์ข้อความ...">
+            <button id="sendBtn">ส่ง</button>
+        </div>
+    </div>
+</div>
+
+<div class="error-modal" id="errorModal">
+    <h3>⚠️ เกิดข้อผิดพลาด</h3>
+    <p id="errorMessage">ไม่พบข้อมูลที่ต้องการ กรุณาตรวจสอบ Course ID</p>
+    <button onclick="window.location.href='dashboard.html'">กลับสู่ Dashboard</button>
+</div>
+
+<!-- Not Enrolled Gate -->
+<div class="not-enrolled-gate" id="notEnrolledGate">
+    <div style="font-size:4rem;">🔒</div>
+    <h2>คุณยังไม่ได้สมัครเรียนคอร์สนี้</h2>
+    <p>กรุณาสมัครเข้าเรียนก่อน เพื่อเข้าถึงเนื้อหาบทเรียน</p>
+    <button class="btn-go-enroll" onclick="window.location.href='dashboard.html'">← กลับไปสมัครเรียน</button>
+</div>
+
+<!-- Quiz Modal -->
+<div class="quiz-modal-overlay" id="quizModalOverlay">
+    <div class="quiz-modal-box" id="quizModalBox">
+        <!-- filled by JS -->
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
+    authDomain: "skillnest-2026.firebaseapp.com",
+    projectId: "skillnest-2026",
+    storageBucket: "skillnest-2026.firebasestorage.app",
+    messagingSenderId: "416822065212",
+    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentCourse = null;
+let currentLessonIndex = 0;
+let currentUser = null;
+let isEnrolled = false;
+let userType = 'student';
+
+// ตรวจสอบ auth และ enrollment ก่อนโหลดคอร์ส
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = '../login-page/login.html';
+        return;
+    }
+    currentUser = user;
+
+    // ดึง userType
+    try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) userType = userDoc.data().userType || 'student';
+    } catch(e) {}
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+
+    if (!courseId) { loadCourseData(); return; }
+
+    // ครูสามารถดูได้ทุกคอร์ส นักเรียนต้องสมัครก่อน
+    if (userType === 'teacher') {
+        isEnrolled = true;
+        loadCourseData();
+    } else {
+        // check enrollment
+        try {
+            const enrollSnap = await getDoc(doc(db, 'enrollments', `${user.uid}_${courseId}`));
+            isEnrolled = enrollSnap.exists();
+        } catch(e) {}
+
+        if (!isEnrolled) {
+            document.getElementById('notEnrolledGate').classList.add('show');
+        } else {
+            loadCourseData();
+        }
+    }
+});
+
+async function loadCourseData(retryCount = 0) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+
+    console.log("Loading course with ID:", courseId, "Retry:", retryCount);
+
+    if (!courseId) {
+        showError("ไม่พบ Course ID ใน URL กรุณาเพิ่ม ?id=COURSE_ID ใน URL");
+        return;
+    }
+
+    try {
+        console.log("Attempting to fetch course from Firestore...");
+        const courseRef = doc(db, "courses", courseId);
+        
+        // Add timeout to detect connection issues
+        const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Connection timeout after 10 seconds')), 10000)
+        );
+        
+        const courseSnap = await Promise.race([
+            getDoc(courseRef),
+            timeout
+        ]);
+
+        if (!courseSnap.exists()) {
+            showError("ไม่พบข้อมูลคอร์สนี้ในระบบ<br><br>Course ID: <code>" + courseId + "</code><br><br>กรุณาตรวจสอบว่า Course ID ถูกต้อง");
+            return;
+        }
+
+        currentCourse = courseSnap.data();
+        console.log("Course data loaded successfully:", currentCourse);
+
+        document.getElementById("courseTitle").innerText = currentCourse.title || "ไม่มีชื่อคอร์ส";
+        document.title = (currentCourse.title || "คอร์สเรียน") + " - SkillNest";
+        document.getElementById("courseInstructor").innerText = "👤 " + (currentCourse.instructor || currentCourse.creatorId || "ไม่ระบุผู้สอน");
+        document.getElementById("courseCategory").innerText = "📚 " + (currentCourse.category || "ทั่วไป");
+
+        if (currentCourse.lessons && Array.isArray(currentCourse.lessons) && currentCourse.lessons.length > 0) {
+            renderLessonList(currentCourse.lessons);
+            playLesson(0);
+        } else {
+            showError("ไม่มีบทเรียนในคอร์สนี้<br><br>กรุณาเพิ่มบทเรียนผ่าน Firebase Console");
+        }
+
+        // แสดง quiz tab ถ้ามี quiz
+        if (currentCourse.quiz && currentCourse.quiz.length > 0) {
+            document.getElementById('quizTabBtn').style.display = 'inline-block';
+            const qCount = currentCourse.quiz.length;
+            document.getElementById('quizPanelDesc').textContent = `คอร์สนี้มีแบบทดสอบทั้งหมด ${qCount} ข้อ ทดสอบความเข้าใจของคุณหลังเรียนจบ`;
+
+            // โหลดคะแนนเดิม (ถ้ามี)
+            if (currentUser) {
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const courseId = urlParams.get('id');
+                    const scoreSnap = await getDoc(doc(db, 'quizScores', `${currentUser.uid}_${courseId}`));
+                    if (scoreSnap.exists()) {
+                        const sd = scoreSnap.data();
+                        const sumEl = document.getElementById('quizScoreSummary');
+                        sumEl.classList.add('show');
+                        document.getElementById('quizScoreVal').textContent = `${sd.score}/${sd.total}`;
+                        document.getElementById('quizScoreDetail').textContent = `${sd.pct}% • ทำล่าสุดแล้ว`;
+                        document.getElementById('btnStartQuiz').textContent = '🔁 ทำแบบทดสอบอีกครั้ง';
+                    }
+                } catch(e) {}
+            }
+        }
+
+        // แสดง homework tab ถ้ามีการบ้าน
+        if (currentCourse.homework && currentCourse.homework.length > 0) {
+            document.getElementById('hwTabBtn').style.display = 'inline-block';
+            await loadHomeworkPanel();
+        }
+
+    } catch (error) {
+        console.error("Error loading course:", error);
+        
+        // Retry logic for network errors
+        if ((error.message.includes('offline') || error.message.includes('timeout')) && retryCount < 2) {
+            console.log(`Retrying... (${retryCount + 1}/2)`);
+            setTimeout(() => loadCourseData(retryCount + 1), 2000);
+            return;
+        }
+        
+        let errorMsg = "เกิดข้อผิดพลาดในการโหลดข้อมูล:<br><br>";
+        
+        if (error.message.includes('offline') || error.message.includes('client is offline')) {
+            errorMsg += `
+                <strong>❌ ไม่สามารถเชื่อมต่อกับ Firebase</strong><br><br>
+                กรุณาตรวจสอบ:<br>
+                • เชื่อมต่ออินเทอร์เน็ตแล้วหรือยัง?<br>
+                • Firebase configuration ถูกต้องหรือไม่?<br>
+                • Firestore Rules อนุญาตให้อ่านข้อมูลได้หรือไม่?<br>
+                • เปิด Developer Console (F12) เพื่อดูรายละเอียด error<br><br>
+                <small>Error: ${error.message}</small>
+            `;
+        } else if (error.message.includes('timeout')) {
+            errorMsg += `
+                <strong>⏱️ การเชื่อมต่อใช้เวลานานเกินไป</strong><br><br>
+                กรุณาลองอีกครั้ง หรือตรวจสอบความเร็วอินเทอร์เน็ต<br><br>
+                <small>Error: ${error.message}</small>
+            `;
+        } else if (error.code === 'permission-denied') {
+            errorMsg += `
+                <strong>🔒 ไม่มีสิทธิ์เข้าถึงข้อมูล</strong><br><br>
+                กรุณาตรวจสอบ Firebase Security Rules<br><br>
+                <small>Error: ${error.message}</small>
+            `;
+        } else {
+            errorMsg += error.message;
+        }
+        
+        showError(errorMsg);
+    }
+}
+
+function showError(message) {
+    const modal = document.getElementById("errorModal");
+    const errorMessage = document.getElementById("errorMessage");
+    errorMessage.innerHTML = message;
+    modal.classList.add("show");
+}
+
+function renderLessonList(lessons) {
+    const listContainer = document.getElementById("lessonList");
+    document.getElementById("lessonCount").innerText = `${lessons.length} บทเรียน`;
+
+    listContainer.innerHTML = lessons.map((lesson, index) => {
+        const fileType = detectFileType(lesson.fileUrl);
+        const typeLabel = getFileTypeLabel(fileType);
+        
+        return `
+            <div class="lesson-item ${index === 0 ? 'active' : ''}" 
+                 data-index="${index}" 
+                 onclick="playLesson(${index})">
+                <div class="lesson-number">${index + 1}</div>
+                <div class="lesson-details">
+                    <span class="lesson-title">
+                        ${lesson.title || 'บทเรียนที่ ' + (index + 1)}
+                        <span class="lesson-type-badge">${typeLabel}</span>
+                    </span>
+                    <span class="lesson-duration">${lesson.duration || 'ไม่ระบุเวลา'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getFileTypeLabel(type) {
+    const labels = {
+        'pdf': 'PDF',
+        'youtube': 'YouTube',
+        'video': 'วิดีโอ',
+        'image': 'รูปภาพ',
+        'ppt': 'PowerPoint',
+        'doc': 'Word',
+        'excel': 'Excel',
+        'unknown': 'ไฟล์'
+    };
+    return labels[type] || 'ไฟล์';
+}
+
+window.playLesson = function(index) {
+    currentLessonIndex = index;
+    
+    document.querySelectorAll('.lesson-item').forEach((item, i) => {
+        if (i === index) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
+    const container = document.getElementById("lessonPlayer");
+    const lesson = currentCourse.lessons[index];
+
+    if (!lesson || !lesson.fileUrl) {
+        container.innerHTML = '<div class="loading-screen"><div>❌ ไม่พบไฟล์บทเรียน</div></div>';
+        return;
+    }
+
+    const fileUrl = lesson.fileUrl;
+    // ถ้า type ที่บันทึกไว้เป็น unknown ให้ detect ใหม่จาก URL
+    const fileType = (lesson.type && lesson.type !== 'unknown')
+        ? lesson.type
+        : detectFileType(fileUrl);
+
+    console.log("Playing lesson:", { 
+        title: lesson.title, 
+        type: fileType, 
+        url: fileUrl,
+        detectedType: detectFileType(fileUrl)
+    });
+
+    if (fileType === 'pdf') {
+        renderPDFViewer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'youtube') {
+        renderYouTubePlayer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'video') {
+        renderVideoPlayer(container, fileUrl);
+    }
+    else if (fileType === 'image') {
+        renderImageViewer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'ppt' || fileType === 'doc' || fileType === 'excel') {
+        renderDocumentViewer(container, fileUrl, lesson.title, fileType);
+    }
+    else {
+        renderUnsupportedFile(container, fileUrl, lesson.title, fileType);
+    }
+}
+
+function detectFileType(url) {
+    if (!url) return 'unknown';
+    const lowerUrl = url.toLowerCase();
+
+    if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) return 'youtube';
+    if (lowerUrl.endsWith('.pdf') || lowerUrl.includes('/pdf/upload/')) return 'pdf';
+    if (lowerUrl.match(/\.(mp4|webm|mov|avi|mkv|flv|wmv)(\?|$)/)) return 'video';
+    if (lowerUrl.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?|$)/)) return 'image';
+    if (lowerUrl.match(/\.(ppt|pptx)(\?|$)/)) return 'ppt';
+    if (lowerUrl.match(/\.(doc|docx)(\?|$)/)) return 'doc';
+    if (lowerUrl.match(/\.(xls|xlsx|csv)(\?|$)/)) return 'excel';
+
+    // Cloudinary: ตรวจจาก resource type ใน URL path
+    // เช่น /video/upload/ = วิดีโอ, /image/upload/ = รูป, /raw/upload/ = ไฟล์อื่น
+    if (lowerUrl.includes('cloudinary.com')) {
+        if (lowerUrl.includes('/video/upload/')) return 'video';
+        if (lowerUrl.includes('/image/upload/')) return 'image';
+        if (lowerUrl.includes('/raw/upload/')) {
+            // ดูนามสกุลหลัง /raw/upload/
+            const parts = lowerUrl.split('/raw/upload/');
+            const filename = parts[parts.length - 1].split('?')[0];
+            if (filename.endsWith('.pdf')) return 'pdf';
+            if (filename.match(/\.(ppt|pptx)$/)) return 'ppt';
+            if (filename.match(/\.(doc|docx)$/)) return 'doc';
+            if (filename.match(/\.(xls|xlsx|csv)$/)) return 'excel';
+        }
+    }
+
+    return 'unknown';
+}
+
+function renderYouTubePlayer(container, fileUrl, title) {
+    let embedUrl = fileUrl;
+    if (fileUrl.includes('watch?v=')) {
+        const videoId = fileUrl.split('v=')[1].split('&')[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    } else if (fileUrl.includes('youtu.be/')) {
+        const videoId = fileUrl.split('youtu.be/')[1].split('?')[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    container.innerHTML = `
+        <iframe 
+            src="${embedUrl}" 
+            title="${title}" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen
+            style="width:100%; height:100%;">
+        </iframe>
+    `;
+}
+
+function renderVideoPlayer(container, fileUrl) {
+    container.innerHTML = `
+        <video controls autoplay style="width:100%; height:100%;">
+            <source src="${fileUrl}">
+            เบราว์เซอร์ของคุณไม่รองรับวิดีโอ
+        </video>
+    `;
+}
+
+function renderImageViewer(container, fileUrl, title) {
+    container.innerHTML = `
+        <div class="image-viewer">
+            <img src="${fileUrl}" alt="${title}" onerror="this.parentElement.innerHTML='<div class=\\'loading-screen\\'><div>❌ ไม่สามารถโหลดรูปภาพได้</div></div>';" />
+        </div>
+    `;
+}
+
+function renderPDFViewer(container, fileUrl, title) {
+    const viewerId = 'pdf-viewer-' + Date.now();
+    
+    container.innerHTML = `
+        <div class="pdf-viewer-container">
+            <div class="pdf-toolbar">
+                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">
+                    📄 เปิดในแท็บใหม่
+                </button>
+                <a href="${fileUrl}" download class="pdf-btn download">
+                    ⬇️ ดาวน์โหลด
+                </a>
+                <select id="viewerMethod" class="pdf-btn" onchange="switchPDFViewer('${fileUrl.replace(/'/g, "\\'")}', '${viewerId}', this.value)">
+                    <option value="direct">แสดงโดยตรง</option>
+                    <option value="google">Google Docs Viewer</option>
+                    <option value="mozilla">Mozilla PDF.js</option>
+                </select>
+            </div>
+            <div id="${viewerId}" style="flex: 1; width: 100%; background: #1e1e1e;"></div>
+            <div class="pdf-fallback" id="fallback-${viewerId}">
+                <div style="font-size:48px;">📄</div>
+                <div style="font-size:18px;">ไม่สามารถแสดงตัวอย่าง PDF ได้</div>
+                <div style="font-size:14px; max-width:400px;">
+                    ไฟล์นี้อาจมีข้อจำกัดในการแสดงผล กรุณาเปิดในแท็บใหม่หรือดาวน์โหลด
+                </div>
+                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">
+                    เปิดไฟล์
+                </button>
+            </div>
+        </div>
+    `;
+    
+    switchPDFViewer(fileUrl, viewerId, 'direct');
+}
+
+function renderDocumentViewer(container, fileUrl, title, fileType) {
+    const icons = { 'ppt': '📊', 'doc': '📝', 'excel': '📈' };
+    const typeNames = { 'ppt': 'PowerPoint', 'doc': 'Word Document', 'excel': 'Excel Spreadsheet' };
+
+    container.innerHTML = `
+        <div class="document-viewer">
+            <div class="document-icon">${icons[fileType] || '📄'}</div>
+            <div class="document-info">
+                <h3>${title}</h3>
+                <p>${typeNames[fileType] || 'Document'}</p>
+            </div>
+            <a href="${fileUrl}" target="_blank" class="download-btn">
+                เปิดไฟล์
+            </a>
+            <a href="${fileUrl}" download class="download-btn" style="background:#10b981; margin-left:1rem;">
+                ดาวน์โหลด
+            </a>
+        </div>
+    `;
+}
+
+function renderUnsupportedFile(container, fileUrl, title, fileType) {
+    container.innerHTML = `
+        <div class="document-viewer">
+            <div class="document-icon">📎</div>
+            <div class="document-info">
+                <h3>${title}</h3>
+                <p>ไฟล์ประเภท: ${fileType}</p>
+                <p style="font-size:0.8rem; color:#666;">URL: ${fileUrl.substring(0, 60)}...</p>
+            </div>
+            <a href="${fileUrl}" target="_blank" class="download-btn">
+                เปิดไฟล์
+            </a>
+            <a href="${fileUrl}" download class="download-btn" style="background:#10b981; margin-left:1rem;">
+                ดาวน์โหลด
+            </a>
+        </div>
+    `;
+}
+
+window.switchPDFViewer = function(fileUrl, viewerId, method) {
+    const viewer = document.getElementById(viewerId);
+    const fallback = document.getElementById('fallback-' + viewerId);
+    
+    if (!viewer) return;
+    
+    viewer.innerHTML = '';
+    viewer.style.display = 'block';
+    if (fallback) fallback.style.display = 'none';
+    
+    if (method === 'direct') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.src = fileUrl;
+        
+        iframe.onerror = () => {
+            console.error("Direct PDF load failed");
+            viewer.style.display = 'none';
+            if (fallback) fallback.style.display = 'flex';
+        };
+        
+        viewer.appendChild(iframe);
+    } 
+    else if (method === 'google') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+        
+        iframe.onerror = () => {
+            console.error("Google Docs viewer failed");
+            viewer.style.display = 'none';
+            if (fallback) fallback.style.display = 'flex';
+        };
+        
+        viewer.appendChild(iframe);
+    }
+    else if (method === 'mozilla') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(fileUrl)}`;
+        
+        iframe.onerror = () => {
+            console.error("Mozilla PDF.js failed");
+            viewer.style.display = 'none';
+            if (fallback) fallback.style.display = 'flex';
+        };
+        
+        viewer.appendChild(iframe);
+    }
+}
+
+window.openPDFInNewTab = function(url) {
+    window.open(url, '_blank');
+}
+
+const chatMessages = document.getElementById("chatMessages");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+
+sendBtn.addEventListener("click", sendMessage);
+chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
+
+async function sendMessage() {
+    const userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    addUserMessage(userMessage);
+    chatInput.value = "";
+
+    const botReply = await sendMessageToGemini(userMessage);
+    addBotMessage(botReply);
+}
+
+function addUserMessage(text) {
+    const div = document.createElement("div");
+    div.className = "msg-user";
+    div.innerText = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addBotMessage(text) {
+    const div = document.createElement("div");
+    div.className = "msg-bot";
+    div.innerText = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+const GEMINI_API_KEY = "AIzaSyCVaxV8es44AAouviwDzKLlIw5Q3GZEmDI"; 
+
+async function sendMessageToGemini(userMessage, retryCount = 0) {
+  try {
+    const MODEL_ID = "gemini-2.5-flash";
+    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: userMessage }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Gemini API Error:", errorText);
+      
+      if (response.status === 429) {
+        if (retryCount < 3) {
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          return sendMessageToGemini(userMessage, retryCount + 1);
+        }
+        return "API หมด quota แล้ว กรุณารอสักครู่แล้วลองใหม่อีกครั้ง 🔑";
+      }
+      
+      if (response.status === 404) return `ไม่พบโมเดล AI กรุณาตรวจสอบการตั้งค่า`;
+      if (response.status === 403) return "API Key ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า 🔑";
+      
+      return "ขออภัย เกิดข้อผิดพลาดในการติดต่อ AI";
+    }
+
+    const data = await response.json();
+    if (data.candidates && data.candidates.length > 0) {
+        return data.candidates[0].content.parts[0].text;
+    } else {
+        return "🤔 AI ไม่สามารถตอบกลับได้ในขณะนี้";
+    }
+
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return `❌ เกิดข้อผิดพลาด: ${error.message}`;
+  }
+}
+
+// === Tab Switching ===
+window.switchTab = function(tab, btn) {
+    document.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panelId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+    document.getElementById(panelId).classList.add('active');
+};
+
+// === Homework Panel ===
+async function loadHomeworkPanel() {
+    const container = document.getElementById('hwPanelList');
+    if (!container || !currentCourse.homework) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+
+    // โหลด submissions ของ user นี้
+    const submissionsMap = {};
+    if (currentUser) {
+        try {
+            const subSnap = await getDocs(query(
+                collection(db, 'submissions'),
+                where('userId', '==', currentUser.uid),
+                where('courseId', '==', courseId)
+            ));
+            subSnap.forEach(d => {
+                const s = d.data();
+                submissionsMap[s.homeworkIndex] = { id: d.id, ...s };
+            });
+        } catch(e) {}
+    }
+
+    const now = new Date();
+    container.innerHTML = '';
+
+    currentCourse.homework.forEach((hw, idx) => {
+        const sub = submissionsMap[idx];
+        const isGraded = sub && sub.status === 'graded';
+        const isSubmitted = sub && (sub.status === 'submitted' || isGraded);
+        const isOverdue = hw.deadline && new Date(hw.deadline) < now && !isSubmitted;
+
+        let statusBadge = `<span class="hw-status-badge pending">⏳ ยังไม่ส่ง${isOverdue ? ' (เกินกำหนด)' : ''}</span>`;
+        if (isGraded) statusBadge = `<span class="hw-status-badge graded">✅ ตรวจแล้ว</span>`;
+        else if (isSubmitted) statusBadge = `<span class="hw-status-badge submitted">📤 ส่งแล้ว รอตรวจ</span>`;
+
+        const deadlineText = hw.deadline
+            ? `📅 กำหนดส่ง: ${new Date(hw.deadline).toLocaleString('th-TH')}`
+            : '📅 ไม่มีกำหนดส่ง';
+
+        const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
+        const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
+
+        let scoreHtml = '';
+        if (isGraded) {
+            scoreHtml = `
+                <div class="hw-score-display">
+                    🎯 คะแนนที่ได้: <strong>${sub.grade} / ${hw.maxScore || 100}</strong>
+                    ${sub.comment ? `<div class="hw-comment-display" style="margin-top:0.5rem;">💬 ความคิดเห็นครู: ${sub.comment}</div>` : ''}
+                </div>`;
+        }
+
+        let submittedHtml = '';
+        if (isSubmitted && sub.content) {
+            submittedHtml = `<div class="hw-comment-display">📝 งานที่ส่ง: ${sub.content}</div>`;
+        }
+        if (isSubmitted && sub.fileUrl) {
+            submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.fileUrl}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
+        }
+
+        let submitFormHtml = '';
+        if (!isSubmitted) {
+            submitFormHtml = `
+                <div class="hw-submit-area" id="hw-form-${idx}">
+                    ${canSubmit ? `<textarea placeholder="พิมพ์คำตอบ / งานของคุณที่นี่..." id="hw-text-${idx}"></textarea>` : ''}
+                    ${canFile ? `
+                        <div class="hw-file-upload" onclick="document.getElementById('hw-file-input-${idx}').click()">
+                            📎 คลิกเพื่อแนบไฟล์ (PDF, Word, รูปภาพ)
+                        </div>
+                        <input type="file" id="hw-file-input-${idx}" style="display:none;" onchange="previewHwFile(${idx}, this)">
+                        <div id="hw-file-preview-${idx}" style="font-size:0.85rem; color:#60a5fa; margin-top:0.4rem;"></div>
+                    ` : ''}
+                    <button class="btn-submit-hw" onclick="submitHomework(${idx}, '${courseId}')">
+                        📤 ส่งการบ้าน
+                    </button>
+                </div>`;
+        } else if (!isGraded) {
+            submitFormHtml = `<p style="font-size:0.85rem;color:var(--text-dim);margin-top:0.5rem;">รอครูตรวจงาน...</p>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'hw-card';
+        card.innerHTML = `
+            <div class="hw-card-header">
+                <div class="hw-card-title">${idx + 1}. ${hw.title}</div>
+                ${statusBadge}
+            </div>
+            <div class="hw-deadline">${deadlineText} • คะแนนเต็ม ${hw.maxScore || 100} คะแนน</div>
+            ${hw.description ? `<div class="hw-desc-text">${hw.description}</div>` : ''}
+            ${scoreHtml}
+            ${submittedHtml}
+            ${submitFormHtml}
+        `;
+        container.appendChild(card);
+    });
+}
+
+window.previewHwFile = function(idx, input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById(`hw-file-preview-${idx}`).textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+};
+
+window.submitHomework = async function(hwIdx, courseId) {
+    const hw = currentCourse.homework[hwIdx];
+    const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
+    const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
+
+    const textEl = document.getElementById(`hw-text-${hwIdx}`);
+    const fileInput = document.getElementById(`hw-file-input-${hwIdx}`);
+
+    const textContent = textEl ? textEl.value.trim() : '';
+    const file = fileInput ? fileInput.files[0] : null;
+
+    if (canSubmit && !textContent && !file) {
+        alert('❌ กรุณากรอกคำตอบหรือแนบไฟล์ก่อนส่ง');
+        return;
+    }
+
+    const btn = document.querySelector(`#hw-form-${hwIdx} .btn-submit-hw`);
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังส่ง...'; }
+
+    try {
+        let fileUrl = '';
+        if (file) {
+            // Upload to Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'skillnest');
+            formData.append('folder', 'skillnest/homework');
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dtuvwwmm0/auto/upload`, { method: 'POST', body: formData });
+            const data = await res.json();
+            fileUrl = data.secure_url || '';
+        }
+
+        const subId = `${currentUser.uid}_${courseId}_${hwIdx}`;
+        await setDoc(doc(db, 'submissions', subId), {
+            userId: currentUser.uid,
+            courseId,
+            homeworkIndex: hwIdx,
+            homeworkTitle: hw.title,
+            content: textContent,
+            fileUrl,
+            submittedAt: serverTimestamp(),
+            status: 'submitted',
+            grade: null,
+            comment: ''
+        });
+
+        alert('✅ ส่งการบ้านสำเร็จ!');
+        await loadHomeworkPanel(); // refresh
+    } catch(e) {
+        console.error('Submit homework error:', e);
+        alert('❌ เกิดข้อผิดพลาด: ' + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = '📤 ส่งการบ้าน'; }
+    }
+};
+
+// === Quiz Logic (inline in course-content) ===
+let cqState = null; // current quiz state
+
+window.startCourseQuiz = function() {
+    if (!currentCourse || !currentCourse.quiz || currentCourse.quiz.length === 0) return;
+    cqState = {
+        questions: currentCourse.quiz,
+        index: 0,
+        score: 0,
+        answered: false
+    };
+    renderCourseQuestion();
+    document.getElementById('quizModalOverlay').classList.add('show');
+};
+
+function renderCourseQuestion() {
+    const { questions, index } = cqState;
+    const q = questions[index];
+    const total = questions.length;
+    const pct = Math.round((index / total) * 100);
+    const labels = ['A','B','C','D'];
+    const choices = q.type === 'true_false' ? ['ถูก','ผิด'] : (q.choices || []);
+
+    document.getElementById('quizModalBox').innerHTML = `
+        <div class="qm-header">
+            <div>
+                <div style="font-weight:600; margin-bottom:0.2rem;">${currentCourse.title}</div>
+                <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total}</div>
+            </div>
+            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()">✕ ออก</button>
+        </div>
+        <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
+        <div class="qm-question">${index+1}. ${q.question}</div>
+        <div id="cqChoices">
+            ${choices.map((c,i) => `
+                <div class="qm-choice" id="cqc-${i}" onclick="selectCourseChoice(${i})">
+                    <span class="qm-letter">${labels[i]}</span>
+                    <span>${c}</span>
+                </div>`).join('')}
+        </div>
+        <button class="qm-btn-next" id="cqBtnNext" disabled onclick="nextCourseQuestion()">
+            ${index+1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯'}
+        </button>
+    `;
+    cqState.answered = false;
+}
+
+window.selectCourseChoice = function(idx) {
+    if (cqState.answered) return;
+    const { questions, index } = cqState;
+    const q = questions[index];
+    const labels = ['A','B','C','D'];
+    const correctIdx = labels.indexOf(q.correct);
+
+    cqState.answered = true;
+    document.getElementById(`cqc-${idx}`).classList.add('selected');
+
+    setTimeout(() => {
+        document.getElementById(`cqc-${correctIdx}`)?.classList.add('correct');
+        if (idx !== correctIdx) document.getElementById(`cqc-${idx}`)?.classList.add('wrong');
+        if (idx === correctIdx) cqState.score++;
+        document.getElementById('cqBtnNext').disabled = false;
+    }, 300);
+};
+
+window.nextCourseQuestion = function() {
+    const { questions, index } = cqState;
+    if (index + 1 < questions.length) {
+        cqState.index++;
+        renderCourseQuestion();
+    } else {
+        showCourseQuizResult();
+    }
+};
+
+async function showCourseQuizResult() {
+    const { questions, score } = cqState;
+    const total = questions.length;
+    const pct = Math.round((score/total)*100);
+    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+    const msg = pct >= 80 ? 'ยอดเยี่ยมมาก!' : pct >= 60 ? 'ทำได้ดี!' : 'ลองทำใหม่อีกครั้งนะ';
+
+    // Save score
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    if (currentUser && courseId) {
+        try {
+            await setDoc(doc(db, 'quizScores', `${currentUser.uid}_${courseId}`), {
+                userId: currentUser.uid, courseId, score, total, pct, updatedAt: new Date()
+            });
+            // update summary in quiz tab
+            const sumEl = document.getElementById('quizScoreSummary');
+            if (sumEl) {
+                sumEl.classList.add('show');
+                document.getElementById('quizScoreVal').textContent = `${score}/${total}`;
+                document.getElementById('quizScoreDetail').textContent = `${pct}% • เพิ่งทำเสร็จ`;
+                document.getElementById('btnStartQuiz').textContent = '🔁 ทำแบบทดสอบอีกครั้ง';
+            }
+        } catch(e) {}
+    }
+
+    document.getElementById('quizModalBox').innerHTML = `
+        <div class="qm-result">
+            <div class="qm-result-emoji">${emoji}</div>
+            <div class="qm-result-score">${score} / ${total}</div>
+            <div class="qm-result-sub">${msg} — คะแนน ${pct}%</div>
+            <div class="qm-result-grid">
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#10b981;">${score}</div><div class="qm-result-label">ถูก</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#ef4444;">${total-score}</div><div class="qm-result-label">ผิด</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#3b82f6;">${pct}%</div><div class="qm-result-label">คะแนน</div></div>
+            </div>
+            <button class="btn-retry-qm" onclick="startCourseQuiz()">🔁 ทำใหม่</button>
+            <button class="btn-close-qm" onclick="closeCourseQuiz()">ปิด</button>
+        </div>
+    `;
+}
+
+window.closeCourseQuiz = function() {
+    document.getElementById('quizModalOverlay').classList.remove('show');
+    cqState = null;
+};
+
+document.getElementById('quizModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCourseQuiz();
+});
+
+</script>
+
+</body>
+</html>
