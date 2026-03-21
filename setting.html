@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตั้งค่าบัญชี - SkillNest</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* ธีมปกติ (ม่วงสลับน้ำเงิน ไม่มีพื้นหลังสีขาว) */
+            --bg-main: linear-gradient(135deg, #2e1065 0%, #1e3a8a 100%);
+            --header-bg: rgba(15, 23, 42, 0.8);
+            --card-bg: rgba(30, 27, 75, 0.7);
+            --card-hover: rgba(46, 16, 101, 0.9);
+            --text-main: #e2e8f0; /* สีเทาสว่างแทนสีขาวล้วนเพื่อให้มองเห็นชัด */
+            --text-muted: #94a3b8;
+            --primary-color: #a78bfa;
+            --primary-hover: #c4b5fd;
+            --primary-active: rgba(167, 139, 250, 0.2);
+            --border-color: #4c1d95;
+            --input-bg: rgba(15, 23, 42, 0.7);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --backdrop: blur(12px);
+            --toggle-circle: #c4b5fd; /* วงกลมสวิตช์สีม่วงอ่อน */
+        }
+
+        [data-theme="light"] {
+            /* ธีมสว่าง (พื้นหลังสีขาว/สว่าง) */
+            --bg-main: #f8fafc;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --card-hover: #f1f5f9;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary-color: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --primary-active: #eef2ff;
+            --border-color: #e2e8f0;
+            --input-bg: #f8fafc;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            --backdrop: none;
+            --toggle-circle: #ffffff;
+        }
+
+        body {
+            background: var(--bg-main);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* --- Header --- */
+        .top-navbar {
+            background: var(--header-bg);
+            backdrop-filter: var(--backdrop);
+            padding: 15px 50px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .brand-logo {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            gap: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary-color);
+        }
+
+        .theme-btn {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .theme-btn:hover {
+            background: var(--primary-active);
+            border-color: var(--primary-color);
+        }
+
+        /* --- Wrapper & Layout --- */
+        .settings-wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 30px;
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        /* --- Sidebar --- */
+        .settings-sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            backdrop-filter: var(--backdrop);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 100px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            margin-top: 0;
+            color: var(--text-main);
+            font-size: 1.3rem;
+            margin-bottom: 24px;
+            font-weight: 800;
+        }
+
+        .settings-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .settings-menu li {
+            margin-bottom: 8px;
+        }
+
+        .settings-menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            text-decoration: none;
+            color: var(--text-muted);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .settings-menu a:hover, .settings-menu a.active {
+            background-color: var(--primary-active);
+            color: var(--primary-color);
+        }
+
+        /* --- Content Area --- */
+        .settings-content-area {
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            backdrop-filter: var(--backdrop);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            margin-top: 0;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* --- Forms --- */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-active);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+        /* --- Profile Upload --- */
+        .profile-upload {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 35px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-upload img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #111827; 
+            width: 100%;
+            justify-content: center;
+        }
+
+        [data-theme="light"] .btn-primary {
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(167, 139, 250, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-active);
+        }
+
+        /* --- Toggle Switch --- */
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .toggle-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-label-title {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .toggle-label-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s;
+            border-radius: 28px;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="light"] .slider {
+            background-color: #cbd5e1;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--toggle-circle);
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+            background-color: #ffffff; /* วงกลมเป็นสีขาวเมื่อเปิดใช้งาน */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-navbar">
+        <a href="dashboard.html" class="brand-logo">SKILLNEST</a>
+        <nav class="nav-links">
+            <a href="dashboard.html"><i class="fas fa-home"></i> แดชบอร์ด</a>
+            <a href="profile.html"><i class="fas fa-user-circle"></i> โปรไฟล์</a>
+            <a href="#" class="active"><i class="fas fa-cog"></i> การตั้งค่า</a>
+            <button class="theme-btn" id="themeToggleBtn">
+                <i class="fas fa-sun"></i> ธีมสว่าง
+            </button>
+        </nav>
+    </header>
+
+    <div class="settings-wrapper">
+        <aside class="settings-sidebar">
+            <h3 class="sidebar-header">การตั้งค่า</h3>
+            <ul class="settings-menu" id="settingsMenu">
+                <li><a class="active" data-tab="tab-profile"><i class="fas fa-user"></i> ข้อมูลส่วนตัว</a></li>
+                <li><a data-tab="tab-security"><i class="fas fa-lock"></i> ความปลอดภัย</a></li>
+                <li><a data-tab="tab-notifications"><i class="fas fa-bell"></i> การแจ้งเตือน</a></li>
+            </ul>
+        </aside>
+
+        <main class="settings-content-area">
+            <div id="tab-profile" class="tab-content active">
+                <h2 class="section-header">ข้อมูลส่วนตัว (Personal Info)</h2>
+                <form>
+                    <div class="profile-upload">
+                        <img src="https://ui-avatars.com/api/?name=Student&background=a78bfa&color=111827&size=128" alt="Profile">
+                        <div>
+                            <button type="button" class="btn btn-outline"><i class="fas fa-camera"></i> อัปโหลดรูปใหม่</button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ชื่อจริง</label>
+                            <input type="text" class="form-control" placeholder="กรอกชื่อ">
+                        </div>
+                        <div class="form-group">
+                            <label>นามสกุล</label>
+                            <input type="text" class="form-control" placeholder="กรอกนามสกุล">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>อีเมล (ที่ใช้นำเข้าระบบ)</label>
+                        <input type="email" class="form-control" value="student@bu.ac.th" readonly style="opacity: 0.7; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label>แนะนำตัวสั้นๆ (Bio)</label>
+                        <textarea class="form-control" rows="5" placeholder="สนใจ Data Science, Web Development..."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกข้อมูลส่วนตัว</button>
+                </form>
+            </div>
+
+            <div id="tab-security" class="tab-content">
+                <h2 class="section-header">ความปลอดภัย (Security)</h2>
+                <form>
+                    <div class="form-group">
+                        <label>รหัสผ่านปัจจุบัน</label>
+                        <input type="password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>รหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary"><i class="fas fa-key"></i> อัปเดตรหัสผ่าน</button>
+                </form>
+            </div>
+
+            <div id="tab-notifications" class="tab-content">
+                <h2 class="section-header">การแจ้งเตือน (Notifications)</h2>
+                <div class="notification-list">
+                    <div class="toggle-item">
+                        <div>
+                            <div class="toggle-label-title">อัปเดตคอร์สเรียน</div>
+                            <div class="toggle-label-desc">รับอีเมลเมื่อมีคอร์สใหม่ในหมวดหมู่ที่คุณสนใจ</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="toggle-item">
+                        <div>
+                            <div class="toggle-label-title">การส่งงาน (Assignments)</div>
+                            <div class="toggle-label-desc">แจ้งเตือนก่อนถึงกำหนดส่งงาน 24 ชั่วโมง</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ระบบ Tab
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuLinks = document.querySelectorAll('#settingsMenu a');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    menuLinks.forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+                });
+            });
+
+            // ระบบสลับธีม (ม่วง/สว่าง)
+            const themeBtn = document.getElementById('themeToggleBtn');
+            const htmlTag = document.documentElement;
+
+            themeBtn.addEventListener('click', () => {
+                const currentTheme = htmlTag.getAttribute('data-theme');
+                
+                // ถ้าปัจจุบันไม่ใช่ธีม light (หมายความว่าเป็นธีมปกติ/ม่วง)
+                if (currentTheme !== 'light') {
+                    htmlTag.setAttribute('data-theme', 'light');
+                    themeBtn.innerHTML = '<i class="fas fa-moon"></i> ธีมปกติ';
+                } else {
+                    // กลับไปเป็นธีมปกติ (ม่วง)
+                    htmlTag.removeAttribute('data-theme');
+                    themeBtn.innerHTML = '<i class="fas fa-sun"></i> ธีมสว่าง';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

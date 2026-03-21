@@ -76,14 +76,21 @@
         }
 
         .search-bar input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 8px 15px 8px 35px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 9px 40px 9px 38px;
             color: var(--text-main);
             width: 100%;
-            max-width: 500px;
             font-size: 0.9rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--primary-blue);
+            background: rgba(59, 130, 246, 0.08);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
         }
 
         .search-bar::before {
@@ -93,24 +100,480 @@
             top: 50%;
             transform: translateY(-50%);
             opacity: 0.5;
+            z-index: 1;
+            pointer-events: none;
         }
 
-        .notification {
+        /* Clear button */
+        .search-clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .search-clear-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+        .search-clear-btn.show { display: flex; }
+
+        /* =============================================
+           🔍 SEARCH DROPDOWN
+        ============================================= */
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: #0d1030;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            z-index: 1500;
+            overflow: hidden;
+            display: none;
+            animation: dropdownSlide 0.18s ease;
+        }
+        @keyframes dropdownSlide {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .search-dropdown.show { display: block; }
+
+        /* Filter bar */
+        .search-filter-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 14px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .search-filter-bar::-webkit-scrollbar { display: none; }
+
+        .filter-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-dim);
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .filter-chip:hover { border-color: var(--primary-blue); color: white; background: rgba(59,130,246,0.1); }
+        .filter-chip.active { border-color: var(--primary-blue); background: rgba(59,130,246,0.18); color: white; }
+
+        /* Trending section */
+        .search-section-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 10px 14px 6px;
+        }
+
+        .trending-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            padding: 0 14px 12px;
+        }
+
+        .trending-tag {
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .trending-tag:hover { background: rgba(59,130,246,0.12); border-color: var(--primary-blue); color: white; }
+
+        /* Suggestion results */
+        .search-results-list {
+            max-height: 240px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .search-result-item:hover { background: rgba(255,255,255,0.04); }
+        .search-result-item:last-child { border-bottom: none; }
+
+        .search-result-thumb {
+            width: 40px;
+            height: 32px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.8);
+            overflow: hidden;
+        }
+
+        .search-result-info { flex: 1; min-width: 0; }
+        .search-result-title { font-size: 0.83rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-result-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 1px; }
+
+        .search-result-badge {
+            font-size: 0.68rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(59,130,246,0.15);
+            color: #60a5fa;
+            white-space: nowrap;
+        }
+
+        .search-no-result {
+            padding: 28px 14px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.84rem;
+        }
+
+        .search-footer {
+            padding: 8px 14px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.73rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        /* Recent searches */
+        .recent-searches-list { padding: 0 14px 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .recent-item {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 10px; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+            font-size: 0.78rem; color: var(--text-dim); cursor: pointer; transition: 0.15s;
+        }
+        .recent-item:hover { border-color: var(--primary-blue); color: white; background: rgba(59,130,246,0.1); }
+        .recent-item-remove {
+            font-size: 0.65rem; opacity: 0.5; margin-left: 2px;
+            cursor: pointer; padding: 0 2px;
+        }
+        .recent-item-remove:hover { opacity: 1; color: #ef4444; }
+
+        /* Favorites grid */
+        .favorites-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 8px; padding: 6px 14px 12px;
+        }
+        .fav-card {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;
+            cursor: pointer; transition: 0.15s;
+        }
+        .fav-card:hover { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.3); }
+        .fav-thumb {
+            width: 36px; height: 28px; border-radius: 6px; flex-shrink: 0;
+            background-size: cover; background-position: center;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.8);
+        }
+        .fav-info { min-width: 0; }
+        .fav-title { font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fav-sub { font-size: 0.67rem; color: var(--text-dim); margin-top: 1px; }
+
+        /* =============================================
+           🔔 NOTIFICATION BELL SYSTEM
+        ============================================= */
+        .notification-wrapper {
             position: relative;
             cursor: pointer;
-            font-size: 1.2rem;
+        }
+
+        .notification-bell-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            position: relative;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .notification-bell-btn:hover {
+            background: rgba(255,255,255,0.07);
         }
 
         .notification-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
+            top: 2px;
+            right: 2px;
             background: #ef4444;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+            line-height: 1;
+            border: 2px solid #020418;
+            animation: badgePop 0.3s ease;
         }
 
+        @keyframes badgePop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Notification Dropdown Panel */
+        .notif-panel {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: -10px;
+            width: 360px;
+            background: #0d1030;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(59,130,246,0.1);
+            z-index: 2000;
+            overflow: hidden;
+            display: none;
+            animation: panelSlide 0.2s ease;
+        }
+
+        @keyframes panelSlide {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .notif-panel.show { display: block; }
+
+        .notif-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .notif-panel-header h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .notif-mark-all {
+            font-size: 0.75rem;
+            color: #60a5fa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .notif-mark-all:hover { text-decoration: underline; }
+
+        .notif-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .notif-tab {
+            flex: 1;
+            padding: 9px;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .notif-tab.active {
+            color: var(--text-main);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .notif-list {
+            max-height: 340px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+
+        .notif-item {
+            display: flex;
+            gap: 12px;
+            padding: 13px 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .notif-item:hover { background: rgba(255,255,255,0.04); }
+
+        .notif-item.unread { background: rgba(59,130,246,0.06); }
+        .notif-item.unread:hover { background: rgba(59,130,246,0.1); }
+
+        .notif-unread-dot {
+            position: absolute;
+            top: 16px;
+            right: 14px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+        }
+
+        .notif-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .notif-icon.course  { background: rgba(59,130,246,0.2); }
+        .notif-icon.homework { background: rgba(245,158,11,0.2); }
+        .notif-icon.system  { background: rgba(139,92,246,0.2); }
+
+        .notif-content { flex: 1; min-width: 0; }
+
+        .notif-content p {
+            font-size: 0.82rem;
+            line-height: 1.45;
+            color: var(--text-main);
+            margin-bottom: 3px;
+        }
+
+        .notif-content span {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+        }
+
+        .notif-empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .notif-empty .notif-empty-icon { font-size: 2.2rem; margin-bottom: 8px; }
+
+        .notif-panel-footer {
+            padding: 10px 18px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            text-align: center;
+        }
+
+        .notif-panel-footer a {
+            font-size: 0.78rem;
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        /* =============================================
+           Toast Notification
+        ============================================= */
+        #toastContainer {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #0f1035;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-left: 3px solid var(--primary-blue);
+            border-radius: 12px;
+            padding: 14px 16px;
+            max-width: 320px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            pointer-events: all;
+            animation: toastIn 0.35s cubic-bezier(.175,.885,.32,1.275);
+        }
+
+        .toast.homework { border-left-color: #f59e0b; }
+        .toast.system   { border-left-color: #8b5cf6; }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(30px) scale(0.95); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to   { opacity: 0; transform: translateX(30px); }
+        }
+
+        .toast-icon { font-size: 1.1rem; margin-top: 1px; }
+
+        .toast-body { flex: 1; }
+
+        .toast-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .toast-msg {
+            font-size: 0.76rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        /* =============================================
+           PROFILE & DROPDOWN
+        ============================================= */
         .profile-dropdown {
             position: relative;
         }
@@ -140,17 +603,8 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
-        .profile-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-icon svg {
-            width: 16px;
-            height: 16px;
-            fill: white;
-        }
+        .profile-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-icon svg { width: 16px; height: 16px; fill: white; }
 
         .dropdown-menu {
             display: none;
@@ -165,9 +619,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        .dropdown-menu.show {
-            display: block;
-        }
+        .dropdown-menu.show { display: block; }
 
         .dropdown-item {
             padding: 12px 20px;
@@ -178,11 +630,11 @@
             cursor: pointer;
         }
 
-        .dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
-        }
+        .dropdown-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
 
+        /* =============================================
+           SIDEBAR & MAIN
+        ============================================= */
         .sidebar {
             position: fixed;
             left: 0;
@@ -208,8 +660,7 @@
             cursor: pointer;
         }
 
-        .sidebar-item:hover,
-        .sidebar-item.active {
+        .sidebar-item:hover, .sidebar-item.active {
             background: rgba(59, 130, 246, 0.1);
             color: var(--text-main);
         }
@@ -228,15 +679,8 @@
             margin-bottom: 40px;
         }
 
-        .welcome-banner h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
-
-        .welcome-banner p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
-        }
+        .welcome-banner h1 { font-size: 1.8rem; margin-bottom: 10px; }
+        .welcome-banner p { color: rgba(255, 255, 255, 0.9); font-size: 1rem; }
 
         .section-header {
             display: flex;
@@ -314,247 +758,56 @@
             gap: 5px;
         }
 
-        .course-info {
-            padding: 20px;
-        }
+        .course-info { padding: 20px; }
+        .course-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .course-subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 5px; }
+        .course-author { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 15px; }
 
-        .course-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+        .progress-section { margin-top: 15px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary-blue); border-radius: 3px; transition: width 0.3s; }
 
-        .course-subtitle {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            margin-bottom: 5px;
-        }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 20px; }
+        .empty-state h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-main); }
 
-        .course-author {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-        }
-
-        .progress-section {
-            margin-top: 15px;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            margin-bottom: 8px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-blue);
-            border-radius: 3px;
-            transition: width 0.3s;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-dim);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-
-        .empty-state h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: var(--text-main);
-        }
-
-        .loading-spinner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 60px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid var(--primary-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 60px; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-            }
-            
-            .sidebar-item span {
-                display: none;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-                width: calc(100% - 70px);
-                padding: 20px;
-            }
-            
-            .search-bar input {
-                width: 200px;
-            }
+            .sidebar { width: 70px; }
+            .sidebar-item span { display: none; }
+            .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
+            .search-bar input { width: 200px; }
+            .notif-panel { right: -60px; width: 310px; }
         }
 
         /* === Enrollment Modal === */
         .enroll-modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            z-index: 3000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px); z-index: 3000; display: none;
+            align-items: center; justify-content: center; padding: 1rem;
         }
         .enroll-modal-overlay.show { display: flex; }
 
-        .enroll-modal {
-            background: #0f1035;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px;
-            width: 100%;
-            max-width: 520px;
-            overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-        }
-
-        .enroll-modal-thumb {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            font-weight: 700;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .enroll-modal-body {
-            padding: 1.75rem;
-        }
-
-        .enroll-modal-body h2 {
-            font-size: 1.35rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .enroll-modal-meta {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-
-        .enroll-badge {
-            background: rgba(59,130,246,0.15);
-            color: #60a5fa;
-            padding: 0.25rem 0.7rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        .enroll-modal-desc {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            max-height: 80px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .enroll-modal-lessons {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .enroll-modal-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .btn-enroll {
-            flex: 1;
-            padding: 0.9rem;
-            background: linear-gradient(135deg, #3b82f6, #6d28d9);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .enroll-modal { background: #0f1035; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; width: 100%; max-width: 520px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+        .enroll-modal-thumb { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700; color: rgba(255,255,255,0.5); }
+        .enroll-modal-body { padding: 1.75rem; }
+        .enroll-modal-body h2 { font-size: 1.35rem; margin-bottom: 0.5rem; }
+        .enroll-modal-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .enroll-badge { background: rgba(59,130,246,0.15); color: #60a5fa; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.8rem; }
+        .enroll-modal-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; max-height: 80px; overflow: hidden; text-overflow: ellipsis; }
+        .enroll-modal-lessons { display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .enroll-modal-actions { display: flex; gap: 0.75rem; }
+        .btn-enroll { flex: 1; padding: 0.9rem; background: linear-gradient(135deg, #3b82f6, #6d28d9); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
         .btn-enroll:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        .btn-go-course {
-            flex: 1;
-            padding: 0.9rem;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .btn-go-course { flex: 1; padding: 0.9rem; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
         .btn-go-course:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        .btn-cancel-enroll {
-            padding: 0.9rem 1.25rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-dim);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .btn-cancel-enroll { padding: 0.9rem 1.25rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 12px; cursor: pointer; transition: 0.2s; }
         .btn-cancel-enroll:hover { color: white; }
-
-        .enrolled-tag {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(16,185,129,0.85);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+        .enrolled-tag { position: absolute; top: 10px; left: 10px; background: rgba(16,185,129,0.85); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -564,14 +817,97 @@
                 <span class="logo-icon">W</span>
                 <span>SkillNest</span>
             </div>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="ค้นหาคอร์สเรียน...">
+            <div class="search-bar" id="searchBarWrapper">
+                <input type="text" id="searchInput" placeholder="ค้นหาคอร์สเรียน..." autocomplete="off">
+                <button class="search-clear-btn" id="searchClearBtn" title="ล้าง">✕</button>
+
+                <!-- 🔍 Search Dropdown -->
+                <div class="search-dropdown" id="searchDropdown">
+
+                    <!-- Filter chips -->
+                    <div class="search-filter-bar" id="filterBar">
+                        <div class="filter-chip active" data-filter="all">ทั้งหมด</div>
+                        <div class="filter-chip" data-filter="programming">💻 การเขียนโปรแกรม</div>
+                        <div class="filter-chip" data-filter="design">🎨 ดีไซน์</div>
+                        <div class="filter-chip" data-filter="business">💼 ธุรกิจ</div>
+                        <div class="filter-chip" data-filter="marketing">📣 การตลาด</div>
+                        <div class="filter-chip" data-filter="data-science">📊 Data Science</div>
+                        <div class="filter-chip" data-filter="beginner">🌱 เริ่มต้น</div>
+                        <div class="filter-chip" data-filter="intermediate">⚡ ปานกลาง</div>
+                        <div class="filter-chip" data-filter="advanced">🔥 ขั้นสูง</div>
+                    </div>
+
+                    <!-- Trending (shown when input empty) -->
+                    <div id="searchTrendingSection">
+                        <!-- Recent searches (dynamic) -->
+                        <div id="recentSearchesBlock" style="display:none;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px;">
+                                <span class="search-section-label" style="padding:0;">🕐 ค้นหาล่าสุด</span>
+                                <button id="clearRecentBtn" style="font-size:0.72rem;color:#60a5fa;background:none;border:none;cursor:pointer;padding:0;">ล้างทั้งหมด</button>
+                            </div>
+                            <div class="recent-searches-list" id="recentSearchesList"></div>
+                            <div style="height:1px;background:rgba(255,255,255,0.06);margin:6px 0;"></div>
+                        </div>
+
+                        <div class="search-section-label">🔥 หมวดหมู่ยอดนิยม</div>
+                        <div class="trending-tags" id="trendingTags">
+                            <span class="trending-tag" data-search="python" data-category="programming">🐍 Python</span>
+                            <span class="trending-tag" data-search="javascript" data-category="programming">🟨 JavaScript</span>
+                            <span class="trending-tag" data-search="java" data-category="programming">☕ Java</span>
+                            <span class="trending-tag" data-search="css" data-category="design">🎨 CSS / Design</span>
+                            <span class="trending-tag" data-search="ai" data-category="ai-ml">🤖 AI & ML</span>
+                            <span class="trending-tag" data-search="data" data-category="data-science">📊 Data Science</span>
+                            <span class="trending-tag" data-search="marketing" data-category="marketing">📣 การตลาด</span>
+                            <span class="trending-tag" data-search="excel" data-category="business">📈 Excel</span>
+                            <span class="trending-tag" data-search="web" data-category="programming">🌐 Web Dev</span>
+                            <span class="trending-tag" data-search="sql" data-category="data-science">🗄️ SQL</span>
+                        </div>
+
+                        <!-- Learner favorites (top 4 from cache) -->
+                        <div id="favoritesBlock">
+                            <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 0 0;"></div>
+                            <div class="search-section-label" style="margin-top:4px;">⭐ คอร์สแนะนำ</div>
+                            <div class="favorites-grid" id="favoritesGrid"></div>
+                        </div>
+                    </div>
+
+                    <!-- Results (shown when typing) -->
+                    <div id="searchResultsSection" style="display:none;">
+                        <div class="search-section-label" id="searchResultsLabel">ผลการค้นหา</div>
+                        <div class="search-results-list" id="searchResultsList"></div>
+                    </div>
+
+                    <div class="search-footer" id="searchFooter">กด Enter เพื่อค้นหาทั้งหมด</div>
+                </div>
             </div>
             <div class="nav-right">
-                <div class="notification">
-                    🔔
-                    <span class="notification-badge"></span>
+
+                <!-- 🔔 NOTIFICATION BELL -->
+                <div class="notification-wrapper" id="notifWrapper">
+                    <button class="notification-bell-btn" id="notifBellBtn" title="การแจ้งเตือน">🔔</button>
+                    <!-- badge จะถูก inject ด้วย JS -->
+                    <div class="notif-panel" id="notifPanel">
+                        <div class="notif-panel-header">
+                            <h4>🔔 การแจ้งเตือน</h4>
+                            <button class="notif-mark-all" id="markAllReadBtn">อ่านทั้งหมด</button>
+                        </div>
+                        <div class="notif-tabs">
+                            <button class="notif-tab active" data-tab="all">ทั้งหมด</button>
+                            <button class="notif-tab" data-tab="course">📚 คอร์สใหม่</button>
+                            <button class="notif-tab" data-tab="homework">📋 การบ้าน</button>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">
+                                <div class="notif-empty-icon">🔔</div>
+                                <p>กำลังโหลด...</p>
+                            </div>
+                        </div>
+                        <div class="notif-panel-footer">
+                            <a href="#" id="clearAllNotifsLink">ล้างการแจ้งเตือนทั้งหมด</a>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="profile-dropdown">
                     <button class="profile-btn" id="profileBtn">
                         <div class="profile-icon" id="profileIconContainer">
@@ -583,7 +919,7 @@
                     </button>
                     <div class="dropdown-menu" id="dropdownMenu">
                         <a href="profile.html" class="dropdown-item" id="profileItem">โปรไฟล์</a>
-                        <a href="setting.html" class="dropdown-item" id="settingsItem">การตั้งค่า</a>
+                        <a class="dropdown-item" id="settingsItem">การตั้งค่า</a>
                         <a href="manage-courses.html" class="dropdown-item teacher-only" id="manageCourseItem" style="display: none;">จัดการคอร์สของฉัน</a>
                         <a class="dropdown-item" id="logoutItem">ออกจากระบบ</a>
                     </div>
@@ -592,16 +928,16 @@
         </nav>
 
         <div id="manageModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>คอร์สที่คุณอัพโหลด</h3>
-            <span class="close-modal" id="closeManageModal">&times;</span>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>คอร์สที่คุณอัพโหลด</h3>
+                    <span class="close-modal" id="closeManageModal">&times;</span>
+                </div>
+                <div id="myCourseList" class="modal-body">
+                    <p style="text-align:center; color: var(--text-dim);">กำลังโหลด...</p>
+                </div>
+            </div>
         </div>
-        <div id="myCourseList" class="modal-body">
-            <p style="text-align:center; color: var(--text-dim);">กำลังโหลด...</p>
-        </div>
-    </div>
-</div>
 
         <aside class="sidebar">
             <div class="sidebar-item active" id="sidebarExplore" data-page="explore" onclick="switchPage('explore')">
@@ -619,7 +955,7 @@
             <div class="sidebar-item student-only" id="sidebarMyQuizzes" data-page="my-quizzes" onclick="window.location.href='my-quizzes.html'" style="display: none;">
                 📝 <span>แบบฝึกหัดของฉัน</span>
             </div>
-            <div class="sidebar-item" data-page="progress" onclick="window.location.href='learning.html'">
+            <div class="sidebar-item" data-page="progress">
                 📊 <span>ผลการเรียนรู้</span>
             </div>
         </aside>
@@ -644,6 +980,9 @@
         </main>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
     <!-- Enrollment Modal -->
     <div id="enrollModalOverlay" class="enroll-modal-overlay">
         <div class="enroll-modal">
@@ -657,9 +996,7 @@
                 </div>
                 <div class="enroll-modal-desc" id="enrollModalDesc"></div>
                 <div class="enroll-modal-lessons" id="enrollModalLessons">📖 0 บทเรียน</div>
-                <div class="enroll-modal-actions" id="enrollModalActions">
-                    <!-- filled dynamically -->
-                </div>
+                <div class="enroll-modal-actions" id="enrollModalActions"></div>
             </div>
         </div>
     </div>
@@ -667,7 +1004,11 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, query, where, getDocs, doc, getDoc, orderBy, deleteDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import {
+            getFirestore, collection, query, where, getDocs, doc, getDoc,
+            orderBy, deleteDoc, setDoc, serverTimestamp, addDoc, writeBatch,
+            onSnapshot, updateDoc, limit
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
@@ -683,8 +1024,13 @@
         const db = getFirestore(app);
 
         let currentUser = null;
+        let unsubscribeNotif = null; // real-time listener unsubscribe handle
+        let allNotifications = [];
+        let activeTab = 'all';
 
-        // สี gradient แบบสุ่มสำหรับคอร์ส
+        // =============================================
+        // 🎨 Utility maps
+        // =============================================
         const courseColors = [
             'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
             'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
@@ -694,85 +1040,303 @@
             'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'
         ];
 
-        // แปลงหมวดหมู่เป็นภาษาไทย
         const categoryMap = {
-            'programming': 'การเขียนโปรแกรม',
-            'design': 'การออกแบบ',
-            'business': 'ธุรกิจ',
-            'marketing': 'การตลาด',
-            'data-science': 'Data Science',
-            'ai-ml': 'AI & Machine Learning',
-            'other': 'อื่นๆ'
+            'programming': 'การเขียนโปรแกรม', 'design': 'การออกแบบ', 'business': 'ธุรกิจ',
+            'marketing': 'การตลาด', 'data-science': 'Data Science', 'ai-ml': 'AI & Machine Learning', 'other': 'อื่นๆ'
+        };
+        const levelMap = { 'beginner': 'เริ่มต้น', 'intermediate': 'ปานกลาง', 'advanced': 'ขั้นสูง' };
+
+        // =============================================
+        // 🔔 NOTIFICATION SYSTEM
+        // =============================================
+
+        /**
+         * สร้าง notification document ใน Firestore
+         * type: 'course' | 'homework' | 'system'
+         * targetUserId: null = broadcast to all, string = specific user
+         */
+        window.createNotification = async function({ type, title, message, link, targetUserId }) {
+            try {
+                await addDoc(collection(db, 'notifications'), {
+                    type,
+                    title,
+                    message,
+                    link: link || null,
+                    targetUserId: targetUserId || 'broadcast', // 'broadcast' = ทุกคน
+                    createdAt: serverTimestamp(),
+                    readBy: []
+                });
+            } catch(e) { console.error('createNotification error:', e); }
         };
 
-        // แปลงระดับเป็นภาษาไทย
-        const levelMap = {
-            'beginner': 'เริ่มต้น',
-            'intermediate': 'ปานกลาง',
-            'advanced': 'ขั้นสูง'
+        // เริ่ม real-time listener สำหรับ notifications
+        function startNotificationListener(userId) {
+            if (unsubscribeNotif) unsubscribeNotif(); // cleanup ก่อน
+
+            // ดึง notifications ที่:
+            // 1) targetUserId == 'broadcast' (ส่งทุกคน)
+            // 2) targetUserId == userId (เฉพาะ user)
+            // หมายเหตุ: ใช้ 'broadcast' แทน null เพราะ Firestore ไม่รองรับ query where == null
+            const broadcastQ = query(
+                collection(db, 'notifications'),
+                where('targetUserId', '==', 'broadcast'),
+                orderBy('createdAt', 'desc'),
+                limit(50)
+            );
+            const personalQ = query(
+                collection(db, 'notifications'),
+                where('targetUserId', '==', userId),
+                orderBy('createdAt', 'desc'),
+                limit(50)
+            );
+
+            let broadcastData = [];
+            let personalData = [];
+            let initialized = { b: false, p: false };
+
+            function mergeAndRender() {
+                if (!initialized.b || !initialized.p) return;
+                const combined = [...broadcastData, ...personalData];
+                combined.sort((a, b) => {
+                    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                    return tb - ta;
+                });
+
+                // หา items ใหม่ที่เพิ่งเข้ามา (เทียบกับ allNotifications เดิม)
+                const prevIds = new Set(allNotifications.map(n => n.id));
+                const newItems = combined.filter(n => !prevIds.has(n.id) && !(n.readBy || []).includes(userId));
+
+                allNotifications = combined;
+                renderNotifPanel(userId);
+
+                // แสดง toast สำหรับ items ใหม่ที่ยังไม่อ่าน (ยกเว้นครั้งแรก)
+                if (initialized.b && initialized.p && newItems.length > 0 && prevIds.size > 0) {
+                    newItems.slice(0, 3).forEach(n => showToast(n));
+                }
+            }
+
+            const unsubB = onSnapshot(broadcastQ, snap => {
+                broadcastData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                initialized.b = true;
+                mergeAndRender();
+            }, err => { console.error('broadcast notif error:', err); initialized.b = true; mergeAndRender(); });
+
+            const unsubP = onSnapshot(personalQ, snap => {
+                personalData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                initialized.p = true;
+                mergeAndRender();
+            }, err => { console.error('personal notif error:', err); initialized.p = true; mergeAndRender(); });
+
+            unsubscribeNotif = () => { unsubB(); unsubP(); };
+        }
+
+        function renderNotifPanel(userId) {
+            const list = document.getElementById('notifList');
+            if (!list) return;
+
+            const filtered = activeTab === 'all'
+                ? allNotifications
+                : allNotifications.filter(n => n.type === activeTab);
+
+            const unreadCount = allNotifications.filter(n => !(n.readBy || []).includes(userId)).length;
+            updateBadge(unreadCount);
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon">🎉</div><p>ไม่มีการแจ้งเตือน</p></div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map(n => {
+                const isUnread = !(n.readBy || []).includes(userId);
+                const timeAgo = formatTimeAgo(n.createdAt);
+                const icon = n.type === 'course' ? '📚' : n.type === 'homework' ? '📋' : '🔔';
+                const iconClass = n.type === 'course' ? 'course' : n.type === 'homework' ? 'homework' : 'system';
+                return `
+                    <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${n.id}" onclick="handleNotifClick('${n.id}', '${n.link || ''}')">
+                        <div class="notif-icon ${iconClass}">${icon}</div>
+                        <div class="notif-content">
+                            <p><strong>${escapeHtml(n.title)}</strong> — ${escapeHtml(n.message)}</p>
+                            <span>${timeAgo}</span>
+                        </div>
+                        ${isUnread ? '<div class="notif-unread-dot"></div>' : ''}
+                    </div>`;
+            }).join('');
+        }
+
+        function updateBadge(count) {
+            const btn = document.getElementById('notifBellBtn');
+            if (!btn) return;
+            let badge = btn.querySelector('.notification-badge');
+            if (count > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'notification-badge';
+                    btn.appendChild(badge);
+                }
+                badge.textContent = count > 99 ? '99+' : count;
+            } else {
+                if (badge) badge.remove();
+            }
+        }
+
+        window.handleNotifClick = async function(notifId, link) {
+            if (!currentUser) return;
+            // mark as read
+            try {
+                const notifRef = doc(db, 'notifications', notifId);
+                const notifSnap = await getDoc(notifRef);
+                if (notifSnap.exists()) {
+                    const readBy = notifSnap.data().readBy || [];
+                    if (!readBy.includes(currentUser.uid)) {
+                        await updateDoc(notifRef, { readBy: [...readBy, currentUser.uid] });
+                    }
+                }
+            } catch(e) { console.error('mark read error:', e); }
+            if (link && link !== 'null' && link !== '') {
+                closeNotifPanel();
+                window.location.href = link;
+            }
         };
 
-        // ดึงข้อมูลคอร์สทั้งหมด
+        document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+            if (!currentUser || allNotifications.length === 0) return;
+            try {
+                const batch = writeBatch(db);
+                const unread = allNotifications.filter(n => !(n.readBy || []).includes(currentUser.uid));
+                unread.forEach(n => {
+                    batch.update(doc(db, 'notifications', n.id), {
+                        readBy: [...(n.readBy || []), currentUser.uid]
+                    });
+                });
+                await batch.commit();
+            } catch(e) { console.error('mark all read error:', e); }
+        });
+
+        document.getElementById('clearAllNotifsLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            if (!confirm('ต้องการล้างการแจ้งเตือนทั้งหมดหรือไม่?')) return;
+            try {
+                // ล้างโดย mark ว่าอ่านแล้วทุกอัน
+                const batch = writeBatch(db);
+                allNotifications.forEach(n => {
+                    if (!(n.readBy || []).includes(currentUser.uid)) {
+                        batch.update(doc(db, 'notifications', n.id), {
+                            readBy: [...(n.readBy || []), currentUser.uid]
+                        });
+                    }
+                });
+                await batch.commit();
+                closeNotifPanel();
+            } catch(e) { console.error('clear notif error:', e); }
+        });
+
+        // Tab switching
+        document.querySelectorAll('.notif-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                activeTab = tab.dataset.tab;
+                if (currentUser) renderNotifPanel(currentUser.uid);
+            });
+        });
+
+        // Bell toggle
+        document.getElementById('notifBellBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('notifPanel').classList.toggle('show');
+            document.getElementById('dropdownMenu').classList.remove('show');
+        });
+
+        function closeNotifPanel() {
+            document.getElementById('notifPanel').classList.remove('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('notifWrapper').contains(e.target)) {
+                closeNotifPanel();
+            }
+        });
+
+        // =============================================
+        // 🍞 Toast
+        // =============================================
+        function showToast(notif) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const icon = notif.type === 'course' ? '📚' : notif.type === 'homework' ? '📋' : '🔔';
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast ${notif.type}`;
+            toastEl.innerHTML = `
+                <div class="toast-icon">${icon}</div>
+                <div class="toast-body">
+                    <div class="toast-title">${escapeHtml(notif.title)}</div>
+                    <div class="toast-msg">${escapeHtml(notif.message)}</div>
+                </div>`;
+            toastEl.style.cursor = notif.link ? 'pointer' : 'default';
+            toastEl.addEventListener('click', () => {
+                if (notif.link) handleNotifClick(notif.id, notif.link);
+            });
+            container.appendChild(toastEl);
+            setTimeout(() => {
+                toastEl.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toastEl.remove(), 300);
+            }, 5000);
+        }
+
+        // =============================================
+        // 🕐 Time Formatter
+        // =============================================
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return '';
+            const now = Date.now();
+            const ts = timestamp.toMillis ? timestamp.toMillis() : now;
+            const diff = Math.floor((now - ts) / 1000);
+            if (diff < 60) return 'เมื่อกี้';
+            if (diff < 3600) return `${Math.floor(diff/60)} นาทีที่แล้ว`;
+            if (diff < 86400) return `${Math.floor(diff/3600)} ชั่วโมงที่แล้ว`;
+            if (diff < 604800) return `${Math.floor(diff/86400)} วันที่แล้ว`;
+            const d = new Date(ts);
+            return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543}`;
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // =============================================
+        // 📚 COURSE LOADING
+        // =============================================
         async function loadCourses() {
             const courseGrid = document.getElementById('courseGrid');
-            
             try {
-                const coursesQuery = query(
-                    collection(db, 'courses'),
-                    orderBy('createdAt', 'desc')
-                );
-                
+                const coursesQuery = query(collection(db, 'courses'), orderBy('createdAt', 'desc'));
                 const querySnapshot = await getDocs(coursesQuery);
-                
                 if (querySnapshot.empty) {
-                    courseGrid.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📚</div>
-                            <h3>ยังไม่มีคอร์สเรียน</h3>
-                            <p>เริ่มต้นสร้างคอร์สแรกของคุณเลย!</p>
-                        </div>
-                    `;
+                    courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📚</div><h3>ยังไม่มีคอร์สเรียน</h3><p>เริ่มต้นสร้างคอร์สแรกของคุณเลย!</p></div>`;
                     return;
                 }
-
                 courseGrid.innerHTML = '';
                 let visibleCount = 0;
-                
                 for (const docSnapshot of querySnapshot.docs) {
                     const course = docSnapshot.data();
                     const courseId = docSnapshot.id;
-
-                    // ข้ามคอร์สที่สมัครแล้ว (explore = เฉพาะยังไม่สมัคร)
                     if (enrolledCourseIds.has(courseId)) continue;
                     visibleCount++;
-                    
-                    // ดึงข้อมูลผู้สร้าง
                     let creatorName = 'ไม่ทราบชื่อ';
                     try {
                         const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
                         if (creatorDoc.exists()) {
-                            const creatorData = creatorDoc.data();
-                            creatorName = `${creatorData.firstName || ''} ${creatorData.lastName || ''}`.trim() || creatorData.email;
+                            const cd = creatorDoc.data();
+                            creatorName = `${cd.firstName||''} ${cd.lastName||''}`.trim() || cd.email;
                         }
-                    } catch (error) {
-                        console.error('Error fetching creator:', error);
-                    }
-
-                    // คำนวณจำนวนบทเรียน
+                    } catch(e) {}
                     const lessonCount = course.lessons ? course.lessons.length : 0;
-                    
-                    // สุ่มสีพื้นหลัง
                     const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
-                    
-                    // สร้างการ์ดคอร์ส
                     const courseCard = document.createElement('div');
                     courseCard.className = 'course-card';
-                    
-                    // ตรวจสอบว่ามี thumbnail หรือไม่
-                    const thumbnailStyle = course.thumbnail 
-                        ? `background-image: url('${course.thumbnail}');`
-                        : `background: ${randomColor};`;
-                    
+                    const thumbnailStyle = course.thumbnail ? `background-image: url('${course.thumbnail}');` : `background: ${randomColor};`;
                     courseCard.innerHTML = `
                         <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
                             ${!course.thumbnail ? course.title.substring(0, 15) : ''}
@@ -780,45 +1344,43 @@
                         </div>
                         <div class="course-info">
                             <div class="course-title">${course.title}</div>
-                            <div class="course-subtitle">${categoryMap[course.category] || course.category} • ${levelMap[course.level] || course.level}</div>
+                            <div class="course-subtitle">${categoryMap[course.category]||course.category} • ${levelMap[course.level]||course.level}</div>
                             <div class="course-author">${creatorName}</div>
                             <div class="progress-section">
-                                <div class="progress-label">
-                                    <span>ความคืบหน้า</span>
-                                    <span>0%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%;"></div>
-                                </div>
+                                <div class="progress-label"><span>ความคืบหน้า</span><span>0%</span></div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                     courseCard.addEventListener('click', () => openCourseModal(courseId, course, randomColor, creatorName));
                     courseGrid.appendChild(courseCard);
-                }
 
-                if (visibleCount === 0) {
-                    courseGrid.innerHTML = `
-                        <div class="empty-state" style="grid-column:1/-1;">
-                            <div class="empty-state-icon">🎉</div>
-                            <h3>คุณสมัครเรียนครบทุกคอร์สแล้ว!</h3>
-                            <p>ไปที่ "คอร์สของฉัน" เพื่อเริ่มเรียน</p>
-                        </div>`;
+                    // เพิ่มเข้า cache สำหรับ search suggestion
+                    if (!allCourseCache.find(c => c.id === courseId)) {
+                        allCourseCache.push({
+                            id: courseId,
+                            title: course.title,
+                            category: course.category || '',
+                            level: course.level || '',
+                            thumbnail: course.thumbnail || '',
+                            color: randomColor,
+                            lessonCount: course.lessons ? course.lessons.length : 0
+                        });
+                    }
+                    // อัปเดต favorites grid ทุกครั้งที่ cache เพิ่ม
+                    renderFavoritesGrid();
                 }
-                
-            } catch (error) {
+                if (visibleCount === 0) {
+                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">🎉</div><h3>คุณสมัครเรียนครบทุกคอร์สแล้ว!</h3><p>ไปที่ "คอร์สของฉัน" เพื่อเริ่มเรียน</p></div>`;
+                }
+            } catch(error) {
                 console.error('Error loading courses:', error);
-                courseGrid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <h3>เกิดข้อผิดพลาด</h3>
-                        <p>ไม่สามารถโหลดคอร์สได้ กรุณาลองใหม่อีกครั้ง</p>
-                    </div>
-                `;
+                courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3><p>ไม่สามารถโหลดคอร์สได้ กรุณาลองใหม่อีกครั้ง</p></div>`;
             }
         }
 
-        // ตรวจสอบสถานะการเข้าสู่ระบบ
+        // =============================================
+        // 🔐 AUTH
+        // =============================================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -827,371 +1389,529 @@
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
                         const firstName = userData.firstName || 'User';
-                        const userType = userData.userType || 'student'; // ค่าเริ่มต้นเป็น student
-                        const profileImageUrl = userData.profilePicture || null; // ดึงรูปโปรไฟล์จาก Firebase
-                        
+                        const userType = userData.userType || 'student';
+                        const profileImageUrl = userData.profilePicture || null;
                         document.getElementById('userName').textContent = firstName;
                         document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName} 🚀`;
-                        
-                        // แสดงรูปโปรไฟล์ถ้ามี
                         const profileIconContainer = document.getElementById('profileIconContainer');
                         if (profileImageUrl && profileIconContainer) {
                             const img = document.createElement('img');
                             img.src = profileImageUrl;
                             img.alt = 'Profile';
-                            img.style.width = '100%';
-                            img.style.height = '100%';
-                            img.style.objectFit = 'cover';
-                            
-                            img.onload = function() {
-                                profileIconContainer.innerHTML = '';
-                                profileIconContainer.appendChild(img);
-                            };
-                            
-                            img.onerror = function() {
-                                console.log('Failed to load profile image');
-                            };
+                            img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+                            img.onload = () => { profileIconContainer.innerHTML = ''; profileIconContainer.appendChild(img); };
                         }
-                        
-                        // แสดงเมนูครูถ้าเป็นครู
                         if (userType === 'teacher') {
-                            // แสดงเมนูจัดการคอร์สใน dropdown
-                            const manageCourseItem = document.getElementById('manageCourseItem');
-                            if (manageCourseItem) manageCourseItem.style.display = 'block';
-                            // แสดงเมนูเพิ่มคอร์สใน sidebar
-                            const sidebarCreateCourse = document.getElementById('sidebarCreateCourse');
-                            if (sidebarCreateCourse) sidebarCreateCourse.style.display = 'flex';
-                            // แสดงปุ่มสร้างคอร์สใหม่ใน header
-                            const headerCreateCourseBtn = document.getElementById('headerCreateCourseBtn');
-                            if (headerCreateCourseBtn) headerCreateCourseBtn.style.display = 'flex';
-                            // แสดงปุ่มตรวจการบ้าน
-                            const sidebarHomework = document.getElementById('sidebarHomework');
-                            if (sidebarHomework) sidebarHomework.style.display = 'flex';
+                            ['manageCourseItem','sidebarCreateCourse','headerCreateCourseBtn','sidebarHomework'].forEach(id => {
+                                const el = document.getElementById(id);
+                                if (el) el.style.display = id.startsWith('sidebar') || id === 'headerCreateCourseBtn' ? 'flex' : 'block';
+                            });
                         }
-
-                        // แสดงปุ่มแบบฝึกหัดถ้าเป็นนักเรียน
                         if (userType === 'student') {
-                            const sidebarMyQuizzes = document.getElementById('sidebarMyQuizzes');
-                            if (sidebarMyQuizzes) sidebarMyQuizzes.style.display = 'flex';
+                            const el = document.getElementById('sidebarMyQuizzes');
+                            if (el) el.style.display = 'flex';
                         }
                     }
-                } catch (error) {
-                    console.error('Error fetching user data:', error);
-                }
-                
-                // โหลดคอร์สตาม URL param
+                } catch(e) { console.error('Error fetching user data:', e); }
+
                 await loadEnrollments();
+
+                // 🔔 เริ่ม real-time notification listener
+                startNotificationListener(user.uid);
+
                 const urlPage = new URLSearchParams(window.location.search).get('page');
-                if (urlPage === 'my-courses') {
-                    switchPage('my-courses');
-                } else {
-                    await loadCourses();
-                }
+                if (urlPage === 'my-courses') { switchPage('my-courses'); } else { await loadCourses(); }
             } else {
                 window.location.href = '../login-page/login.html';
             }
         });
 
-        // Dropdown menu
+        // =============================================
+        // DROPDOWN + LOGOUT
+        // =============================================
         const profileBtn = document.getElementById('profileBtn');
         const dropdownMenu = document.getElementById('dropdownMenu');
-
-        profileBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dropdownMenu.classList.toggle('show');
-        });
-
-        document.addEventListener('click', function() {
-            dropdownMenu.classList.remove('show');
-        });
-
-        dropdownMenu.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-
-        // Logout functionality
+        profileBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); closeNotifPanel(); });
+        document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
+        dropdownMenu.addEventListener('click', (e) => e.stopPropagation());
         document.getElementById('logoutItem').addEventListener('click', async () => {
+            if (unsubscribeNotif) unsubscribeNotif();
+            try { await signOut(auth); window.location.href = '../login-page/login.html'; }
+            catch(e) { alert('เกิดข้อผิดพลาดในการออกจากระบบ'); }
+        });
+
+        // =============================================
+        // PAGE SWITCH
+        // =============================================
+        let currentPage = 'explore';
+
+        window.switchPage = async function(page) {
+            currentPage = page;
+            document.querySelectorAll('.sidebar-item[data-page]').forEach(el => el.classList.remove('active'));
+            const activeEl = document.getElementById(page === 'explore' ? 'sidebarExplore' : 'sidebarMyCourses');
+            if (activeEl) activeEl.classList.add('active');
+            const headerText = document.getElementById('sectionHeaderText');
+            if (headerText) headerText.textContent = page === 'explore' ? '🔍 ค้นหาคอร์สใหม่' : '📚 คอร์สของฉัน';
+            const si = document.getElementById('searchInput');
+            if (si) si.value = '';
+            searchClearBtn.classList.remove('show');
+            // reset filter chips
+            activeFilter = 'all';
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            const allChip = document.querySelector('.filter-chip[data-filter="all"]');
+            if (allChip) allChip.classList.add('active');
+            if (page === 'explore') { await loadCourses(); } else { await loadMyCourses(); }
+        };
+
+        async function loadMyCourses() {
+            const courseGrid = document.getElementById('courseGrid');
+            courseGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+            if (!currentUser) return;
             try {
-                await signOut(auth);
-                window.location.href = '../login-page/login.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-                alert('เกิดข้อผิดพลาดในการออกจากระบบ');
+                const enrollSnap = await getDocs(query(collection(db, 'enrollments'), where('userId', '==', currentUser.uid)));
+                if (enrollSnap.empty) {
+                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div><h3>ยังไม่มีคอร์สที่สมัคร</h3><p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อเลือกสมัครเรียนคอร์สที่สนใจ</p></div>`;
+                    return;
+                }
+                courseGrid.innerHTML = '';
+                for (const enrollDoc of enrollSnap.docs) {
+                    const courseId = enrollDoc.data().courseId;
+                    try {
+                        const courseSnap = await getDoc(doc(db, 'courses', courseId));
+                        if (!courseSnap.exists()) continue;
+                        const course = courseSnap.data();
+                        const lessonCount = course.lessons ? course.lessons.length : 0;
+                        const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
+                        let creatorName = 'ไม่ทราบชื่อ';
+                        try {
+                            const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
+                            if (creatorDoc.exists()) {
+                                const cd = creatorDoc.data();
+                                creatorName = `${cd.firstName||''} ${cd.lastName||''}`.trim() || cd.email;
+                            }
+                        } catch(e) {}
+                        const thumbnailStyle = course.thumbnail ? `background-image:url('${course.thumbnail}');background-size:cover;background-position:center;` : `background:${randomColor};`;
+                        const courseCard = document.createElement('div');
+                        courseCard.className = 'course-card';
+                        courseCard.innerHTML = `
+                            <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
+                                ${!course.thumbnail ? course.title.substring(0,15) : ''}
+                                <div class="course-duration">⏱ ${lessonCount} บท</div>
+                                <div class="enrolled-tag">✅ สมัครแล้ว</div>
+                            </div>
+                            <div class="course-info">
+                                <div class="course-title">${course.title}</div>
+                                <div class="course-subtitle">${categoryMap[course.category]||course.category} • ${levelMap[course.level]||course.level}</div>
+                                <div class="course-author">${creatorName}</div>
+                                <div style="margin-top:0.75rem;">
+                                    <button onclick="event.stopPropagation();window.location.href='course-content.html?id=${courseId}'" style="width:100%;padding:0.6rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">▶️ เข้าสู่บทเรียน</button>
+                                </div>
+                            </div>`;
+                        courseCard.addEventListener('click', () => window.location.href = `course-content.html?id=${courseId}`);
+                        courseGrid.appendChild(courseCard);
+                    } catch(e) { console.error('Error loading enrolled course:', e); }
+                }
+            } catch(e) {
+                courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3></div>`;
+            }
+        }
+
+        // =============================================
+        // 🔍 ENHANCED SEARCH SYSTEM (Coursera-style)
+        // =============================================
+        const searchInput    = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+        const searchClearBtn = document.getElementById('searchClearBtn');
+        const filterBar      = document.getElementById('filterBar');
+
+        let allCourseCache = []; // [{ id, title, category, level, thumbnail, color, lessonCount }]
+        let activeFilter   = 'all';
+
+        // ── keyword → category mapping ─────────────────────
+        // ทำให้ tag "python" กรอง category programming ได้ทันที
+        const keywordCategoryMap = {
+            'python': 'programming', 'javascript': 'programming', 'java': 'programming',
+            'web': 'programming', 'sql': 'data-science', 'css': 'design',
+            'ai': 'ai-ml', 'machine learning': 'ai-ml', 'data': 'data-science',
+            'excel': 'business', 'marketing': 'marketing', 'design': 'design'
+        };
+
+        // ── Recent Searches (localStorage) ────────────────
+        function getRecentSearches() {
+            try { return JSON.parse(localStorage.getItem('sn_recent_searches') || '[]'); }
+            catch { return []; }
+        }
+        function saveRecentSearch(term) {
+            if (!term.trim()) return;
+            let recent = getRecentSearches().filter(r => r.toLowerCase() !== term.toLowerCase());
+            recent.unshift(term);
+            recent = recent.slice(0, 8);
+            try { localStorage.setItem('sn_recent_searches', JSON.stringify(recent)); } catch {}
+        }
+        function removeRecentSearch(term) {
+            let recent = getRecentSearches().filter(r => r !== term);
+            try { localStorage.setItem('sn_recent_searches', JSON.stringify(recent)); } catch {}
+            renderRecentSearches();
+        }
+        function clearRecentSearches() {
+            try { localStorage.removeItem('sn_recent_searches'); } catch {}
+            renderRecentSearches();
+        }
+
+        function renderRecentSearches() {
+            const block = document.getElementById('recentSearchesBlock');
+            const list  = document.getElementById('recentSearchesList');
+            const recent = getRecentSearches();
+            if (recent.length === 0) { block.style.display = 'none'; return; }
+            block.style.display = 'block';
+            list.innerHTML = recent.map(r => `
+                <div class="recent-item" onclick="triggerRecentSearch('${escapeHtml(r)}')">
+                    <span style="opacity:0.5;font-size:0.85rem;">🕐</span>
+                    <span>${escapeHtml(r)}</span>
+                    <span class="recent-item-remove" onclick="event.stopPropagation();removeRecentSearch_btn('${escapeHtml(r)}')">✕</span>
+                </div>`).join('');
+        }
+
+        window.triggerRecentSearch = function(term) {
+            searchInput.value = term;
+            searchClearBtn.classList.add('show');
+            const mappedCategory = keywordCategoryMap[term.toLowerCase()];
+            if (mappedCategory) {
+                setActiveFilterChip(mappedCategory);
+            }
+            renderSearchDropdown(term);
+            applyCardFilter(term, activeFilter);
+        };
+
+        window.removeRecentSearch_btn = function(term) {
+            removeRecentSearch(term);
+        };
+
+        document.getElementById('clearRecentBtn').addEventListener('click', () => {
+            clearRecentSearches();
+        });
+
+        // ── Favorites grid ─────────────────────────────────
+        function renderFavoritesGrid() {
+            const grid = document.getElementById('favoritesGrid');
+            if (!grid) return;
+            const top4 = allCourseCache.slice(0, 4);
+            if (top4.length === 0) {
+                document.getElementById('favoritesBlock').style.display = 'none';
+                return;
+            }
+            const categoryMapLocal = {
+                'programming':'💻 โปรแกรม','design':'🎨 ดีไซน์','business':'💼 ธุรกิจ',
+                'marketing':'📣 การตลาด','data-science':'📊 Data','ai-ml':'🤖 AI','other':'📌 อื่นๆ'
+            };
+            grid.innerHTML = top4.map(c => {
+                const thumbStyle = c.thumbnail ? `background-image:url('${c.thumbnail}');` : `background:${c.color};`;
+                return `
+                    <div class="fav-card" onclick="selectSearchResult('${c.id}','${escapeHtml(c.title)}')">
+                        <div class="fav-thumb" style="${thumbStyle}">${!c.thumbnail ? c.title.substring(0,3) : ''}</div>
+                        <div class="fav-info">
+                            <div class="fav-title">${escapeHtml(c.title)}</div>
+                            <div class="fav-sub">${categoryMapLocal[c.category]||c.category}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        // ── helper: set active filter chip ────────────────
+        function setActiveFilterChip(filterValue) {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            const target = document.querySelector(`.filter-chip[data-filter="${filterValue}"]`);
+            if (target) { target.classList.add('active'); activeFilter = filterValue; }
+            else { document.querySelector('.filter-chip[data-filter="all"]').classList.add('active'); activeFilter = 'all'; }
+        }
+
+        // ── open / close ───────────────────────────────────
+        function openSearchDropdown() { searchDropdown.classList.add('show'); }
+        function closeSearchDropdown() { searchDropdown.classList.remove('show'); }
+
+        searchInput.addEventListener('focus', () => {
+            renderRecentSearches();
+            renderFavoritesGrid();
+            openSearchDropdown();
+            renderSearchDropdown(searchInput.value.trim());
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('searchBarWrapper').contains(e.target)) closeSearchDropdown();
+        });
+
+        // ── input event ────────────────────────────────────
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            searchClearBtn.classList.toggle('show', val.length > 0);
+            renderSearchDropdown(val.trim());
+            applyCardFilter(val.trim(), activeFilter);
+        });
+
+        searchClearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClearBtn.classList.remove('show');
+            setActiveFilterChip('all');
+            renderSearchDropdown('');
+            applyCardFilter('', 'all');
+            searchInput.focus();
+        });
+
+        // ── filter chips ───────────────────────────────────
+        filterBar.addEventListener('click', (e) => {
+            const chip = e.target.closest('.filter-chip');
+            if (!chip) return;
+            setActiveFilterChip(chip.dataset.filter);
+            renderSearchDropdown(searchInput.value.trim());
+            applyCardFilter(searchInput.value.trim(), activeFilter);
+        });
+
+        // ── trending tag click ─────────────────────────────
+        // กด "python" → set filter chip เป็น programming + ค้นหา "python"
+        document.getElementById('trendingTags').addEventListener('click', (e) => {
+            const tag = e.target.closest('.trending-tag');
+            if (!tag) return;
+            const keyword  = tag.dataset.search;
+            const category = tag.dataset.category || 'all';
+
+            searchInput.value = keyword;
+            searchClearBtn.classList.add('show');
+
+            // map filter chip ให้ตรงกับ category ของ tag
+            setActiveFilterChip(category);
+
+            saveRecentSearch(keyword);
+            renderSearchDropdown(keyword);
+            applyCardFilter(keyword, activeFilter);
+            closeSearchDropdown();
+        });
+
+        // ── keyboard ───────────────────────────────────────
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { closeSearchDropdown(); searchInput.blur(); }
+            if (e.key === 'Enter') {
+                const term = searchInput.value.trim();
+                if (term) saveRecentSearch(term);
+                closeSearchDropdown();
+                applyCardFilter(term, activeFilter);
             }
         });
 
-    // ------------------------------------------------
-    // Page Switch: ค้นหาคอร์สใหม่ vs คอร์สของฉัน
-    // ------------------------------------------------
-    let currentPage = 'explore';
+        // ── render dropdown ────────────────────────────────
+        function renderSearchDropdown(query) {
+            const trendingSection = document.getElementById('searchTrendingSection');
+            const resultsSection  = document.getElementById('searchResultsSection');
+            const resultsList     = document.getElementById('searchResultsList');
+            const resultsLabel    = document.getElementById('searchResultsLabel');
 
-    window.switchPage = async function(page) {
-        currentPage = page;
+            const categoryFilters = ['programming','design','business','marketing','data-science','ai-ml','other'];
+            const levelFilters    = ['beginner','intermediate','advanced'];
 
-        // update sidebar active state
-        document.querySelectorAll('.sidebar-item[data-page]').forEach(el => el.classList.remove('active'));
-        const activeId = page === 'explore' ? 'sidebarExplore' : 'sidebarMyCourses';
-        const activeEl = document.getElementById(activeId);
-        if (activeEl) activeEl.classList.add('active');
+            let filtered = [...allCourseCache];
 
-        // update header text
-        const headerText = document.getElementById('sectionHeaderText');
-        if (headerText) {
-            headerText.textContent = page === 'explore' ? '🔍 ค้นหาคอร์สใหม่' : '📚 คอร์สของฉัน';
-        }
+            // apply chip filter
+            if (activeFilter !== 'all') {
+                if (categoryFilters.includes(activeFilter)) {
+                    filtered = filtered.filter(c => c.category === activeFilter);
+                } else if (levelFilters.includes(activeFilter)) {
+                    filtered = filtered.filter(c => c.level === activeFilter);
+                }
+            }
 
-        // clear search
-        const si = document.getElementById('searchInput');
-        if (si) si.value = '';
+            if (!query) {
+                trendingSection.style.display = 'block';
+                resultsSection.style.display  = 'none';
+                return;
+            }
 
-        if (page === 'explore') {
-            await loadCourses();
-        } else {
-            await loadMyCourses();
-        }
-    };
+            trendingSection.style.display = 'none';
+            resultsSection.style.display  = 'block';
 
-    async function loadMyCourses() {
-        const courseGrid = document.getElementById('courseGrid');
-        courseGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+            const q = query.toLowerCase();
+            const matches = filtered.filter(c =>
+                c.title.toLowerCase().includes(q) ||
+                (c.category || '').toLowerCase().includes(q) ||
+                (c.level || '').toLowerCase().includes(q)
+            ).slice(0, 7);
 
-        if (!currentUser) return;
+            resultsLabel.textContent = matches.length > 0
+                ? `ผลการค้นหา "${query}" (${matches.length} คอร์ส)`
+                : `ผลการค้นหา "${query}"`;
 
-        try {
-            // ดึง enrollments ของ user
-            const enrollSnap = await getDocs(query(
-                collection(db, 'enrollments'),
-                where('userId', '==', currentUser.uid)
-            ));
+            const categoryMapLocal = {
+                'programming':'💻 การเขียนโปรแกรม','design':'🎨 ดีไซน์','business':'💼 ธุรกิจ',
+                'marketing':'📣 การตลาด','data-science':'📊 Data Science','ai-ml':'🤖 AI/ML','other':'📌 อื่นๆ'
+            };
+            const levelMapLocal = { 'beginner':'🌱 เริ่มต้น','intermediate':'⚡ ปานกลาง','advanced':'🔥 ขั้นสูง' };
 
-            if (enrollSnap.empty) {
-                courseGrid.innerHTML = `
-                    <div class="empty-state" style="grid-column:1/-1;">
-                        <div class="empty-state-icon">📭</div>
-                        <h3>ยังไม่มีคอร์สที่สมัคร</h3>
-                        <p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อเลือกสมัครเรียนคอร์สที่สนใจ</p>
+            if (matches.length === 0) {
+                resultsList.innerHTML = `
+                    <div class="search-no-result">
+                        🔍 ไม่พบคอร์สที่ตรงกับ "<strong>${escapeHtml(query)}</strong>"<br>
+                        <span style="font-size:0.75rem;margin-top:4px;display:block;">ลองเปลี่ยนตัวกรองหรือคำค้นหา</span>
                     </div>`;
                 return;
             }
 
-            courseGrid.innerHTML = '';
-
-            for (const enrollDoc of enrollSnap.docs) {
-                const courseId = enrollDoc.data().courseId;
-                try {
-                    const courseSnap = await getDoc(doc(db, 'courses', courseId));
-                    if (!courseSnap.exists()) continue;
-
-                    const course = courseSnap.data();
-                    const lessonCount = course.lessons ? course.lessons.length : 0;
-                    const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
-
-                    let creatorName = 'ไม่ทราบชื่อ';
-                    try {
-                        const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
-                        if (creatorDoc.exists()) {
-                            const cd = creatorDoc.data();
-                            creatorName = `${cd.firstName || ''} ${cd.lastName || ''}`.trim() || cd.email;
-                        }
-                    } catch(e) {}
-
-                    const thumbnailStyle = course.thumbnail
-                        ? `background-image: url('${course.thumbnail}'); background-size:cover; background-position:center;`
-                        : `background: ${randomColor};`;
-
-                    const courseCard = document.createElement('div');
-                    courseCard.className = 'course-card';
-                    courseCard.innerHTML = `
-                        <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
-                            ${!course.thumbnail ? course.title.substring(0, 15) : ''}
-                            <div class="course-duration">⏱ ${lessonCount} บท</div>
-                            <div class="enrolled-tag">✅ สมัครแล้ว</div>
+            resultsList.innerHTML = matches.map(c => {
+                const thumbStyle = c.thumbnail
+                    ? `background-image:url('${c.thumbnail}');`
+                    : `background:${c.color};`;
+                return `
+                    <div class="search-result-item" onclick="selectSearchResult('${c.id}','${escapeHtml(c.title)}')">
+                        <div class="search-result-thumb" style="${thumbStyle}">
+                            ${!c.thumbnail ? c.title.substring(0,3) : ''}
                         </div>
-                        <div class="course-info">
-                            <div class="course-title">${course.title}</div>
-                            <div class="course-subtitle">${categoryMap[course.category] || course.category} • ${levelMap[course.level] || course.level}</div>
-                            <div class="course-author">${creatorName}</div>
-                            <div style="margin-top:0.75rem;">
-                                <button onclick="event.stopPropagation(); window.location.href='course-content.html?id=${courseId}'" style="width:100%;padding:0.6rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
-                                    ▶️ เข้าสู่บทเรียน
-                                </button>
-                            </div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">${highlightMatch(c.title, query)}</div>
+                            <div class="search-result-sub">${categoryMapLocal[c.category]||c.category} • ${levelMapLocal[c.level]||c.level||''}</div>
                         </div>
-                    `;
-                    courseCard.addEventListener('click', () => window.location.href = `course-content.html?id=${courseId}`);
-                    courseGrid.appendChild(courseCard);
-                } catch(e) { console.error('Error loading enrolled course:', e); }
-            }
-
-        } catch(e) {
-            console.error('loadMyCourses error:', e);
-            courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3></div>`;
-        }
-    }
-
-    // ------------------------------------------------
-    // ส่วนฟังก์ชันค้นหา (Search Logic)
-    // ------------------------------------------------
-    const searchInput = document.getElementById('searchInput');
-
-    searchInput.addEventListener('input', function(e) {
-        const searchText = e.target.value.toLowerCase().trim();
-        const courses = document.querySelectorAll('.course-card');
-        const courseGrid = document.getElementById('courseGrid');
-        let hasVisibleCourses = false;
-
-        // ลบข้อความ "ไม่พบข้อมูล" เก่าออกก่อน (ถ้ามี)
-        const existingNoResult = document.getElementById('no-result-message');
-        if (existingNoResult) existingNoResult.remove();
-
-        courses.forEach(card => {
-            // ดึงชื่อคอร์ส
-            const titleElement = card.querySelector('.course-title');
-            const title = titleElement ? titleElement.textContent.toLowerCase() : '';
-            
-            // ดึงหมวดหมู่ (เผื่ออยากค้นหาด้วยหมวดหมู่)
-            const subtitleElement = card.querySelector('.course-subtitle');
-            const subtitle = subtitleElement ? subtitleElement.textContent.toLowerCase() : '';
-
-            // ตรวจสอบว่าตรงกับคำค้นหาหรือไม่
-            if (title.includes(searchText) || subtitle.includes(searchText)) {
-                card.style.display = 'block'; // แสดง
-                hasVisibleCourses = true;
-            } else {
-                card.style.display = 'none'; // ซ่อน
-            }
-        });
-
-        // แสดงข้อความเมื่อไม่พบคอร์สที่ค้นหา
-        if (!hasVisibleCourses && courses.length > 0) {
-            const noResultDiv = document.createElement('div');
-            noResultDiv.id = 'no-result-message';
-            noResultDiv.style.textAlign = 'center';
-            noResultDiv.style.width = '100%';
-            noResultDiv.style.padding = '40px';
-            noResultDiv.style.gridColumn = '1 / -1'; // ให้ข้อความอยู่ตรงกลางกินพื้นที่ทุกคอลัมน์
-            noResultDiv.style.color = 'var(--text-dim)';
-            noResultDiv.innerHTML = `
-                <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
-                <h3>ไม่พบคอร์สที่ค้นหา</h3>
-                <p>ลองค้นหาด้วยคำสำคัญอื่น</p>
-            `;
-            courseGrid.appendChild(noResultDiv);
-        }
-    });
-
-    // ------------------------------------------------
-    // Enrollment Modal Logic
-    // ------------------------------------------------
-    let enrolledCourseIds = new Set();
-    let pendingCourseData = null; // { courseId, course }
-
-    // ดึง enrollment ของ user คนนี้
-    async function loadEnrollments() {
-        if (!currentUser) return;
-        try {
-            const snap = await getDocs(query(
-                collection(db, 'enrollments'),
-                where('userId', '==', currentUser.uid)
-            ));
-            snap.forEach(d => enrolledCourseIds.add(d.data().courseId));
-
-            // อัพเดต badge บน card ที่มีอยู่แล้ว
-            enrolledCourseIds.forEach(cid => markCardAsEnrolled(cid));
-        } catch(e) { console.error('loadEnrollments error:', e); }
-    }
-
-    function markCardAsEnrolled(courseId) {
-        const img = document.getElementById('course-img-' + courseId);
-        if (img && !img.querySelector('.enrolled-tag')) {
-            const tag = document.createElement('div');
-            tag.className = 'enrolled-tag';
-            tag.textContent = '✅ สมัครแล้ว';
-            img.appendChild(tag);
-        }
-    }
-
-    window.openCourseModal = function(courseId, course, color, creatorName) {
-        pendingCourseData = { courseId, course };
-        const isEnrolled = enrolledCourseIds.has(courseId);
-
-        // Fill modal content
-        const thumbEl = document.getElementById('enrollModalThumb');
-        if (course.thumbnail) {
-            thumbEl.style.backgroundImage = `url('${course.thumbnail}')`;
-            thumbEl.style.backgroundSize = 'cover';
-            thumbEl.style.backgroundPosition = 'center';
-            thumbEl.innerHTML = '';
-        } else {
-            thumbEl.style.backgroundImage = 'none';
-            thumbEl.style.background = color;
-            thumbEl.innerHTML = course.title.substring(0,15);
+                        <span class="search-result-badge">${c.lessonCount} บท</span>
+                    </div>`;
+            }).join('');
         }
 
-        document.getElementById('enrollModalTitle').textContent = course.title;
-        document.getElementById('enrollModalCategory').textContent = categoryMap[course.category] || course.category || 'ทั่วไป';
-        document.getElementById('enrollModalLevel').textContent = levelMap[course.level] || course.level || '';
-        document.getElementById('enrollModalInstructor').textContent = '👤 ' + (creatorName || 'ไม่ระบุ');
-        document.getElementById('enrollModalDesc').textContent = course.description || '';
-        const lessonCount = course.lessons ? course.lessons.length : 0;
-        document.getElementById('enrollModalLessons').innerHTML = `📖 ${lessonCount} บทเรียน${course.quiz && course.quiz.length > 0 ? ` &nbsp;•&nbsp; 📝 ${course.quiz.length} แบบทดสอบ` : ''}`;
-
-        const actionsEl = document.getElementById('enrollModalActions');
-        if (isEnrolled) {
-            actionsEl.innerHTML = `
-                <button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button>
-                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
-            `;
-        } else {
-            actionsEl.innerHTML = `
-                <button class="btn-enroll" onclick="enrollCourse('${courseId}')">🎓 สมัครเข้าเรียน</button>
-                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
-            `;
+        function highlightMatch(text, query) {
+            if (!query) return escapeHtml(text);
+            const idx = text.toLowerCase().indexOf(query.toLowerCase());
+            if (idx === -1) return escapeHtml(text);
+            return escapeHtml(text.substring(0, idx))
+                + `<mark style="background:rgba(59,130,246,0.35);color:white;border-radius:2px;padding:0 2px;">${escapeHtml(text.substring(idx, idx+query.length))}</mark>`
+                + escapeHtml(text.substring(idx+query.length));
         }
 
-        document.getElementById('enrollModalOverlay').classList.add('show');
-    };
+        // ── select suggestion item ─────────────────────────
+        window.selectSearchResult = function(courseId, title) {
+            searchInput.value = title;
+            searchClearBtn.classList.add('show');
+            saveRecentSearch(title);
+            closeSearchDropdown();
+            applyCardFilter(title, activeFilter);
+            setTimeout(() => {
+                const card = document.querySelector(`#course-img-${courseId}`)?.closest('.course-card');
+                if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        };
 
-    window.closeEnrollModal = function() {
-        document.getElementById('enrollModalOverlay').classList.remove('show');
-        pendingCourseData = null;
-    };
+        // ── apply filter to course cards ───────────────────
+        function applyCardFilter(searchText, filter) {
+            const q = searchText.toLowerCase().trim();
+            const courseGrid = document.getElementById('courseGrid');
+            const courses    = document.querySelectorAll('.course-card');
+            const existing   = document.getElementById('no-result-message');
+            if (existing) existing.remove();
 
-    window.enrollCourse = async function(courseId) {
-        if (!currentUser) { alert('กรุณาล็อกอินก่อน'); return; }
-        try {
-            const enrollId = `${currentUser.uid}_${courseId}`;
-            await setDoc(doc(db, 'enrollments', enrollId), {
-                userId: currentUser.uid,
-                courseId: courseId,
-                enrolledAt: serverTimestamp()
+            const categoryFilters = ['programming','design','business','marketing','data-science','ai-ml','other'];
+            const levelFilters    = ['beginner','intermediate','advanced'];
+
+            let hasVisible = false;
+            courses.forEach(card => {
+                const title    = (card.querySelector('.course-title')?.textContent  || '').toLowerCase();
+                const subtitle = (card.querySelector('.course-subtitle')?.textContent || '').toLowerCase();
+                const imgEl    = card.querySelector('[id^="course-img-"]');
+                const courseId = imgEl?.id?.replace('course-img-','') || '';
+                const cached   = allCourseCache.find(c => c.id === courseId);
+
+                // text match — ตรงกับ title, subtitle หรือ keyword→category
+                const mappedCat = q ? (keywordCategoryMap[q] || '') : '';
+                const textMatch = !q || title.includes(q) || subtitle.includes(q)
+                    || (cached && mappedCat && cached.category === mappedCat);
+
+                // chip filter match
+                let chipMatch = true;
+                if (filter !== 'all' && cached) {
+                    if (categoryFilters.includes(filter)) chipMatch = cached.category === filter;
+                    else if (levelFilters.includes(filter)) chipMatch = cached.level === filter;
+                }
+
+                const show = textMatch && chipMatch;
+                card.style.display = show ? 'block' : 'none';
+                if (show) hasVisible = true;
             });
-            enrolledCourseIds.add(courseId);
-            markCardAsEnrolled(courseId);
 
-            // Update modal to show "go to course" button
-            const actionsEl = document.getElementById('enrollModalActions');
-            actionsEl.innerHTML = `
-                <button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button>
-                <button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>
-            `;
-            document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend',
-                '<p style="color:#10b981; font-size:0.9rem; margin-top:0.3rem;">✅ สมัครเรียนสำเร็จแล้ว!</p>');
-        } catch(e) {
-            console.error('Enroll error:', e);
-            alert('❌ เกิดข้อผิดพลาดในการสมัคร: ' + e.message);
+            if (!hasVisible && courses.length > 0) {
+                const d = document.createElement('div');
+                d.id = 'no-result-message';
+                d.style.cssText = 'text-align:center;width:100%;padding:40px;grid-column:1/-1;color:var(--text-dim);';
+                d.innerHTML = `<div style="font-size:3rem;margin-bottom:10px;">🔍</div><h3>ไม่พบคอร์สที่ค้นหา</h3><p>ลองเปลี่ยนตัวกรองหรือคำค้นหาใหม่</p>`;
+                courseGrid.appendChild(d);
+            }
         }
-    };
 
-    window.goToCourse = function(courseId) {
-        window.location.href = `course-content.html?id=${courseId}`;
-    };
+        // =============================================
+        // ENROLLMENT
+        // =============================================
+        let enrolledCourseIds = new Set();
+        let pendingCourseData = null;
 
-    // Close modal on backdrop click
-    document.getElementById('enrollModalOverlay').addEventListener('click', function(e) {
-        if (e.target === this) closeEnrollModal();
-    });
+        async function loadEnrollments() {
+            if (!currentUser) return;
+            try {
+                const snap = await getDocs(query(collection(db, 'enrollments'), where('userId', '==', currentUser.uid)));
+                snap.forEach(d => enrolledCourseIds.add(d.data().courseId));
+                enrolledCourseIds.forEach(cid => markCardAsEnrolled(cid));
+            } catch(e) { console.error('loadEnrollments error:', e); }
+        }
 
+        function markCardAsEnrolled(courseId) {
+            const img = document.getElementById('course-img-' + courseId);
+            if (img && !img.querySelector('.enrolled-tag')) {
+                const tag = document.createElement('div');
+                tag.className = 'enrolled-tag';
+                tag.textContent = '✅ สมัครแล้ว';
+                img.appendChild(tag);
+            }
+        }
+
+        window.openCourseModal = function(courseId, course, color, creatorName) {
+            pendingCourseData = { courseId, course };
+            const isEnrolled = enrolledCourseIds.has(courseId);
+            const thumbEl = document.getElementById('enrollModalThumb');
+            if (course.thumbnail) {
+                thumbEl.style.backgroundImage = `url('${course.thumbnail}')`;
+                thumbEl.style.backgroundSize = 'cover'; thumbEl.style.backgroundPosition = 'center';
+                thumbEl.innerHTML = '';
+            } else {
+                thumbEl.style.backgroundImage = 'none'; thumbEl.style.background = color;
+                thumbEl.innerHTML = course.title.substring(0,15);
+            }
+            document.getElementById('enrollModalTitle').textContent = course.title;
+            document.getElementById('enrollModalCategory').textContent = categoryMap[course.category] || course.category || 'ทั่วไป';
+            document.getElementById('enrollModalLevel').textContent = levelMap[course.level] || course.level || '';
+            document.getElementById('enrollModalInstructor').textContent = '👤 ' + (creatorName || 'ไม่ระบุ');
+            document.getElementById('enrollModalDesc').textContent = course.description || '';
+            const lessonCount = course.lessons ? course.lessons.length : 0;
+            document.getElementById('enrollModalLessons').innerHTML = `📖 ${lessonCount} บทเรียน${course.quiz?.length > 0 ? ` &nbsp;•&nbsp; 📝 ${course.quiz.length} แบบทดสอบ` : ''}`;
+            const actionsEl = document.getElementById('enrollModalActions');
+            actionsEl.innerHTML = isEnrolled
+                ? `<button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`
+                : `<button class="btn-enroll" onclick="enrollCourse('${courseId}')">🎓 สมัครเข้าเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
+            document.getElementById('enrollModalOverlay').classList.add('show');
+        };
+
+        window.closeEnrollModal = function() {
+            document.getElementById('enrollModalOverlay').classList.remove('show');
+            pendingCourseData = null;
+        };
+
+        window.enrollCourse = async function(courseId) {
+            if (!currentUser) { alert('กรุณาล็อกอินก่อน'); return; }
+            try {
+                const enrollId = `${currentUser.uid}_${courseId}`;
+                await setDoc(doc(db, 'enrollments', enrollId), { userId: currentUser.uid, courseId, enrolledAt: serverTimestamp() });
+                enrolledCourseIds.add(courseId);
+                markCardAsEnrolled(courseId);
+                const actionsEl = document.getElementById('enrollModalActions');
+                actionsEl.innerHTML = `<button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
+                document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend', '<p style="color:#10b981;font-size:0.9rem;margin-top:0.3rem;">✅ สมัครเรียนสำเร็จแล้ว!</p>');
+            } catch(e) { alert('❌ เกิดข้อผิดพลาดในการสมัคร: ' + e.message); }
+        };
+
+        window.goToCourse = function(courseId) { window.location.href = `course-content.html?id=${courseId}`; };
+
+        document.getElementById('enrollModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeEnrollModal();
+        });
     </script>
 </body>
 </html>

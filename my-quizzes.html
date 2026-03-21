@@ -30,7 +30,6 @@
             overflow-x: hidden;
         }
 
-        /* === Top Nav === */
         .top-nav {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -68,7 +67,6 @@
             color: var(--text-dim);
         }
 
-        /* === Sidebar === */
         .app-container { display: flex; min-height: 100vh; }
 
         .sidebar {
@@ -100,7 +98,6 @@
             color: var(--text-main);
         }
 
-        /* === Main Content === */
         .main-content {
             margin-left: 250px;
             margin-top: 70px;
@@ -108,20 +105,10 @@
             width: calc(100% - 250px);
         }
 
-        .page-header {
-            margin-bottom: 2rem;
-        }
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .page-header p { color: var(--text-dim); }
 
-        .page-header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-            color: var(--text-dim);
-        }
-
-        /* === Quiz Cards === */
         .quiz-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -150,11 +137,7 @@
             margin-bottom: 1rem;
         }
 
-        .quiz-course-name {
-            font-size: 1rem;
-            font-weight: 600;
-            flex: 1;
-        }
+        .quiz-course-name { font-size: 1rem; font-weight: 600; flex: 1; }
 
         .quiz-count-badge {
             background: rgba(139, 92, 246, 0.2);
@@ -166,11 +149,7 @@
             white-space: nowrap;
         }
 
-        .quiz-meta {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            margin-bottom: 1.25rem;
-        }
+        .quiz-meta { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.25rem; }
 
         .quiz-score-bar {
             background: rgba(255,255,255,0.08);
@@ -194,10 +173,19 @@
             color: var(--text-dim);
         }
 
+        /* ── ปุ่มสองปุ่มล่างการ์ด ── */
+        .quiz-card-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 1rem;
+            align-items: stretch;   /* ← ทำให้สูงเท่ากันทั้งคู่ */
+        }
+
         .btn-start-quiz {
-            width: 100%;
-            margin-top: 1.25rem;
-            padding: 0.75rem;
+            flex: 1;
+            /* ไม่กำหนด height แบบ fixed → ยืดตาม container */
+            padding: 0 0.75rem;
+            min-height: 48px;       /* ← ความสูงขั้นต่ำ แทน height คงที่ */
             background: linear-gradient(135deg, #8b5cf6, #3b82f6);
             color: white;
             border: none;
@@ -210,7 +198,29 @@
 
         .btn-start-quiz:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* === Modal Quiz === */
+        .btn-go-lesson {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            /* ไม่มี height → stretch จาก parent ทำให้สูงเท่า btn-start-quiz */
+        }
+
+        .btn-go-lesson:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.25);
+            color: white;
+        }
+
+        /* === Modal === */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -243,10 +253,7 @@
             margin-bottom: 1.5rem;
         }
 
-        .quiz-progress-info {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-        }
+        .quiz-progress-info { font-size: 0.9rem; color: var(--text-dim); }
 
         .btn-close-modal {
             background: rgba(255,255,255,0.05);
@@ -273,12 +280,7 @@
             transition: width 0.4s ease;
         }
 
-        .question-text {
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
+        .question-text { font-size: 1.15rem; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; }
 
         .choice-option {
             display: flex;
@@ -293,13 +295,10 @@
             transition: all 0.2s;
         }
 
-        .choice-option:hover { border-color: var(--purple); background: rgba(139, 92, 246, 0.08); }
-
-        .choice-option.selected { border-color: var(--primary-blue); background: rgba(59, 130, 246, 0.12); }
-
-        .choice-option.correct { border-color: var(--success-green) !important; background: rgba(16, 185, 129, 0.12) !important; }
-
-        .choice-option.wrong { border-color: var(--danger-red) !important; background: rgba(239, 68, 68, 0.12) !important; }
+        .choice-option:hover { border-color: var(--purple); background: rgba(139,92,246,0.08); }
+        .choice-option.selected { border-color: var(--primary-blue); background: rgba(59,130,246,0.12); }
+        .choice-option.correct { border-color: var(--success-green) !important; background: rgba(16,185,129,0.12) !important; }
+        .choice-option.wrong   { border-color: var(--danger-red) !important;    background: rgba(239,68,68,0.12) !important; }
 
         .choice-letter {
             background: rgba(255,255,255,0.1);
@@ -328,27 +327,11 @@
         .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-next:not(:disabled):hover { background: #2563eb; }
 
-        /* === Result Screen === */
-        .result-screen {
-            text-align: center;
-            padding: 1rem 0;
-        }
-
-        .result-emoji {
-            font-size: 4.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .result-score {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .result-sub {
-            color: var(--text-dim);
-            margin-bottom: 2rem;
-        }
+        /* === Result === */
+        .result-screen { text-align: center; padding: 1rem 0; }
+        .result-emoji  { font-size: 4.5rem; margin-bottom: 1rem; }
+        .result-score  { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .result-sub    { color: var(--text-dim); margin-bottom: 2rem; }
 
         .result-detail {
             display: grid;
@@ -357,21 +340,9 @@
             margin-bottom: 2rem;
         }
 
-        .result-stat {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem;
-        }
-
-        .result-stat-num {
-            font-size: 1.6rem;
-            font-weight: 700;
-        }
-
-        .result-stat-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
+        .result-stat { background: var(--card-bg); border-radius: 12px; padding: 1rem; }
+        .result-stat-num   { font-size: 1.6rem; font-weight: 700; }
+        .result-stat-label { font-size: 0.8rem; color: var(--text-dim); }
 
         .btn-retry {
             background: linear-gradient(135deg, #8b5cf6, #3b82f6);
@@ -395,23 +366,12 @@
             cursor: pointer;
         }
 
-        /* === Empty State === */
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: var(--text-dim);
-        }
-
-        .empty-icon { font-size: 4rem; margin-bottom: 1rem; }
-
+        /* === Empty / Loading === */
+        .empty-state { text-align: center; padding: 80px 20px; color: var(--text-dim); }
+        .empty-icon  { font-size: 4rem; margin-bottom: 1rem; }
         .empty-state h3 { color: var(--text-main); font-size: 1.3rem; margin-bottom: 0.5rem; }
 
-        .loading-spinner {
-            display: flex;
-            justify-content: center;
-            padding: 60px;
-        }
-
+        .loading-spinner { display: flex; justify-content: center; padding: 60px; }
         .spinner {
             width: 50px; height: 50px;
             border: 4px solid rgba(255,255,255,0.1);
@@ -463,15 +423,13 @@
 
 <!-- Quiz Modal -->
 <div id="quizModalOverlay" class="modal-overlay">
-    <div class="quiz-modal" id="quizModal">
-        <!-- Dynamic content here -->
-    </div>
+    <div class="quiz-modal" id="quizModal"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
@@ -484,93 +442,60 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
-
+const db   = getFirestore(app);
 let currentUser = null;
 
-// === Auth Check ===
 onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '../login-page/login.html'; return; }
-
     const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (userDoc.exists()) {
-        const userData = userDoc.data();
-        if (userData.userType !== 'student') {
-            alert('หน้านี้สำหรับนักเรียนเท่านั้น');
-            window.location.href = 'dashboard.html';
-            return;
-        }
+    if (userDoc.exists() && userDoc.data().userType !== 'student') {
+        alert('หน้านี้สำหรับนักเรียนเท่านั้น');
+        window.location.href = 'dashboard.html';
+        return;
     }
-
     currentUser = user;
     loadQuizzes();
 });
 
-// === Load Quizzes from enrolled courses only ===
 async function loadQuizzes() {
     const grid = document.getElementById('quizGrid');
-
     try {
-        // โหลด enrollments ของ user คนนี้ก่อน
-        const enrollSnap = await getDocs(query(
-            collection(db, 'enrollments'),
-            where('userId', '==', currentUser.uid)
-        ));
+        const enrollSnap = await getDocs(query(collection(db,'enrollments'), where('userId','==',currentUser.uid)));
         const enrolledIds = new Set();
         enrollSnap.forEach(d => enrolledIds.add(d.data().courseId));
 
         if (enrolledIds.size === 0) {
-            grid.innerHTML = `
-                <div class="empty-state" style="grid-column: 1/-1;">
-                    <div class="empty-icon">📭</div>
-                    <h3>ยังไม่ได้สมัครเรียนคอร์สใด</h3>
-                    <p>กลับไปที่ <a href="dashboard.html" style="color:#3b82f6;">Dashboard</a> เพื่อสมัครเรียนคอร์สที่สนใจ</p>
-                </div>`;
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่ได้สมัครเรียนคอร์สใด</h3><p>กลับไปที่ <a href="dashboard.html" style="color:#3b82f6;">Dashboard</a> เพื่อสมัครเรียนคอร์สที่สนใจ</p></div>`;
             return;
         }
 
-        // โหลดคอร์สที่สมัครแล้วและมี quiz
         const coursesWithQuiz = [];
         for (const cid of enrolledIds) {
             try {
-                const cdoc = await getDoc(doc(db, 'courses', cid));
+                const cdoc = await getDoc(doc(db,'courses',cid));
                 if (cdoc.exists()) {
                     const data = cdoc.data();
-                    if (data.quiz && data.quiz.length > 0) {
-                        coursesWithQuiz.push({ id: cid, ...data });
-                    }
+                    if (data.quiz && data.quiz.length > 0) coursesWithQuiz.push({ id: cid, ...data });
                 }
             } catch(e) {}
         }
 
         if (coursesWithQuiz.length === 0) {
-            grid.innerHTML = `
-                <div class="empty-state" style="grid-column: 1/-1;">
-                    <div class="empty-icon">📭</div>
-                    <h3>ยังไม่มีแบบฝึกหัด</h3>
-                    <p>คอร์สที่คุณสมัครยังไม่มีแบบทดสอบ</p>
-                </div>`;
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่มีแบบฝึกหัด</h3><p>คอร์สที่คุณสมัครยังไม่มีแบบทดสอบ</p></div>`;
             return;
         }
 
-        // โหลดคะแนนที่เคยทำ
         const scoresMap = {};
         try {
-            const scoresSnap = await getDocs(query(
-                collection(db, 'quizScores'),
-                where('userId', '==', currentUser.uid)
-            ));
-            scoresSnap.forEach(d => {
-                const s = d.data();
-                scoresMap[s.courseId] = s;
-            });
-        } catch(e) { /* ยังไม่มีคะแนน */ }
+            const scoresSnap = await getDocs(query(collection(db,'quizScores'), where('userId','==',currentUser.uid)));
+            scoresSnap.forEach(d => { const s = d.data(); scoresMap[s.courseId] = s; });
+        } catch(e) {}
 
         grid.innerHTML = '';
         coursesWithQuiz.forEach(course => {
             const quizCount = course.quiz.length;
             const scoreData = scoresMap[course.id];
-            const hasScore = !!scoreData;
+            const hasScore  = !!scoreData;
             const pct = hasScore ? Math.round((scoreData.score / quizCount) * 100) : 0;
 
             const card = document.createElement('div');
@@ -589,43 +514,33 @@ async function loadQuizzes() {
                         <span>คะแนนล่าสุด</span>
                         <span>${scoreData.score}/${quizCount} (${pct}%)</span>
                     </div>
-                ` : `<p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.5rem;">ยังไม่เคยทำ</p>`}
-                <div style="display:flex; gap:0.6rem; margin-top:1rem;">
-                    <button class="btn-start-quiz" style="flex:1;" onclick="startQuiz('${course.id}')">
+                ` : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำ</p>`}
+
+                <div class="quiz-card-actions">
+                    <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">
                         ${hasScore ? '🔁 ทำใหม่' : '▶️ เริ่มทำ'}
                     </button>
-                    <a href="course-content.html?id=${course.id}" style="display:flex;align-items:center;justify-content:center;padding:0 1rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text-dim);text-decoration:none;font-size:0.85rem;white-space:nowrap;" title="ดูบทเรียน">📚 บทเรียน</a>
+                    <a href="course-content.html?id=${course.id}" class="btn-go-lesson" title="ดูบทเรียน">
+                        📚 บทเรียน
+                    </a>
                 </div>
             `;
             grid.appendChild(card);
         });
 
-        // expose quiz data globally for startQuiz
         window.__coursesWithQuiz = coursesWithQuiz;
-
-    } catch (err) {
+    } catch(err) {
         console.error(err);
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3><p>${err.message}</p></div>`;
     }
 }
 
-// === Quiz Logic ===
-let currentQuiz = null; // { courseId, courseName, questions, currentIndex, score, selected, answered }
+let currentQuiz = null;
 
 window.startQuiz = function(courseId) {
     const course = window.__coursesWithQuiz.find(c => c.id === courseId);
     if (!course) return;
-
-    currentQuiz = {
-        courseId,
-        courseName: course.title,
-        questions: course.quiz,
-        currentIndex: 0,
-        score: 0,
-        selected: null,
-        answered: false
-    };
-
+    currentQuiz = { courseId, courseName: course.title, questions: course.quiz, currentIndex: 0, score: 0, selected: null, answered: false };
     renderQuestion();
     document.getElementById('quizModalOverlay').classList.add('show');
 };
@@ -635,34 +550,31 @@ function renderQuestion() {
     const q = questions[currentIndex];
     const total = questions.length;
     const pct = Math.round((currentIndex / total) * 100);
-
-    const choices = q.type === 'true_false' ? ['ถูก', 'ผิด'] : (q.choices || []);
-    const labels = ['A', 'B', 'C', 'D'];
+    const choices = q.type === 'true_false' ? ['ถูก','ผิด'] : (q.choices || []);
+    const labels  = ['A','B','C','D'];
 
     document.getElementById('quizModal').innerHTML = `
         <div class="quiz-modal-header">
             <div>
-                <div style="font-weight:600; margin-bottom:0.25rem;">${courseName}</div>
-                <div class="quiz-progress-info">ข้อที่ ${currentIndex + 1} / ${total}</div>
+                <div style="font-weight:600;margin-bottom:0.25rem;">${courseName}</div>
+                <div class="quiz-progress-info">ข้อที่ ${currentIndex+1} / ${total}</div>
             </div>
             <button class="btn-close-modal" onclick="closeQuizModal()">✕ ออก</button>
         </div>
         <div class="quiz-modal-progress-bar">
             <div class="quiz-modal-progress-fill" style="width:${pct}%"></div>
         </div>
-        <div class="question-text">${currentIndex + 1}. ${q.question}</div>
+        <div class="question-text">${currentIndex+1}. ${q.question}</div>
         <div id="choiceList">
-            ${choices.map((c, i) => `
+            ${choices.map((c,i) => `
                 <div class="choice-option" id="choice-${i}" onclick="selectChoice(${i})">
                     <span class="choice-letter">${labels[i]}</span>
                     <span>${c}</span>
-                </div>
-            `).join('')}
+                </div>`).join('')}
         </div>
         <button class="btn-next" id="btnNext" disabled onclick="nextQuestion()">
-            ${currentIndex + 1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯'}
-        </button>
-    `;
+            ${currentIndex+1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯'}
+        </button>`;
 
     currentQuiz.selected = null;
     currentQuiz.answered = false;
@@ -670,60 +582,41 @@ function renderQuestion() {
 
 window.selectChoice = function(index) {
     if (currentQuiz.answered) return;
-
     const { questions, currentIndex } = currentQuiz;
     const q = questions[currentIndex];
-    const labels = ['A', 'B', 'C', 'D'];
-    const correctLetter = q.correct; // 'A', 'B', etc.
-    const correctIndex = labels.indexOf(correctLetter);
+    const labels = ['A','B','C','D'];
+    const correctIndex = labels.indexOf(q.correct);
 
     currentQuiz.selected = index;
     currentQuiz.answered = true;
+    document.querySelectorAll('.choice-option').forEach((el,i) => { if (i===index) el.classList.add('selected'); });
 
-    // Mark selected
-    document.querySelectorAll('.choice-option').forEach((el, i) => {
-        if (i === index) el.classList.add('selected');
-    });
-
-    // Reveal correct / wrong
     setTimeout(() => {
-        document.querySelectorAll('.choice-option').forEach((el, i) => {
+        document.querySelectorAll('.choice-option').forEach((el,i) => {
             if (i === correctIndex) el.classList.add('correct');
             if (i === index && i !== correctIndex) el.classList.add('wrong');
         });
-
         if (index === correctIndex) currentQuiz.score++;
-
         document.getElementById('btnNext').disabled = false;
     }, 300);
 };
 
 window.nextQuestion = function() {
     const { questions, currentIndex } = currentQuiz;
-    if (currentIndex + 1 < questions.length) {
-        currentQuiz.currentIndex++;
-        renderQuestion();
-    } else {
-        showResult();
-    }
+    if (currentIndex + 1 < questions.length) { currentQuiz.currentIndex++; renderQuestion(); }
+    else { showResult(); }
 };
 
 async function showResult() {
     const { questions, score, courseName, courseId } = currentQuiz;
     const total = questions.length;
-    const pct = Math.round((score / total) * 100);
-    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
-    const msg = pct >= 80 ? 'ยอดเยี่ยม!' : pct >= 60 ? 'ทำได้ดี!' : 'ลองทำใหม่อีกครั้งนะ';
+    const pct   = Math.round((score/total)*100);
+    const emoji = pct>=80 ? '🎉' : pct>=60 ? '👍' : '📚';
+    const msg   = pct>=80 ? 'ยอดเยี่ยม!' : pct>=60 ? 'ทำได้ดี!' : 'ลองทำใหม่อีกครั้งนะ';
 
-    // Save score to Firestore
     try {
-        await setDoc(doc(db, 'quizScores', `${currentUser.uid}_${courseId}`), {
-            userId: currentUser.uid,
-            courseId,
-            score,
-            total,
-            pct,
-            updatedAt: new Date()
+        await setDoc(doc(db,'quizScores',`${currentUser.uid}_${courseId}`), {
+            userId: currentUser.uid, courseId, score, total, pct, updatedAt: new Date()
         });
     } catch(e) { console.error('Save score error:', e); }
 
@@ -733,25 +626,14 @@ async function showResult() {
             <div class="result-score">${score} / ${total}</div>
             <div class="result-sub">${msg} — คะแนน ${pct}%</div>
             <div class="result-detail">
-                <div class="result-stat">
-                    <div class="result-stat-num" style="color:var(--success-green);">${score}</div>
-                    <div class="result-stat-label">ถูก</div>
-                </div>
-                <div class="result-stat">
-                    <div class="result-stat-num" style="color:var(--danger-red);">${total - score}</div>
-                    <div class="result-stat-label">ผิด</div>
-                </div>
-                <div class="result-stat">
-                    <div class="result-stat-num" style="color:var(--primary-blue);">${pct}%</div>
-                    <div class="result-stat-label">คะแนน</div>
-                </div>
+                <div class="result-stat"><div class="result-stat-num" style="color:var(--success-green);">${score}</div><div class="result-stat-label">ถูก</div></div>
+                <div class="result-stat"><div class="result-stat-num" style="color:var(--danger-red);">${total-score}</div><div class="result-stat-label">ผิด</div></div>
+                <div class="result-stat"><div class="result-stat-num" style="color:var(--primary-blue);">${pct}%</div><div class="result-stat-label">คะแนน</div></div>
             </div>
             <button class="btn-retry" onclick="startQuiz('${courseId}')">🔁 ทำใหม่</button>
             <button class="btn-close-result" onclick="closeQuizModal()">กลับหน้าหลัก</button>
-        </div>
-    `;
+        </div>`;
 
-    // Reload cards to update score
     loadQuizzes();
 }
 
@@ -760,7 +642,6 @@ window.closeQuizModal = function() {
     currentQuiz = null;
 };
 
-// Close on backdrop click
 document.getElementById('quizModalOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeQuizModal();
 });
