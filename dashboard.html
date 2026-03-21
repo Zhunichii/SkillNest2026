@@ -1408,8 +1408,10 @@
                             });
                         }
                         if (userType === 'student') {
-                            const el = document.getElementById('sidebarMyQuizzes');
-                            if (el) el.style.display = 'flex';
+                            ['sidebarMyQuizzes', 'sidebarLearning'].forEach(id => {
+                                const el = document.getElementById(id);
+                                if (el) el.style.display = 'flex';
+                            });
                         }
                     }
                 } catch(e) { console.error('Error fetching user data:', e); }
