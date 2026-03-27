@@ -555,30 +555,51 @@ window.generateQuizWithAI = async function() {
     const topic = document.getElementById('aiQuizTopic').value.trim();
     const count = document.getElementById('aiQuizCount').value;
     const type = document.getElementById('aiQuizType').value;
-    if (!topic) { alert('❌ กรุณาระบุหัวข้อหรือเนื้อหาก่อนสร้าง Quiz'); return; }
+    
+    if (!topic) { 
+        alert('❌ กรุณาระบุหัวข้อหรือเนื้อหาก่อนสร้าง Quiz'); 
+        return; 
+    }
+    
     const btn = document.getElementById('btnGenQuiz');
     const loadingText = document.getElementById('aiLoadingText');
+    
     btn.disabled = true;
     loadingText.classList.add('show');
-    const typeDesc = type === 'true_false' ? 'ถูก/ผิด (True/False) โดยตัวเลือก A คือ "ถูก" และ B คือ "ผิด"' : 'ปรนัย 4 ตัวเลือก (A, B, C, D)';
+    
+    const typeDesc = type === 'true_false' 
+        ? 'ถูก/ผิด (True/False) โดยตัวเลือก A คือ "ถูก" และ B คือ "ผิด"' 
+        : 'ปรนัย 4 ตัวเลือก (A, B, C, D)';
+        
     const prompt = `คุณคือผู้เชี่ยวชาญการสร้างข้อสอบภาษาไทย
 สร้างแบบทดสอบประเภท${typeDesc} จำนวน ${count} ข้อ เกี่ยวกับหัวข้อ: "${topic}"
 ตอบเป็น JSON array เท่านั้น ไม่ต้องมีข้อความอื่น ไม่ต้องใส่ markdown code block รูปแบบ:
 ${type === 'true_false' ? `[{"question":"คำถาม","type":"true_false","correct":"A หรือ B"}]` : `[{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D"}]`}`;
+
     try {
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: prompt }] })
+        const response = await fetch('/api/generate-quiz', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: prompt
+            })
         });
+
         const data = await response.json();
-        const rawText = data.content?.map(b => b.text || '').join('') || '';
+        
+        if (data.error) throw new Error(data.error);
+        const rawText = data.text || '';
         const clean = rawText.replace(/```json|```/g, '').trim();
         const questions = JSON.parse(clean);
+        
         document.getElementById('quizList').innerHTML = '';
         quizQuestions = [];
         quizCounter = 0;
+        
         questions.forEach(q => addQuizQuestion(q));
+        
         loadingText.classList.remove('show');
         btn.disabled = false;
     } catch (err) {
