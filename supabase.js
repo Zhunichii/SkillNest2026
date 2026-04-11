@@ -3,7 +3,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const SUPABASE_URL = "https://jgqulowoebbzmnasmrdz.supabase.co/"
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpncXVsb3dvZWJiem1uYXNtcmR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjY1NzAsImV4cCI6MjA5MDIwMjU3MH0.80JzT7-0W0w_c_1ioPhFUZXk31iIwY28PEtJl5ul-vg"                
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Helper: ดึง user ปัจจุบัน พร้อม profile จาก users table
 export async function getCurrentUserWithProfile() {

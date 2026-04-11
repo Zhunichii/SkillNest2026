@@ -418,7 +418,7 @@
                 <h2 class="section-header">ข้อมูลส่วนตัว (Personal Info)</h2>
                 <form>
                     <div class="profile-upload">
-                        <img src="https://ui-avatars.com/api/?name=Student&background=a78bfa&color=111827&size=128" alt="Profile">
+                        <img id="settingProfileImg" src="https://ui-avatars.com/api/?name=U&background=a78bfa&color=111827&size=128" alt="Profile">
                         <div>
                             <button type="button" class="btn btn-outline"><i class="fas fa-camera"></i> อัปโหลดรูปใหม่</button>
                         </div>
@@ -426,22 +426,23 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>ชื่อจริง</label>
-                            <input type="text" class="form-control" placeholder="กรอกชื่อ">
+                            <input type="text" id="settingFirstName" class="form-control" placeholder="กรอกชื่อ">
                         </div>
                         <div class="form-group">
                             <label>นามสกุล</label>
-                            <input type="text" class="form-control" placeholder="กรอกนามสกุล">
+                            <input type="text" id="settingLastName" class="form-control" placeholder="กรอกนามสกุล">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>อีเมล (ที่ใช้นำเข้าระบบ)</label>
-                        <input type="email" class="form-control" value="student@bu.ac.th" readonly style="opacity: 0.7; cursor: not-allowed;">
+                        <input type="email" id="settingEmail" class="form-control" readonly style="opacity: 0.7; cursor: not-allowed;">
                     </div>
                     <div class="form-group">
                         <label>แนะนำตัวสั้นๆ (Bio)</label>
-                        <textarea class="form-control" rows="5" placeholder="สนใจ Data Science, Web Development..."></textarea>
+                        <textarea id="settingBio" class="form-control" rows="5" placeholder="สนใจ Data Science, Web Development..."></textarea>
                     </div>
-                    <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกข้อมูลส่วนตัว</button>
+                    <p id="profileMsg" style="display:none; font-size:0.9rem; margin-bottom:0.5rem;"></p>
+                    <button type="button" id="btnSaveProfile" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกข้อมูลส่วนตัว</button>
                 </form>
             </div>
 
@@ -450,19 +451,20 @@
                 <form>
                     <div class="form-group">
                         <label>รหัสผ่านปัจจุบัน</label>
-                        <input type="password" class="form-control" placeholder="••••••••">
+                        <input type="password" id="settingCurrentPass" class="form-control" placeholder="••••••••">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>รหัสผ่านใหม่</label>
-                            <input type="password" class="form-control" placeholder="••••••••">
+                            <input type="password" id="settingNewPass" class="form-control" placeholder="••••••••">
                         </div>
                         <div class="form-group">
                             <label>ยืนยันรหัสผ่านใหม่</label>
-                            <input type="password" class="form-control" placeholder="••••••••">
+                            <input type="password" id="settingConfirmPass" class="form-control" placeholder="••••••••">
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary"><i class="fas fa-key"></i> อัปเดตรหัสผ่าน</button>
+                    <p id="securityMsg" style="display:none; font-size:0.9rem; margin-bottom:0.5rem;"></p>
+                    <button type="button" id="btnChangePass" class="btn btn-primary"><i class="fas fa-key"></i> อัปเดตรหัสผ่าน</button>
                 </form>
             </div>
 
@@ -474,22 +476,124 @@
                             <div class="toggle-label-title">อัปเดตคอร์สเรียน</div>
                             <div class="toggle-label-desc">รับอีเมลเมื่อมีคอร์สใหม่ในหมวดหมู่ที่คุณสนใจ</div>
                         </div>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="notifCourse" checked><span class="slider"></span></label>
                     </div>
                     <div class="toggle-item">
                         <div>
                             <div class="toggle-label-title">การส่งงาน (Assignments)</div>
                             <div class="toggle-label-desc">แจ้งเตือนก่อนถึงกำหนดส่งงาน 24 ชั่วโมง</div>
                         </div>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="notifAssign" checked><span class="slider"></span></label>
                     </div>
                 </div>
+                <p id="notifMsg" style="display:none; font-size:0.9rem; margin: 1rem 0 0.5rem;"></p>
+                <button type="button" id="btnSaveNotif" class="btn btn-primary" style="margin-top:1rem;"><i class="fas fa-bell"></i> บันทึกการตั้งค่าแจ้งเตือน</button>
             </div>
         </main>
     </div>
 
-    <script>
-        // ระบบ Tab
+    <script type="module">
+        import { supabase } from './supabase.js';
+
+        let currentUser = null;
+
+        // === โหลดข้อมูล Profile ===
+        async function loadProfile(user) {
+            const { data: userData } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (!userData) return;
+
+            document.getElementById('settingFirstName').value = userData.first_name || '';
+            document.getElementById('settingLastName').value = userData.last_name || '';
+            document.getElementById('settingEmail').value = userData.email || user.email || '';
+            document.getElementById('settingBio').value = userData.bio || '';
+
+            if (userData.profile_picture) {
+                document.getElementById('settingProfileImg').src = userData.profile_picture;
+            } else {
+                const initials = ((userData.first_name||'U')[0] + (userData.last_name||'')[0]).toUpperCase();
+                document.getElementById('settingProfileImg').src =
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=a78bfa&color=111827&size=128`;
+            }
+
+            // Notification prefs
+            const prefs = userData.notification_prefs || {};
+            document.getElementById('notifCourse').checked  = prefs.course_updates  !== false;
+            document.getElementById('notifAssign').checked  = prefs.assignments      !== false;
+        }
+
+        // === บันทึก Profile ===
+        async function saveProfile() {
+            const firstName = document.getElementById('settingFirstName').value.trim();
+            const lastName  = document.getElementById('settingLastName').value.trim();
+            const bio       = document.getElementById('settingBio').value.trim();
+
+            if (!firstName || !lastName) {
+                showMsg('profileMsg', 'กรุณากรอกชื่อและนามสกุล', 'error'); return;
+            }
+
+            const { error } = await supabase
+                .from('users')
+                .update({ first_name: firstName, last_name: lastName, bio })
+                .eq('id', currentUser.id);
+
+            if (error) { showMsg('profileMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
+            showMsg('profileMsg', 'บันทึกข้อมูลเรียบร้อยแล้ว ✅', 'success');
+        }
+
+        // === เปลี่ยนรหัสผ่าน ===
+        async function changePassword() {
+            const newPass    = document.getElementById('settingNewPass').value;
+            const confirmPass= document.getElementById('settingConfirmPass').value;
+
+            if (!newPass || newPass.length < 6) {
+                showMsg('securityMsg', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error'); return;
+            }
+            if (newPass !== confirmPass) {
+                showMsg('securityMsg', 'รหัสผ่านใหม่ไม่ตรงกัน', 'error'); return;
+            }
+
+            const { error } = await supabase.auth.updateUser({ password: newPass });
+
+            if (error) { showMsg('securityMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
+
+            showMsg('securityMsg', 'อัปเดตรหัสผ่านเรียบร้อยแล้ว ✅', 'success');
+            document.getElementById('settingCurrentPass').value = '';
+            document.getElementById('settingNewPass').value = '';
+            document.getElementById('settingConfirmPass').value = '';
+        }
+
+        // === บันทึก Notification Preferences ===
+        async function saveNotifications() {
+            const prefs = {
+                course_updates: document.getElementById('notifCourse').checked,
+                assignments:    document.getElementById('notifAssign').checked,
+            };
+
+            const { error } = await supabase
+                .from('users')
+                .update({ notification_prefs: prefs })
+                .eq('id', currentUser.id);
+
+            if (error) { showMsg('notifMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
+            showMsg('notifMsg', 'บันทึกการตั้งค่าแจ้งเตือนเรียบร้อยแล้ว ✅', 'success');
+        }
+
+        // === Helper: แสดง message ===
+        function showMsg(elId, text, type) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            el.textContent = text;
+            el.style.display = 'block';
+            el.style.color = type === 'error' ? '#ef4444' : '#10b981';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+
+        // === ระบบ Tab ===
         document.addEventListener('DOMContentLoaded', () => {
             const menuLinks = document.querySelectorAll('#settingsMenu a');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -499,29 +603,39 @@
                     e.preventDefault();
                     menuLinks.forEach(item => item.classList.remove('active'));
                     this.classList.add('active');
-                    
                     tabContents.forEach(content => content.classList.remove('active'));
                     document.getElementById(this.getAttribute('data-tab')).classList.add('active');
                 });
             });
 
-            // ระบบสลับธีม (ม่วง/สว่าง)
+            // ผูกปุ่มต่างๆ
+            document.getElementById('btnSaveProfile').addEventListener('click', saveProfile);
+            document.getElementById('btnChangePass').addEventListener('click', changePassword);
+            document.getElementById('btnSaveNotif').addEventListener('click', saveNotifications);
+
+            // ธีม
             const themeBtn = document.getElementById('themeToggleBtn');
             const htmlTag = document.documentElement;
-
             themeBtn.addEventListener('click', () => {
-                const currentTheme = htmlTag.getAttribute('data-theme');
-                
-                // ถ้าปัจจุบันไม่ใช่ธีม light (หมายความว่าเป็นธีมปกติ/ม่วง)
-                if (currentTheme !== 'light') {
+                if (htmlTag.getAttribute('data-theme') !== 'light') {
                     htmlTag.setAttribute('data-theme', 'light');
                     themeBtn.innerHTML = '<i class="fas fa-moon"></i> ธีมปกติ';
                 } else {
-                    // กลับไปเป็นธีมปกติ (ม่วง)
                     htmlTag.removeAttribute('data-theme');
                     themeBtn.innerHTML = '<i class="fas fa-sun"></i> ธีมสว่าง';
                 }
             });
+        });
+
+        // === Auth ===
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            const user = session?.user;
+            if (user) {
+                currentUser = user;
+                await loadProfile(user);
+            } else {
+                window.location.href = '../login-page/login.html';
+            }
         });
     </script>
 </body>

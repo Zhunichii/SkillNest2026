@@ -879,22 +879,7 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-    authDomain: "skillnest-2026.firebaseapp.com",
-    projectId: "skillnest-2026",
-    storageBucket: "skillnest-2026.firebasestorage.app",
-    messagingSenderId: "416822065212",
-    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { supabase } from './supabase.js';
 
 let currentCourse = null;
 let currentLessonIndex = 0;
@@ -903,17 +888,19 @@ let isEnrolled = false;
 let userType = 'student';
 
 // ตรวจสอบ auth และ enrollment ก่อนโหลดคอร์ส
-onAuthStateChanged(auth, async (user) => {
+supabase.auth.onAuthStateChange(async (event, session) => {
+    const user = session?.user;
     if (!user) {
         window.location.href = '../login-page/login.html';
         return;
     }
+    if (currentUser) return; // ป้องกัน run ซ้ำ
     currentUser = user;
 
     // ดึง userType
     try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) userType = userDoc.data().userType || 'student';
+        const { data: userData } = await supabase.from('users').select('user_type').eq('id', user.id).single();
+        if (userData) userType = userData.user_type || 'student';
     } catch(e) {}
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -921,15 +908,19 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!courseId) { loadCourseData(); return; }
 
-    // ครูสามารถดูได้ทุกคอร์ส นักเรียนต้องสมัครก่อน
+    // ครูดูได้ทุกคอร์ส นักเรียนต้องสมัครก่อน
     if (userType === 'teacher') {
         isEnrolled = true;
         loadCourseData();
     } else {
-        // check enrollment
         try {
-            const enrollSnap = await getDoc(doc(db, 'enrollments', `${user.uid}_${courseId}`));
-            isEnrolled = enrollSnap.exists();
+            const { data: enrollment } = await supabase
+                .from('enrollments')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('course_id', courseId)
+                .single();
+            isEnrolled = !!enrollment;
         } catch(e) {}
 
         if (!isEnrolled) {
@@ -940,11 +931,9 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-async function loadCourseData(retryCount = 0) {
+async function loadCourseData() {
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get('id');
-
-    console.log("Loading course with ID:", courseId, "Retry:", retryCount);
 
     if (!courseId) {
         showError("ไม่พบ Course ID ใน URL กรุณาเพิ่ม ?id=COURSE_ID ใน URL");
@@ -952,37 +941,29 @@ async function loadCourseData(retryCount = 0) {
     }
 
     try {
-        console.log("Attempting to fetch course from Firestore...");
-        const courseRef = doc(db, "courses", courseId);
-        
-        // Add timeout to detect connection issues
-        const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Connection timeout after 10 seconds')), 10000)
-        );
-        
-        const courseSnap = await Promise.race([
-            getDoc(courseRef),
-            timeout
-        ]);
+        const { data: course, error } = await supabase
+            .from('courses')
+            .select('*')
+            .eq('id', courseId)
+            .single();
 
-        if (!courseSnap.exists()) {
-            showError("ไม่พบข้อมูลคอร์สนี้ในระบบ<br><br>Course ID: <code>" + courseId + "</code><br><br>กรุณาตรวจสอบว่า Course ID ถูกต้อง");
+        if (error || !course) {
+            showError("ไม่พบข้อมูลคอร์สนี้ในระบบ<br><br>Course ID: <code>" + courseId + "</code>");
             return;
         }
 
-        currentCourse = courseSnap.data();
-        console.log("Course data loaded successfully:", currentCourse);
+        currentCourse = course;
 
         document.getElementById("courseTitle").innerText = currentCourse.title || "ไม่มีชื่อคอร์ส";
         document.title = (currentCourse.title || "คอร์สเรียน") + " - SkillNest";
-        document.getElementById("courseInstructor").innerText = "👤 " + (currentCourse.instructor || currentCourse.creatorId || "ไม่ระบุผู้สอน");
+        document.getElementById("courseInstructor").innerText = "👤 " + (currentCourse.instructor || currentCourse.creator_id || "ไม่ระบุผู้สอน");
         document.getElementById("courseCategory").innerText = "📚 " + (currentCourse.category || "ทั่วไป");
 
         if (currentCourse.lessons && Array.isArray(currentCourse.lessons) && currentCourse.lessons.length > 0) {
             renderLessonList(currentCourse.lessons);
             playLesson(0);
         } else {
-            showError("ไม่มีบทเรียนในคอร์สนี้<br><br>กรุณาเพิ่มบทเรียนผ่าน Firebase Console");
+            showError("ไม่มีบทเรียนในคอร์สนี้");
         }
 
         // แสดง quiz tab ถ้ามี quiz
@@ -994,15 +975,17 @@ async function loadCourseData(retryCount = 0) {
             // โหลดคะแนนเดิม (ถ้ามี)
             if (currentUser) {
                 try {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const courseId = urlParams.get('id');
-                    const scoreSnap = await getDoc(doc(db, 'quizScores', `${currentUser.uid}_${courseId}`));
-                    if (scoreSnap.exists()) {
-                        const sd = scoreSnap.data();
+                    const { data: scoreData } = await supabase
+                        .from('quiz_scores')
+                        .select('*')
+                        .eq('user_id', currentUser.id)
+                        .eq('course_id', courseId)
+                        .single();
+                    if (scoreData) {
                         const sumEl = document.getElementById('quizScoreSummary');
                         sumEl.classList.add('show');
-                        document.getElementById('quizScoreVal').textContent = `${sd.score}/${sd.total}`;
-                        document.getElementById('quizScoreDetail').textContent = `${sd.pct}% • ทำล่าสุดแล้ว`;
+                        document.getElementById('quizScoreVal').textContent = `${scoreData.score}/${scoreData.total}`;
+                        document.getElementById('quizScoreDetail').textContent = `${scoreData.pct}% • ทำล่าสุดแล้ว`;
                         document.getElementById('btnStartQuiz').textContent = '🔁 ทำแบบทดสอบอีกครั้ง';
                     }
                 } catch(e) {}
@@ -1017,43 +1000,7 @@ async function loadCourseData(retryCount = 0) {
 
     } catch (error) {
         console.error("Error loading course:", error);
-        
-        // Retry logic for network errors
-        if ((error.message.includes('offline') || error.message.includes('timeout')) && retryCount < 2) {
-            console.log(`Retrying... (${retryCount + 1}/2)`);
-            setTimeout(() => loadCourseData(retryCount + 1), 2000);
-            return;
-        }
-        
-        let errorMsg = "เกิดข้อผิดพลาดในการโหลดข้อมูล:<br><br>";
-        
-        if (error.message.includes('offline') || error.message.includes('client is offline')) {
-            errorMsg += `
-                <strong>❌ ไม่สามารถเชื่อมต่อกับ Firebase</strong><br><br>
-                กรุณาตรวจสอบ:<br>
-                • เชื่อมต่ออินเทอร์เน็ตแล้วหรือยัง?<br>
-                • Firebase configuration ถูกต้องหรือไม่?<br>
-                • Firestore Rules อนุญาตให้อ่านข้อมูลได้หรือไม่?<br>
-                • เปิด Developer Console (F12) เพื่อดูรายละเอียด error<br><br>
-                <small>Error: ${error.message}</small>
-            `;
-        } else if (error.message.includes('timeout')) {
-            errorMsg += `
-                <strong>⏱️ การเชื่อมต่อใช้เวลานานเกินไป</strong><br><br>
-                กรุณาลองอีกครั้ง หรือตรวจสอบความเร็วอินเทอร์เน็ต<br><br>
-                <small>Error: ${error.message}</small>
-            `;
-        } else if (error.code === 'permission-denied') {
-            errorMsg += `
-                <strong>🔒 ไม่มีสิทธิ์เข้าถึงข้อมูล</strong><br><br>
-                กรุณาตรวจสอบ Firebase Security Rules<br><br>
-                <small>Error: ${error.message}</small>
-            `;
-        } else {
-            errorMsg += error.message;
-        }
-        
-        showError(errorMsg);
+        showError("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message);
     }
 }
 
@@ -1476,14 +1423,13 @@ async function loadHomeworkPanel() {
     const submissionsMap = {};
     if (currentUser) {
         try {
-            const subSnap = await getDocs(query(
-                collection(db, 'submissions'),
-                where('userId', '==', currentUser.uid),
-                where('courseId', '==', courseId)
-            ));
-            subSnap.forEach(d => {
-                const s = d.data();
-                submissionsMap[s.homeworkIndex] = { id: d.id, ...s };
+            const { data: subs } = await supabase
+                .from('submissions')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('course_id', courseId);
+            (subs || []).forEach(s => {
+                submissionsMap[s.homework_index] = s;
             });
         } catch(e) {}
     }
@@ -1600,19 +1546,24 @@ window.submitHomework = async function(hwIdx, courseId) {
             fileUrl = data.secure_url || '';
         }
 
-        const subId = `${currentUser.uid}_${courseId}_${hwIdx}`;
-        await setDoc(doc(db, 'submissions', subId), {
-            userId: currentUser.uid,
-            courseId,
-            homeworkIndex: hwIdx,
-            homeworkTitle: hw.title,
-            content: textContent,
-            fileUrl,
-            submittedAt: serverTimestamp(),
-            status: 'submitted',
-            grade: null,
-            comment: ''
-        });
+        const subId = `${currentUser.id}_${courseId}_${hwIdx}`;
+        const { error } = await supabase
+            .from('submissions')
+            .upsert({
+                id: subId,
+                user_id: currentUser.id,
+                course_id: courseId,
+                homework_index: hwIdx,
+                homework_title: hw.title,
+                content: textContent,
+                file_url: fileUrl,
+                submitted_at: new Date().toISOString(),
+                status: 'submitted',
+                grade: null,
+                comment: ''
+            });
+
+        if (error) throw error;
 
         alert('✅ ส่งการบ้านสำเร็จ!');
         await loadHomeworkPanel(); // refresh
@@ -1710,9 +1661,14 @@ async function showCourseQuizResult() {
     const courseId = urlParams.get('id');
     if (currentUser && courseId) {
         try {
-            await setDoc(doc(db, 'quizScores', `${currentUser.uid}_${courseId}`), {
-                userId: currentUser.uid, courseId, score, total, pct, updatedAt: new Date()
-            });
+            await supabase
+                .from('quiz_scores')
+                .upsert({
+                    user_id: currentUser.id,
+                    course_id: courseId,
+                    score, total, pct,
+                    updated_at: new Date().toISOString()
+                });
             // update summary in quiz tab
             const sumEl = document.getElementById('quizScoreSummary');
             if (sumEl) {

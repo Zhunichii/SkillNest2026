@@ -440,23 +440,23 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">เวลาเรียนรวม</div>
-            <div class="stat-value">24.5 <small style="font-size:1rem;color:var(--text-dim)">ชม.</small></div>
-            <div class="stat-sub up">↑ 12% จากเดือนที่แล้ว</div>
+            <div class="stat-value" id="statTotalHours">— <small style="font-size:1rem;color:var(--text-dim)">ชม.</small></div>
+            <div class="stat-sub up" id="statHoursSub"></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">คอร์สที่เรียนจบ</div>
-            <div class="stat-value">3 <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small></div>
-            <div class="stat-sub up">+1 คอร์สใหม่</div>
+            <div class="stat-value" id="statCourseDone">— <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small></div>
+            <div class="stat-sub up" id="statCourseSub"></div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Streak ต่อเนื่อง</div>
-            <div class="stat-value">7 <small style="font-size:1rem;color:var(--text-dim)">วัน</small></div>
-            <div class="stat-sub warn">🔥 สถิติสูงสุด 14 วัน</div>
+            <div class="stat-label">คอร์สที่กำลังเรียน</div>
+            <div class="stat-value" id="statCourseActive">— <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small></div>
+            <div class="stat-sub" id="statActiveSub"></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">คะแนน Quiz เฉลี่ย</div>
-            <div class="stat-value">82 <small style="font-size:1rem;color:var(--text-dim)">%</small></div>
-            <div class="stat-sub up">↑ +5% จากเดิม</div>
+            <div class="stat-value" id="statAvgQuiz">— <small style="font-size:1rem;color:var(--text-dim)">%</small></div>
+            <div class="stat-sub up" id="statQuizSub"></div>
         </div>
     </div>
 
@@ -464,22 +464,7 @@
     <div class="mid-grid">
         <div class="card">
             <div class="card-title">ความคืบหน้าคอร์ส</div>
-            <div class="progress-item">
-                <div class="progress-row"><span>Python for Data Science</span><span>78%</span></div>
-                <div class="progress-track"><div class="progress-fill" style="width:78%;background:#8b5cf6"></div></div>
-            </div>
-            <div class="progress-item">
-                <div class="progress-row"><span>UX Design Fundamentals</span><span>45%</span></div>
-                <div class="progress-track"><div class="progress-fill" style="width:45%;background:#10b981"></div></div>
-            </div>
-            <div class="progress-item">
-                <div class="progress-row"><span>Marketing Analytics</span><span>20%</span></div>
-                <div class="progress-track"><div class="progress-fill" style="width:20%;background:#f59e0b"></div></div>
-            </div>
-            <div class="progress-item">
-                <div class="progress-row"><span>Public Speaking Pro</span><span>100%</span></div>
-                <div class="progress-track"><div class="progress-fill" style="width:100%;background:#3b82f6"></div></div>
-            </div>
+            <div id="courseProgressList"><div style="color:#a0a0ba;font-size:0.9rem;">กำลังโหลด...</div></div>
         </div>
 
         <div class="card">
@@ -513,23 +498,8 @@
         <!-- Badges -->
         <div class="card">
             <div class="card-title">Badge ที่ได้รับ</div>
-            <div class="badges-grid">
-                <div class="badge-item">
-                    <div class="badge-icon" style="border-color:#f59e0b;color:#f59e0b">⭐</div>
-                    <div class="badge-name" style="color:#f59e0b">เริ่มต้น</div>
-                </div>
-                <div class="badge-item">
-                    <div class="badge-icon" style="border-color:#10b981;color:#10b981">★</div>
-                    <div class="badge-name" style="color:#10b981">สม่ำเสมอ</div>
-                </div>
-                <div class="badge-item">
-                    <div class="badge-icon" style="border-color:#8b5cf6;color:#8b5cf6">●</div>
-                    <div class="badge-name" style="color:#8b5cf6">นักเรียนดีเด่น</div>
-                </div>
-                <div class="badge-item locked">
-                    <div class="badge-icon" style="border-color:#64748b;color:#64748b">○</div>
-                    <div class="badge-name" style="color:#64748b">ล็อกอยู่</div>
-                </div>
+            <div class="badges-grid" id="badgesGrid">
+                <div style="color:#a0a0ba;font-size:0.9rem;grid-column:1/-1;">กำลังโหลด...</div>
             </div>
         </div>
 
@@ -537,82 +507,201 @@
 
 </main>
 
-<script>
-// Filter tabs
+<script type="module">
+import { supabase } from './supabase.js';
+
+// ============ FILTER TABS ============
 function setFilter(btn) {
     document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
+window.setFilter = setFilter;
 
-// Bar Chart
-new Chart(document.getElementById('chartBar'), {
-    type: 'bar',
-    data: {
-        labels: ['จ','อ','พ','พฤ','ศ','ส','อา'],
-        datasets: [{
-            data: [2,3,1,4,5,3,2],
-            backgroundColor: '#3b82f6',
-            borderRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { grid: { display: false }, ticks: { color: '#a0a0ba' } },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a0a0ba' } }
+// ============ CHART ============
+let barChart = null;
+function renderBarChart(data) {
+    const ctx = document.getElementById('chartBar');
+    if (!ctx) return;
+    if (barChart) barChart.destroy();
+    barChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['จ','อ','พ','พฤ','ศ','ส','อา'],
+            datasets: [{ data, backgroundColor: '#3b82f6', borderRadius: 6 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#a0a0ba' } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a0a0ba' } }
+            }
         }
-    }
-});
+    });
+}
 
-// AI Analysis
-const skills = [
-    { name: "Data visualization", score: 85 },
-    { name: "Statistical analysis", score: 80 },
-    { name: "Machine learning", score: 50 },
-    { name: "SQL queries", score: 45 },
-    { name: "Deep learning", score: 20 }
-];
+// ============ BADGE LOGIC ============
+function computeBadges(enrollments, quizScores) {
+    const badges = [];
+    const totalEnrolled = enrollments.length;
+    const completed = enrollments.filter(e => e.progress >= 100).length;
+    const avgQuiz = quizScores.length
+        ? Math.round(quizScores.reduce((s, q) => s + (q.pct || 0), 0) / quizScores.length)
+        : 0;
 
+    if (totalEnrolled >= 1)  badges.push({ icon: '⭐', name: 'เริ่มต้น',      color: '#f59e0b' });
+    if (completed >= 1)      badges.push({ icon: '🏆', name: 'จบคอร์ส',       color: '#10b981' });
+    if (avgQuiz >= 80)       badges.push({ icon: '🎯', name: 'เซียน Quiz',    color: '#8b5cf6' });
+    if (totalEnrolled >= 3)  badges.push({ icon: '📚', name: 'นักเรียนตัวยง', color: '#3b82f6' });
+
+    return badges;
+}
+
+// ============ LEVEL HELPER ============
 function getLevel(score) {
-    if (score >= 75) return { text: "เก่งมาก", cls: "badge-green" };
-    if (score >= 40) return { text: "ควรทบทวน", cls: "badge-yellow" };
-    return { text: "ต้องฝึกเพิ่ม", cls: "badge-red" };
+    if (score >= 75) return { text: 'เก่งมาก',    cls: 'badge-green' };
+    if (score >= 40) return { text: 'ควรทบทวน',   cls: 'badge-yellow' };
+    return             { text: 'ต้องฝึกเพิ่ม', cls: 'badge-red' };
 }
 
-const aiBox = document.getElementById('aiAnalysis');
-skills.forEach(s => {
-    const lv = getLevel(s.score);
-    aiBox.innerHTML += `
-        <div class="skill-row">
-            <span>${s.name}</span>
-            <span class="skill-badge ${lv.cls}">${lv.text}</span>
-        </div>`;
-});
+// ============ HEATMAP (from enrollments updated_at) ============
+function renderHeatmap(enrollments) {
+    const heatmap = document.getElementById('heatmap');
+    if (!heatmap) return;
+    heatmap.innerHTML = '';
 
-// Suggestions
-const suggestions = skills
-    .filter(s => s.score < 75)
-    .map(s => {
-        const hrs = s.score < 40
-            ? `ควรเรียน ${s.name} เพิ่ม ${Math.ceil((40 - s.score) / 10) * 2} ชม.`
-            : `ทบทวน ${s.name} อีก ${Math.ceil((75 - s.score) / 15)} ชม.`;
-        return `<div class="suggestion-item">👉 ${hrs}</div>`;
-    }).join('');
+    // สร้าง set ของวันที่มีการเรียน (28 วันย้อนหลัง)
+    const activeDays = new Set();
+    const heavyDays  = new Set();
+    enrollments.forEach(e => {
+        if (e.last_updated_at) {
+            activeDays.add(e.last_updated_at.split('T')[0]);
+        }
+    });
 
-if (suggestions) {
-    aiBox.innerHTML += `<div class="ai-suggestion">${suggestions}</div>`;
+    // สร้าง 28 cells (4 สัปดาห์)
+    for (let i = 27; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const cell = document.createElement('div');
+        const isActive = activeDays.has(dateStr);
+        cell.className = 'heat-cell ' + (isActive ? 'heat-on' : 'heat-off');
+        cell.title = dateStr;
+        heatmap.appendChild(cell);
+    }
 }
 
-// Heatmap
-const heatData = [0,1,1,0,1,1,0, 1,1,0,1,1,0,2, 0,1,1,0,1,1,1, 2,0,1,1,0,1,1];
-const heatmap = document.getElementById('heatmap');
-heatData.forEach(v => {
-    const d = document.createElement('div');
-    d.className = 'heat-cell ' + (v === 0 ? 'heat-off' : v === 2 ? 'heat-on hot' : 'heat-on');
-    heatmap.appendChild(d);
-});
+// ============ MAIN LOAD ============
+async function loadLearningData() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { window.location.href = '../login-page/login.html'; return; }
+
+    // 1. โหลด enrollments + courses
+    const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('*, courses(title)')
+        .eq('user_id', user.id);
+
+    // 2. โหลด quiz scores
+    const { data: quizScores } = await supabase
+        .from('quiz_scores')
+        .select('*')
+        .eq('user_id', user.id);
+
+    const enrList   = enrollments || [];
+    const quizList  = quizScores  || [];
+    const completed = enrList.filter(e => e.progress >= 100);
+    const inProgress= enrList.filter(e => e.progress < 100);
+    const avgQuiz   = quizList.length
+        ? Math.round(quizList.reduce((s, q) => s + (q.pct || 0), 0) / quizList.length)
+        : 0;
+
+    // ===== STAT CARDS =====
+    document.getElementById('statTotalHours').innerHTML =
+        `${enrList.length * 2} <small style="font-size:1rem;color:var(--text-dim)">ชม. (ประมาณ)</small>`;
+    document.getElementById('statCourseDone').innerHTML =
+        `${completed.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
+    document.getElementById('statCourseActive').innerHTML =
+        `${inProgress.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
+    document.getElementById('statAvgQuiz').innerHTML = quizList.length
+        ? `${avgQuiz} <small style="font-size:1rem;color:var(--text-dim)">%</small>`
+        : `— <small style="font-size:1rem;color:var(--text-dim)">%</small>`;
+
+    // ===== COURSE PROGRESS LIST =====
+    const progressEl = document.getElementById('courseProgressList');
+    if (enrList.length === 0) {
+        progressEl.innerHTML = '<div style="color:#a0a0ba;">ยังไม่ได้ลงทะเบียนคอร์สใดเลย</div>';
+    } else {
+        const colors = ['#8b5cf6','#10b981','#f59e0b','#3b82f6','#ef4444','#06b6d4'];
+        progressEl.innerHTML = enrList.map((e, i) => {
+            const title = e.courses?.title || 'คอร์สไม่ระบุชื่อ';
+            const pct   = e.progress || 0;
+            const color = colors[i % colors.length];
+            return `<div class="progress-item">
+                <div class="progress-row"><span>${title}</span><span>${pct}%</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+            </div>`;
+        }).join('');
+    }
+
+    // ===== BAR CHART (quiz scores by day of week) =====
+    const dayData = [0,0,0,0,0,0,0];
+    quizList.forEach(q => {
+        if (q.updated_at) {
+            const day = new Date(q.updated_at).getDay(); // 0=อาทิตย์
+            const idx = day === 0 ? 6 : day - 1; // map จ=0 ... อา=6
+            dayData[idx] += q.pct || 0;
+        }
+    });
+    renderBarChart(dayData);
+
+    // ===== AI ANALYSIS (จาก quiz scores) =====
+    const aiBox = document.getElementById('aiAnalysis');
+    if (quizList.length === 0) {
+        aiBox.innerHTML = '<div style="color:#a0a0ba;">ยังไม่มีข้อมูล Quiz กรุณาทำแบบทดสอบในคอร์สก่อน</div>';
+    } else {
+        const skillData = quizList.map(q => ({
+            name: q.course_id,
+            score: q.pct || 0
+        }));
+        skillData.forEach(s => {
+            const lv = getLevel(s.score);
+            aiBox.innerHTML += `<div class="skill-row">
+                <span>${s.name}</span>
+                <span class="skill-badge ${lv.cls}">${lv.text} (${s.score}%)</span>
+            </div>`;
+        });
+        const suggestions = skillData
+            .filter(s => s.score < 75)
+            .map(s => {
+                const hrs = s.score < 40
+                    ? `ควรทบทวน ${s.name} เพิ่ม ${Math.ceil((40-s.score)/10)*2} ชม.`
+                    : `ทบทวน ${s.name} อีก ${Math.ceil((75-s.score)/15)} ชม.`;
+                return `<div class="suggestion-item">👉 ${hrs}</div>`;
+            }).join('');
+        if (suggestions) aiBox.innerHTML += `<div class="ai-suggestion">${suggestions}</div>`;
+    }
+
+    // ===== HEATMAP =====
+    renderHeatmap(enrList);
+
+    // ===== BADGES =====
+    const badgesGrid = document.getElementById('badgesGrid');
+    const earned = computeBadges(enrList, quizList);
+    if (earned.length === 0) {
+        badgesGrid.innerHTML = '<div style="color:#a0a0ba;grid-column:1/-1;">ยังไม่ได้รับ Badge ใดเลย เริ่มเรียนเลย!</div>';
+    } else {
+        badgesGrid.innerHTML = earned.map(b => `
+            <div class="badge-item">
+                <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.icon}</div>
+                <div class="badge-name" style="color:${b.color}">${b.name}</div>
+            </div>`).join('');
+    }
+}
+
+loadLearningData();
 </script>
 
 </body>

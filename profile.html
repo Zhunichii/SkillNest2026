@@ -475,9 +475,8 @@
         import { supabase } from './supabase.js';
 
         // Cloudinary Configuration
-        const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';  // เช่น 'dxxxxxxxx'
-        const CLOUDINARY_UPLOAD_PRESET = 'skillnest';  // ชื่อ Upload Preset ที่สร้างไว้
-        const CLOUDINARY_API_KEY = '346538585181618Y'; // ⚠️ แทนที่ด้วย API Key ของคุณ (optional สำหรับการลบ)
+        const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';
+        const CLOUDINARY_UPLOAD_PRESET = 'skillnest';
 
         let currentUser = null;
         let originalData = {};
@@ -488,36 +487,21 @@
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            formData.append('folder', 'skillnest/profile-pictures'); // จัดเก็บในโฟลเดอร์
-            formData.append('public_id', `user_${currentUser.id}`); // ใช้ user ID เป็นชื่อไฟล์
-            
+            formData.append('folder', 'skillnest/profile-pictures');
+            formData.append('public_id', `user_${currentUser.id}`);
+
             try {
                 const response = await fetch(
                     `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-                    {
-                        method: 'POST',
-                        body: formData
-                    }
+                    { method: 'POST', body: formData }
                 );
-
-                if (!response.ok) {
-                    throw new Error('Upload failed');
-                }
-
+                if (!response.ok) throw new Error('Upload failed');
                 const data = await response.json();
-                return data.secure_url; // URL ของรูปที่อัพโหลด
+                return data.secure_url;
             } catch (error) {
                 console.error('Cloudinary upload error:', error);
                 throw error;
             }
-        }
-
-        // Cloudinary Delete Function (Optional - ใช้ API ต้องมี signature)
-        async function deleteFromCloudinary(publicId) {
-            // หมายเหตุ: การลบจาก Cloudinary ต้องใช้ signed request
-            // วิธีที่ง่ายกว่าคือปล่อยให้รูปเก่าอยู่ และแค่อัพเดท URL ใหม่
-            // หรือใช้ Cloudinary Admin API จาก backend
-            console.log('Image will be overwritten on next upload');
         }
 
         // Elements
@@ -534,30 +518,23 @@
         const userTypeBadge = document.getElementById('userTypeBadge');
         const saveBtn = document.getElementById('saveBtn');
 
-        // Show/Hide Loading
         function showLoading(show = true) {
             loadingOverlay.classList.toggle('show', show);
         }
 
-        // Show Message
         function showMessage(message, type = 'success') {
             messageBox.textContent = message;
             messageBox.className = `message ${type}`;
             messageBox.style.display = 'block';
-            
-            setTimeout(() => {
-                messageBox.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { messageBox.style.display = 'none'; }, 5000);
         }
 
-        // Get Initials
         function getInitials(firstName, lastName) {
             const first = firstName ? firstName.charAt(0).toUpperCase() : '';
             const last = lastName ? lastName.charAt(0).toUpperCase() : '';
             return first + last || 'U';
         }
 
-        // Update Profile Picture Display
         function updateProfilePictureDisplay(url) {
             if (url) {
                 profileImage.src = url;
@@ -571,38 +548,36 @@
             }
         }
 
-        // Load User Data
+        // Load User Data จาก Supabase
         async function loadUserData(user) {
             try {
                 showLoading(true);
-                const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
-                
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    originalData = userData;
+                const { data: userData, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
 
-                    // Set form values
-                    firstNameInput.value = userData.firstName || '';
-                    lastNameInput.value = userData.lastName || '';
-                    emailInput.value = userData.email || '';
+                if (error) throw error;
 
-                    // Set profile initials
-                    profileInitials.textContent = getInitials(userData.firstName, userData.lastName);
+                originalData = userData;
 
-                    // Set profile picture
-                    if (userData.profilePicture) {
-                        updateProfilePictureDisplay(userData.profilePicture);
-                    }
+                firstNameInput.value = userData.first_name || '';
+                lastNameInput.value = userData.last_name || '';
+                emailInput.value = userData.email || user.email || '';
+                profileInitials.textContent = getInitials(userData.first_name, userData.last_name);
 
-                    // Set user type badge
-                    if (userData.userType === 'teacher') {
-                        userTypeBadge.textContent = '👨‍🏫 ครู';
-                        userTypeBadge.classList.add('teacher');
-                    } else {
-                        userTypeBadge.textContent = '📚 นักเรียน';
-                    }
+                if (userData.profile_picture) {
+                    updateProfilePictureDisplay(userData.profile_picture);
                 }
-                
+
+                if (userData.user_type === 'teacher') {
+                    userTypeBadge.textContent = '👨‍🏫 ครู';
+                    userTypeBadge.classList.add('teacher');
+                } else {
+                    userTypeBadge.textContent = '📚 นักเรียน';
+                }
+
                 showLoading(false);
             } catch (error) {
                 console.error('Error loading user data:', error);
@@ -614,50 +589,30 @@
         // Handle Profile Picture Selection
         profilePictureInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
-                // Validate file type
-                if (!file.type.startsWith('image/')) {
-                    showMessage('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
-                    return;
-                }
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { showMessage('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error'); return; }
+            if (file.size > 5 * 1024 * 1024) { showMessage('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 5MB', 'error'); return; }
 
-                // Validate file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    showMessage('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 5MB', 'error');
-                    return;
-                }
-
-                selectedProfilePicture = file;
-
-                // Preview image
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    updateProfilePictureDisplay(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
+            selectedProfilePicture = file;
+            const reader = new FileReader();
+            reader.onload = (e) => updateProfilePictureDisplay(e.target.result);
+            reader.readAsDataURL(file);
         });
 
-        // Remove Profile Picture
+        // Remove Profile Picture — อัปเดต Supabase
         removePhotoBtn.addEventListener('click', async () => {
             if (!confirm('คุณต้องการลบรูปโปรไฟล์ใช่หรือไม่?')) return;
-
             try {
                 showLoading(true);
+                const { error } = await supabase
+                    .from('users')
+                    .update({ profile_picture: null })
+                    .eq('id', currentUser.id);
+                if (error) throw error;
 
-                // Note: Cloudinary ไม่ต้องลบไฟล์จริง เพราะจะ overwrite เมื่ออัพโหลดใหม่
-                // หรือถ้าต้องการลบจริงๆ ต้องใช้ backend API
-                
-                // Update Firestore - ลบ URL
-                await updateDoc(doc(db, 'users', currentUser.id), {
-                    profile_picture: null
-                });
-
-                // Update UI
                 updateProfilePictureDisplay(null);
                 selectedProfilePicture = null;
-                originalData.profilePicture = null;
-                
+                originalData.profile_picture = null;
                 showMessage('ลบรูปโปรไฟล์เรียบร้อยแล้ว', 'success');
                 showLoading(false);
             } catch (error) {
@@ -667,7 +622,7 @@
             }
         });
 
-        // Handle Form Submit
+        // Handle Form Submit — อัปเดต Supabase
         profileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -683,21 +638,14 @@
                 showLoading(true);
                 saveBtn.disabled = true;
 
-                const updates = {
-                    first_name: firstName,
-                    last_name: lastName
-                };
+                const updates = { first_name: firstName, last_name: lastName };
 
-                // Upload profile picture to Cloudinary if selected
                 if (selectedProfilePicture) {
                     try {
                         const photoURL = await uploadToCloudinary(selectedProfilePicture);
-                        updates.profilePicture = photoURL;
-                        
-                        // Update UI with new photo
+                        updates.profile_picture = photoURL;
                         updateProfilePictureDisplay(photoURL);
                     } catch (error) {
-                        console.error('Error uploading to Cloudinary:', error);
                         showMessage('เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ กรุณาลองใหม่', 'error');
                         showLoading(false);
                         saveBtn.disabled = false;
@@ -705,13 +653,14 @@
                     }
                 }
 
-                // Update Firestore
-                await updateDoc(doc(db, 'users', currentUser.id), updates);
+                const { error } = await supabase
+                    .from('users')
+                    .update(updates)
+                    .eq('id', currentUser.id);
 
-                // Update initials
+                if (error) throw error;
+
                 profileInitials.textContent = getInitials(firstName, lastName);
-
-                // Update original data
                 originalData = { ...originalData, ...updates };
                 selectedProfilePicture = null;
 

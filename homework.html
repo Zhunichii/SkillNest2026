@@ -252,37 +252,31 @@ import { supabase } from './supabase.js';
 
 let currentUser = null;
 let myCourses = [];
-let pendingGrade = null; // { submissionId, maxScore }
+let pendingGrade = null;
 
 // Auth check — teacher only
 const { data: { user } } = await supabase.auth.getUser();
 if (!user) { window.location.href = '../login-page/login.html'; }
-{
-    const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
-    if (userDoc.exists() && userDoc.data().userType !== 'teacher') {
-        alert('หน้านี้สำหรับครูเท่านั้น');
-        window.location.href = 'dashboard.html';
-        return;
-    }
-    currentUser = user;
-    await loadMyCourses();
-};
+
+const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
+if (userDoc && userDoc.user_type !== 'teacher') {
+    alert('หน้านี้สำหรับครูเท่านั้น');
+    window.location.href = 'dashboard.html';
+}
+currentUser = user;
+await loadMyCourses();
 
 async function loadMyCourses() {
     const tabsEl = document.getElementById('courseTabs');
     try {
-        const snap = await getDocs(query(
-            collection(db, 'courses'),
-            where('creatorId', '==', currentUser.id)
-        ));
+        const { data: courses, error } = await supabase
+            .from('courses')
+            .select('*')
+            .eq('creator_id', currentUser.id);
 
-        myCourses = [];
-        snap.forEach(d => {
-            const data = d.data();
-            if (data.homework && data.homework.length > 0) {
-                myCourses.push({ id: d.id, ...data });
-            }
-        });
+        if (error) throw error;
+
+        myCourses = (courses || []).filter(c => c.homework && c.homework.length > 0);
 
         if (myCourses.length === 0) {
             tabsEl.innerHTML = '';
@@ -299,7 +293,6 @@ async function loadMyCourses() {
             `<div class="course-tab-btn ${i===0?'active':''}" onclick="selectCourse('${c.id}', this)">${c.title}</div>`
         ).join('');
 
-        // โหลดคอร์สแรกอัตโนมัติ
         await loadHomeworksByCourse(myCourses[0].id);
 
     } catch(e) {
@@ -321,39 +314,33 @@ async function loadHomeworksByCourse(courseId) {
     const course = myCourses.find(c => c.id === courseId);
     if (!course || !course.homework) { contentEl.innerHTML = ''; return; }
 
-    // โหลด submissions ทั้งหมดของคอร์สนี้
+    // โหลด submissions ของคอร์สนี้
     let submissions = [];
     try {
-        const subSnap = await getDocs(query(
-            collection(db, 'submissions'),
-            where('courseId', '==', courseId)
-        ));
-        subSnap.forEach(d => submissions.push({ id: d.id, ...d.data() }));
+        const { data } = await supabase
+            .from('submissions')
+            .select('*')
+            .eq('course_id', courseId);
+        submissions = data || [];
     } catch(e) {}
 
     // โหลดชื่อนักเรียน
     const studentNames = {};
-    const userIds = [...new Set(submissions.map(s => s.userId))];
+    const userIds = [...new Set(submissions.map(s => s.user_id))];
     for (const uid of userIds) {
         try {
-            const uDoc = await getDoc(doc(db, 'users', uid));
-            if (uDoc.exists()) {
-                const u = uDoc.data();
-                studentNames[uid] = `${u.first_name||''} ${u.last_name||''}`.trim() || u.email;
-            }
+            const { data: u } = await supabase.from('users').select('first_name, last_name, email').eq('id', uid).single();
+            if (u) studentNames[uid] = `${u.first_name||''} ${u.last_name||''}`.trim() || u.email;
         } catch(e) {}
     }
 
     contentEl.innerHTML = '';
 
     course.homework.forEach((hw, idx) => {
-        const hwSubs = submissions.filter(s => s.homeworkIndex === idx);
-        const gradedCount = hwSubs.filter(s => s.status === 'graded').length;
+        const hwSubs = submissions.filter(s => s.homework_index === idx);
+        const gradedCount  = hwSubs.filter(s => s.status === 'graded').length;
         const pendingCount = hwSubs.filter(s => s.status === 'submitted').length;
-
-        const deadlineText = hw.deadline
-            ? new Date(hw.deadline).toLocaleString('th-TH')
-            : 'ไม่มีกำหนด';
+        const deadlineText = hw.deadline ? new Date(hw.deadline).toLocaleString('th-TH') : 'ไม่มีกำหนด';
 
         let rowsHtml = '';
         if (hwSubs.length === 0) {
@@ -361,19 +348,16 @@ async function loadHomeworksByCourse(courseId) {
         } else {
             rowsHtml = hwSubs.map(sub => {
                 const name = studentNames[sub.user_id] || sub.user_id;
-                const submittedAt = sub.submitted_at?.toDate
-                    ? sub.submitted_at.toDate().toLocaleString('th-TH')
+                const submittedAt = sub.submitted_at
+                    ? new Date(sub.submitted_at).toLocaleString('th-TH')
                     : 'ไม่ระบุ';
                 const statusBadge = sub.status === 'graded'
                     ? `<span class="status-badge graded">✅ ตรวจแล้ว (${sub.grade}/${hw.maxScore||100})</span>`
                     : `<span class="status-badge submitted">📤 รอตรวจ</span>`;
-
                 const workHtml = sub.content
-                    ? `<span title="${sub.content.substring(0,200)}" style="cursor:help;">📝 ดูงาน</span>`
-                    : '';
-                const fileHtml = sub.fileUrl
-                    ? `<a href="${sub.fileUrl}" target="_blank" class="view-link">📎 ไฟล์</a>`
-                    : '';
+                    ? `<span title="${sub.content.substring(0,200)}" style="cursor:help;">📝 ดูงาน</span>` : '';
+                const fileHtml = sub.file_url
+                    ? `<a href="${sub.file_url}" target="_blank" class="view-link">📎 ไฟล์</a>` : '';
 
                 return `<tr>
                     <td>${name}</td>
@@ -381,7 +365,7 @@ async function loadHomeworksByCourse(courseId) {
                     <td>${workHtml} ${fileHtml}</td>
                     <td>${statusBadge}</td>
                     <td>
-                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.fileUrl||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}')">
+                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}')">
                             ✏️ ${sub.status==='graded'?'แก้คะแนน':'ให้คะแนน'}
                         </button>
                     </td>
@@ -404,18 +388,9 @@ async function loadHomeworksByCourse(courseId) {
                 </div>
             </div>
             <table class="submissions-table">
-                <thead>
-                    <tr>
-                        <th>นักเรียน</th>
-                        <th>เวลาส่ง</th>
-                        <th>งาน</th>
-                        <th>สถานะ</th>
-                        <th>ดำเนินการ</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>นักเรียน</th><th>เวลาส่ง</th><th>งาน</th><th>สถานะ</th><th>ดำเนินการ</th></tr></thead>
                 <tbody>${rowsHtml}</tbody>
-            </table>
-        `;
+            </table>`;
         contentEl.appendChild(card);
     });
 }
@@ -437,7 +412,6 @@ window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore,
     if (fileUrl) previewHtml += `${content?'<br>':''}📎 ไฟล์แนบ: <a href="${fileUrl}" target="_blank" style="color:#60a5fa;">เปิดไฟล์</a>`;
     if (!content && !fileUrl) previewHtml = '<em>ไม่มีเนื้อหางาน</em>';
     document.getElementById('gradeSubmissionPreview').innerHTML = previewHtml;
-
     document.getElementById('gradeModalOverlay').classList.add('show');
 };
 
@@ -448,23 +422,26 @@ window.closeGradeModal = function() {
 
 window.confirmGrade = async function() {
     if (!pendingGrade) return;
-    const score = parseInt(document.getElementById('gradeScore').value);
+    const score   = parseInt(document.getElementById('gradeScore').value);
     const comment = document.getElementById('gradeComment').value.trim();
 
     if (isNaN(score) || score < 0 || score > pendingGrade.maxScore) {
-        alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingGrade.maxScore}`);
-        return;
+        alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingGrade.maxScore}`); return;
     }
 
     try {
-        await updateDoc(doc(db, 'submissions', pendingGrade.subId), {
-            grade: score,
-            comment,
-            status: 'graded',
-            gradedAt: serverTimestamp()
-        });
+        const { error } = await supabase
+            .from('submissions')
+            .update({
+                grade: score,
+                comment,
+                status: 'graded',
+                graded_at: new Date().toISOString()
+            })
+            .eq('id', pendingGrade.subId);
+
+        if (error) throw error;
         closeGradeModal();
-        // Reload current course tab
         const activeTab = document.querySelector('.course-tab-btn.active');
         if (activeTab) activeTab.click();
     } catch(e) {
