@@ -239,9 +239,9 @@
         </ul>
         
         <div class="nav-auth">
-            <button class="btn-login" id="loginBtn" style="display: none;">Log in</button>
-            <div class="user-profile" id="userProfile">
-                <span class="user-name" id="displayName">Loading...</span>
+            <button class="btn-login" id="loginBtn" style="display: block;">Log in</button>
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <span class="user-name" id="displayName"></span>
                 <button class="profile-dropdown-btn" id="profileDropdownBtn">
                     👤 <span id="userInitial"></span>
                 </button>
@@ -422,15 +422,17 @@
                         .single();
                     const firstName = profile?.first_name || 'User';
                     loginBtn.style.display = 'none';
-                    userProfile.classList.add('show');
+                    userProfile.style.display = 'flex';
                     displayName.textContent = `Hello, ${firstName}`;
                     userInitial.textContent = firstName.charAt(0).toUpperCase();
                 } catch (error) {
                     console.error('Error fetching user data:', error);
+                    loginBtn.style.display = 'block';
+                    userProfile.style.display = 'none';
                 }
             } else {
                 loginBtn.style.display = 'block';
-                userProfile.classList.remove('show');
+                userProfile.style.display = 'none';
             }
         });
 
