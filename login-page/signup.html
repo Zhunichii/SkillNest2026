@@ -266,9 +266,6 @@
                 signupBtn.textContent = 'Sign Up';
                 return;
             }
-
-            // อัปเดต first_name, last_name, user_type หลัง signUp
-            // (Trigger จาก Step 1 สร้าง row ใน public.users แล้ว)
             if (data.user) {
                 await supabase.from('users').update({
                     first_name: firstName,
@@ -281,8 +278,7 @@
             successMessage.style.display = 'block';
 
             setTimeout(() => {
-                // แก้ไขจาก ../index.html เป็น index.html เพื่อให้ path ถูกต้อง
-                window.location.href = 'index.html';
+                window.location.href = 'dashboard.html';
             }, 2000);
         });
     </script>
