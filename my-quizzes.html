@@ -427,27 +427,14 @@
 </div>
 
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-    authDomain: "skillnest-2026.firebaseapp.com",
-    projectId: "skillnest-2026",
-    storageBucket: "skillnest-2026.firebasestorage.app",
-    messagingSenderId: "416822065212",
-    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
+import { supabase } from './supabase.js';
 let currentUser = null;
 
-onAuthStateChanged(auth, async (user) => {
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) { window.location.href = '../login-page/login.html'; } else
+(async (user) => {
     if (!user) { window.location.href = '../login-page/login.html'; return; }
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
     if (userDoc.exists() && userDoc.data().userType !== 'student') {
         alert('หน้านี้สำหรับนักเรียนเท่านั้น');
         window.location.href = 'dashboard.html';
@@ -460,7 +447,7 @@ onAuthStateChanged(auth, async (user) => {
 async function loadQuizzes() {
     const grid = document.getElementById('quizGrid');
     try {
-        const enrollSnap = await getDocs(query(collection(db,'enrollments'), where('userId','==',currentUser.uid)));
+        const enrollSnap = await getDocs(query(collection(db,'enrollments'), where('userId','==',currentUser.id)));
         const enrolledIds = new Set();
         enrollSnap.forEach(d => enrolledIds.add(d.data().courseId));
 
@@ -487,7 +474,7 @@ async function loadQuizzes() {
 
         const scoresMap = {};
         try {
-            const scoresSnap = await getDocs(query(collection(db,'quizScores'), where('userId','==',currentUser.uid)));
+            const scoresSnap = await getDocs(query(collection(db,'quizScores'), where('userId','==',currentUser.id)));
             scoresSnap.forEach(d => { const s = d.data(); scoresMap[s.courseId] = s; });
         } catch(e) {}
 
@@ -615,8 +602,11 @@ async function showResult() {
     const msg   = pct>=80 ? 'ยอดเยี่ยม!' : pct>=60 ? 'ทำได้ดี!' : 'ลองทำใหม่อีกครั้งนะ';
 
     try {
-        await setDoc(doc(db,'quizScores',`${currentUser.uid}_${courseId}`), {
-            userId: currentUser.uid, courseId, score, total, pct, updatedAt: new Date()
+        await supabase.from('quiz_scores').upsert({
+            id: `${currentUser.id}_${courseId}`,
+            user_id: currentUser.id,
+            course_id: courseId,
+            userId: currentUser.id, courseId, score, total, pct, updatedAt: new Date()
         });
     } catch(e) { console.error('Save score error:', e); }
 

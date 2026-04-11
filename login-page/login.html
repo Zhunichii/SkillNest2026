@@ -85,9 +85,7 @@
             font-weight: 600;
         }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
+        .input-group { margin-bottom: 20px; }
 
         .input-field {
             width: 100%;
@@ -101,10 +99,7 @@
             outline: none;
         }
         
-        .input-field::placeholder {
-            color: #444;
-            font-weight: 600;
-        }
+        .input-field::placeholder { color: #444; font-weight: 600; }
 
         .btn-login {
             width: 40%;
@@ -121,21 +116,10 @@
             transition: 0.3s;
         }
 
-        .btn-login:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
+        .btn-login:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .signup-text {
-            color: #666;
-            font-size: 0.85rem;
-            font-style: italic;
-        }
+        .signup-text { color: #666; font-size: 0.85rem; font-style: italic; }
 
         .signup-link {
             color: var(--green-link);
@@ -143,10 +127,7 @@
             font-weight: 500;
             margin-left: 5px;
         }
-        
-        .signup-link:hover {
-            text-decoration: underline;
-        }
+        .signup-link:hover { text-decoration: underline; }
 
         .error-message {
             color: #ef4444;
@@ -167,7 +148,6 @@
             filter: blur(80px);
             z-index: -1;
         }
-
     </style>
 </head>
 <body>
@@ -206,26 +186,9 @@
 
     <div class="bottom-glow"></div>
 
-    <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { supabase } from './supabase.js';
 
-        // ⚠️ แทนที่ค่าด้านล่างด้วย Firebase Config ของคุณ (ต้องเหมือนกับ signup.html)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-            authDomain: "skillnest-2026.firebaseapp.com",
-            projectId: "skillnest-2026",
-            storageBucket: "skillnest-2026.firebasestorage.app",
-            messagingSenderId: "416822065212",
-            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // Form Handler
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
         const errorMessage = document.getElementById('errorMessage');
@@ -236,42 +199,25 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            // Reset error message
             errorMessage.style.display = 'none';
-
-            // Disable button
             loginBtn.disabled = true;
             loginBtn.textContent = 'Logging in...';
 
-            try {
-                // Sign in with Firebase Authentication
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-                console.log('Login successful:', user.uid);
-
-                // Redirect to index page
-                window.location.href = '../index.html';
-
-            } catch (error) {
-                console.error('Login error:', error);
-                
+            if (error) {
                 let errorMsg = 'An error occurred. Please try again.';
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                if (error.message.includes('Invalid login credentials')) {
                     errorMsg = 'Invalid email or password!';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = 'Invalid email address!';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMsg = 'Too many failed attempts. Please try again later.';
-                } else if (error.code === 'auth/invalid-credential') {
-                    errorMsg = 'Invalid email or password!';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMsg = 'Please confirm your email first.';
                 }
-                
                 errorMessage.textContent = errorMsg;
                 errorMessage.style.display = 'block';
-                
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Login';
+            } else {
+                window.location.href = 'index.html';
             }
         });
     </script>

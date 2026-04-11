@@ -401,22 +401,7 @@
     </footer>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-            authDomain: "skillnest-2026.firebaseapp.com",
-            projectId: "skillnest-2026",
-            storageBucket: "skillnest-2026.firebasestorage.app",
-            messagingSenderId: "416822065212",
-            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        import { supabase } from './supabase.js';
 
         const loginBtn = document.getElementById('loginBtn');
         const userProfile = document.getElementById('userProfile');
@@ -426,18 +411,20 @@
         const profileDropdownBtn = document.getElementById('profileDropdownBtn');
         const dropdownMenu = document.getElementById('dropdownMenu');
 
-        onAuthStateChanged(auth, async (user) => {
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            const user = session?.user;
             if (user) {
                 try {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        const firstName = userData.firstName || 'User';
-                        loginBtn.style.display = 'none';
-                        userProfile.classList.add('show');
-                        displayName.textContent = `Hello, ${firstName}`;
-                        userInitial.textContent = firstName.charAt(0).toUpperCase();
-                    }
+                    const { data: profile } = await supabase
+                        .from('users')
+                        .select('first_name')
+                        .eq('id', user.id)
+                        .single();
+                    const firstName = profile?.first_name || 'User';
+                    loginBtn.style.display = 'none';
+                    userProfile.classList.add('show');
+                    displayName.textContent = `Hello, ${firstName}`;
+                    userInitial.textContent = firstName.charAt(0).toUpperCase();
                 } catch (error) {
                     console.error('Error fetching user data:', error);
                 }
@@ -448,13 +435,16 @@
         });
 
         loginBtn.addEventListener('click', () => window.location.href = 'login-page/login.html');
-        freetrialBtn.addEventListener('click', () => window.location.href = auth.currentUser ? 'dashboard.html' : 'login-page/login.html');
+        freetrialBtn.addEventListener('click', async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            window.location.href = user ? 'dashboard.html' : 'login-page/login.html';
+        });
         profileDropdownBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
         document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
         dropdownMenu.addEventListener('click', (e) => e.stopPropagation());
         document.getElementById('dashboardItem').addEventListener('click', () => window.location.href = 'dashboard.html');
         document.getElementById('logoutItem').addEventListener('click', async () => {
-            try { await signOut(auth); window.location.reload(); } 
+            try { await supabase.auth.signOut(); window.location.reload(); }
             catch (error) { console.error('Logout error:', error); alert('เกิดข้อผิดพลาดในการออกจากระบบ'); }
         });
 

@@ -385,21 +385,7 @@
 </div>
 
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-    authDomain: "skillnest-2026.firebaseapp.com",
-    projectId: "skillnest-2026",
-    storageBucket: "skillnest-2026.firebasestorage.app",
-    messagingSenderId: "416822065212",
-    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { supabase } from './supabase.js';
 
 const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';
 const CLOUDINARY_UPLOAD_PRESET = 'skillnest';
@@ -419,42 +405,35 @@ let homeworks = [];
 let hwCounter = 0;
 
 // ─── Auth & Load ───────────────────────────────────────────────
-onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = '../login-page/login.html'; return; }
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (!userDoc.exists() || userDoc.data().userType !== 'teacher') {
+const { data: { user: _eu } } = await supabase.auth.getUser();
+if (!_eu) { window.location.href = '../login-page/login.html'; }
+else {
+    const { data: _ep } = await supabase.from('users').select('user_type').eq('id', _eu.id).single();
+    if (_ep?.user_type !== 'teacher') {
         alert('เฉพาะครูเท่านั้น');
         window.location.href = 'dashboard.html';
-        return;
+    } else {
+        currentUser = _eu;
+        courseId = new URLSearchParams(window.location.search).get('id');
+        if (!courseId) { alert('ไม่พบ course ID'); window.location.href = 'manage-courses.html'; }
+        else { await loadCourseForEdit(); }
     }
-    currentUser = user;
-
-    courseId = new URLSearchParams(window.location.search).get('id');
-    if (!courseId) { alert('ไม่พบ course ID'); window.location.href = 'manage-courses.html'; return; }
-
-    await loadCourseForEdit();
-});
+}
 
 async function loadCourseForEdit() {
     showLoading('กำลังโหลดข้อมูลคอร์ส...');
-    try {
-        const snap = await getDoc(doc(db, 'courses', courseId));
-        if (!snap.exists()) { alert('ไม่พบคอร์สนี้'); window.location.href = 'manage-courses.html'; return; }
-        originalCourse = snap.data();
+    const { data: snap, error } = await supabase.from('courses').select('*').eq('id', courseId).single();
+    if (error || !snap) { alert('ไม่พบคอร์สนี้'); window.location.href = 'manage-courses.html'; return; }
+    originalCourse = snap;
 
-        // ตรวจสอบ ownership
-        if (originalCourse.creatorId !== currentUser.uid) {
-            alert('คุณไม่มีสิทธิ์แก้ไขคอร์สนี้');
-            window.location.href = 'manage-courses.html';
-            return;
-        }
-
-        populateForm(originalCourse);
-        hideLoading();
-    } catch(e) {
-        hideLoading();
-        alert('เกิดข้อผิดพลาด: ' + e.message);
+    if (originalCourse.creator_id !== currentUser.id) {
+        alert('คุณไม่มีสิทธิ์แก้ไขคอร์สนี้');
+        window.location.href = 'manage-courses.html';
+        return;
     }
+
+    populateForm(originalCourse);
+    hideLoading();
 }
 
 function populateForm(course) {
@@ -943,9 +922,9 @@ window.saveCourse = async function() {
         const quizData = collectQuizData();
         const homeworkData = collectHomeworkData();
 
-        // 4. Update Firestore
+        // 4. Update Supabase
         updateSubText('กำลังบันทึกข้อมูล...');
-        await updateDoc(doc(db, 'courses', courseId), {
+        const { error: upErr } = await supabase.from('courses').update({
             title,
             description,
             category,
@@ -955,8 +934,9 @@ window.saveCourse = async function() {
             lessons: lessonsData,
             quiz: quizData,
             homework: homeworkData,
-            updatedAt: serverTimestamp()
-        });
+            updated_at: new Date().toISOString()
+        }).eq('id', courseId);
+        if (upErr) throw upErr;
 
         hideLoading();
         alert('✅ บันทึกการแก้ไขสำเร็จ!');

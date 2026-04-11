@@ -1002,26 +1002,7 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import {
-            getFirestore, collection, query, where, getDocs, doc, getDoc,
-            orderBy, deleteDoc, setDoc, serverTimestamp, addDoc, writeBatch,
-            onSnapshot, updateDoc, limit
-        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-            authDomain: "skillnest-2026.firebaseapp.com",
-            projectId: "skillnest-2026",
-            storageBucket: "skillnest-2026.firebasestorage.app",
-            messagingSenderId: "416822065212",
-            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        import { supabase, sendNotification } from './supabase.js';
 
         let currentUser = null;
         let unsubscribeNotif = null; // real-time listener unsubscribe handle
@@ -1055,80 +1036,44 @@
          * type: 'course' | 'homework' | 'system'
          * targetUserId: null = broadcast to all, string = specific user
          */
-        window.createNotification = async function({ type, title, message, link, targetUserId }) {
-            try {
-                await addDoc(collection(db, 'notifications'), {
-                    type,
-                    title,
-                    message,
-                    link: link || null,
-                    targetUserId: targetUserId || 'broadcast', // 'broadcast' = ทุกคน
-                    createdAt: serverTimestamp(),
-                    readBy: []
-                });
-            } catch(e) { console.error('createNotification error:', e); }
-        };
+        window.createNotification = sendNotification;
 
-        // เริ่ม real-time listener สำหรับ notifications
-        function startNotificationListener(userId) {
+        // เริ่ม real-time listener สำหรับ notifications (Supabase Realtime)
+        async function startNotificationListener(userId) {
             if (unsubscribeNotif) unsubscribeNotif(); // cleanup ก่อน
 
-            // ดึง notifications ที่:
-            // 1) targetUserId == 'broadcast' (ส่งทุกคน)
-            // 2) targetUserId == userId (เฉพาะ user)
-            // หมายเหตุ: ใช้ 'broadcast' แทน null เพราะ Firestore ไม่รองรับ query where == null
-            const broadcastQ = query(
-                collection(db, 'notifications'),
-                where('targetUserId', '==', 'broadcast'),
-                orderBy('createdAt', 'desc'),
-                limit(50)
-            );
-            const personalQ = query(
-                collection(db, 'notifications'),
-                where('targetUserId', '==', userId),
-                orderBy('createdAt', 'desc'),
-                limit(50)
-            );
+            // โหลด notifications ครั้งแรก
+            const { data: initial } = await supabase
+                .from('notifications')
+                .select('*')
+                .or(`target_user_id.eq.broadcast,target_user_id.eq.${userId}`)
+                .order('created_at', { ascending: false })
+                .limit(50);
 
-            let broadcastData = [];
-            let personalData = [];
-            let initialized = { b: false, p: false };
+            allNotifications = initial || [];
+            renderNotifPanel(userId);
 
-            function mergeAndRender() {
-                if (!initialized.b || !initialized.p) return;
-                const combined = [...broadcastData, ...personalData];
-                combined.sort((a, b) => {
-                    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-                    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-                    return tb - ta;
-                });
+            // Supabase Realtime — แทน onSnapshot
+            const channel = supabase
+                .channel('notifications_realtime')
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'notifications'
+                }, (payload) => {
+                    const n = payload.new;
+                    // กรองเฉพาะที่เกี่ยวกับ user นี้
+                    if (n.target_user_id !== 'broadcast' && n.target_user_id !== userId) return;
+                    const prevIds = new Set(allNotifications.map(x => x.id));
+                    allNotifications = [n, ...allNotifications].slice(0, 50);
+                    renderNotifPanel(userId);
+                    if (!prevIds.has(n.id) && !(n.read_by || []).includes(userId)) {
+                        showToast(n);
+                    }
+                })
+                .subscribe();
 
-                // หา items ใหม่ที่เพิ่งเข้ามา (เทียบกับ allNotifications เดิม)
-                const prevIds = new Set(allNotifications.map(n => n.id));
-                const newItems = combined.filter(n => !prevIds.has(n.id) && !(n.readBy || []).includes(userId));
-
-                allNotifications = combined;
-                renderNotifPanel(userId);
-
-                // แสดง toast สำหรับ items ใหม่ที่ยังไม่อ่าน (ยกเว้นครั้งแรก)
-                if (initialized.b && initialized.p && newItems.length > 0 && prevIds.size > 0) {
-                    newItems.slice(0, 3).forEach(n => showToast(n));
-                }
-            }
-
-            const unsubB = onSnapshot(broadcastQ, snap => {
-                broadcastData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                initialized.b = true;
-                mergeAndRender();
-            }, err => { console.error('broadcast notif error:', err); initialized.b = true; mergeAndRender(); });
-
-            const unsubP = onSnapshot(personalQ, snap => {
-                personalData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                initialized.p = true;
-                mergeAndRender();
-            }, err => { console.error('personal notif error:', err); initialized.p = true; mergeAndRender(); });
-
-            unsubscribeNotif = () => { unsubB(); unsubP(); };
+            unsubscribeNotif = () => supabase.removeChannel(channel);
         }
 
         function renderNotifPanel(userId) {
@@ -1139,7 +1084,7 @@
                 ? allNotifications
                 : allNotifications.filter(n => n.type === activeTab);
 
-            const unreadCount = allNotifications.filter(n => !(n.readBy || []).includes(userId)).length;
+            const unreadCount = allNotifications.filter(n => !(n.read_by || []).includes(userId)).length;
             updateBadge(unreadCount);
 
             if (filtered.length === 0) {
@@ -1148,8 +1093,8 @@
             }
 
             list.innerHTML = filtered.map(n => {
-                const isUnread = !(n.readBy || []).includes(userId);
-                const timeAgo = formatTimeAgo(n.createdAt);
+                const isUnread = !(n.read_by || []).includes(userId);
+                const timeAgo = formatTimeAgo(n.created_at);
                 const icon = n.type === 'course' ? '📚' : n.type === 'homework' ? '📋' : '🔔';
                 const iconClass = n.type === 'course' ? 'course' : n.type === 'homework' ? 'homework' : 'system';
                 return `
@@ -1182,16 +1127,13 @@
 
         window.handleNotifClick = async function(notifId, link) {
             if (!currentUser) return;
-            // mark as read
+            // mark as read via SQL function (append_to_read_by)
             try {
-                const notifRef = doc(db, 'notifications', notifId);
-                const notifSnap = await getDoc(notifRef);
-                if (notifSnap.exists()) {
-                    const readBy = notifSnap.data().readBy || [];
-                    if (!readBy.includes(currentUser.uid)) {
-                        await updateDoc(notifRef, { readBy: [...readBy, currentUser.uid] });
-                    }
-                }
+                await supabase.rpc('append_to_read_by', { notif_id: notifId, user_id: currentUser.id });
+                // อัปเดต local state
+                const n = allNotifications.find(x => x.id === notifId);
+                if (n) n.read_by = [...(n.read_by || []), currentUser.id];
+                renderNotifPanel(currentUser.id);
             } catch(e) { console.error('mark read error:', e); }
             if (link && link !== 'null' && link !== '') {
                 closeNotifPanel();
@@ -1203,10 +1145,10 @@
             if (!currentUser || allNotifications.length === 0) return;
             try {
                 const batch = writeBatch(db);
-                const unread = allNotifications.filter(n => !(n.readBy || []).includes(currentUser.uid));
+                const unread = allNotifications.filter(n => !(n.read_by || []).includes(currentUser.id));
                 unread.forEach(n => {
                     batch.update(doc(db, 'notifications', n.id), {
-                        readBy: [...(n.readBy || []), currentUser.uid]
+                        readBy: [...(n.read_by || []), currentUser.id]
                     });
                 });
                 await batch.commit();
@@ -1221,9 +1163,9 @@
                 // ล้างโดย mark ว่าอ่านแล้วทุกอัน
                 const batch = writeBatch(db);
                 allNotifications.forEach(n => {
-                    if (!(n.readBy || []).includes(currentUser.uid)) {
+                    if (!(n.read_by || []).includes(currentUser.id)) {
                         batch.update(doc(db, 'notifications', n.id), {
-                            readBy: [...(n.readBy || []), currentUser.uid]
+                            readBy: [...(n.read_by || []), currentUser.id]
                         });
                     }
                 });
@@ -1238,7 +1180,7 @@
                 document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 activeTab = tab.dataset.tab;
-                if (currentUser) renderNotifPanel(currentUser.uid);
+                if (currentUser) renderNotifPanel(currentUser.id);
             });
         });
 
@@ -1291,7 +1233,7 @@
         function formatTimeAgo(timestamp) {
             if (!timestamp) return '';
             const now = Date.now();
-            const ts = timestamp.toMillis ? timestamp.toMillis() : now;
+            const ts = typeof timestamp === 'string' ? new Date(timestamp).getTime() : now;
             const diff = Math.floor((now - ts) / 1000);
             if (diff < 60) return 'เมื่อกี้';
             if (diff < 3600) return `${Math.floor(diff/60)} นาทีที่แล้ว`;
@@ -1311,26 +1253,24 @@
         async function loadCourses() {
             const courseGrid = document.getElementById('courseGrid');
             try {
-                const coursesQuery = query(collection(db, 'courses'), orderBy('createdAt', 'desc'));
-                const querySnapshot = await getDocs(coursesQuery);
-                if (querySnapshot.empty) {
+                const { data: querySnapshot, error: coursesErr } = await supabase
+                    .from('courses')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (coursesErr || !querySnapshot || querySnapshot.length === 0) {
                     courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📚</div><h3>ยังไม่มีคอร์สเรียน</h3><p>เริ่มต้นสร้างคอร์สแรกของคุณเลย!</p></div>`;
                     return;
                 }
                 courseGrid.innerHTML = '';
                 let visibleCount = 0;
-                for (const docSnapshot of querySnapshot.docs) {
-                    const course = docSnapshot.data();
-                    const courseId = docSnapshot.id;
+                for (const course of querySnapshot) {
+                    const courseId = course.id;
                     if (enrolledCourseIds.has(courseId)) continue;
                     visibleCount++;
                     let creatorName = 'ไม่ทราบชื่อ';
                     try {
-                        const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
-                        if (creatorDoc.exists()) {
-                            const cd = creatorDoc.data();
-                            creatorName = `${cd.firstName||''} ${cd.lastName||''}`.trim() || cd.email;
-                        }
+                        const { data: cd } = await supabase.from('users').select('first_name,last_name,email').eq('id', course.creator_id).single();
+                        if (cd) creatorName = `${cd.first_name||''} ${cd.last_name||''}`.trim() || cd.email;
                     } catch(e) {}
                     const lessonCount = course.lessons ? course.lessons.length : 0;
                     const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
@@ -1381,16 +1321,16 @@
         // =============================================
         // 🔐 AUTH
         // =============================================
-        onAuthStateChanged(auth, async (user) => {
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            const user = session?.user;
             if (user) {
                 currentUser = user;
                 try {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        const firstName = userData.firstName || 'User';
-                        const userType = userData.userType || 'student';
-                        const profileImageUrl = userData.profilePicture || null;
+                    const { data: userData } = await supabase.from('users').select('*').eq('id', user.id).single();
+                    if (userData) {
+                        const firstName = userData.first_name || 'User';
+                        const userType = userData.user_type || 'student';
+                        const profileImageUrl = userData.profile_picture || null;
                         document.getElementById('userName').textContent = firstName;
                         document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName} 🚀`;
                         const profileIconContainer = document.getElementById('profileIconContainer');
@@ -1419,7 +1359,7 @@
                 await loadEnrollments();
 
                 // 🔔 เริ่ม real-time notification listener
-                startNotificationListener(user.uid);
+                startNotificationListener(user.id);
 
                 const urlPage = new URLSearchParams(window.location.search).get('page');
                 if (urlPage === 'my-courses') { switchPage('my-courses'); } else { await loadCourses(); }
@@ -1438,7 +1378,7 @@
         dropdownMenu.addEventListener('click', (e) => e.stopPropagation());
         document.getElementById('logoutItem').addEventListener('click', async () => {
             if (unsubscribeNotif) unsubscribeNotif();
-            try { await signOut(auth); window.location.href = '../login-page/login.html'; }
+            try { await supabase.auth.signOut(); window.location.href = '../login-page/login.html'; }
             catch(e) { alert('เกิดข้อผิดพลาดในการออกจากระบบ'); }
         });
 
@@ -1470,27 +1410,23 @@
             courseGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
             if (!currentUser) return;
             try {
-                const enrollSnap = await getDocs(query(collection(db, 'enrollments'), where('userId', '==', currentUser.uid)));
-                if (enrollSnap.empty) {
+                const { data: enrollSnap } = await supabase.from('enrollments').select('course_id').eq('user_id', currentUser.id);
+                if (!enrollSnap || enrollSnap.length === 0) {
                     courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div><h3>ยังไม่มีคอร์สที่สมัคร</h3><p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อเลือกสมัครเรียนคอร์สที่สนใจ</p></div>`;
                     return;
                 }
                 courseGrid.innerHTML = '';
-                for (const enrollDoc of enrollSnap.docs) {
-                    const courseId = enrollDoc.data().courseId;
+                for (const enrollDoc of enrollSnap) {
+                    const courseId = enrollDoc.course_id;
                     try {
-                        const courseSnap = await getDoc(doc(db, 'courses', courseId));
-                        if (!courseSnap.exists()) continue;
-                        const course = courseSnap.data();
+                        const { data: course } = await supabase.from('courses').select('*').eq('id', courseId).single();
+                        if (!course) continue;
                         const lessonCount = course.lessons ? course.lessons.length : 0;
                         const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
                         let creatorName = 'ไม่ทราบชื่อ';
                         try {
-                            const creatorDoc = await getDoc(doc(db, 'users', course.creatorId));
-                            if (creatorDoc.exists()) {
-                                const cd = creatorDoc.data();
-                                creatorName = `${cd.firstName||''} ${cd.lastName||''}`.trim() || cd.email;
-                            }
+                            const { data: cd } = await supabase.from('users').select('first_name,last_name,email').eq('id', course.creator_id).single();
+                            if (cd) creatorName = `${cd.first_name||''} ${cd.last_name||''}`.trim() || cd.email;
                         } catch(e) {}
                         const thumbnailStyle = course.thumbnail ? `background-image:url('${course.thumbnail}');background-size:cover;background-position:center;` : `background:${randomColor};`;
                         const courseCard = document.createElement('div');
@@ -1849,8 +1785,11 @@
         async function loadEnrollments() {
             if (!currentUser) return;
             try {
-                const snap = await getDocs(query(collection(db, 'enrollments'), where('userId', '==', currentUser.uid)));
-                snap.forEach(d => enrolledCourseIds.add(d.data().courseId));
+                const { data: snap } = await supabase
+                    .from('enrollments')
+                    .select('course_id')
+                    .eq('user_id', currentUser.id);
+                (snap || []).forEach(d => enrolledCourseIds.add(d.course_id));
                 enrolledCourseIds.forEach(cid => markCardAsEnrolled(cid));
             } catch(e) { console.error('loadEnrollments error:', e); }
         }
@@ -1899,8 +1838,11 @@
         window.enrollCourse = async function(courseId) {
             if (!currentUser) { alert('กรุณาล็อกอินก่อน'); return; }
             try {
-                const enrollId = `${currentUser.uid}_${courseId}`;
-                await setDoc(doc(db, 'enrollments', enrollId), { userId: currentUser.uid, courseId, enrolledAt: serverTimestamp() });
+                await supabase.from('enrollments').upsert({
+                    id: `${currentUser.id}_${courseId}`,
+                    user_id: currentUser.id,
+                    course_id: courseId
+                });
                 enrolledCourseIds.add(courseId);
                 markCardAsEnrolled(courseId);
                 const actionsEl = document.getElementById('enrollModalActions');

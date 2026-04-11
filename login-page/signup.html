@@ -56,19 +56,8 @@
             border-radius: 6px; font-style: normal; font-weight: bold;
         }
 
-        .header-title {
-            color: var(--text-blue);
-            font-size: 1.4rem;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .header-subtitle {
-            color: var(--text-grey);
-            font-size: 0.95rem;
-            margin-bottom: 30px;
-            font-weight: 300;
-        }
+        .header-title { color: var(--text-blue); font-size: 1.4rem; margin-bottom: 8px; font-weight: 600; }
+        .header-subtitle { color: var(--text-grey); font-size: 0.95rem; margin-bottom: 30px; font-weight: 300; }
 
         .signup-card {
             background: var(--card-bg);
@@ -78,17 +67,9 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .card-title {
-            color: var(--text-blue);
-            margin-bottom: 25px;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
+        .card-title { color: var(--text-blue); margin-bottom: 25px; font-size: 1.5rem; font-weight: 600; }
 
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
+        .input-group { margin-bottom: 15px; text-align: left; }
 
         .input-field {
             width: 100%;
@@ -101,11 +82,7 @@
             font-weight: 600;
             outline: none;
         }
-        
-        .input-field::placeholder {
-            color: #444;
-            font-weight: 600;
-        }
+        .input-field::placeholder { color: #444; font-weight: 600; }
 
         .btn-signup {
             width: 50%;
@@ -122,47 +99,16 @@
             transition: 0.3s;
             box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
         }
+        .btn-signup:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-signup:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-signup:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
+        .error-message { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; }
+        .success-message { color: #10b981; font-size: 0.85rem; margin-top: 10px; display: none; }
 
-        .btn-signup:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        .login-link { color: var(--text-grey); font-size: 0.85rem; margin-top: 15px; }
+        .login-link a { color: var(--primary-blue); text-decoration: none; }
+        .login-link a:hover { text-decoration: underline; }
 
-        .error-message {
-            color: #ef4444;
-            font-size: 0.85rem;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .success-message {
-            color: #10b981;
-            font-size: 0.85rem;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .login-link {
-            color: var(--text-grey);
-            font-size: 0.85rem;
-            margin-top: 15px;
-        }
-
-        .login-link a {
-            color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        /* User Type Selection Styles */
         .user-type-label {
             display: block;
             color: var(--text-blue);
@@ -172,20 +118,9 @@
             text-align: center;
         }
 
-        .user-type-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-
-        .user-type-option {
-            cursor: pointer;
-        }
-
-        .user-type-option input[type="radio"] {
-            display: none;
-        }
+        .user-type-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
+        .user-type-option { cursor: pointer; }
+        .user-type-option input[type="radio"] { display: none; }
 
         .user-type-card {
             background: rgba(217, 217, 217, 0.1);
@@ -202,39 +137,16 @@
             box-shadow: 0 0 15px rgba(0, 122, 255, 0.3);
         }
 
-        .user-type-card:hover {
-            border-color: var(--primary-blue);
-            transform: translateY(-2px);
-        }
-
-        .user-type-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .user-type-title {
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .user-type-desc {
-            color: var(--text-grey);
-            font-size: 0.75rem;
-            line-height: 1.3;
-        }
+        .user-type-card:hover { border-color: var(--primary-blue); transform: translateY(-2px); }
+        .user-type-icon { font-size: 2rem; margin-bottom: 10px; }
+        .user-type-title { color: white; font-size: 1rem; font-weight: 600; margin-bottom: 5px; }
+        .user-type-desc { color: var(--text-grey); font-size: 0.75rem; line-height: 1.3; }
 
         .bottom-glow {
-            position: fixed;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            height: 100px;
+            position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%);
+            width: 80%; height: 100px;
             background: rgba(255, 255, 255, 0.15);
-            filter: blur(80px);
-            z-index: -1;
+            filter: blur(80px); z-index: -1;
         }
     </style>
 </head>
@@ -269,7 +181,6 @@
                     <input type="password" id="confirmPassword" class="input-field" placeholder="Confirm Password" required>
                 </div>
 
-                <!-- User Type Selection -->
                 <div class="input-group">
                     <label class="user-type-label">เลือกประเภทผู้ใช้:</label>
                     <div class="user-type-container">
@@ -306,29 +217,9 @@
 
     <div class="bottom-glow"></div>
 
-    <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { supabase } from './supabase.js';
 
-        // ⚠️ แทนที่ค่าด้านล่างด้วย Firebase Config ของคุณ
-        const firebaseConfig = {
-            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-            authDomain: "skillnest-2026.firebaseapp.com",
-            projectId: "skillnest-2026",
-            storageBucket: "skillnest-2026.firebasestorage.app",
-            messagingSenderId: "416822065212",
-            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-        };
-
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Form Handler
         const signupForm = document.getElementById('signupForm');
         const signupBtn = document.getElementById('signupBtn');
         const errorMessage = document.getElementById('errorMessage');
@@ -344,11 +235,9 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
             const userType = document.querySelector('input[name="userType"]:checked').value;
 
-            // Reset messages
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
 
-            // Validation
             if (password !== confirmPassword) {
                 errorMessage.textContent = 'Passwords do not match!';
                 errorMessage.style.display = 'block';
@@ -361,51 +250,40 @@
                 return;
             }
 
-            // Disable button
             signupBtn.disabled = true;
             signupBtn.textContent = 'Creating Account...';
 
-            try {
-                // Create user with Firebase Authentication
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+            const { data, error } = await supabase.auth.signUp({ email, password });
 
-                // Save additional user data to Firestore
-                await setDoc(doc(db, 'users', user.uid), {
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    userType: userType, // เพิ่มประเภทผู้ใช้
-                    profilePicture: null,
-                    createdAt: new Date().toISOString()
-                });
-
-                successMessage.textContent = 'Account created successfully! Redirecting...';
-                successMessage.style.display = 'block';
-
-                // Redirect to index page after 2 seconds
-                setTimeout(() => {
-                    window.location.href = '../index.html';
-                }, 2000);
-
-            } catch (error) {
-                console.error('Error:', error);
-                
+            if (error) {
                 let errorMsg = 'An error occurred. Please try again.';
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMsg = 'This email is already registered!';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = 'Invalid email address!';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMsg = 'Password is too weak!';
-                }
-                
+                if (error.message.includes('already registered')) errorMsg = 'This email is already registered!';
+                else if (error.message.includes('invalid')) errorMsg = 'Invalid email address!';
+                else if (error.message.includes('weak')) errorMsg = 'Password is too weak!';
                 errorMessage.textContent = errorMsg;
                 errorMessage.style.display = 'block';
-                
                 signupBtn.disabled = false;
                 signupBtn.textContent = 'Sign Up';
+                return;
             }
+
+            // อัปเดต first_name, last_name, user_type หลัง signUp
+            // (Trigger จาก Step 1 สร้าง row ใน public.users แล้ว)
+            if (data.user) {
+                await supabase.from('users').update({
+                    first_name: firstName,
+                    last_name: lastName,
+                    user_type: userType
+                }).eq('id', data.user.id);
+            }
+
+            successMessage.textContent = 'Account created successfully! Redirecting...';
+            successMessage.style.display = 'block';
+
+            setTimeout(() => {
+                // แก้ไขจาก ../index.html เป็น index.html เพื่อให้ path ถูกต้อง
+                window.location.href = 'index.html';
+            }, 2000);
         });
     </script>
 

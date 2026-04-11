@@ -62,33 +62,6 @@
         .form-control:focus { outline: none; border-color: var(--primary-blue); background: rgba(59,130,246,0.05); }
         textarea.form-control { resize: vertical; min-height: 100px; }
 
-        /* แก้ dropdown ให้อ่านได้บน dark theme */
-        select.form-control {
-            background-color: #0f1035;
-            color: var(--text-main);
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a0a0ba' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 2.5rem;
-        }
-        select.form-control:focus {
-            background-color: #131640;
-            border-color: var(--primary-blue);
-        }
-        /* option ต้องกำหนด background เพื่อให้ dropdown list มืด */
-        select.form-control option {
-            background-color: #0f1035;
-            color: var(--text-main);
-            padding: 10px;
-        }
-        select.form-control option:hover,
-        select.form-control option:checked {
-            background-color: #1e2a6e;
-        }
-
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
         .file-upload-area {
@@ -317,22 +290,7 @@
 </div>
 
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-    authDomain: "skillnest-2026.firebaseapp.com",
-    projectId: "skillnest-2026",
-    storageBucket: "skillnest-2026.firebasestorage.app",
-    messagingSenderId: "416822065212",
-    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { supabase, sendNotification } from './supabase.js';
 
 const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';
 const CLOUDINARY_UPLOAD_PRESET = 'skillnest';
@@ -349,48 +307,22 @@ let currentUserName = 'ครู'; // ← ใช้ใน notification message
 //    targetUserId = null  → broadcast ทุกคน
 //    targetUserId = "uid" → ส่งให้ user คนเดียว
 // =============================================
-async function sendNotification({ type, title, message, link = null, targetUserId = 'broadcast' }) {
-    try {
-        await addDoc(collection(db, 'notifications'), {
-            type,
-            title,
-            message,
-            link,
-            targetUserId,   // 'broadcast' = ทุกคน, uid = เฉพาะ user
-            createdAt: serverTimestamp(),
-            readBy: []
-        });
-    } catch (e) {
-        console.error('sendNotification error:', e);
-    }
-}
+// sendNotification imported from supabase.js
 
 // ตรวจสอบ Login และสิทธิ์
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                const userType = userData.userType || 'student';
-                if (userType !== 'teacher') {
-                    alert('คุณไม่มีสิทธิ์สร้างคอร์ส เฉพาะครูเท่านั้น');
-                    window.location.href = 'dashboard.html';
-                    return;
-                }
-                currentUser = user;
-                // เก็บชื่อครูไว้ใช้ใน notification
-                currentUserName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email || 'ครู';
-            }
-        } catch (error) {
-            console.error('Error checking permissions:', error);
-            alert('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์');
-            window.location.href = 'dashboard.html';
-        }
+// ตรวจสอบ Login และสิทธิ์
+const { data: { user: _initUser } } = await supabase.auth.getUser();
+if (!_initUser) { window.location.href = '../login-page/login.html'; }
+else {
+    const { data: _profile } = await supabase.from('users').select('user_type, first_name, last_name, email').eq('id', _initUser.id).single();
+    if (_profile?.user_type !== 'teacher') {
+        alert('คุณไม่มีสิทธิ์สร้างคอร์ส เฉพาะครูเท่านั้น');
+        window.location.href = 'dashboard.html';
     } else {
-        window.location.href = '../login-page/login.html';
+        currentUser = _initUser;
+        currentUserName = `${_profile.first_name || ''} ${_profile.last_name || ''}`.trim() || _profile.email || 'ครู';
     }
-});
+}
 
 // === Thumbnail Upload ===
 document.getElementById('thumbnailInput').addEventListener('change', function(e) {
@@ -582,31 +514,51 @@ window.generateQuizWithAI = async function() {
     const topic = document.getElementById('aiQuizTopic').value.trim();
     const count = document.getElementById('aiQuizCount').value;
     const type = document.getElementById('aiQuizType').value;
-    if (!topic) { alert('❌ กรุณาระบุหัวข้อหรือเนื้อหาก่อนสร้าง Quiz'); return; }
+    
+    if (!topic) { 
+        alert('❌ กรุณาระบุหัวข้อหรือเนื้อหาก่อนสร้าง Quiz'); 
+        return; 
+    }
+    
     const btn = document.getElementById('btnGenQuiz');
     const loadingText = document.getElementById('aiLoadingText');
+    
     btn.disabled = true;
     loadingText.classList.add('show');
-    const typeDesc = type === 'true_false' ? 'ถูก/ผิด (True/False) โดยตัวเลือก A คือ "ถูก" และ B คือ "ผิด"' : 'ปรนัย 4 ตัวเลือก (A, B, C, D)';
+    
+    const typeDesc = type === 'true_false' 
+        ? 'ถูก/ผิด (True/False) โดยตัวเลือก A คือ "ถูก" และ B คือ "ผิด"' 
+        : 'ปรนัย 4 ตัวเลือก (A, B, C, D)';
+        
     const prompt = `คุณคือผู้เชี่ยวชาญการสร้างข้อสอบภาษาไทย
 สร้างแบบทดสอบประเภท${typeDesc} จำนวน ${count} ข้อ เกี่ยวกับหัวข้อ: "${topic}"
 ตอบเป็น JSON array เท่านั้น ไม่ต้องมีข้อความอื่น ไม่ต้องใส่ markdown code block รูปแบบ:
 ${type === 'true_false' ? `[{"question":"คำถาม","type":"true_false","correct":"A หรือ B"}]` : `[{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D"}]`}`;
+
     try {
         const response = await fetch('/api/generate-quiz', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: prompt
+            })
         });
+
         const data = await response.json();
+        
         if (data.error) throw new Error(data.error);
         const rawText = data.text || '';
         const clean = rawText.replace(/```json|```/g, '').trim();
         const questions = JSON.parse(clean);
+        
         document.getElementById('quizList').innerHTML = '';
         quizQuestions = [];
         quizCounter = 0;
+        
         questions.forEach(q => addQuizQuestion(q));
+        
         loadingText.classList.remove('show');
         btn.disabled = false;
     } catch (err) {
@@ -808,7 +760,7 @@ window.createCourse = async function() {
             lessonsData.push({ title: lessonTitle, fileUrl, type: fileType, duration: lessonDuration ? parseInt(lessonDuration) : null, order: i });
         }
 
-        // 3. Save to Firestore
+        // 3. Save to Supabase
         showLoading('กำลังบันทึกข้อมูลคอร์ส...');
         const quizData     = collectQuizData();
         const homeworkData = collectHomeworkData();
@@ -817,16 +769,16 @@ window.createCourse = async function() {
             title, description, category, level,
             instructor:    instructor || 'ไม่ระบุ',
             thumbnail:     thumbnailUrl || '',
-            enrolledCount: 0,
-            createdAt:     serverTimestamp(),
-            creatorId:     currentUser.uid,
-            creatorEmail:  currentUser.email,
+            enrolled_count: 0,
+            creator_id:    currentUser.id,
+            creator_email: currentUser.email,
             lessons:       lessonsData,
             quiz:          quizData,
             homework:      homeworkData
         };
 
-        const docRef = await addDoc(collection(db, 'courses'), courseData);
+        const { data: docRef, error: insertErr } = await supabase.from('courses').insert(courseData).select().single();
+        if (insertErr) throw insertErr;
 
         // =============================================
         // 🔔 ส่ง Notifications หลัง addDoc สำเร็จ

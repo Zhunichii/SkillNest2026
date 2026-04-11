@@ -472,23 +472,7 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-            authDomain: "skillnest-2026.firebaseapp.com",
-            projectId: "skillnest-2026",
-            storageBucket: "skillnest-2026.firebasestorage.app",
-            messagingSenderId: "416822065212",
-            appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        import { supabase } from './supabase.js';
 
         // Cloudinary Configuration
         const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';  // เช่น 'dxxxxxxxx'
@@ -505,7 +489,7 @@
             formData.append('file', file);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             formData.append('folder', 'skillnest/profile-pictures'); // จัดเก็บในโฟลเดอร์
-            formData.append('public_id', `user_${currentUser.uid}`); // ใช้ user ID เป็นชื่อไฟล์
+            formData.append('public_id', `user_${currentUser.id}`); // ใช้ user ID เป็นชื่อไฟล์
             
             try {
                 const response = await fetch(
@@ -591,7 +575,7 @@
         async function loadUserData(user) {
             try {
                 showLoading(true);
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
                 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
@@ -665,8 +649,8 @@
                 // หรือถ้าต้องการลบจริงๆ ต้องใช้ backend API
                 
                 // Update Firestore - ลบ URL
-                await updateDoc(doc(db, 'users', currentUser.uid), {
-                    profilePicture: null
+                await updateDoc(doc(db, 'users', currentUser.id), {
+                    profile_picture: null
                 });
 
                 // Update UI
@@ -700,8 +684,8 @@
                 saveBtn.disabled = true;
 
                 const updates = {
-                    firstName: firstName,
-                    lastName: lastName
+                    first_name: firstName,
+                    last_name: lastName
                 };
 
                 // Upload profile picture to Cloudinary if selected
@@ -722,7 +706,7 @@
                 }
 
                 // Update Firestore
-                await updateDoc(doc(db, 'users', currentUser.uid), updates);
+                await updateDoc(doc(db, 'users', currentUser.id), updates);
 
                 // Update initials
                 profileInitials.textContent = getInitials(firstName, lastName);
@@ -743,7 +727,8 @@
         });
 
         // Auth State Observer
-        onAuthStateChanged(auth, async (user) => {
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            const user = session?.user;
             if (user) {
                 currentUser = user;
                 await loadUserData(user);

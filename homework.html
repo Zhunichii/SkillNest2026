@@ -248,30 +248,17 @@
 </div>
 
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBDvhHzbh8KV4hh_owDABrP1itijZ6fNaw",
-    authDomain: "skillnest-2026.firebaseapp.com",
-    projectId: "skillnest-2026",
-    storageBucket: "skillnest-2026.firebasestorage.app",
-    messagingSenderId: "416822065212",
-    appId: "1:416822065212:web:f7d9356073bacbf5f9ab39"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { supabase } from './supabase.js';
 
 let currentUser = null;
 let myCourses = [];
 let pendingGrade = null; // { submissionId, maxScore }
 
 // Auth check — teacher only
-onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = '../login-page/login.html'; return; }
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) { window.location.href = '../login-page/login.html'; }
+{
+    const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
     if (userDoc.exists() && userDoc.data().userType !== 'teacher') {
         alert('หน้านี้สำหรับครูเท่านั้น');
         window.location.href = 'dashboard.html';
@@ -279,14 +266,14 @@ onAuthStateChanged(auth, async (user) => {
     }
     currentUser = user;
     await loadMyCourses();
-});
+};
 
 async function loadMyCourses() {
     const tabsEl = document.getElementById('courseTabs');
     try {
         const snap = await getDocs(query(
             collection(db, 'courses'),
-            where('creatorId', '==', currentUser.uid)
+            where('creatorId', '==', currentUser.id)
         ));
 
         myCourses = [];
@@ -352,7 +339,7 @@ async function loadHomeworksByCourse(courseId) {
             const uDoc = await getDoc(doc(db, 'users', uid));
             if (uDoc.exists()) {
                 const u = uDoc.data();
-                studentNames[uid] = `${u.firstName||''} ${u.lastName||''}`.trim() || u.email;
+                studentNames[uid] = `${u.first_name||''} ${u.last_name||''}`.trim() || u.email;
             }
         } catch(e) {}
     }
@@ -373,9 +360,9 @@ async function loadHomeworksByCourse(courseId) {
             rowsHtml = `<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:2rem;">ยังไม่มีนักเรียนส่งงาน</td></tr>`;
         } else {
             rowsHtml = hwSubs.map(sub => {
-                const name = studentNames[sub.userId] || sub.userId;
-                const submittedAt = sub.submittedAt?.toDate
-                    ? sub.submittedAt.toDate().toLocaleString('th-TH')
+                const name = studentNames[sub.user_id] || sub.user_id;
+                const submittedAt = sub.submitted_at?.toDate
+                    ? sub.submitted_at.toDate().toLocaleString('th-TH')
                     : 'ไม่ระบุ';
                 const statusBadge = sub.status === 'graded'
                     ? `<span class="status-badge graded">✅ ตรวจแล้ว (${sub.grade}/${hw.maxScore||100})</span>`
