@@ -1040,40 +1040,52 @@
 
         // เริ่ม real-time listener สำหรับ notifications (Supabase Realtime)
         async function startNotificationListener(userId) {
-            if (unsubscribeNotif) unsubscribeNotif(); // cleanup ก่อน
+            // cleanup channel เก่าก่อนเสมอ
+            if (unsubscribeNotif) {
+                unsubscribeNotif();
+                unsubscribeNotif = null;
+                await new Promise(r => setTimeout(r, 300)); // รอให้ channel ปิดก่อน
+            }
 
             // โหลด notifications ครั้งแรก
-            const { data: initial } = await supabase
-                .from('notifications')
-                .select('*')
-                .or(`target_user_id.eq.broadcast,target_user_id.eq.${userId}`)
-                .order('created_at', { ascending: false })
-                .limit(50);
+            try {
+                const { data: initial } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .or(`target_user_id.eq.broadcast,target_user_id.eq.${userId}`)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                allNotifications = initial || [];
+                renderNotifPanel(userId);
+            } catch(e) {
+                console.warn('Notifications load error:', e);
+                allNotifications = [];
+            }
 
-            allNotifications = initial || [];
-            renderNotifPanel(userId);
-
-            // Supabase Realtime — แทน onSnapshot
-            const channel = supabase
-                .channel('notifications_realtime')
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'notifications'
-                }, (payload) => {
-                    const n = payload.new;
-                    // กรองเฉพาะที่เกี่ยวกับ user นี้
-                    if (n.target_user_id !== 'broadcast' && n.target_user_id !== userId) return;
-                    const prevIds = new Set(allNotifications.map(x => x.id));
-                    allNotifications = [n, ...allNotifications].slice(0, 50);
-                    renderNotifPanel(userId);
-                    if (!prevIds.has(n.id) && !(n.read_by || []).includes(userId)) {
-                        showToast(n);
-                    }
-                })
-                .subscribe();
-
-            unsubscribeNotif = () => supabase.removeChannel(channel);
+            // Supabase Realtime — ใช้ unique channel name ป้องกัน duplicate
+            try {
+                const channelName = `notif_${userId}_${Date.now()}`;
+                const channel = supabase
+                    .channel(channelName)
+                    .on('postgres_changes', {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'notifications'
+                    }, (payload) => {
+                        const n = payload.new;
+                        if (n.target_user_id !== 'broadcast' && n.target_user_id !== userId) return;
+                        const prevIds = new Set(allNotifications.map(x => x.id));
+                        allNotifications = [n, ...allNotifications].slice(0, 50);
+                        renderNotifPanel(userId);
+                        if (!prevIds.has(n.id) && !(n.read_by || []).includes(userId)) {
+                            showToast(n);
+                        }
+                    })
+                    .subscribe();
+                unsubscribeNotif = () => supabase.removeChannel(channel);
+            } catch(e) {
+                console.warn('Realtime subscription error:', e);
+            }
         }
 
         function renderNotifPanel(userId) {
@@ -1321,52 +1333,63 @@
         // =============================================
         // 🔐 AUTH
         // =============================================
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            const user = session?.user;
-            if (user) {
-                currentUser = user;
-                try {
-                    const { data: userData } = await supabase.from('users').select('*').eq('id', user.id).single();
-                    if (userData) {
-                        const firstName = userData.first_name || 'User';
-                        const userType = userData.user_type || 'student';
-                        const profileImageUrl = userData.profile_picture || null;
-                        document.getElementById('userName').textContent = firstName;
-                        document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName} 🚀`;
-                        const profileIconContainer = document.getElementById('profileIconContainer');
-                        if (profileImageUrl && profileIconContainer) {
-                            const img = document.createElement('img');
-                            img.src = profileImageUrl;
-                            img.alt = 'Profile';
-                            img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-                            img.onload = () => { profileIconContainer.innerHTML = ''; profileIconContainer.appendChild(img); };
-                        }
-                        if (userType === 'teacher') {
-                            ['manageCourseItem','sidebarCreateCourse','headerCreateCourseBtn','sidebarHomework'].forEach(id => {
-                                const el = document.getElementById(id);
-                                if (el) el.style.display = id.startsWith('sidebar') || id === 'headerCreateCourseBtn' ? 'flex' : 'block';
-                            });
-                        }
-                        if (userType === 'student') {
-                            ['sidebarMyQuizzes', 'sidebarLearning'].forEach(id => {
-                                const el = document.getElementById(id);
-                                if (el) el.style.display = 'flex';
-                            });
-                        }
+        // ใช้ getUser() ครั้งเดียวแทน onAuthStateChange เพื่อป้องกัน fire ซ้ำ
+        async function initDashboard() {
+            const { data: { user }, error } = await supabase.auth.getUser();
+
+            if (!user) {
+                window.location.href = '../login-page/login.html';
+                return;
+            }
+
+            currentUser = user;
+
+            try {
+                const { data: userData } = await supabase.from('users').select('*').eq('id', user.id).single();
+                if (userData) {
+                    const firstName = userData.first_name || 'User';
+                    const userType = userData.user_type || 'student';
+                    const profileImageUrl = userData.profile_picture || null;
+                    document.getElementById('userName').textContent = firstName;
+                    document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName} 🚀`;
+                    const profileIconContainer = document.getElementById('profileIconContainer');
+                    if (profileImageUrl && profileIconContainer) {
+                        const img = document.createElement('img');
+                        img.src = profileImageUrl;
+                        img.alt = 'Profile';
+                        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+                        img.onload = () => { profileIconContainer.innerHTML = ''; profileIconContainer.appendChild(img); };
                     }
-                } catch(e) { console.error('Error fetching user data:', e); }
+                    if (userType === 'teacher') {
+                        ['manageCourseItem','sidebarCreateCourse','headerCreateCourseBtn','sidebarHomework'].forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.style.display = id.startsWith('sidebar') || id === 'headerCreateCourseBtn' ? 'flex' : 'block';
+                        });
+                    }
+                    if (userType === 'student') {
+                        ['sidebarMyQuizzes', 'sidebarLearning'].forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.style.display = 'flex';
+                        });
+                    }
+                }
+            } catch(e) { console.error('Error fetching user data:', e); }
 
-                await loadEnrollments();
+            await loadEnrollments();
+            startNotificationListener(user.id);
 
-                // 🔔 เริ่ม real-time notification listener
-                startNotificationListener(user.id);
+            const urlPage = new URLSearchParams(window.location.search).get('page');
+            if (urlPage === 'my-courses') { switchPage('my-courses'); } else { await loadCourses(); }
+        }
 
-                const urlPage = new URLSearchParams(window.location.search).get('page');
-                if (urlPage === 'my-courses') { switchPage('my-courses'); } else { await loadCourses(); }
-            } else {
+        // handle logout เมื่อ session หมด
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
                 window.location.href = '../login-page/login.html';
             }
         });
+
+        initDashboard();
 
         // =============================================
         // DROPDOWN + LOGOUT
