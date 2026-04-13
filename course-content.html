@@ -888,16 +888,14 @@ let isEnrolled = false;
 let userType = 'student';
 
 // ตรวจสอบ auth และ enrollment ก่อนโหลดคอร์ส
-supabase.auth.onAuthStateChange(async (event, session) => {
-    const user = session?.user;
+async function initCourseContent() {
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         window.location.href = '../login-page/login.html';
         return;
     }
-    if (currentUser) return; // ป้องกัน run ซ้ำ
     currentUser = user;
 
-    // ดึง userType
     try {
         const { data: userData } = await supabase.from('users').select('user_type').eq('id', user.id).single();
         if (userData) userType = userData.user_type || 'student';
@@ -908,7 +906,6 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 
     if (!courseId) { loadCourseData(); return; }
 
-    // ครูดูได้ทุกคอร์ส นักเรียนต้องสมัครก่อน
     if (userType === 'teacher') {
         isEnrolled = true;
         loadCourseData();
@@ -929,7 +926,11 @@ supabase.auth.onAuthStateChange(async (event, session) => {
             loadCourseData();
         }
     }
+}
+supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') window.location.href = '../login-page/login.html';
 });
+initCourseContent();
 
 async function loadCourseData() {
     const urlParams = new URLSearchParams(window.location.search);

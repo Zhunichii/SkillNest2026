@@ -628,15 +628,19 @@
         });
 
         // === Auth ===
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            const user = session?.user;
+        async function initSettings() {
+            const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 currentUser = user;
                 await loadProfile(user);
             } else {
                 window.location.href = '../login-page/login.html';
             }
+        }
+        supabase.auth.onAuthStateChange((event) => {
+            if (event === 'SIGNED_OUT') window.location.href = '../login-page/login.html';
         });
+        initSettings();
     </script>
 </body>
 </html>

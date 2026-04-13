@@ -676,15 +676,24 @@
         });
 
         // Auth State Observer
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            const user = session?.user;
+        // ใช้ getUser() ครั้งเดียวแทน onAuthStateChange เพื่อป้องกัน fire ซ้ำ
+        async function initProfile() {
+            const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 currentUser = user;
                 await loadUserData(user);
             } else {
                 window.location.href = '../login-page/login.html';
             }
+        }
+
+        supabase.auth.onAuthStateChange((event) => {
+            if (event === 'SIGNED_OUT') {
+                window.location.href = '../login-page/login.html';
+            }
         });
+
+        initProfile();
     </script>
 </body>
 </html>
