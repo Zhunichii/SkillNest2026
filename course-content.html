@@ -786,6 +786,19 @@
                 <span id="courseInstructor">👤 กำลังโหลด...</span>
                 <span id="courseCategory">📚 กำลังโหลด...</span>
             </div>
+            <!-- Progress bar -->
+            <div id="progressSection" style="margin-top:1rem;display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+                    <span style="font-size:0.85rem;color:#a0a0ba;">ความคืบหน้า</span>
+                    <span id="progressPct" style="font-size:0.85rem;color:#8b5cf6;font-weight:600;">0%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.08);border-radius:99px;height:6px;overflow:hidden;">
+                    <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border-radius:99px;width:0%;transition:width 0.5s ease;"></div>
+                </div>
+                <button id="btnMarkDone" onclick="markCurrentLessonDone()" style="margin-top:0.8rem;padding:0.5rem 1.2rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
+                    ✅ เรียนจบบทนี้แล้ว
+                </button>
+            </div>
         </div>
 
         <div class="playlist-section">
@@ -888,6 +901,110 @@ let isEnrolled = false;
 let userType = 'student';
 
 // ตรวจสอบ auth และ enrollment ก่อนโหลดคอร์ส
+// ============ PROGRESS TRACKING ============
+let completedLessons = new Set();
+let totalLessons = 0;
+let enrollmentId = null;
+
+async function loadProgress(userId, courseId) {
+    try {
+        const { data } = await supabase
+            .from('enrollments')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('course_id', courseId)
+            .single();
+
+        if (data) {
+            enrollmentId = data.id;
+            completedLessons = new Set(data.completed_lessons || []);
+            totalLessons = data.total_lessons || 0;
+            updateProgressUI();
+            markCompletedLessonsInList();
+        }
+    } catch(e) { console.warn('loadProgress error:', e); }
+}
+
+function updateProgressUI() {
+    const pct = totalLessons > 0
+        ? Math.round((completedLessons.size / totalLessons) * 100)
+        : 0;
+    const bar = document.getElementById('progressBar');
+    const pctEl = document.getElementById('progressPct');
+    const section = document.getElementById('progressSection');
+    if (section) section.style.display = 'block';
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+}
+
+function markCompletedLessonsInList() {
+    document.querySelectorAll('.lesson-item').forEach((el, i) => {
+        const lessonId = `lesson_${i}`;
+        if (completedLessons.has(lessonId)) {
+            el.classList.add('completed');
+            if (!el.querySelector('.lesson-done-badge')) {
+                const badge = document.createElement('span');
+                badge.className = 'lesson-done-badge';
+                badge.textContent = '✓';
+                badge.style.cssText = 'color:#10b981;font-weight:700;margin-left:auto;flex-shrink:0;';
+                el.appendChild(badge);
+            }
+        }
+    });
+}
+
+window.markCurrentLessonDone = async function() {
+    if (!currentUser || !currentCourse) return;
+    const btn = document.getElementById('btnMarkDone');
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    const lessonId = `lesson_${currentLessonIndex}`;
+
+    if (completedLessons.has(lessonId)) {
+        btn.textContent = '✅ บทนี้เรียนจบแล้ว';
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'default';
+        return;
+    }
+
+    btn.textContent = '⏳ กำลังบันทึก...';
+    btn.disabled = true;
+
+    completedLessons.add(lessonId);
+    totalLessons = currentCourse.lessons.length;
+    const progress = Math.round((completedLessons.size / totalLessons) * 100);
+
+    try {
+        await supabase
+            .from('enrollments')
+            .update({
+                completed_lessons: [...completedLessons],
+                progress: progress,
+                total_lessons: totalLessons,
+                last_accessed_lesson: lessonId,
+                last_updated_at: new Date().toISOString()
+            })
+            .eq('user_id', currentUser.id)
+            .eq('course_id', courseId);
+
+        updateProgressUI();
+        markCompletedLessonsInList();
+        btn.textContent = '✅ บันทึกแล้ว!';
+        btn.style.background = 'linear-gradient(135deg,#6b7280,#4b5563)';
+
+        if (progress >= 100) {
+            setTimeout(() => {
+                btn.textContent = '🎉 เรียนจบคอร์สแล้ว!';
+            }, 1000);
+        }
+    } catch(e) {
+        console.error('markDone error:', e);
+        completedLessons.delete(lessonId);
+        btn.textContent = '✅ เรียนจบบทนี้แล้ว';
+        btn.disabled = false;
+    }
+};
+
 async function initCourseContent() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -924,6 +1041,8 @@ async function initCourseContent() {
             document.getElementById('notEnrolledGate').classList.add('show');
         } else {
             loadCourseData();
+            // โหลด progress หลัง confirm enrollment
+            await loadProgress(user.id, courseId);
         }
     }
 }
@@ -1061,6 +1180,20 @@ window.playLesson = function(index) {
             item.classList.remove('active');
         }
     });
+
+    // อัปเดตปุ่มตามสถานะ lesson นี้
+    const lessonId = `lesson_${index}`;
+    const btn = document.getElementById('btnMarkDone');
+    if (btn) {
+        const isDone = completedLessons.has(lessonId);
+        btn.textContent = isDone ? '✅ บทนี้เรียนจบแล้ว' : '✅ เรียนจบบทนี้แล้ว';
+        btn.style.background = isDone
+            ? 'linear-gradient(135deg,#6b7280,#4b5563)'
+            : 'linear-gradient(135deg,#10b981,#059669)';
+        btn.style.opacity = isDone ? '0.6' : '1';
+        btn.style.cursor = isDone ? 'default' : 'pointer';
+        btn.disabled = false;
+    }
 
     const container = document.getElementById("lessonPlayer");
     const lesson = currentCourse.lessons[index];
