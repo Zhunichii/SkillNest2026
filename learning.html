@@ -18,6 +18,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         body {
             background-color: var(--bg-color);
@@ -657,32 +658,11 @@ async function loadLearningData() {
     });
     renderBarChart(dayData);
 
-    // ===== AI ANALYSIS (จาก quiz scores) =====
+    // ===== AI ANALYSIS — เรียก Gemini วิเคราะห์จริง =====
+    _enrCache = enrList;
+    _quizCache = quizList;
     const aiBox = document.getElementById('aiAnalysis');
-    if (quizList.length === 0) {
-        aiBox.innerHTML = '<div style="color:#a0a0ba;">ยังไม่มีข้อมูล Quiz กรุณาทำแบบทดสอบในคอร์สก่อน</div>';
-    } else {
-        const skillData = quizList.map(q => ({
-            name: q.course_id,
-            score: q.pct || 0
-        }));
-        skillData.forEach(s => {
-            const lv = getLevel(s.score);
-            aiBox.innerHTML += `<div class="skill-row">
-                <span>${s.name}</span>
-                <span class="skill-badge ${lv.cls}">${lv.text} (${s.score}%)</span>
-            </div>`;
-        });
-        const suggestions = skillData
-            .filter(s => s.score < 75)
-            .map(s => {
-                const hrs = s.score < 40
-                    ? `ควรทบทวน ${s.name} เพิ่ม ${Math.ceil((40-s.score)/10)*2} ชม.`
-                    : `ทบทวน ${s.name} อีก ${Math.ceil((75-s.score)/15)} ชม.`;
-                return `<div class="suggestion-item">👉 ${hrs}</div>`;
-            }).join('');
-        if (suggestions) aiBox.innerHTML += `<div class="ai-suggestion">${suggestions}</div>`;
-    }
+    await runAIAnalysis(enrList, quizList, aiBox);
 
     // ===== HEATMAP =====
     renderHeatmap(enrList);
@@ -700,6 +680,94 @@ async function loadLearningData() {
             </div>`).join('');
     }
 }
+
+// ============ AI ANALYSIS FUNCTION ============
+async function runAIAnalysis(enrollments, quizScores, aiBox) {
+    aiBox.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;color:#a0a0ba;padding:0.5rem 0;">
+            <div style="width:18px;height:18px;border:2px solid #8b5cf6;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+            <span>AI กำลังวิเคราะห์ข้อมูลการเรียนของคุณ...</span>
+        </div>`;
+
+    if (enrollments.length === 0 && quizScores.length === 0) {
+        aiBox.innerHTML = '<div style="color:#a0a0ba;">ยังไม่มีข้อมูลการเรียน เริ่มเรียนคอร์สแรกเลย!</div>';
+        return;
+    }
+
+    // เตรียมข้อมูลส่งให้ AI
+    const courseList = enrollments.map(e => ({
+        ชื่อคอร์ส: e.courses?.title || e.course_id,
+        ความคืบหน้า: `${e.progress || 0}%`,
+        สถานะ: (e.progress || 0) >= 100 ? 'เรียนจบแล้ว' : 'กำลังเรียน'
+    }));
+
+    const quizList = quizScores.map(q => ({
+        คอร์ส: q.course_id,
+        คะแนน: `${q.score}/${q.total}`,
+        เปอร์เซ็นต์: `${q.pct}%`
+    }));
+
+    const avgPct = quizScores.length
+        ? Math.round(quizScores.reduce((s, q) => s + (q.pct || 0), 0) / quizScores.length)
+        : null;
+
+    const prompt = `คุณเป็น AI ผู้ช่วยวิเคราะห์การเรียนรู้สำหรับแพลตฟอร์ม SkillNest
+
+ข้อมูลการเรียนของนักเรียน:
+คอร์สที่ลงทะเบียน: ${JSON.stringify(courseList, null, 2)}
+ผลคะแนน Quiz: ${quizScores.length > 0 ? JSON.stringify(quizList, null, 2) : 'ยังไม่ได้ทำ Quiz'}
+คะแนนเฉลี่ย: ${avgPct !== null ? avgPct + '%' : 'ยังไม่มี'}
+
+กรุณาวิเคราะห์และตอบเป็นภาษาไทย โดยแบ่งเป็น 3 ส่วน:
+1. จุดแข็ง (สิ่งที่ทำได้ดี)
+2. จุดที่ควรพัฒนา
+3. คำแนะนำสำหรับขั้นตอนถัดไป
+
+ตอบกระชับ ไม่เกิน 5-6 ประโยค ใช้ภาษาเป็นกันเอง สร้างแรงบันดาลใจ`;
+
+    try {
+        const res = await fetch('/api/groq-analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        const text = data.text || '';
+
+        if (!text) throw new Error('AI ไม่ตอบกลับ');
+
+        // แปลง text เป็น HTML สวยงาม
+        const lines = text.split('\n').filter(l => l.trim());
+        let html = '<div style="line-height:1.8;font-size:0.92rem;">';
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed.match(/^[1-9]\.|จุดแข็ง|จุดที่ควร|คำแนะนำ/)) {
+                html += `<div style="color:#8b5cf6;font-weight:600;margin-top:0.8rem;margin-bottom:0.3rem;">${trimmed}</div>`;
+            } else if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
+                html += `<div style="color:#e2e8f0;padding-left:1rem;">👉 ${trimmed.replace(/^[-•]\s*/, '')}</div>`;
+            } else if (trimmed) {
+                html += `<div style="color:#e2e8f0;">${trimmed}</div>`;
+            }
+        });
+        html += `<div style="margin-top:1rem;text-align:right;">
+            <button onclick="rerunAIAnalysis()" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:#8b5cf6;padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.82rem;">🔄 วิเคราะห์ใหม่</button>
+        </div>`;
+        html += '</div>';
+        aiBox.innerHTML = html;
+
+    } catch(e) {
+        console.error('AI Analysis error:', e);
+        aiBox.innerHTML = `<div style="color:#a0a0ba;">ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ <button onclick="rerunAIAnalysis()" style="background:transparent;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></div>`;
+    }
+}
+
+// Store data for re-run
+let _enrCache = [], _quizCache = [];
+
+window.rerunAIAnalysis = async function() {
+    const aiBox = document.getElementById('aiAnalysis');
+    await runAIAnalysis(_enrCache, _quizCache, aiBox);
+};
 
 loadLearningData();
 </script>
