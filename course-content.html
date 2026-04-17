@@ -901,6 +901,15 @@ let isEnrolled = false;
 let userType = 'student';
 
 // ตรวจสอบ auth และ enrollment ก่อนโหลดคอร์ส
+// แปลง duration string เช่น "2:04" หรือ "1:30:00" เป็นวินาที
+function parseDurationToSeconds(dur) {
+    if (!dur) return 0;
+    const parts = String(dur).split(':').map(Number);
+    if (parts.length === 2) return parts[0]*60 + parts[1];
+    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+    return parseInt(dur) || 0;
+}
+
 // ============ PROGRESS TRACKING ============
 let completedLessons = new Set();
 let totalLessons = 0;
@@ -953,6 +962,27 @@ function markCompletedLessonsInList() {
     });
 }
 
+// อัปเดต progress bar ในหน้าตาม % ของ video/pdf
+function updateLessonProgress(pct) {
+    const bar = document.getElementById('progressBar');
+    const pctEl = document.getElementById('progressPct');
+    // blend lesson pct into overall progress
+    if (!bar || !currentCourse) return;
+    const totalL = currentCourse.lessons.length || 1;
+    const basePct = (completedLessons.size / totalL) * 100;
+    const lessonContrib = (1 / totalL) * pct;
+    const display = Math.min(100, Math.round(basePct + lessonContrib));
+    bar.style.width = display + '%';
+    if (pctEl) pctEl.textContent = display + '%';
+}
+
+// auto mark done เมื่อดูวิดีโอถึง 90%
+async function autoMarkLessonDone() {
+    const lessonId = `lesson_${currentLessonIndex}`;
+    if (completedLessons.has(lessonId)) return;
+    await window.markCurrentLessonDone();
+}
+
 window.markCurrentLessonDone = async function() {
     if (!currentUser || !currentCourse) return;
     const btn = document.getElementById('btnMarkDone');
@@ -975,6 +1005,12 @@ window.markCurrentLessonDone = async function() {
     const progress = Math.round((completedLessons.size / totalLessons) * 100);
 
     try {
+        // คำนวณเวลาเรียนรวมโดยประมาณ (นับจากจำนวนบทที่เรียนจบ × ความยาว)
+        const lesson = currentCourse.lessons[currentLessonIndex];
+        const durationSec = lesson?.duration
+            ? parseDurationToSeconds(lesson.duration)
+            : 0;
+
         await supabase
             .from('enrollments')
             .update({
@@ -1291,11 +1327,27 @@ function renderYouTubePlayer(container, fileUrl, title) {
 
 function renderVideoPlayer(container, fileUrl) {
     container.innerHTML = `
-        <video controls autoplay style="width:100%; height:100%;">
+        <video id="lessonVideo" controls autoplay style="width:100%; height:100%;">
             <source src="${fileUrl}">
             เบราว์เซอร์ของคุณไม่รองรับวิดีโอ
         </video>
     `;
+    // ติด event listener หลัง render
+    setTimeout(() => {
+        const vid = document.getElementById('lessonVideo');
+        if (!vid) return;
+        let lastSavedPct = 0;
+        vid.addEventListener('timeupdate', () => {
+            if (!vid.duration) return;
+            const pct = Math.round((vid.currentTime / vid.duration) * 100);
+            updateLessonProgress(pct);
+            // auto-mark done เมื่อดูถึง 90%
+            if (pct >= 90 && lastSavedPct < 90) {
+                autoMarkLessonDone();
+            }
+            lastSavedPct = pct;
+        });
+    }, 500);
 }
 
 function renderImageViewer(container, fileUrl, title) {
@@ -1308,7 +1360,7 @@ function renderImageViewer(container, fileUrl, title) {
 
 function renderPDFViewer(container, fileUrl, title) {
     const viewerId = 'pdf-viewer-' + Date.now();
-    
+
     container.innerHTML = `
         <div class="pdf-viewer-container">
             <div class="pdf-toolbar">
@@ -1318,6 +1370,11 @@ function renderPDFViewer(container, fileUrl, title) {
                 <a href="${fileUrl}" download class="pdf-btn download">
                     ⬇️ ดาวน์โหลด
                 </a>
+                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                    <span style="font-size:0.78rem;color:#a0a0ba;">หน้า</span>
+                    <input id="pdfPageInput" type="number" min="1" value="1" style="width:48px;background:#1a1a3e;border:1px solid rgba(255,255,255,0.15);color:white;padding:3px 6px;border-radius:6px;font-size:0.82rem;" onchange="onPDFPageChange(this.value)">
+                    <span id="pdfTotalPages" style="font-size:0.78rem;color:#a0a0ba;">/ —</span>
+                </div>
                 <select id="viewerMethod" class="pdf-btn" onchange="switchPDFViewer('${fileUrl.replace(/'/g, "\\'")}', '${viewerId}', this.value)">
                     <option value="direct">แสดงโดยตรง</option>
                     <option value="google">Google Docs Viewer</option>
@@ -1328,18 +1385,68 @@ function renderPDFViewer(container, fileUrl, title) {
             <div class="pdf-fallback" id="fallback-${viewerId}">
                 <div style="font-size:48px;">📄</div>
                 <div style="font-size:18px;">ไม่สามารถแสดงตัวอย่าง PDF ได้</div>
-                <div style="font-size:14px; max-width:400px;">
-                    ไฟล์นี้อาจมีข้อจำกัดในการแสดงผล กรุณาเปิดในแท็บใหม่หรือดาวน์โหลด
-                </div>
-                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">
-                    เปิดไฟล์
-                </button>
+                <div style="font-size:14px; max-width:400px;">กรุณาเปิดในแท็บใหม่หรือดาวน์โหลด</div>
+                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">เปิดไฟล์</button>
             </div>
         </div>
     `;
-    
+
     switchPDFViewer(fileUrl, viewerId, 'direct');
+
+    // โหลด PDF.js เพื่อนับหน้าและ track progress
+    loadPDFPageCount(fileUrl);
 }
+
+let _pdfTotalPages = 0;
+
+async function loadPDFPageCount(fileUrl) {
+    try {
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        if (!pdfjsLib) {
+            // fallback: ถ้า pdf.js ไม่มี ให้ track จาก scroll
+            trackPDFScrollProgress();
+            return;
+        }
+        const pdf = await pdfjsLib.getDocument(fileUrl).promise;
+        _pdfTotalPages = pdf.numPages;
+        const totalEl = document.getElementById('pdfTotalPages');
+        const pageInput = document.getElementById('pdfPageInput');
+        if (totalEl) totalEl.textContent = `/ ${_pdfTotalPages}`;
+        if (pageInput) pageInput.max = _pdfTotalPages;
+    } catch(e) {
+        trackPDFScrollProgress();
+    }
+}
+
+function trackPDFScrollProgress() {
+    // ถ้าไม่มี PDF.js ใช้ scroll position ของ iframe แทน
+    setTimeout(() => {
+        const iframe = document.querySelector('.pdf-viewer-container iframe');
+        if (!iframe) return;
+        iframe.addEventListener('load', () => {
+            try {
+                const iDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (!iDoc) return;
+                iDoc.addEventListener('scroll', () => {
+                    const scrolled = iDoc.documentElement.scrollTop || iDoc.body.scrollTop;
+                    const total = iDoc.documentElement.scrollHeight - iDoc.documentElement.clientHeight;
+                    if (total <= 0) return;
+                    const pct = Math.round((scrolled / total) * 100);
+                    updateLessonProgress(pct);
+                    if (pct >= 90) autoMarkLessonDone();
+                });
+            } catch(e) {}
+        });
+    }, 1500);
+}
+
+window.onPDFPageChange = function(page) {
+    if (!_pdfTotalPages) return;
+    const p = Math.max(1, Math.min(parseInt(page) || 1, _pdfTotalPages));
+    const pct = Math.round((p / _pdfTotalPages) * 100);
+    updateLessonProgress(pct);
+    if (pct >= 90) autoMarkLessonDone();
+};
 
 function renderDocumentViewer(container, fileUrl, title, fileType) {
     const icons = { 'ppt': '📊', 'doc': '📝', 'excel': '📈' };

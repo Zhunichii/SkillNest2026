@@ -599,10 +599,10 @@ async function loadLearningData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.location.href = '../login-page/login.html'; return; }
 
-    // 1. โหลด enrollments + courses
+    // 1. โหลด enrollments + courses (รวม lessons เพื่อคำนวณเวลาจริง)
     const { data: enrollments } = await supabase
         .from('enrollments')
-        .select('*, courses(title)')
+        .select('*, courses(title, lessons)')
         .eq('user_id', user.id);
 
     // 2. โหลด quiz scores
@@ -613,15 +613,42 @@ async function loadLearningData() {
 
     const enrList   = enrollments || [];
     const quizList  = quizScores  || [];
-    const completed = enrList.filter(e => e.progress >= 100);
-    const inProgress= enrList.filter(e => e.progress < 100);
-    const avgQuiz   = quizList.length
+
+    // คำนวณสถานะจริงจาก progress field
+    const completed  = enrList.filter(e => (e.progress || 0) >= 100);
+    const inProgress = enrList.filter(e => (e.progress || 0) > 0 && (e.progress || 0) < 100);
+    const notStarted = enrList.filter(e => (e.progress || 0) === 0);
+
+    // คำนวณเวลาเรียนรวม: ดึงจาก courses.lessons duration จริง
+    let totalMinutes = 0;
+    enrList.forEach(e => {
+        const course = e.courses;
+        if (course && Array.isArray(course.lessons)) {
+            course.lessons.forEach(lesson => {
+                if (lesson.duration) {
+                    const parts = String(lesson.duration).split(':').map(Number);
+                    if (parts.length === 2) totalMinutes += parts[0] + parts[1]/60;
+                    else if (parts.length === 3) totalMinutes += parts[0]*60 + parts[1] + parts[2]/60;
+                }
+            });
+        }
+    });
+    // ปรับตาม progress เฉลี่ย (เรียนไปแค่ไหน)
+    const avgProgress = enrList.length
+        ? enrList.reduce((s, e) => s + (e.progress || 0), 0) / enrList.length / 100
+        : 0;
+    const watchedMinutes = Math.round(totalMinutes * avgProgress);
+    const displayTime = watchedMinutes >= 60
+        ? `${(watchedMinutes/60).toFixed(1)} ชม.`
+        : `${watchedMinutes} นาที`;
+
+    const avgQuiz = quizList.length
         ? Math.round(quizList.reduce((s, q) => s + (q.pct || 0), 0) / quizList.length)
         : 0;
 
     // ===== STAT CARDS =====
     document.getElementById('statTotalHours').innerHTML =
-        `${enrList.length * 2} <small style="font-size:1rem;color:var(--text-dim)">ชม. (ประมาณ)</small>`;
+        `${displayTime} <small style="font-size:0.85rem;color:var(--text-dim)">(ประมาณ)</small>`;
     document.getElementById('statCourseDone').innerHTML =
         `${completed.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
     document.getElementById('statCourseActive').innerHTML =
@@ -637,11 +664,22 @@ async function loadLearningData() {
     } else {
         const colors = ['#8b5cf6','#10b981','#f59e0b','#3b82f6','#ef4444','#06b6d4'];
         progressEl.innerHTML = enrList.map((e, i) => {
-            const title = e.courses?.title || 'คอร์สไม่ระบุชื่อ';
-            const pct   = e.progress || 0;
-            const color = colors[i % colors.length];
+            const title    = e.courses?.title || 'คอร์สไม่ระบุชื่อ';
+            const pct      = e.progress || 0;
+            const color    = colors[i % colors.length];
+            const total    = e.total_lessons || 0;
+            const done     = (e.completed_lessons || []).length;
+            const statusText = pct >= 100 ? '✅ จบแล้ว'
+                : pct > 0 ? `📖 ${done}/${total} บท`
+                : '⏳ ยังไม่เริ่ม';
             return `<div class="progress-item">
-                <div class="progress-row"><span>${title}</span><span>${pct}%</span></div>
+                <div class="progress-row">
+                    <span>${title}</span>
+                    <span style="display:flex;gap:8px;align-items:center;">
+                        <span style="font-size:0.75rem;color:#a0a0ba;">${statusText}</span>
+                        <span>${pct}%</span>
+                    </span>
+                </div>
                 <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
             </div>`;
         }).join('');
