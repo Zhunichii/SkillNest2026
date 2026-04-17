@@ -896,9 +896,30 @@ import { supabase } from './supabase.js';
 
 let currentCourse = null;
 let currentLessonIndex = 0;
+let currentPdfText = ''; // เพิ่มบรรทัดนี้
 let currentUser = null;
 let isEnrolled = false;
 let userType = 'student';
+
+async function extractPdfText(pdfUrl) {
+    currentPdfText = '';
+    try {
+        const loadingTask = pdfjsLib.getDocument({ url: pdfUrl, withCredentials: false });
+        const pdf = await loadingTask.promise;
+        let fullText = '';
+        const maxPages = Math.min(pdf.numPages, 30);
+        for (let i = 1; i <= maxPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(item => item.str).join(' ') + '\n';
+        }
+        currentPdfText = fullText.trim();
+        console.log(`✅ Extracted PDF text: ${currentPdfText.length} chars`);
+    } catch (e) {
+        console.warn('⚠️ PDF extract failed:', e.message);
+        currentPdfText = '';
+    }
+}
 
 // ตรวจสอบ auth และ enrollment ก่อนโหลดคอร์ส
 // แปลง duration string เช่น "2:04" หรือ "1:30:00" เป็นวินาที
@@ -1253,7 +1274,8 @@ window.playLesson = function(index) {
     });
 
     if (fileType === 'pdf') {
-        renderPDFViewer(container, fileUrl, lesson.title);
+    renderPDFViewer(container, fileUrl, lesson.title);
+    extractPdfText(fileUrl); // เพิ่มบรรทัดนี้
     }
     else if (fileType === 'youtube') {
         renderYouTubePlayer(container, fileUrl, lesson.title);
@@ -1267,9 +1289,18 @@ window.playLesson = function(index) {
     else if (fileType === 'ppt' || fileType === 'doc' || fileType === 'excel') {
         renderDocumentViewer(container, fileUrl, lesson.title, fileType);
     }
+    else if (fileType === 'youtube') {
+    currentPdfText = ''; // reset
+    renderYouTubePlayer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'video') {
+    currentPdfText = ''; // reset
+    renderVideoPlayer(container, fileUrl);
+    }
     else {
         renderUnsupportedFile(container, fileUrl, lesson.title, fileType);
     }
+    
 }
 
 function detectFileType(url) {
@@ -1608,39 +1639,42 @@ function addBotMessage(text) {
 }
 
 async function sendMessageToGemini(userMessage, retryCount = 0) {
-  try {
-    // --- Gemini (ผ่าน Vercel Serverless Function) ---
-    const response = await fetch('/api/chat', {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: userMessage })
-    });
+    try {
+        const lesson = currentCourse?.lessons?.[currentLessonIndex];
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Chat API Error:", errorData);
+        const response = await fetch('/api/chat', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                prompt: userMessage,
+                courseTitle: currentCourse?.title || '',
+                lessonTitle: lesson?.title || '',
+                pdfText: currentPdfText || ''
+            })
+        });
 
-      if (response.status === 429) {
-        if (retryCount < 3) {
-          await new Promise(resolve => setTimeout(resolve, 5000));
-          return sendMessageToGemini(userMessage, retryCount + 1);
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Chat API Error:", errorData);
+            if (response.status === 429) {
+                if (retryCount < 3) {
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    return sendMessageToGemini(userMessage, retryCount + 1);
+                }
+                return "API หมด quota แล้ว กรุณารอสักครู่แล้วลองใหม่อีกครั้ง 🔑";
+            }
+            if (response.status === 404) return "ไม่พบโมเดล AI กรุณาตรวจสอบการตั้งค่า";
+            if (response.status === 403) return "API Key ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า 🔑";
+            return "ขออภัย เกิดข้อผิดพลาดในการติดต่อ AI";
         }
-        return "API หมด quota แล้ว กรุณารอสักครู่แล้วลองใหม่อีกครั้ง 🔑";
-      }
 
-      if (response.status === 404) return `ไม่พบโมเดล AI กรุณาตรวจสอบการตั้งค่า`;
-      if (response.status === 403) return "API Key ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า 🔑";
+        const data = await response.json();
+        return data.text || "🤔 AI ไม่สามารถตอบกลับได้ในขณะนี้";
 
-      return "ขออภัย เกิดข้อผิดพลาดในการติดต่อ AI";
+    } catch (error) {
+        console.error("Chat API Error:", error);
+        return `❌ เกิดข้อผิดพลาด: ${error.message}`;
     }
-
-    const data = await response.json();
-    return data.text || "🤔 AI ไม่สามารถตอบกลับได้ในขณะนี้";
-
-  } catch (error) {
-    console.error("Chat API Error:", error);
-    return `❌ เกิดข้อผิดพลาด: ${error.message}`;
-  }
 }
 
 // === Tab Switching ===
