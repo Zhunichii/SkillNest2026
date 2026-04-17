@@ -1642,7 +1642,7 @@ async function sendMessageToGemini(userMessage, retryCount = 0) {
     try {
         const lesson = currentCourse?.lessons?.[currentLessonIndex];
 
-        const response = await fetch('/api/chat', {
+        const response = await fetch('../api/chat', {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
