@@ -860,6 +860,7 @@
 
     <div class="chat-section">
         <div class="chat-header">💬 แชทกับ AI Assistant</div>
+        <div id="pdfContextIndicator" style="display:none;padding:4px 12px;background:rgba(16,185,129,0.1);border-bottom:1px solid rgba(16,185,129,0.2);"></div>
         <div class="chat-messages" id="chatMessages">
             <div class="msg-bot">สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ? 😊</div>
         </div>
@@ -1217,6 +1218,12 @@ window.playLesson = function(index) {
         }
     });
 
+    // reset PDF context และ chat history เมื่อเปลี่ยนบทเรียน
+    lessonPdfContext = '';
+    chatHistory = [];
+    const indicator = document.getElementById('pdfContextIndicator');
+    if (indicator) indicator.style.display = 'none';
+
     // อัปเดตปุ่มตามสถานะ lesson นี้
     const lessonId = `lesson_${index}`;
     const btn = document.getElementById('btnMarkDone');
@@ -1254,6 +1261,7 @@ window.playLesson = function(index) {
 
     if (fileType === 'pdf') {
         renderPDFViewer(container, fileUrl, lesson.title);
+        loadPdfContext(fileUrl); // โหลด PDF text เป็น context ให้ chatbot
     }
     else if (fileType === 'youtube') {
         renderYouTubePlayer(container, fileUrl, lesson.title);
@@ -1553,6 +1561,59 @@ const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
 
+// ============ PDF CONTEXT SYSTEM ============
+let lessonPdfContext = '';   // เก็บ text จาก PDF ของบทเรียนปัจจุบัน
+let chatHistory = [];        // เก็บ chat history สำหรับ multi-turn
+
+// โหลด PDF text เมื่อ lesson เปลี่ยน
+async function loadPdfContext(fileUrl) {
+    lessonPdfContext = '';
+    if (!fileUrl || !fileUrl.toLowerCase().includes('.pdf') && !fileUrl.toLowerCase().includes('/pdf/')) return;
+
+    try {
+        // โหลด PDF.js จาก CDN
+        if (!window.pdfjsLib) {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+        }
+
+        const pdf = await window.pdfjsLib.getDocument(fileUrl).promise;
+        let fullText = '';
+        const maxPages = Math.min(pdf.numPages, 15); // จำกัด 15 หน้าแรก
+
+        for (let i = 1; i <= maxPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(' ');
+            fullText += `[หน้า ${i}] ${pageText}
+`;
+        }
+
+        // จำกัดความยาว context ไม่เกิน 4,000 chars
+        lessonPdfContext = fullText.slice(0, 4000);
+        chatHistory = []; // reset history เมื่อเปลี่ยนบทเรียน
+
+        // แสดง indicator ว่า AI อ่าน PDF แล้ว
+        const indicator = document.getElementById('pdfContextIndicator');
+        if (indicator) {
+            indicator.style.display = 'flex';
+            indicator.innerHTML = `<span style="font-size:11px;color:#10b981;">📄 AI อ่าน PDF แล้ว (${pdf.numPages} หน้า)</span>`;
+        }
+        console.log('✅ PDF context loaded:', fullText.length, 'chars');
+    } catch(e) {
+        console.warn('PDF context load failed:', e);
+        lessonPdfContext = '';
+    }
+}
+
+// ============ CHAT FUNCTIONS ============
 sendBtn.addEventListener("click", sendMessage);
 chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") sendMessage();
@@ -1568,7 +1629,7 @@ async function sendMessage() {
     sendBtn.disabled = true;
 
     const typingDiv = addTypingIndicator();
-    const botReply = await sendMessageToGemini(userMessage);
+    const botReply = await sendMessageWithContext(userMessage);
     typingDiv.remove();
 
     addBotMessage(botReply);
@@ -1597,6 +1658,9 @@ function addUserMessage(text) {
     div.innerText = text;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    // เพิ่มใน history
+    chatHistory.push({ role: 'user', content: text });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 }
 
 function addBotMessage(text) {
@@ -1605,42 +1669,53 @@ function addBotMessage(text) {
     div.innerText = text;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    // เพิ่มใน history
+    chatHistory.push({ role: 'assistant', content: text });
 }
 
-async function sendMessageToGemini(userMessage, retryCount = 0) {
-  try {
-    // --- Gemini (ผ่าน Vercel Serverless Function) ---
-    const response = await fetch('/api/chat', {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: userMessage })
-    });
+// ส่งคำถามพร้อม PDF context + chat history
+async function sendMessageWithContext(userMessage) {
+    try {
+        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนปัจจุบัน';
+        const courseTitle = currentCourse?.title || 'คอร์สเรียน';
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Chat API Error:", errorData);
+        // สร้าง system prompt พร้อม context
+        let systemPrompt = `คุณเป็น AI Tutor สำหรับคอร์ส "${courseTitle}" บทเรียน "${lessonTitle}" บน SkillNest
+ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย`;
 
-      if (response.status === 429) {
-        if (retryCount < 3) {
-          await new Promise(resolve => setTimeout(resolve, 5000));
-          return sendMessageToGemini(userMessage, retryCount + 1);
+        if (lessonPdfContext) {
+            systemPrompt += `
+
+เนื้อหาจากเอกสาร PDF ของบทเรียนนี้:
+---
+${lessonPdfContext}
+---
+ตอบคำถามโดยอ้างอิงเนื้อหาข้างต้นเป็นหลัก ถ้าถามนอกเนื้อหาให้บอกว่าอยู่นอกขอบเขตบทเรียนนี้`;
         }
-        return "API หมด quota แล้ว กรุณารอสักครู่แล้วลองใหม่อีกครั้ง 🔑";
-      }
 
-      if (response.status === 404) return `ไม่พบโมเดล AI กรุณาตรวจสอบการตั้งค่า`;
-      if (response.status === 403) return "API Key ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า 🔑";
+        const response = await fetch('/api/groq-analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                systemPrompt,
+                messages: chatHistory,
+                prompt: userMessage
+            })
+        });
 
-      return "ขออภัย เกิดข้อผิดพลาดในการติดต่อ AI";
+        if (!response.ok) {
+            const err = await response.json();
+            if (response.status === 429) return 'API เต็มชั่วคราว กรุณารอแล้วลองใหม่';
+            return 'เกิดข้อผิดพลาด: ' + (err.error || 'unknown');
+        }
+
+        const data = await response.json();
+        return data.text || 'AI ไม่สามารถตอบได้ในขณะนี้';
+
+    } catch (error) {
+        console.error('Chat error:', error);
+        return `❌ เกิดข้อผิดพลาด: ${error.message}`;
     }
-
-    const data = await response.json();
-    return data.text || "🤔 AI ไม่สามารถตอบกลับได้ในขณะนี้";
-
-  } catch (error) {
-    console.error("Chat API Error:", error);
-    return `❌ เกิดข้อผิดพลาด: ${error.message}`;
-  }
 }
 
 // === Tab Switching ===
