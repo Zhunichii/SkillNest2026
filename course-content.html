@@ -1366,95 +1366,147 @@ function renderImageViewer(container, fileUrl, title) {
     `;
 }
 
-function renderPDFViewer(container, fileUrl, title) {
-    const viewerId = 'pdf-viewer-' + Date.now();
+// ============ PDF.js VIEWER (render จริง ไม่ใช่ iframe) ============
+let _pdfDoc       = null;
+let _pdfCurPage   = 1;
+let _pdfTotalPages = 0;
+let _pdfRendering = false;
+let _pdfUrl       = '';
+
+async function ensurePdfJs() {
+    if (window.pdfjsLib) return true;
+    return new Promise(resolve => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+        s.onload = () => {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+            resolve(true);
+        };
+        s.onerror = () => resolve(false);
+        document.head.appendChild(s);
+    });
+}
+
+async function renderPDFViewer(container, fileUrl, title) {
+    _pdfUrl = fileUrl;
+    _pdfCurPage = 1;
+    _pdfDoc = null;
 
     container.innerHTML = `
-        <div class="pdf-viewer-container">
-            <div class="pdf-toolbar">
-                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">
-                    📄 เปิดในแท็บใหม่
-                </button>
-                <a href="${fileUrl}" download class="pdf-btn download">
-                    ⬇️ ดาวน์โหลด
-                </a>
-                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-                    <span style="font-size:0.78rem;color:#a0a0ba;">หน้า</span>
-                    <input id="pdfPageInput" type="number" min="1" value="1" style="width:48px;background:#1a1a3e;border:1px solid rgba(255,255,255,0.15);color:white;padding:3px 6px;border-radius:6px;font-size:0.82rem;" onchange="onPDFPageChange(this.value)">
-                    <span id="pdfTotalPages" style="font-size:0.78rem;color:#a0a0ba;">/ —</span>
+        <div class="pdf-viewer-container" style="display:flex;flex-direction:column;height:100%;background:#1a1a2e;">
+            <div class="pdf-toolbar" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#12122a;flex-shrink:0;flex-wrap:wrap;">
+                <button class="pdf-btn" onclick="pdfPrevPage()">◀ ก่อนหน้า</button>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="font-size:0.82rem;color:#a0a0ba;">หน้า</span>
+                    <input id="pdfPageInput" type="number" min="1" value="1"
+                        style="width:52px;background:#1a1a3e;border:1px solid rgba(255,255,255,0.2);color:white;padding:4px 6px;border-radius:6px;font-size:0.85rem;text-align:center;"
+                        onchange="pdfGoToPage(parseInt(this.value))">
+                    <span id="pdfTotalPages" style="font-size:0.82rem;color:#a0a0ba;">/ —</span>
                 </div>
-                <select id="viewerMethod" class="pdf-btn" onchange="switchPDFViewer('${fileUrl.replace(/'/g, "\\'")}', '${viewerId}', this.value)">
-                    <option value="direct">แสดงโดยตรง</option>
-                    <option value="google">Google Docs Viewer</option>
-                    <option value="mozilla">Mozilla PDF.js</option>
-                </select>
+                <button class="pdf-btn" onclick="pdfNextPage()">ถัดไป ▶</button>
+                <div id="pdfProgressLabel" style="margin-left:auto;font-size:0.8rem;color:#8b5cf6;font-weight:600;"></div>
+                <a href="${fileUrl}" target="_blank" class="pdf-btn" style="background:#374151;">📄 เปิดใหม่</a>
+                <a href="${fileUrl}" download class="pdf-btn download">⬇️ โหลด</a>
             </div>
-            <div id="${viewerId}" style="flex: 1; width: 100%; background: #1e1e1e;"></div>
-            <div class="pdf-fallback" id="fallback-${viewerId}">
-                <div style="font-size:48px;">📄</div>
-                <div style="font-size:18px;">ไม่สามารถแสดงตัวอย่าง PDF ได้</div>
-                <div style="font-size:14px; max-width:400px;">กรุณาเปิดในแท็บใหม่หรือดาวน์โหลด</div>
-                <button class="pdf-btn" onclick="openPDFInNewTab('${fileUrl.replace(/'/g, "\\'")}')">เปิดไฟล์</button>
+            <div id="pdfCanvasWrap" style="flex:1;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;padding:16px;background:#1a1a2e;">
+                <canvas id="pdfCanvas" style="max-width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.5);border-radius:4px;"></canvas>
+            </div>
+            <div id="pdfLoadingMsg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a0a0ba;font-size:0.9rem;background:#1a1a2e;">
+                <div style="text-align:center;"><div style="font-size:2rem;margin-bottom:8px;">📄</div>กำลังโหลด PDF...</div>
             </div>
         </div>
     `;
 
-    switchPDFViewer(fileUrl, viewerId, 'direct');
+    const ok = await ensurePdfJs();
+    if (!ok) {
+        document.getElementById('pdfLoadingMsg').innerHTML =
+            '<div style="text-align:center;color:#ef4444;">โหลด PDF.js ไม่สำเร็จ<br><a href="' + fileUrl + '" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>';
+        return;
+    }
 
-    // โหลด PDF.js เพื่อนับหน้าและ track progress
-    loadPDFPageCount(fileUrl);
-}
-
-let _pdfTotalPages = 0;
-
-async function loadPDFPageCount(fileUrl) {
     try {
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        if (!pdfjsLib) {
-            // fallback: ถ้า pdf.js ไม่มี ให้ track จาก scroll
-            trackPDFScrollProgress();
-            return;
-        }
-        const pdf = await pdfjsLib.getDocument(fileUrl).promise;
-        _pdfTotalPages = pdf.numPages;
+        _pdfDoc = await window.pdfjsLib.getDocument({ url: fileUrl, cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true }).promise;
+        _pdfTotalPages = _pdfDoc.numPages;
+
         const totalEl = document.getElementById('pdfTotalPages');
         const pageInput = document.getElementById('pdfPageInput');
         if (totalEl) totalEl.textContent = `/ ${_pdfTotalPages}`;
         if (pageInput) pageInput.max = _pdfTotalPages;
+
+        document.getElementById('pdfLoadingMsg').style.display = 'none';
+        await pdfRenderPage(1);
+
+        // โหลด PDF context สำหรับ chatbot ด้วย
+        loadPdfContext(fileUrl);
+
     } catch(e) {
-        trackPDFScrollProgress();
+        console.error('PDF load error:', e);
+        document.getElementById('pdfLoadingMsg').innerHTML =
+            `<div style="text-align:center;color:#ef4444;">โหลด PDF ไม่สำเร็จ<br><small>${e.message}</small><br><br><a href="${fileUrl}" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>`;
     }
 }
 
-function trackPDFScrollProgress() {
-    // ถ้าไม่มี PDF.js ใช้ scroll position ของ iframe แทน
-    setTimeout(() => {
-        const iframe = document.querySelector('.pdf-viewer-container iframe');
-        if (!iframe) return;
-        iframe.addEventListener('load', () => {
-            try {
-                const iDoc = iframe.contentDocument || iframe.contentWindow?.document;
-                if (!iDoc) return;
-                iDoc.addEventListener('scroll', () => {
-                    const scrolled = iDoc.documentElement.scrollTop || iDoc.body.scrollTop;
-                    const total = iDoc.documentElement.scrollHeight - iDoc.documentElement.clientHeight;
-                    if (total <= 0) return;
-                    const pct = Math.round((scrolled / total) * 100);
-                    updateLessonProgress(pct);
-                    if (pct >= 90) autoMarkLessonDone();
-                });
-            } catch(e) {}
-        });
-    }, 1500);
+async function pdfRenderPage(pageNum) {
+    if (!_pdfDoc || _pdfRendering) return;
+    _pdfRendering = true;
+    _pdfCurPage = Math.max(1, Math.min(pageNum, _pdfTotalPages));
+
+    try {
+        const page = await _pdfDoc.getPage(_pdfCurPage);
+        const canvas = document.getElementById('pdfCanvas');
+        if (!canvas) { _pdfRendering = false; return; }
+
+        // คำนวณ scale ให้พอดีกับ container
+        const wrap = document.getElementById('pdfCanvasWrap');
+        const containerW = (wrap?.clientWidth || 800) - 32;
+        const viewport0 = page.getViewport({ scale: 1 });
+        const scale = Math.min(containerW / viewport0.width, 2.0);
+        const viewport = page.getViewport({ scale });
+
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        // อัปเดต UI
+        const pageInput = document.getElementById('pdfPageInput');
+        if (pageInput) pageInput.value = _pdfCurPage;
+
+        // คำนวณ progress จากหน้าที่อ่าน
+        const pct = Math.round((_pdfCurPage / _pdfTotalPages) * 100);
+        const label = document.getElementById('pdfProgressLabel');
+        if (label) label.textContent = `${pct}% อ่านแล้ว`;
+
+        updateLessonProgress(pct);
+        if (pct >= 90) autoMarkLessonDone();
+
+    } catch(e) {
+        console.error('pdfRenderPage error:', e);
+    }
+    _pdfRendering = false;
 }
 
-window.onPDFPageChange = function(page) {
-    if (!_pdfTotalPages) return;
-    const p = Math.max(1, Math.min(parseInt(page) || 1, _pdfTotalPages));
-    const pct = Math.round((p / _pdfTotalPages) * 100);
-    updateLessonProgress(pct);
-    if (pct >= 90) autoMarkLessonDone();
+window.pdfPrevPage = function() {
+    if (_pdfCurPage > 1) pdfRenderPage(_pdfCurPage - 1);
 };
+window.pdfNextPage = function() {
+    if (_pdfCurPage < _pdfTotalPages) pdfRenderPage(_pdfCurPage + 1);
+};
+window.pdfGoToPage = function(p) {
+    if (p >= 1 && p <= _pdfTotalPages) pdfRenderPage(p);
+};
+
+window.openPDFInNewTab = function(url) { window.open(url, '_blank'); };
+
+// keyboard navigation สำหรับ PDF
+document.addEventListener('keydown', (e) => {
+    if (!_pdfDoc) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); pdfNextPage(); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); pdfPrevPage(); }
+});
+
 
 function renderDocumentViewer(container, fileUrl, title, fileType) {
     const icons = { 'ppt': '📊', 'doc': '📝', 'excel': '📈' };
@@ -1496,62 +1548,7 @@ function renderUnsupportedFile(container, fileUrl, title, fileType) {
     `;
 }
 
-window.switchPDFViewer = function(fileUrl, viewerId, method) {
-    const viewer = document.getElementById(viewerId);
-    const fallback = document.getElementById('fallback-' + viewerId);
-    
-    if (!viewer) return;
-    
-    viewer.innerHTML = '';
-    viewer.style.display = 'block';
-    if (fallback) fallback.style.display = 'none';
-    
-    if (method === 'direct') {
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.src = fileUrl;
-        
-        iframe.onerror = () => {
-            console.error("Direct PDF load failed");
-            viewer.style.display = 'none';
-            if (fallback) fallback.style.display = 'flex';
-        };
-        
-        viewer.appendChild(iframe);
-    } 
-    else if (method === 'google') {
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
-        
-        iframe.onerror = () => {
-            console.error("Google Docs viewer failed");
-            viewer.style.display = 'none';
-            if (fallback) fallback.style.display = 'flex';
-        };
-        
-        viewer.appendChild(iframe);
-    }
-    else if (method === 'mozilla') {
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(fileUrl)}`;
-        
-        iframe.onerror = () => {
-            console.error("Mozilla PDF.js failed");
-            viewer.style.display = 'none';
-            if (fallback) fallback.style.display = 'flex';
-        };
-        
-        viewer.appendChild(iframe);
-    }
-}
+// switchPDFViewer ถูกแทนที่ด้วย PDF.js canvas renderer
 
 window.openPDFInNewTab = function(url) {
     window.open(url, '_blank');
