@@ -918,19 +918,51 @@ let enrollmentId = null;
 
 async function loadProgress(userId, courseId) {
     try {
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from('enrollments')
             .select('*')
             .eq('user_id', userId)
             .eq('course_id', courseId)
             .single();
 
+        // total_lessons จากคอร์สจริง (ไม่ใช้จาก DB เพราะอาจยังไม่เซ็ต)
+        const realTotal = currentCourse?.lessons?.length || 0;
+
         if (data) {
             enrollmentId = data.id;
             completedLessons = new Set(data.completed_lessons || []);
-            totalLessons = data.total_lessons || 0;
+            // ใช้ค่าจริงจากคอร์ส ไม่ใช่จาก DB ที่อาจเป็น 0
+            totalLessons = realTotal || data.total_lessons || 0;
+
+            // sync total_lessons ถ้ายังไม่ตรง
+            if (realTotal > 0 && data.total_lessons !== realTotal) {
+                const newProgress = Math.round((completedLessons.size / realTotal) * 100);
+                await supabase
+                    .from('enrollments')
+                    .update({ total_lessons: realTotal, progress: newProgress })
+                    .eq('user_id', userId)
+                    .eq('course_id', courseId);
+            }
+
             updateProgressUI();
             markCompletedLessonsInList();
+        } else if (error?.code === 'PGRST116') {
+            // ยังไม่มี row — สร้างใหม่ด้วย upsert
+            totalLessons = realTotal;
+            completedLessons = new Set();
+            await supabase
+                .from('enrollments')
+                .upsert({
+                    user_id: userId,
+                    course_id: courseId,
+                    completed_lessons: [],
+                    progress: 0,
+                    total_lessons: realTotal,
+                    last_accessed_lesson: null,
+                    enrolled_at: new Date().toISOString(),
+                    last_updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id,course_id' });
+            updateProgressUI();
         }
     } catch(e) { console.warn('loadProgress error:', e); }
 }
@@ -1012,17 +1044,19 @@ window.markCurrentLessonDone = async function() {
             ? parseDurationToSeconds(lesson.duration)
             : 0;
 
-        await supabase
+        const { error: upsertErr } = await supabase
             .from('enrollments')
-            .update({
+            .upsert({
+                user_id: currentUser.id,
+                course_id: courseId,
                 completed_lessons: [...completedLessons],
                 progress: progress,
                 total_lessons: totalLessons,
                 last_accessed_lesson: lessonId,
                 last_updated_at: new Date().toISOString()
-            })
-            .eq('user_id', currentUser.id)
-            .eq('course_id', courseId);
+            }, { onConflict: 'user_id,course_id' });
+
+        if (upsertErr) throw upsertErr;
 
         updateProgressUI();
         markCompletedLessonsInList();
@@ -1062,7 +1096,7 @@ async function initCourseContent() {
 
     if (userType === 'teacher') {
         isEnrolled = true;
-        loadCourseData();
+        await loadCourseData();
     } else {
         try {
             const { data: enrollment } = await supabase
@@ -1077,8 +1111,8 @@ async function initCourseContent() {
         if (!isEnrolled) {
             document.getElementById('notEnrolledGate').classList.add('show');
         } else {
-            loadCourseData();
-            // โหลด progress หลัง confirm enrollment
+            // loadCourseData แล้วค่อย loadProgress (ต้องรู้ lessons.length ก่อน)
+            await loadCourseData();
             await loadProgress(user.id, courseId);
         }
     }
