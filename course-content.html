@@ -1379,17 +1379,66 @@ function renderVideoPlayer(container, fileUrl) {
         const vid = document.getElementById('lessonVideo');
         if (!vid) return;
         let lastSavedPct = 0;
+        let saveTimer = null;
+
         vid.addEventListener('timeupdate', () => {
             if (!vid.duration) return;
             const pct = Math.round((vid.currentTime / vid.duration) * 100);
             updateLessonProgress(pct);
+
             // auto-mark done เมื่อดูถึง 90%
             if (pct >= 90 && lastSavedPct < 90) {
                 autoMarkLessonDone();
             }
+
+            // บันทึก progress ลง Supabase ทุก 10% ที่เปลี่ยนไป (debounce 2 วิ)
+            if (pct > 0 && pct !== lastSavedPct && pct % 10 === 0) {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(() => {
+                    saveVideoProgress(pct);
+                }, 2000);
+            }
             lastSavedPct = pct;
         });
+
+        // บันทึกเมื่อ pause หรือออกจากหน้า
+        vid.addEventListener('pause', () => {
+            if (lastSavedPct > 0) saveVideoProgress(lastSavedPct);
+        });
+        window.addEventListener('beforeunload', () => {
+            if (lastSavedPct > 0) saveVideoProgress(lastSavedPct);
+        });
     }, 500);
+}
+
+// บันทึก video progress ลง Supabase โดยไม่ต้องกดปุ่ม
+async function saveVideoProgress(pct) {
+    if (!currentUser || !currentCourse) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    if (!courseId) return;
+
+    const totalL = currentCourse.lessons.length || 1;
+    // คำนวณ overall progress จาก completed lessons + video progress ของบทปัจจุบัน
+    const baseProgress = (completedLessons.size / totalL) * 100;
+    const lessonContrib = (pct / 100) * (1 / totalL) * 100;
+    const overallProgress = Math.min(99, Math.round(baseProgress + lessonContrib)); // max 99 จนกว่าจะกดจบ
+
+    try {
+        await supabase
+            .from('enrollments')
+            .upsert({
+                user_id: currentUser.id,
+                course_id: courseId,
+                completed_lessons: [...completedLessons],
+                progress: overallProgress,
+                total_lessons: totalL,
+                last_updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id,course_id' });
+        console.log(`💾 Video progress saved: ${overallProgress}%`);
+    } catch(e) {
+        console.warn('saveVideoProgress error:', e);
+    }
 }
 
 function renderImageViewer(container, fileUrl, title) {
