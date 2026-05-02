@@ -231,6 +231,64 @@
         <div id="thumbnailPreview"></div>
     </div>
 
+    <!-- AI Outline Generator -->
+    <div class="section">
+        <h2 class="section-title">🤖 สร้างโครงสร้างคอร์สด้วย AI</h2>
+        <div class="ai-gen-area">
+            <div class="ai-gen-title">✨ Gemini จะช่วยสร้าง บทเรียน + Quiz + การบ้าน ให้อัตโนมัติ</div>
+            <div class="form-group">
+                <label>หัวข้อหลักของคอร์ส <span class="required">*</span></label>
+                <input type="text" id="aiOutlineTopic" class="form-control"
+                    placeholder="เช่น Python สำหรับผู้เริ่มต้น, การตลาดออนไลน์, ฟิสิกส์ ม.4">
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <div class="form-group" style="flex:1;min-width:140px;">
+                    <label>จำนวนบทเรียน</label>
+                    <select id="aiOutlineLessons" class="form-control">
+                        <option value="3">3 บท</option>
+                        <option value="5" selected>5 บท</option>
+                        <option value="8">8 บท</option>
+                        <option value="10">10 บท</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;min-width:140px;">
+                    <label>ระดับผู้เรียน</label>
+                    <select id="aiOutlineLevel" class="form-control">
+                        <option value="beginner">ผู้เริ่มต้น</option>
+                        <option value="intermediate" selected>ระดับกลาง</option>
+                        <option value="advanced">ขั้นสูง</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;min-width:140px;">
+                    <label>สร้าง Quiz ด้วย</label>
+                    <select id="aiOutlineQuiz" class="form-control">
+                        <option value="0">ไม่สร้าง</option>
+                        <option value="3">3 ข้อ</option>
+                        <option value="5" selected>5 ข้อ</option>
+                        <option value="10">10 ข้อ</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;min-width:140px;">
+                    <label>สร้างการบ้านด้วย</label>
+                    <select id="aiOutlineHw" class="form-control">
+                        <option value="0">ไม่สร้าง</option>
+                        <option value="1">1 งาน</option>
+                        <option value="2" selected>2 งาน</option>
+                        <option value="3">3 งาน</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;">
+                <button class="btn btn-ai" id="btnGenOutline" onclick="generateOutlineWithAI()">
+                    🚀 สร้างโครงสร้างคอร์สด้วย AI
+                </button>
+                <span id="aiOutlineStatus" style="font-size:0.85rem;color:#a0a0ba;"></span>
+            </div>
+        </div>
+        <!-- Preview ก่อน apply -->
+        <div id="aiOutlinePreview" style="display:none;"></div>
+    </div>
+
     <div class="section">
         <h2 class="section-title">📚 บทเรียน</h2>
         <div id="lessonsList"></div>
@@ -351,6 +409,203 @@ window.removeThumbnail = function() {
 };
 
 // === Add Lesson ===
+// ============ AI OUTLINE GENERATOR ============
+window.generateOutlineWithAI = async function() {
+    const topic   = document.getElementById('aiOutlineTopic').value.trim();
+    const numLess = parseInt(document.getElementById('aiOutlineLessons').value);
+    const level   = document.getElementById('aiOutlineLevel').value;
+    const numQuiz = parseInt(document.getElementById('aiOutlineQuiz').value);
+    const numHw   = parseInt(document.getElementById('aiOutlineHw').value);
+
+    if (!topic) {
+        alert('กรุณากรอกหัวข้อหลักของคอร์สก่อนครับ');
+        document.getElementById('aiOutlineTopic').focus();
+        return;
+    }
+
+    const btn = document.getElementById('btnGenOutline');
+    const status = document.getElementById('aiOutlineStatus');
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังสร้าง...';
+    status.textContent = 'Gemini กำลังคิด...';
+
+    const levelTh = { beginner: 'ผู้เริ่มต้น', intermediate: 'ระดับกลาง', advanced: 'ขั้นสูง' }[level];
+
+    const prompt = `คุณเป็น instructional designer ผู้เชี่ยวชาญ ช่วยสร้างโครงสร้างคอร์สเรียนออนไลน์
+
+หัวข้อ: "${topic}"
+ระดับ: ${levelTh}
+จำนวนบทเรียน: ${numLess} บท
+${numQuiz > 0 ? `สร้าง Quiz: ${numQuiz} ข้อ` : ''}
+${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
+
+ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+{
+  "courseTitle": "ชื่อคอร์ส",
+  "courseDescription": "คำอธิบายคอร์ส 2-3 ประโยค",
+  "lessons": [
+    { "title": "ชื่อบทเรียน", "description": "สิ่งที่จะเรียนในบทนี้", "duration": 15 }
+  ]${numQuiz > 0 ? `,
+  "quiz": [
+    { "question": "คำถาม", "options": ["ก.", "ข.", "ค.", "ง."], "correct": 0, "explanation": "คำอธิบาย" }
+  ]` : ''}${numHw > 0 ? `,
+  "homework": [
+    { "title": "ชื่องาน", "description": "รายละเอียดงานที่ต้องทำ", "maxScore": 100 }
+  ]` : ''}
+}`;
+
+    try {
+        const res = await fetch('/api/generate-quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, type: 'outline' })
+        });
+        const data = await res.json();
+        const rawText = data.text || data.quiz || '';
+
+        // parse JSON
+        const jsonStr = rawText.replace(/```json|```/g, '').trim();
+        const outline = JSON.parse(jsonStr);
+
+        status.textContent = '✅ สร้างเสร็จแล้ว! ตรวจสอบก่อน Apply';
+        btn.disabled = false;
+        btn.textContent = '🚀 สร้างโครงสร้างคอร์สด้วย AI';
+
+        renderOutlinePreview(outline);
+
+    } catch(e) {
+        console.error('AI Outline error:', e);
+        status.textContent = '❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
+        btn.disabled = false;
+        btn.textContent = '🚀 สร้างโครงสร้างคอร์สด้วย AI';
+    }
+};
+
+function renderOutlinePreview(outline) {
+    const previewEl = document.getElementById('aiOutlinePreview');
+    previewEl.style.display = 'block';
+
+    let html = `
+    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:20px;margin-top:12px;">
+        <div style="font-weight:600;color:#a78bfa;margin-bottom:16px;font-size:1rem;">📋 ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
+
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;margin-bottom:12px;">
+            <div style="font-size:0.75rem;color:#a0a0ba;margin-bottom:4px;">ชื่อคอร์สที่แนะนำ</div>
+            <div style="font-weight:600;">${outline.courseTitle || ''}</div>
+            <div style="font-size:0.85rem;color:#a0a0ba;margin-top:4px;">${outline.courseDescription || ''}</div>
+        </div>
+
+        <div style="font-size:0.82rem;color:#a78bfa;font-weight:600;margin-bottom:8px;">📚 ${(outline.lessons||[]).length} บทเรียน</div>
+        ${(outline.lessons||[]).map((l,i) => `
+            <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                <div style="background:#8b5cf6;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;">${i+1}</div>
+                <div>
+                    <div style="font-weight:500;">${l.title}</div>
+                    <div style="font-size:0.8rem;color:#a0a0ba;">${l.description} • ${l.duration} นาที</div>
+                </div>
+            </div>`).join('')}
+
+        ${(outline.quiz||[]).length > 0 ? `
+        <div style="font-size:0.82rem;color:#10b981;font-weight:600;margin:12px 0 8px;">🧠 ${outline.quiz.length} ข้อ Quiz</div>
+        ${outline.quiz.slice(0,2).map((q,i) => `
+            <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.82rem;">
+                ${i+1}. ${q.question}
+            </div>`).join('')}
+        ${outline.quiz.length > 2 ? `<div style="font-size:0.78rem;color:#a0a0ba;padding-top:6px;">และอีก ${outline.quiz.length-2} ข้อ...</div>` : ''}` : ''}
+
+        ${(outline.homework||[]).length > 0 ? `
+        <div style="font-size:0.82rem;color:#f59e0b;font-weight:600;margin:12px 0 8px;">📋 ${outline.homework.length} การบ้าน</div>
+        ${outline.homework.map(h => `
+            <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.82rem;">
+                📌 ${h.title} — ${h.description}
+            </div>`).join('')}` : ''}
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="btn btn-ai" onclick="applyOutline(${JSON.stringify(outline).replace(/"/g,'&quot;')})">
+                ✅ Apply โครงสร้างนี้
+            </button>
+            <button class="btn btn-outline" onclick="document.getElementById('aiOutlinePreview').style.display='none'">
+                ✕ ปิด
+            </button>
+        </div>
+    </div>`;
+
+    previewEl.innerHTML = html;
+    previewEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+window.applyOutline = function(outlineStr) {
+    const outline = typeof outlineStr === 'string' ? JSON.parse(outlineStr.replace(/&quot;/g,'"')) : outlineStr;
+
+    // ใส่ชื่อและคำอธิบายคอร์ส
+    if (outline.courseTitle) {
+        const titleEl = document.getElementById('courseTitle');
+        if (titleEl && !titleEl.value) titleEl.value = outline.courseTitle;
+    }
+    if (outline.courseDescription) {
+        const descEl = document.getElementById('courseDescription');
+        if (descEl && !descEl.value) descEl.value = outline.courseDescription;
+    }
+
+    // สร้างบทเรียน
+    if (outline.lessons && outline.lessons.length > 0) {
+        // ล้างบทเรียนเดิมออกก่อน (ถ้าไม่มีไฟล์แนบ)
+        const confirmClear = lessons.length === 0 || confirm('ต้องการล้างบทเรียนที่มีอยู่แล้วสร้างใหม่ไหม?');
+        if (confirmClear) {
+            lessons = [];
+            lessonCounter = 0;
+            document.getElementById('lessonsList').innerHTML = '';
+        }
+
+        outline.lessons.forEach(l => {
+            addLesson();
+            const lastLesson = document.querySelector('#lessonsList .lesson-item:last-child');
+            if (lastLesson) {
+                const titleInput = lastLesson.querySelector('.lesson-title');
+                const durInput   = lastLesson.querySelector('.lesson-duration');
+                if (titleInput) titleInput.value = l.title;
+                if (durInput)   durInput.value   = l.duration || 15;
+            }
+        });
+    }
+
+    // ใส่ Quiz
+    if (outline.quiz && outline.quiz.length > 0) {
+        document.getElementById('quizList').innerHTML = '';
+        outline.quiz.forEach(q => {
+            addQuizQuestion({
+                question: q.question,
+                options: q.options || [],
+                correct: q.correct ?? 0,
+                explanation: q.explanation || ''
+            });
+        });
+    }
+
+    // ใส่การบ้าน
+    if (outline.homework && outline.homework.length > 0) {
+        document.getElementById('homeworkList').innerHTML = '';
+        outline.homework.forEach(hw => {
+            addHomework();
+            const lastHw = document.querySelector('#homeworkList .homework-item:last-child');
+            if (lastHw) {
+                const titleInput = lastHw.querySelector('.hw-title');
+                const descInput  = lastHw.querySelector('.hw-desc');
+                const scoreInput = lastHw.querySelector('.hw-score');
+                if (titleInput) titleInput.value = hw.title;
+                if (descInput)  descInput.value  = hw.description;
+                if (scoreInput) scoreInput.value = hw.maxScore || 100;
+            }
+        });
+    }
+
+    document.getElementById('aiOutlinePreview').style.display = 'none';
+    document.getElementById('aiOutlineStatus').textContent = `✅ Apply แล้ว ${outline.lessons?.length||0} บท`;
+
+    // scroll ไปที่บทเรียน
+    document.getElementById('lessonsList').scrollIntoView({ behavior: 'smooth' });
+};
+
 window.addLesson = function() {
     lessonCounter++;
     const lessonId = 'lesson-' + lessonCounter;
