@@ -1380,6 +1380,17 @@ function renderVideoPlayer(container, fileUrl) {
         if (!vid) return;
         let lastSavedPct = 0;
         let saveTimer = null;
+        let watchStart = null;  // จับเวลาดูวิดีโอจริง
+        window._watchStart = null;
+
+        vid.addEventListener('play', () => { watchStart = Date.now(); window._watchStart = watchStart; });
+        vid.addEventListener('pause', () => {
+            if (watchStart) {
+                const sec = Math.round((Date.now() - watchStart) / 1000);
+                accumulateWatchSeconds(sec);
+                watchStart = null;
+            }
+        });
 
         vid.addEventListener('timeupdate', () => {
             if (!vid.duration) return;
@@ -1412,6 +1423,12 @@ function renderVideoPlayer(container, fileUrl) {
 }
 
 // บันทึก video progress ลง Supabase โดยไม่ต้องกดปุ่ม
+// สะสม watch_seconds ใน memory ก่อน แล้วค่อย flush ตอน save
+let _pendingWatchSec = 0;
+function accumulateWatchSeconds(sec) {
+    if (sec > 0) _pendingWatchSec += sec;
+}
+
 async function saveVideoProgress(pct) {
     if (!currentUser || !currentCourse) return;
     const urlParams = new URLSearchParams(window.location.search);
@@ -1419,12 +1436,31 @@ async function saveVideoProgress(pct) {
     if (!courseId) return;
 
     const totalL = currentCourse.lessons.length || 1;
-    // คำนวณ overall progress จาก completed lessons + video progress ของบทปัจจุบัน
     const baseProgress = (completedLessons.size / totalL) * 100;
     const lessonContrib = (pct / 100) * (1 / totalL) * 100;
-    const overallProgress = Math.min(99, Math.round(baseProgress + lessonContrib)); // max 99 จนกว่าจะกดจบ
+    const overallProgress = Math.min(99, Math.round(baseProgress + lessonContrib));
+
+    // รวมเวลาที่ดูอยู่ตอนนี้ (ถ้ายังดูอยู่)
+    const vid = document.getElementById('lessonVideo');
+    if (vid && !vid.paused && _watchStart) {
+        const nowSec = Math.round((Date.now() - _watchStart) / 1000);
+        _pendingWatchSec += nowSec;
+        _watchStart = Date.now(); // reset
+    }
 
     try {
+        // ใช้ RPC เพื่อ increment watch_seconds แบบปลอดภัย
+        const { data: existing } = await supabase
+            .from('enrollments')
+            .select('watch_seconds')
+            .eq('user_id', currentUser.id)
+            .eq('course_id', courseId)
+            .single();
+
+        const currentWatch = existing?.watch_seconds || 0;
+        const newWatch = currentWatch + _pendingWatchSec;
+        _pendingWatchSec = 0; // reset หลัง flush
+
         await supabase
             .from('enrollments')
             .upsert({
@@ -1433,9 +1469,10 @@ async function saveVideoProgress(pct) {
                 completed_lessons: [...completedLessons],
                 progress: overallProgress,
                 total_lessons: totalL,
+                watch_seconds: newWatch,
                 last_updated_at: new Date().toISOString()
             }, { onConflict: 'user_id,course_id' });
-        console.log(`💾 Video progress saved: ${overallProgress}%`);
+        console.log(`💾 Saved: ${overallProgress}% | watch: ${Math.round(newWatch/60)} นาที`);
     } catch(e) {
         console.warn('saveVideoProgress error:', e);
     }
