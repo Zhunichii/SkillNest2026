@@ -266,11 +266,9 @@ async function fetchAll() {
         supabase.from('quiz_scores').select('*').in('course_id', ids)
     ]);
 
-    // กรองเอาเฉพาะ student (ไม่นับครูที่ enroll คอร์สตัวเอง)
-    allEnrolls = (e || []).filter(en =>
-        en.user_id !== currentUser.id &&
-        en.users?.user_type !== 'teacher'
-    );
+    // กรองเฉพาะ user_id ที่ไม่ใช่ creator ของคอร์สนั้น
+    const creatorIds = new Set(allCourses.map(c => c.creator_id).filter(Boolean));
+    allEnrolls = (e || []).filter(en => !creatorIds.has(en.user_id));
     allSubs    = s || [];
     allQuiz    = q || [];
 }
