@@ -259,11 +259,18 @@ async function fetchAll() {
 
     const ids = allCourses.map(c => c.id);
     const [{ data: e }, { data: s }, { data: q }] = await Promise.all([
-        supabase.from('enrollments').select('*, users(first_name,last_name,email)').in('course_id', ids),
+        supabase.from('enrollments')
+            .select('*, users(id, first_name, last_name, email, user_type)')
+            .in('course_id', ids),
         supabase.from('submissions').select('*').in('course_id', ids),
         supabase.from('quiz_scores').select('*').in('course_id', ids)
     ]);
-    allEnrolls = e || [];
+
+    // กรองเอาเฉพาะ student (ไม่นับครูที่ enroll คอร์สตัวเอง)
+    allEnrolls = (e || []).filter(en =>
+        en.user_id !== currentUser.id &&
+        en.users?.user_type !== 'teacher'
+    );
     allSubs    = s || [];
     allQuiz    = q || [];
 }
