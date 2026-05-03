@@ -246,8 +246,8 @@ async function init() {
     document.getElementById('navUser').textContent = `👤 ${profile.first_name || 'ครู'}`;
 
     await fetchAll();
-    renderPage();
     document.getElementById('pageLoading').style.display = 'none';
+    renderPage();
     runAI();
 }
 
@@ -289,6 +289,7 @@ function renderPage() {
         <div class="empty-box"><h3>ยังไม่มีคอร์ส</h3><p>สร้างคอร์สแรกของคุณก่อนนะครับ</p></div>`;
         return;
     }
+    // ป้องกัน element ที่ยังไม่ได้ render
 
     main.innerHTML = `
     <!-- Header -->
