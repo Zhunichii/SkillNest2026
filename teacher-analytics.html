@@ -266,9 +266,9 @@ async function fetchAll() {
         supabase.from('quiz_scores').select('*').in('course_id', ids)
     ]);
 
-    // กรองเฉพาะ user_id ที่ไม่ใช่ creator ของคอร์สนั้น
-    const creatorIds = new Set(allCourses.map(c => c.creator_id).filter(Boolean));
-    allEnrolls = (e || []).filter(en => !creatorIds.has(en.user_id));
+    // ไม่ต้องกรองอะไรเพิ่ม — ครูที่ enroll คอร์สตัวเองถูกลบออกจาก DB แล้ว
+    // แค่กรอง null ออก
+    allEnrolls = (e || []).filter(en => en.user_id && en.course_id);
     allSubs    = s || [];
     allQuiz    = q || [];
 }
