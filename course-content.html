@@ -72,12 +72,19 @@
         }
 
         .lesson-section {
-            padding: 1.5rem 2rem;
-            overflow-y: auto;
+            padding: 0;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             height: calc(100vh - 70px);
-            overflow-x: hidden;
+        }
+
+        /* เนื้อหาด้านล่าง (ชื่อคอร์ส progress ฯลฯ) */
+        .lesson-info-area {
+            padding: 1.2rem 2rem 2rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+            max-height: 45vh;
         }
 
         /* Video: คงอัตราส่วน 16:9 */
@@ -99,12 +106,21 @@
             aspect-ratio: 16/9;
         }
 
-        /* PDF/Document — เต็ม viewport height */
+        /* Video คง 16:9 */
+        .lesson-wrapper.type-video {
+            aspect-ratio: 16/9;
+            flex-shrink: 0;
+        }
+
+        /* PDF/Document เต็ม viewport ไม่มี padding */
         .lesson-wrapper.type-pdf,
         .lesson-wrapper.type-image {
             aspect-ratio: unset;
-            height: calc(100vh - 200px);
-            min-height: 480px;
+            flex: 1;
+            min-height: 0;
+            border-radius: 0;
+            margin-bottom: 0;
+            box-shadow: none;
         }
 
         .lesson-wrapper iframe,
@@ -880,6 +896,7 @@
             </div>
         </div>
 
+        <div class="lesson-info-area">
         <div class="course-info">
             <h1 id="courseTitle">กำลังโหลด...</h1>
             <div class="course-meta">
@@ -956,6 +973,7 @@
                 </div>
             </div>
         </div>
+        </div><!-- end lesson-info-area -->
     </div>
 
     <!-- Floating AI Button -->
@@ -1743,7 +1761,7 @@ async function renderPDFViewer(container, fileUrl, title) {
             <div id="pdfCanvasWrap" style="
                 flex:1; overflow-y:auto; overflow-x:auto;
                 display:flex; justify-content:center; align-items:flex-start;
-                padding:20px 16px; background:#2a2a3e;">
+                padding:12px 8px; background:#1e1e2e;">
                 <canvas id="pdfCanvas" style="
                     box-shadow:0 4px 32px rgba(0,0,0,0.6);
                     border-radius:2px; display:block;"></canvas>
@@ -1804,13 +1822,18 @@ async function renderPDFViewer(container, fileUrl, title) {
 async function pdfAutoFit() {
     if (!_pdfDoc) return;
     try {
-        const page      = await _pdfDoc.getPage(1);
+        const page      = await _pdfDoc.getPage(_pdfCurPage || 1);
         const viewport0 = page.getViewport({ scale: 1 });
         const wrap      = document.getElementById('pdfCanvasWrap');
-        const availW    = (wrap?.clientWidth || 900) - 40;
-        _pdfScale       = Math.min(availW / viewport0.width, 2.0);
+        // ใช้ width จริงของ container ลบแค่ 20px สำหรับ scrollbar
+        const availW    = (wrap?.clientWidth || 900) - 20;
+        const availH    = (wrap?.clientHeight || 600) - 24;
+        // fit-width หรือ fit-height แล้วแต่อันไหนเล็กกว่า เพื่อให้เห็นหน้าเต็ม
+        const scaleW    = availW / viewport0.width;
+        const scaleH    = availH / viewport0.height;
+        _pdfScale       = Math.min(scaleW, scaleH, 2.5);
         updateZoomLabel();
-        await pdfRenderPage(1);
+        await pdfRenderPage(_pdfCurPage || 1);
     } catch(e) { console.warn('autoFit error:', e); }
 }
 
@@ -1861,6 +1884,11 @@ function updateZoomLabel() {
 }
 
 window.pdfPrevPage  = function() { if (_pdfCurPage > 1) pdfRenderPage(_pdfCurPage - 1); };
+
+// Re-fit on window resize
+window.addEventListener('resize', () => {
+    if (_pdfDoc) setTimeout(pdfAutoFit, 100);
+});
 window.pdfNextPage  = function() { if (_pdfCurPage < _pdfTotalPages) pdfRenderPage(_pdfCurPage + 1); };
 window.pdfGoToPage  = function(p) { if (p >= 1 && p <= _pdfTotalPages) pdfRenderPage(p); };
 window.pdfZoomIn    = function() { _pdfScale = Math.min(_pdfScale + 0.2, 3.0); updateZoomLabel(); pdfRenderPage(_pdfCurPage); };
