@@ -231,6 +231,64 @@
         <div id="thumbnailPreview"></div>
     </div>
 
+    <!-- CLO Generator -->
+    <div class="section">
+        <h2 class="section-title">🎯 สร้าง CLO ด้วย AI</h2>
+        <div class="ai-gen-area">
+            <div class="ai-gen-title">✨ AI จะช่วยสร้าง Course Learning Outcomes (CLO) ตามมาตรฐาน Bloom's Taxonomy</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <div class="form-group" style="flex:2;min-width:220px;">
+                    <label>ชื่อรายวิชา / หัวข้อคอร์ส <span class="required">*</span></label>
+                    <input type="text" id="cloTopic" class="form-control"
+                        placeholder="เช่น การเขียนโปรแกรม Python, Marketing Management, ฟิสิกส์ ม.4">
+                </div>
+                <div class="form-group" style="flex:1;min-width:140px;">
+                    <label>ระดับผู้เรียน</label>
+                    <select id="cloLevel" class="form-control">
+                        <option value="ระดับมัธยมปลาย">มัธยมปลาย</option>
+                        <option value="ระดับปริญญาตรี" selected>ปริญญาตรี</option>
+                        <option value="ระดับบัณฑิตศึกษา">บัณฑิตศึกษา</option>
+                        <option value="ผู้เริ่มต้นทั่วไป">ผู้เริ่มต้นทั่วไป</option>
+                        <option value="ผู้ประกอบการ/วิชาชีพ">วิชาชีพ</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;min-width:140px;">
+                    <label>จำนวน CLO</label>
+                    <select id="cloCount" class="form-control">
+                        <option value="3">3 CLO</option>
+                        <option value="5" selected>5 CLO</option>
+                        <option value="7">7 CLO</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;min-width:140px;">
+                    <label>เน้น Domain</label>
+                    <select id="cloDomain" class="form-control">
+                        <option value="ผสม" selected>ผสม (แนะนำ)</option>
+                        <option value="Cognitive (ความรู้ความเข้าใจ)">Cognitive</option>
+                        <option value="Psychomotor (ทักษะปฏิบัติ)">Psychomotor</option>
+                        <option value="Affective (เจตคติ)">Affective</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;">
+                <button class="btn btn-ai" id="btnGenCLO" onclick="generateCLOWithAI()">
+                    🎯 สร้าง CLO ด้วย AI
+                </button>
+                <span id="cloStatus" style="font-size:0.85rem;color:#a0a0ba;"></span>
+            </div>
+        </div>
+        <!-- CLO Preview + Edit -->
+        <div id="cloPreview" style="display:none;margin-top:12px;"></div>
+        <!-- CLO Result (editable) -->
+        <div id="cloResult" style="display:none;margin-top:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <label style="font-weight:600;font-size:0.9rem;">📋 CLO ที่สร้างแล้ว (แก้ไขได้)</label>
+                <button onclick="addCLORow()" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#a78bfa;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;">+ เพิ่ม CLO</button>
+            </div>
+            <div id="cloList"></div>
+        </div>
+    </div>
+
     <!-- AI Outline Generator -->
     <div class="section">
         <h2 class="section-title">🤖 สร้างโครงสร้างคอร์สด้วย AI</h2>
@@ -409,6 +467,187 @@ window.removeThumbnail = function() {
 };
 
 // === Add Lesson ===
+// ============ CLO GENERATOR ============
+let cloItems = []; // เก็บ CLO ที่สร้าง
+
+window.generateCLOWithAI = async function() {
+    const topic  = document.getElementById('cloTopic').value.trim();
+    const level  = document.getElementById('cloLevel').value;
+    const count  = parseInt(document.getElementById('cloCount').value);
+    const domain = document.getElementById('cloDomain').value;
+
+    if (!topic) {
+        alert('กรุณากรอกชื่อรายวิชา / หัวข้อคอร์สก่อนครับ');
+        document.getElementById('cloTopic').focus();
+        return;
+    }
+
+    const btn    = document.getElementById('btnGenCLO');
+    const status = document.getElementById('cloStatus');
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังสร้าง CLO...';
+    status.textContent = 'Gemini กำลังวิเคราะห์...';
+
+    const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการออกแบบหลักสูตร (Curriculum Designer) 
+ช่วยสร้าง Course Learning Outcomes (CLO) สำหรับรายวิชา "${topic}" 
+ระดับ: ${level}
+Domain: ${domain}
+จำนวน: ${count} CLO
+
+กรุณาสร้าง CLO ที่:
+1. เขียนตามหลัก SMART (Specific, Measurable, Achievable, Relevant, Time-bound)
+2. ใช้ Action Verbs จาก Bloom's Taxonomy ที่เหมาะสม
+3. วัดผลได้จริงในบริบทการเรียนออนไลน์
+4. เขียนเป็นภาษาไทย
+
+ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+{
+  "courseName": "ชื่อรายวิชา",
+  "clos": [
+    {
+      "id": "CLO1",
+      "level": "ระดับ Bloom เช่น Remember / Understand / Apply / Analyze / Evaluate / Create",
+      "domain": "Cognitive / Psychomotor / Affective",
+      "actionVerb": "คำกริยาที่ใช้ เช่น อธิบาย / วิเคราะห์ / สร้าง",
+      "statement": "ข้อความ CLO เต็ม เช่น นักศึกษาสามารถอธิบาย...",
+      "assessment": "วิธีวัดผล เช่น แบบทดสอบ / การนำเสนอ / โปรเจกต์"
+    }
+  ]
+}`;
+
+    try {
+        const res = await fetch('/api/generate-quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, type: 'outline' })
+        });
+        const data = await res.json();
+        const rawText = data.text || '';
+
+        let jsonStr = rawText.replace(/\`\`\`json|\`\`\`/g, '').trim();
+        let result;
+        try {
+            result = JSON.parse(jsonStr);
+        } catch(e) {
+            // JSON repair
+            jsonStr = jsonStr.replace(/,\s*$/,'').replace(/,\s*([\]}])/g,'$1');
+            const opens = (jsonStr.match(/\[/g)||[]).length - (jsonStr.match(/\]/g)||[]).length;
+            const opensBrace = (jsonStr.match(/\{/g)||[]).length - (jsonStr.match(/\}/g)||[]).length;
+            for(let i=0;i<opensBrace;i++) jsonStr += '}';
+            for(let i=0;i<opens;i++) jsonStr += ']';
+            result = JSON.parse(jsonStr);
+        }
+
+        cloItems = result.clos || [];
+        status.textContent = `✅ สร้าง ${cloItems.length} CLO เสร็จแล้ว`;
+        btn.disabled = false;
+        btn.textContent = '🎯 สร้าง CLO ด้วย AI';
+
+        renderCLOPreview(result);
+        renderCLOResult(cloItems);
+
+    } catch(e) {
+        console.error('CLO error:', e);
+        status.textContent = `❌ ${e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'}`;
+        btn.disabled = false;
+        btn.textContent = '🎯 สร้าง CLO ด้วย AI';
+    }
+};
+
+function renderCLOPreview(result) {
+    const el = document.getElementById('cloPreview');
+    el.style.display = 'block';
+
+    const levelColor = {
+        'Remember':'#6b7280','Understand':'#3b82f6','Apply':'#10b981',
+        'Analyze':'#f59e0b','Evaluate':'#ef4444','Create':'#8b5cf6'
+    };
+
+    const rows = (result.clos||[]).map((c,i) => {
+        const color = levelColor[c.level] || '#8b5cf6';
+        return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start;">
+            <div style="background:${color};color:white;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-top:2px;">${c.id}</div>
+            <div style="flex:1;">
+                <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${c.statement}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">📚 ${c.level}</span>
+                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">🔑 ${c.actionVerb}</span>
+                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">📝 ${c.assessment}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    el.innerHTML = `
+    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:20px;">
+        <div style="font-weight:600;color:#a78bfa;margin-bottom:14px;font-size:0.95rem;">
+            🎯 CLO สำหรับ "${result.courseName}" — ตรวจสอบก่อน Apply
+        </div>
+        <div style="margin-bottom:16px;">${rows}</div>
+        <div style="display:flex;gap:10px;">
+            <button class="btn btn-ai" onclick="applyCLO()">✅ Apply CLO ทั้งหมด</button>
+            <button class="btn" onclick="document.getElementById('cloPreview').style.display='none'"
+                style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);">✕ ปิด</button>
+        </div>
+    </div>`;
+}
+
+function renderCLOResult(clos) {
+    const el = document.getElementById('cloResult');
+    el.style.display = 'block';
+    refreshCLOList();
+}
+
+function refreshCLOList() {
+    const el = document.getElementById('cloList');
+    el.innerHTML = cloItems.map((c, i) => `
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;" id="cloRow_${i}">
+        <div style="background:#8b5cf6;color:white;padding:4px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-top:8px;">${c.id}</div>
+        <input type="text" value="${c.statement}"
+            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 12px;color:white;font-size:0.85rem;"
+            onchange="cloItems[${i}].statement = this.value" placeholder="ข้อความ CLO">
+        <select onchange="cloItems[${i}].level = this.value"
+            style="background:#1a1a3e;border:1px solid rgba(255,255,255,0.15);color:white;padding:6px 8px;border-radius:8px;font-size:0.8rem;flex-shrink:0;">
+            ${['Remember','Understand','Apply','Analyze','Evaluate','Create'].map(l =>
+                `<option ${c.level===l?'selected':''}>${l}</option>`
+            ).join('')}
+        </select>
+        <button onclick="removeCLO(${i})"
+            style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;">🗑</button>
+    </div>`).join('');
+}
+
+window.applyCLO = function() {
+    // ใส่ CLO ลงใน courseDescription ถ้ายังว่าง
+    const descEl = document.getElementById('courseDescription');
+    if (descEl) {
+        const cloText = cloItems.map((c,i) => `${c.id}: ${c.statement}`).join('');
+        if (!descEl.value || descEl.value.trim() === '') {
+            descEl.value = cloText;
+        } else {
+            descEl.value = descEl.value + 'CLO:' + cloText;
+        }
+    }
+    document.getElementById('cloPreview').style.display = 'none';
+    document.getElementById('cloResult').style.display = 'block';
+    document.getElementById('cloStatus').textContent = '✅ Apply แล้ว!';
+    // scroll ไปที่ description
+    descEl?.scrollIntoView({ behavior:'smooth', block:'center' });
+};
+
+window.addCLORow = function() {
+    const newId = `CLO${cloItems.length + 1}`;
+    cloItems.push({ id: newId, level: 'Apply', domain: 'Cognitive', actionVerb: '', statement: '', assessment: '' });
+    refreshCLOList();
+};
+
+window.removeCLO = function(index) {
+    cloItems.splice(index, 1);
+    // re-index IDs
+    cloItems.forEach((c, i) => { c.id = `CLO${i+1}`; });
+    refreshCLOList();
+};
+
 // ============ AI OUTLINE GENERATOR ============
 window.generateOutlineWithAI = async function() {
     const topic   = document.getElementById('aiOutlineTopic').value.trim();
@@ -464,8 +703,25 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
         const rawText = data.text || data.quiz || '';
 
         // parse JSON
-        const jsonStr = rawText.replace(/```json|```/g, '').trim();
-        const outline = JSON.parse(jsonStr);
+        let jsonStr = rawText.replace(/```json|```/g, '').trim();
+
+        // repair JSON ถ้าถูกตัดกลางคัน
+        let outline;
+        try {
+            outline = JSON.parse(jsonStr);
+        } catch(e) {
+            // ลอง repair: ตัด trailing comma แล้วปิด bracket
+            jsonStr = jsonStr.replace(/,\s*$/, '').replace(/,\s*([\]}])/g, '$1');
+            const opens = (jsonStr.match(/\[/g)||[]).length - (jsonStr.match(/\]/g)||[]).length;
+            const opensBrace = (jsonStr.match(/\{/g)||[]).length - (jsonStr.match(/\}/g)||[]).length;
+            for (let i = 0; i < opensBrace; i++) jsonStr += '}';
+            for (let i = 0; i < opens; i++) jsonStr += ']';
+            try {
+                outline = JSON.parse(jsonStr);
+            } catch(e2) {
+                throw new Error('AI ตอบกลับมาแต่ JSON ไม่ครบ ลองลดจำนวนบทเรียนลงแล้วลองใหม่ครับ');
+            }
+        }
 
         status.textContent = '✅ สร้างเสร็จแล้ว! ตรวจสอบก่อน Apply';
         btn.disabled = false;
@@ -475,7 +731,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
 
     } catch(e) {
         console.error('AI Outline error:', e);
-        status.textContent = '❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
+        status.textContent = `❌ ${e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'}`;
         btn.disabled = false;
         btn.textContent = '🚀 สร้างโครงสร้างคอร์สด้วย AI';
     }
