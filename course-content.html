@@ -1185,7 +1185,7 @@ window.markCurrentLessonDone = async function() {
 };
 
 // ── Toggle chat panel (Gemini-style) ──
-function toggleChat() {
+window.toggleChat = function() {
     const panel   = document.getElementById('chatPanel');
     const overlay = document.getElementById('chatOverlay');
     const fab     = document.getElementById('aiFab');
