@@ -77,6 +77,7 @@
             display: flex;
             flex-direction: column;
             height: calc(100vh - 70px);
+            overflow-x: hidden;
         }
 
         /* Video: คงอัตราส่วน 16:9 */
@@ -98,13 +99,12 @@
             aspect-ratio: 16/9;
         }
 
-        /* PDF/Image ยืดตามเนื้อหา ไม่บีบอัตราส่วน */
+        /* PDF/Document — เต็ม viewport height */
         .lesson-wrapper.type-pdf,
         .lesson-wrapper.type-image {
             aspect-ratio: unset;
-            min-height: 500px;
-            height: calc(100vh - 280px);
-            max-height: 80vh;
+            height: calc(100vh - 200px);
+            min-height: 480px;
         }
 
         .lesson-wrapper iframe,
@@ -1662,8 +1662,8 @@ async function renderPDFViewer(container, fileUrl, title) {
     _pdfDoc = null;
 
     container.innerHTML = `
-        <div class="pdf-viewer-container" style="display:flex;flex-direction:column;height:100%;background:#1a1a2e;">
-            <div class="pdf-toolbar" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#12122a;flex-shrink:0;flex-wrap:wrap;">
+        <div class="pdf-viewer-container" style="display:flex;flex-direction:column;height:100%;background:#2a2a3e;border-radius:8px;overflow:hidden;">
+            <div class="pdf-toolbar" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#1a1a3e;border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;flex-wrap:wrap;">
                 <button class="pdf-btn" onclick="pdfPrevPage()">◀ ก่อนหน้า</button>
                 <div style="display:flex;align-items:center;gap:6px;">
                     <span style="font-size:0.82rem;color:#a0a0ba;">หน้า</span>
@@ -1677,7 +1677,7 @@ async function renderPDFViewer(container, fileUrl, title) {
                 <a href="${fileUrl}" target="_blank" class="pdf-btn" style="background:#374151;">📄 เปิดใหม่</a>
                 <a href="${fileUrl}" download class="pdf-btn download">⬇️ โหลด</a>
             </div>
-            <div id="pdfCanvasWrap" style="flex:1;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;padding:16px;background:#1a1a2e;">
+            <div id="pdfCanvasWrap" style="flex:1;overflow-y:auto;overflow-x:auto;display:flex;justify-content:center;align-items:flex-start;padding:16px 8px;background:#2a2a3e;">
                 <canvas id="pdfCanvas" style="max-width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.5);border-radius:4px;"></canvas>
             </div>
             <div id="pdfLoadingMsg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a0a0ba;font-size:0.9rem;background:#1a1a2e;">
@@ -1725,17 +1725,30 @@ async function pdfRenderPage(pageNum) {
         const canvas = document.getElementById('pdfCanvas');
         if (!canvas) { _pdfRendering = false; return; }
 
-        // คำนวณ scale ให้พอดีกับ container
+        // คำนวณ scale ให้พอดีกับ container จริงๆ — ใช้ทั้ง width และ height
         const wrap = document.getElementById('pdfCanvasWrap');
-        const containerW = (wrap?.clientWidth || 800) - 32;
-        const viewport0 = page.getViewport({ scale: 1 });
-        const scale = Math.min(containerW / viewport0.width, 2.0);
+        const containerW = (wrap?.clientWidth  || 900) - 24;
+        const containerH = (wrap?.clientHeight || 600) - 24;
+        const viewport0  = page.getViewport({ scale: 1 });
+
+        // fit-width ก่อน แล้ว clamp ด้วย fit-height ด้วย
+        const scaleW = containerW / viewport0.width;
+        const scaleH = containerH / viewport0.height;
+        // ใช้ fit-width เป็นหลัก แต่ไม่เกิน 2x และ canvas ไม่ใหญ่เกินจอ
+        const scale  = Math.min(scaleW, 2.5);
         const viewport = page.getViewport({ scale });
 
-        canvas.width  = viewport.width;
-        canvas.height = viewport.height;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width  = viewport.width  * dpr;
+        canvas.height = viewport.height * dpr;
+        canvas.style.width  = viewport.width  + 'px';
+        canvas.style.height = viewport.height + 'px';
+        canvas.style.maxWidth = '100%';
+        canvas.style.borderRadius = '4px';
+        canvas.style.boxShadow = '0 4px 24px rgba(0,0,0,0.5)';
 
         const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
         await page.render({ canvasContext: ctx, viewport }).promise;
 
         // อัปเดต UI
