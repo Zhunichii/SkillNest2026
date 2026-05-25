@@ -1634,12 +1634,13 @@ function renderImageViewer(container, fileUrl, title) {
     `;
 }
 
-// ============ PDF.js VIEWER (render จริง ไม่ใช่ iframe) ============
-let _pdfDoc       = null;
-let _pdfCurPage   = 1;
+// ============ PDF.js VIEWER — Teams-style ============
+let _pdfDoc        = null;
+let _pdfCurPage    = 1;
 let _pdfTotalPages = 0;
-let _pdfRendering = false;
-let _pdfUrl       = '';
+let _pdfRendering  = false;
+let _pdfScale      = 1.0;
+let _pdfUrl        = '';
 
 async function ensurePdfJs() {
     if (window.pdfjsLib) return true;
@@ -1657,135 +1658,226 @@ async function ensurePdfJs() {
 }
 
 async function renderPDFViewer(container, fileUrl, title) {
-    _pdfUrl = fileUrl;
-    _pdfCurPage = 1;
-    _pdfDoc = null;
+    _pdfUrl      = fileUrl;
+    _pdfCurPage  = 1;
+    _pdfDoc      = null;
+    _pdfScale    = 1.0;
 
     container.innerHTML = `
-        <div class="pdf-viewer-container" style="display:flex;flex-direction:column;height:100%;background:#2a2a3e;border-radius:8px;overflow:hidden;">
-            <div class="pdf-toolbar" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#1a1a3e;border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;flex-wrap:wrap;">
-                <button class="pdf-btn" onclick="pdfPrevPage()">◀ ก่อนหน้า</button>
-                <div style="display:flex;align-items:center;gap:6px;">
-                    <span style="font-size:0.82rem;color:#a0a0ba;">หน้า</span>
+        <div id="pdfViewer" style="
+            display:flex; flex-direction:column;
+            width:100%; height:100%;
+            background:#1a1a2e; border-radius:8px; overflow:hidden;">
+
+            <!-- Toolbar แบบ Teams -->
+            <div id="pdfToolbar" style="
+                display:flex; align-items:center; justify-content:center;
+                gap:6px; padding:8px 16px;
+                background:rgba(0,0,0,0.5); backdrop-filter:blur(8px);
+                border-bottom:1px solid rgba(255,255,255,0.08);
+                flex-shrink:0; flex-wrap:wrap;">
+
+                <button onclick="pdfPrevPage()" title="หน้าก่อนหน้า"
+                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    width:32px;height:32px;border-radius:6px;cursor:pointer;
+                    font-size:1rem;display:flex;align-items:center;justify-content:center;
+                    transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#9650;</button>
+
+                <button onclick="pdfNextPage()" title="หน้าถัดไป"
+                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    width:32px;height:32px;border-radius:6px;cursor:pointer;
+                    font-size:1rem;display:flex;align-items:center;justify-content:center;
+                    transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#9660;</button>
+
+                <div style="display:flex;align-items:center;gap:6px;margin:0 4px;">
                     <input id="pdfPageInput" type="number" min="1" value="1"
-                        style="width:52px;background:#1a1a3e;border:1px solid rgba(255,255,255,0.2);color:white;padding:4px 6px;border-radius:6px;font-size:0.85rem;text-align:center;"
+                        style="width:44px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+                        color:white;padding:4px 6px;border-radius:6px;font-size:0.82rem;text-align:center;"
                         onchange="pdfGoToPage(parseInt(this.value))">
-                    <span id="pdfTotalPages" style="font-size:0.82rem;color:#a0a0ba;">/ —</span>
+                    <span id="pdfTotalPages" style="font-size:0.82rem;color:rgba(255,255,255,0.6);">/ —</span>
                 </div>
-                <button class="pdf-btn" onclick="pdfNextPage()">ถัดไป ▶</button>
-                <div id="pdfProgressLabel" style="margin-left:auto;font-size:0.8rem;color:#8b5cf6;font-weight:600;"></div>
-                <a href="${fileUrl}" target="_blank" class="pdf-btn" style="background:#374151;">📄 เปิดใหม่</a>
-                <a href="${fileUrl}" download class="pdf-btn download">⬇️ โหลด</a>
+
+                <div style="width:1px;height:20px;background:rgba(255,255,255,0.15);margin:0 4px;"></div>
+
+                <button onclick="pdfZoomOut()" title="ซูมออก"
+                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.1rem;
+                    display:flex;align-items:center;justify-content:center;
+                    transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#8722;</button>
+
+                <span id="pdfZoomLabel" style="font-size:0.8rem;color:rgba(255,255,255,0.7);min-width:38px;text-align:center;">100%</span>
+
+                <button onclick="pdfZoomIn()" title="ซูมเข้า"
+                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.1rem;
+                    display:flex;align-items:center;justify-content:center;
+                    transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#43;</button>
+
+                <button onclick="pdfFitWidth()" title="พอดีความกว้าง"
+                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    padding:4px 10px;height:32px;border-radius:6px;cursor:pointer;font-size:0.75rem;
+                    transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'">Fit</button>
+
+                <div style="width:1px;height:20px;background:rgba(255,255,255,0.15);margin:0 4px;"></div>
+
+                <span id="pdfProgressLabel" style="font-size:0.78rem;color:#8b5cf6;font-weight:600;"></span>
+
+                <div style="margin-left:auto;display:flex;gap:6px;">
+                    <a href="${fileUrl}" target="_blank"
+                        style="background:rgba(255,255,255,0.1);border:none;color:white;
+                        padding:4px 10px;height:32px;border-radius:6px;cursor:pointer;font-size:0.75rem;
+                        text-decoration:none;display:flex;align-items:center;">เปิดใหม่</a>
+                    <a href="${fileUrl}" download
+                        style="background:rgba(59,130,246,0.6);border:none;color:white;
+                        padding:4px 10px;height:32px;border-radius:6px;cursor:pointer;font-size:0.75rem;
+                        text-decoration:none;display:flex;align-items:center;">โหลด</a>
+                </div>
             </div>
-            <div id="pdfCanvasWrap" style="flex:1;overflow-y:auto;overflow-x:auto;display:flex;justify-content:center;align-items:flex-start;padding:16px 8px;background:#2a2a3e;">
-                <canvas id="pdfCanvas" style="max-width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.5);border-radius:4px;"></canvas>
+
+            <!-- Canvas area -->
+            <div id="pdfCanvasWrap" style="
+                flex:1; overflow-y:auto; overflow-x:auto;
+                display:flex; justify-content:center; align-items:flex-start;
+                padding:20px 16px; background:#2a2a3e;">
+                <canvas id="pdfCanvas" style="
+                    box-shadow:0 4px 32px rgba(0,0,0,0.6);
+                    border-radius:2px; display:block;"></canvas>
             </div>
-            <div id="pdfLoadingMsg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a0a0ba;font-size:0.9rem;background:#1a1a2e;">
-                <div style="text-align:center;"><div style="font-size:2rem;margin-bottom:8px;">📄</div>กำลังโหลด PDF...</div>
+
+            <!-- Loading overlay -->
+            <div id="pdfLoadingMsg" style="
+                position:absolute;inset:0;display:flex;align-items:center;
+                justify-content:center;color:#a0a0ba;font-size:0.9rem;
+                background:#1a1a2e;border-radius:8px;z-index:10;">
+                <div style="text-align:center;">
+                    <div style="font-size:2rem;margin-bottom:8px;">📄</div>
+                    กำลังโหลด PDF...
+                </div>
             </div>
         </div>
     `;
+    container.style.position = 'relative';
 
     const ok = await ensurePdfJs();
     if (!ok) {
         document.getElementById('pdfLoadingMsg').innerHTML =
-            '<div style="text-align:center;color:#ef4444;">โหลด PDF.js ไม่สำเร็จ<br><a href="' + fileUrl + '" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>';
+            '<div style="text-align:center;color:#ef4444;">โหลด PDF.js ไม่สำเร็จ<br>' +
+            '<a href="' + fileUrl + '" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>';
         return;
     }
 
     try {
-        _pdfDoc = await window.pdfjsLib.getDocument({ url: fileUrl, cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true }).promise;
+        _pdfDoc = await window.pdfjsLib.getDocument({
+            url: fileUrl,
+            cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+            cMapPacked: true
+        }).promise;
         _pdfTotalPages = _pdfDoc.numPages;
 
-        const totalEl = document.getElementById('pdfTotalPages');
-        const pageInput = document.getElementById('pdfPageInput');
-        if (totalEl) totalEl.textContent = `/ ${_pdfTotalPages}`;
-        if (pageInput) pageInput.max = _pdfTotalPages;
+        const totalEl    = document.getElementById('pdfTotalPages');
+        const pageInput  = document.getElementById('pdfPageInput');
+        if (totalEl)   totalEl.textContent  = `/ ${_pdfTotalPages}`;
+        if (pageInput) pageInput.max        = _pdfTotalPages;
 
         document.getElementById('pdfLoadingMsg').style.display = 'none';
-        await pdfRenderPage(1);
 
-        // โหลด PDF context สำหรับ chatbot ด้วย
+        // Auto-fit scale on first load
+        await pdfAutoFit();
+
+        // Load PDF context for chatbot
         loadPdfContext(fileUrl);
 
     } catch(e) {
         console.error('PDF load error:', e);
         document.getElementById('pdfLoadingMsg').innerHTML =
-            `<div style="text-align:center;color:#ef4444;">โหลด PDF ไม่สำเร็จ<br><small>${e.message}</small><br><br><a href="${fileUrl}" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>`;
+            '<div style="text-align:center;color:#ef4444;">โหลด PDF ไม่สำเร็จ<br>' +
+            '<small>' + e.message + '</small><br><br>' +
+            '<a href="' + fileUrl + '" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>';
     }
+}
+
+async function pdfAutoFit() {
+    if (!_pdfDoc) return;
+    try {
+        const page      = await _pdfDoc.getPage(1);
+        const viewport0 = page.getViewport({ scale: 1 });
+        const wrap      = document.getElementById('pdfCanvasWrap');
+        const availW    = (wrap?.clientWidth || 900) - 40;
+        _pdfScale       = Math.min(availW / viewport0.width, 2.0);
+        updateZoomLabel();
+        await pdfRenderPage(1);
+    } catch(e) { console.warn('autoFit error:', e); }
 }
 
 async function pdfRenderPage(pageNum) {
     if (!_pdfDoc || _pdfRendering) return;
     _pdfRendering = true;
-    _pdfCurPage = Math.max(1, Math.min(pageNum, _pdfTotalPages));
+    _pdfCurPage   = Math.max(1, Math.min(pageNum, _pdfTotalPages));
 
     try {
-        const page = await _pdfDoc.getPage(_pdfCurPage);
-        const canvas = document.getElementById('pdfCanvas');
+        const page     = await _pdfDoc.getPage(_pdfCurPage);
+        const viewport = page.getViewport({ scale: _pdfScale });
+        const canvas   = document.getElementById('pdfCanvas');
         if (!canvas) { _pdfRendering = false; return; }
 
-        // คำนวณ scale ให้พอดีกับ container จริงๆ — ใช้ทั้ง width และ height
-        const wrap = document.getElementById('pdfCanvasWrap');
-        const containerW = (wrap?.clientWidth  || 900) - 24;
-        const containerH = (wrap?.clientHeight || 600) - 24;
-        const viewport0  = page.getViewport({ scale: 1 });
-
-        // fit-width ก่อน แล้ว clamp ด้วย fit-height ด้วย
-        const scaleW = containerW / viewport0.width;
-        const scaleH = containerH / viewport0.height;
-        // ใช้ fit-width เป็นหลัก แต่ไม่เกิน 2x และ canvas ไม่ใหญ่เกินจอ
-        const scale  = Math.min(scaleW, 2.5);
-        const viewport = page.getViewport({ scale });
-
         const dpr = window.devicePixelRatio || 1;
-        canvas.width  = viewport.width  * dpr;
-        canvas.height = viewport.height * dpr;
+        canvas.width        = viewport.width  * dpr;
+        canvas.height       = viewport.height * dpr;
         canvas.style.width  = viewport.width  + 'px';
         canvas.style.height = viewport.height + 'px';
-        canvas.style.maxWidth = '100%';
-        canvas.style.borderRadius = '4px';
-        canvas.style.boxShadow = '0 4px 24px rgba(0,0,0,0.5)';
 
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
 
-        // อัปเดต UI
+        // Scroll canvas wrap to top on page change
+        const wrap = document.getElementById('pdfCanvasWrap');
+        if (wrap) wrap.scrollTop = 0;
+
+        // Update UI
         const pageInput = document.getElementById('pdfPageInput');
         if (pageInput) pageInput.value = _pdfCurPage;
 
-        // คำนวณ progress จากหน้าที่อ่าน
-        const pct = Math.round((_pdfCurPage / _pdfTotalPages) * 100);
+        const pct   = Math.round((_pdfCurPage / _pdfTotalPages) * 100);
         const label = document.getElementById('pdfProgressLabel');
-        if (label) label.textContent = `${pct}% อ่านแล้ว`;
+        if (label) label.textContent = pct + '%';
 
         updateLessonProgress(pct);
         if (pct >= 90) autoMarkLessonDone();
 
-    } catch(e) {
-        console.error('pdfRenderPage error:', e);
-    }
+    } catch(e) { console.error('pdfRenderPage error:', e); }
     _pdfRendering = false;
 }
 
-window.pdfPrevPage = function() {
-    if (_pdfCurPage > 1) pdfRenderPage(_pdfCurPage - 1);
-};
-window.pdfNextPage = function() {
-    if (_pdfCurPage < _pdfTotalPages) pdfRenderPage(_pdfCurPage + 1);
-};
-window.pdfGoToPage = function(p) {
-    if (p >= 1 && p <= _pdfTotalPages) pdfRenderPage(p);
-};
+function updateZoomLabel() {
+    const el = document.getElementById('pdfZoomLabel');
+    if (el) el.textContent = Math.round(_pdfScale * 100) + '%';
+}
+
+window.pdfPrevPage  = function() { if (_pdfCurPage > 1) pdfRenderPage(_pdfCurPage - 1); };
+window.pdfNextPage  = function() { if (_pdfCurPage < _pdfTotalPages) pdfRenderPage(_pdfCurPage + 1); };
+window.pdfGoToPage  = function(p) { if (p >= 1 && p <= _pdfTotalPages) pdfRenderPage(p); };
+window.pdfZoomIn    = function() { _pdfScale = Math.min(_pdfScale + 0.2, 3.0); updateZoomLabel(); pdfRenderPage(_pdfCurPage); };
+window.pdfZoomOut   = function() { _pdfScale = Math.max(_pdfScale - 0.2, 0.4); updateZoomLabel(); pdfRenderPage(_pdfCurPage); };
+window.pdfFitWidth  = function() { pdfAutoFit(); };
 
 window.openPDFInNewTab = function(url) { window.open(url, '_blank'); };
 
-// keyboard navigation สำหรับ PDF
+// Keyboard navigation
 document.addEventListener('keydown', (e) => {
     if (!_pdfDoc) return;
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); pdfNextPage(); }
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); pdfPrevPage(); }
+    if (e.key === '+' || e.key === '=') pdfZoomIn();
+    if (e.key === '-')                  pdfZoomOut();
 });
 
 
