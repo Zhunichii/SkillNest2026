@@ -80,21 +80,10 @@
             height: calc(100vh - 70px);
         }
 
-        /* PDF mode — section ไม่ scroll เพราะ PDF viewer จัดการเอง */
-        .lesson-section.pdf-mode {
-            overflow: hidden;
-        }
-
         /* เนื้อหาด้านล่าง (ชื่อคอร์ส progress ฯลฯ) */
         .lesson-info-area {
             padding: 1.2rem 2rem 2rem;
-            overflow-y: auto;
             flex-shrink: 0;
-        }
-
-        /* PDF mode: จำกัดความสูง info ไม่ให้ดันขึ้นมากเกิน */
-        .pdf-mode .lesson-info-area {
-            max-height: 42vh;
         }
 
         /* Video: คงอัตราส่วน 16:9 */
@@ -124,11 +113,12 @@
             width: 100%;
         }
 
-        /* PDF/Document — เต็ม viewport ที่เหลือ */
+        /* PDF/Document — สูงคงที่ตามจอ */
         .lesson-wrapper.type-pdf {
             aspect-ratio: unset;
-            flex: 1;
-            min-height: 0;
+            height: calc(100vh - 180px);
+            min-height: 400px;
+            flex-shrink: 0;
             border-radius: 0;
             margin-bottom: 0;
             box-shadow: none;
@@ -1786,9 +1776,9 @@ async function renderPDFViewer(container, fileUrl, title) {
 
             <!-- Canvas area -->
             <div id="pdfCanvasWrap" style="
-                flex:1; overflow-y:auto; overflow-x:hidden;
-                display:flex; justify-content:center; align-items:flex-start;
-                padding:0; background:#1e1e2e;">
+                flex:1; overflow-y:auto; overflow-x:auto;
+                display:flex; justify-content:center; align-items:center;
+                padding:8px; background:#1e1e2e;">
                 <canvas id="pdfCanvas" style="
                     box-shadow:0 4px 32px rgba(0,0,0,0.6);
                     border-radius:2px; display:block;"></canvas>
@@ -1855,10 +1845,11 @@ async function pdfAutoFit() {
         const viewport0 = page.getViewport({ scale: 1 });
         const wrap      = document.getElementById('pdfCanvasWrap');
         if (!wrap) return;
-
-        // ใช้ fit-width เป็นหลัก — ให้ canvas กว้างเท่า container
-        const availW = wrap.clientWidth - 16; // ลบแค่ scrollbar
-        _pdfScale    = Math.min(availW / viewport0.width, 3.0);
+        const availW = wrap.clientWidth  - 16;
+        const availH = wrap.clientHeight - 16;
+        const scaleW = availW / viewport0.width;
+        const scaleH = availH / viewport0.height;
+        _pdfScale    = Math.min(scaleW, scaleH, 3.0);
         updateZoomLabel();
         await pdfRenderPage(_pdfCurPage || 1);
     } catch(e) { console.warn('autoFit error:', e); }
