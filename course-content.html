@@ -897,12 +897,12 @@
             to   { opacity:1; transform:translateX(0) scale(1); }
         }
         @keyframes avatarEnter {
-            from { opacity:0; transform:translateY(80px) scale(0.7); }
-            to   { opacity:1; transform:translateY(0) scale(1); }
+            from { opacity:0; transform:translateY(-50%) translateX(80px) scale(0.8); }
+            to   { opacity:1; transform:translateY(-50%) translateX(0) scale(1); }
         }
         @keyframes avatarLeave {
-            from { opacity:1; transform:translateY(0) scale(1); }
-            to   { opacity:0; transform:translateY(80px) scale(0.7); }
+            from { opacity:1; transform:translateY(-50%) translateX(0) scale(1); }
+            to   { opacity:0; transform:translateY(-50%) translateX(80px) scale(0.8); }
         }
         @keyframes typingDot {
             0%,60%,100% { opacity:0.2; transform:translateY(0); }
@@ -959,14 +959,15 @@
         }
         .avatar-scene.open { display: block; }
 
-        /* ── Avatar ลอยขวาล่าง ── */
+        /* ── Avatar กลางขวาของจอ ── */
         .avatar-character {
             position: absolute;
-            bottom: 0; right: 24px;
+            top: 50%; right: 24px;
+            transform: translateY(-50%);
             pointer-events: all;
             animation: avatarEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
             cursor: pointer;
-            transform-origin: bottom center;
+            transform-origin: center right;
         }
         .avatar-character:hover .avatar-svg-wrap { filter: brightness(1.1); }
         .avatar-character.closing {
@@ -983,10 +984,11 @@
                     drop-shadow(0 0 20px rgba(139,92,246,0.6));
         }
 
-        /* ── Chat Panel อยู่ซ้ายของ avatar ── */
+        /* ── Chat Panel ซ้ายของ avatar ── */
         .avatar-chat-panel {
             position: absolute;
-            bottom: 24px; right: 200px;
+            top: 50%; right: 210px;
+            transform: translateY(-50%);
             width: 290px;
             background: rgba(10,8,28,0.88);
             backdrop-filter: blur(20px);
