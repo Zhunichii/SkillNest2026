@@ -73,10 +73,16 @@
 
         .lesson-section {
             padding: 0;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             height: calc(100vh - 70px);
+        }
+
+        /* PDF mode — section ไม่ scroll เพราะ PDF viewer จัดการเอง */
+        .lesson-section.pdf-mode {
+            overflow: hidden;
         }
 
         /* เนื้อหาด้านล่าง (ชื่อคอร์ส progress ฯลฯ) */
@@ -84,7 +90,11 @@
             padding: 1.2rem 2rem 2rem;
             overflow-y: auto;
             flex-shrink: 0;
-            max-height: 45vh;
+        }
+
+        /* PDF mode: จำกัดความสูง info ไม่ให้ดันขึ้นมากเกิน */
+        .pdf-mode .lesson-info-area {
+            max-height: 42vh;
         }
 
         /* Video: คงอัตราส่วน 16:9 */
@@ -106,21 +116,28 @@
             aspect-ratio: 16/9;
         }
 
-        /* Video คง 16:9 */
+        /* Video คง 16:9 และไม่เกิน 60vh */
         .lesson-wrapper.type-video {
             aspect-ratio: 16/9;
             flex-shrink: 0;
+            max-height: 60vh;
+            width: 100%;
         }
 
-        /* PDF/Document เต็ม viewport ไม่มี padding */
-        .lesson-wrapper.type-pdf,
-        .lesson-wrapper.type-image {
+        /* PDF/Document — เต็ม viewport ที่เหลือ */
+        .lesson-wrapper.type-pdf {
             aspect-ratio: unset;
             flex: 1;
             min-height: 0;
             border-radius: 0;
             margin-bottom: 0;
             box-shadow: none;
+        }
+
+        .lesson-wrapper.type-image {
+            aspect-ratio: unset;
+            max-height: 70vh;
+            flex-shrink: 0;
         }
 
         .lesson-wrapper iframe,
@@ -1453,29 +1470,39 @@ window.playLesson = function(index) {
         detectedType: detectFileType(fileUrl)
     });
 
-    if (fileType === 'pdf') {
+    const lessonSection = document.querySelector('.lesson-section');
+    const infoArea = document.querySelector('.lesson-info-area');
+
+    if (fileType === 'pdf' || fileType === 'ppt' || fileType === 'doc' || fileType === 'excel') {
         container.className = 'lesson-wrapper type-pdf';
-        renderPDFViewer(container, fileUrl, lesson.title);
-        loadPdfContext(fileUrl); // โหลด PDF text เป็น context ให้ chatbot
+        // PDF mode: section ไม่ scroll, info อยู่ด้านล่าง
+        if (lessonSection) lessonSection.classList.add('pdf-mode');
+        if (infoArea) infoArea.style.display = 'block';
+
+        if (fileType === 'pdf') {
+            renderPDFViewer(container, fileUrl, lesson.title);
+            loadPdfContext(fileUrl);
+        } else {
+            renderDocumentViewer(container, fileUrl, lesson.title, fileType);
+        }
     }
-    else if (fileType === 'youtube') {
+    else if (fileType === 'youtube' || fileType === 'video') {
         container.className = 'lesson-wrapper type-video';
-        renderYouTubePlayer(container, fileUrl, lesson.title);
-    }
-    else if (fileType === 'video') {
-        container.className = 'lesson-wrapper type-video';
-        renderVideoPlayer(container, fileUrl);
+        // Video mode: section scroll ได้ปกติ
+        if (lessonSection) lessonSection.classList.remove('pdf-mode');
+        if (infoArea) infoArea.style.display = 'block';
+
+        if (fileType === 'youtube') renderYouTubePlayer(container, fileUrl, lesson.title);
+        else renderVideoPlayer(container, fileUrl);
     }
     else if (fileType === 'image') {
         container.className = 'lesson-wrapper type-image';
+        if (lessonSection) lessonSection.classList.remove('pdf-mode');
         renderImageViewer(container, fileUrl, lesson.title);
-    }
-    else if (fileType === 'ppt' || fileType === 'doc' || fileType === 'excel') {
-        container.className = 'lesson-wrapper type-pdf';
-        renderDocumentViewer(container, fileUrl, lesson.title, fileType);
     }
     else {
         container.className = 'lesson-wrapper type-video';
+        if (lessonSection) lessonSection.classList.remove('pdf-mode');
         renderUnsupportedFile(container, fileUrl, lesson.title, fileType);
     }
 }
@@ -1804,7 +1831,9 @@ async function renderPDFViewer(container, fileUrl, title) {
 
         document.getElementById('pdfLoadingMsg').style.display = 'none';
 
-        // Auto-fit scale on first load
+        // Auto-fit หลังจาก browser render container แล้ว
+        await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => requestAnimationFrame(r));
         await pdfAutoFit();
 
         // Load PDF context for chatbot
