@@ -1560,15 +1560,24 @@ window.openAvatarTeacher = function() {
     if (panel) panel.classList.remove('closing');
     if (fab)   fab.style.display = 'none';
 
-    // Update course tag
+    // Update course tag + ชื่ออาจารย์
     const tag = document.getElementById('avatarCourseTag');
     if (tag && currentCourse) tag.textContent = currentCourse.title || '';
+
+    // ชื่ออาจารย์จากผู้สร้างคอร์ส
+    const instructorName = currentCourse?.instructor || '';
+    const displayName    = instructorName ? `อ. ${instructorName}` : 'อ. AI Assistant';
+    const nameTag    = document.getElementById('avatarNameTag');
+    const headerName = document.getElementById('avatarHeaderName');
+    if (nameTag)    nameTag.textContent    = displayName;
+    if (headerName) headerName.textContent = displayName;
 
     // Greet
     setTimeout(() => {
         const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || '';
+        const instructor = currentCourse?.instructor || 'AI';
         const greeting = currentCourse
-            ? `สวัสดีครับ! ผมอาจารย์ AI ยินดีช่วยสอน${lessonTitle ? ' เรื่อง ' + lessonTitle : ''} ครับ`
+            ? `สวัสดีครับ! ผมอาจารย์ ${instructor} ยินดีช่วยสอน${lessonTitle ? ' เรื่อง ' + lessonTitle : ''} ครับ`
             : 'สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?';
         avatarSpeak(greeting, false);
     }, 500);
@@ -2955,7 +2964,7 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
             <div class="avatar-chat-header">
                 <div class="avatar-chat-header-title">
                     <span>🎓</span>
-                    <span>อ.AI Assistant</span>
+                    <span id="avatarHeaderName">อ. AI</span>
                     <span id="avatarCourseTag"
                         style="font-size:0.65rem;background:rgba(59,130,246,0.2);color:#93c5fd;
                         padding:1px 7px;border-radius:99px;font-weight:400;"></span>
@@ -3046,7 +3055,7 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
                 </svg>
             </div>
             <div class="avatar-bottom-info">
-                <div class="avatar-name-tag" id="avatarNameTag">อ.AI Assistant</div>
+                <div class="avatar-name-tag" id="avatarNameTag">อ. AI</div>
                 <div class="avatar-status">
                     <div class="avatar-status-dot"></div>
                     <span id="avatarStatusText">พร้อมสอน</span>
