@@ -989,8 +989,8 @@
             position: absolute;
             top: 50%; right: 210px;
             transform: translateY(-50%);
-            width: 290px;
-            min-width: 240px;
+            width: 310px;
+            min-width: 260px;
             max-width: 480px;
             min-height: 200px;
             max-height: calc(100vh - 120px);
@@ -1031,12 +1031,22 @@
         .avatar-chat-header {
             display: flex; align-items: center;
             justify-content: space-between;
-            padding: 10px 14px 6px;
+            padding: 10px 12px 6px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
+            gap: 6px;
+            flex-wrap: nowrap;
+            min-width: 0;
         }
         .avatar-chat-header-title {
             font-size: 0.78rem; font-weight: 600; color: #c4b5fd;
             display: flex; align-items: center; gap: 6px;
+            overflow: hidden; flex: 1; min-width: 0;
+        }
+        .avatar-chat-header-title span:nth-child(2) {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
         }
         .avatar-chat-close {
             width: 22px; height: 22px; border-radius: 50%;
@@ -1878,8 +1888,15 @@ function buildVoiceSettingsPanel() {
         pointer-events:all;`;
 
     panel.innerHTML = `
-        <div style="font-size:0.82rem;font-weight:600;color:#c4b5fd;margin-bottom:12px;">
-            🔊 ตั้งค่าเสียงอาจารย์
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:0.82rem;font-weight:600;color:#c4b5fd;">🔊 ตั้งค่าเสียงอาจารย์</div>
+            <button onclick="document.getElementById('avatarVoiceSettingsPanel')?.remove()"
+                style="width:22px;height:22px;border-radius:50%;border:none;
+                background:rgba(255,255,255,0.08);color:#a0a0ba;cursor:pointer;
+                font-size:0.8rem;display:flex;align-items:center;justify-content:center;
+                transition:all 0.2s;"
+                onmouseover="this.style.background='rgba(239,68,68,0.25)';this.style.color='#f87171'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='#a0a0ba'">✕</button>
         </div>
 
         <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">เลือกเสียง</label>
@@ -3319,33 +3336,24 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
                         style="font-size:0.65rem;background:rgba(59,130,246,0.2);color:#93c5fd;
                         padding:1px 7px;border-radius:99px;font-weight:400;"></span>
                 </div>
-                <div style="display:flex;gap:4px;align-items:center;">
-                    <!-- Resize presets -->
+                <div style="display:flex;gap:3px;align-items:center;flex-shrink:0;">
                     <button onclick="resizeAvatarPanel('sm')" title="ย่อ"
-                        style="width:22px;height:22px;border-radius:6px;border:none;
+                        style="width:20px;height:20px;border-radius:5px;border:none;
                         background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.65rem;display:flex;align-items:center;justify-content:center;
-                        transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-                        onmouseout="this.style.background='rgba(255,255,255,0.06)'">▫</button>
+                        font-size:0.6rem;display:flex;align-items:center;justify-content:center;">▫</button>
                     <button onclick="resizeAvatarPanel('md')" title="ปกติ"
-                        style="width:22px;height:22px;border-radius:6px;border:none;
+                        style="width:20px;height:20px;border-radius:5px;border:none;
                         background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.65rem;display:flex;align-items:center;justify-content:center;
-                        transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-                        onmouseout="this.style.background='rgba(255,255,255,0.06)'">▪</button>
+                        font-size:0.6rem;display:flex;align-items:center;justify-content:center;">▪</button>
                     <button onclick="resizeAvatarPanel('lg')" title="ขยาย"
-                        style="width:22px;height:22px;border-radius:6px;border:none;
+                        style="width:20px;height:20px;border-radius:5px;border:none;
                         background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.65rem;display:flex;align-items:center;justify-content:center;
-                        transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-                        onmouseout="this.style.background='rgba(255,255,255,0.06)'">⬛</button>
-                    <div style="width:1px;height:14px;background:rgba(255,255,255,0.1);margin:0 2px;"></div>
+                        font-size:0.6rem;display:flex;align-items:center;justify-content:center;">⬛</button>
+                    <div style="width:1px;height:14px;background:rgba(255,255,255,0.1);margin:0 1px;flex-shrink:0;"></div>
                     <button onclick="toggleAvatarVoiceSettings()" title="ตั้งค่าเสียง"
-                        style="width:22px;height:22px;border-radius:50%;border:none;
+                        style="width:20px;height:20px;border-radius:50%;border:none;
                         background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.75rem;display:flex;align-items:center;justify-content:center;
-                        transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)';this.style.color='#c4b5fd'"
-                        onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='#a0a0ba'">⚙️</button>
+                        font-size:0.7rem;display:flex;align-items:center;justify-content:center;">⚙️</button>
                     <button class="avatar-chat-close" onclick="closeAvatarTeacher()">✕</button>
                 </div>
             </div>
