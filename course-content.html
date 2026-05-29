@@ -105,16 +105,11 @@
             aspect-ratio: 16/9;
         }
 
-        /* Video คง 16:9 และไม่เกิน 60vh */
-        .lesson-wrapper.type-video {
-            aspect-ratio: 16/9;
-            flex-shrink: 0;
-            max-height: 60vh;
-            width: 100%;
-        }
-
-        /* PDF/Document — สูงคงที่ตามจอ */
-        .lesson-wrapper.type-pdf {
+        /* ทุกประเภทไฟล์ — กรอบสูงเท่ากัน */
+        .lesson-wrapper.type-video,
+        .lesson-wrapper.type-pdf,
+        .lesson-wrapper.type-doc,
+        .lesson-wrapper.type-image {
             aspect-ratio: unset;
             height: calc(100vh - 180px);
             min-height: 400px;
@@ -122,12 +117,7 @@
             border-radius: 0;
             margin-bottom: 0;
             box-shadow: none;
-        }
-
-        .lesson-wrapper.type-image {
-            aspect-ratio: unset;
-            max-height: 70vh;
-            flex-shrink: 0;
+            overflow: hidden;
         }
 
         .lesson-wrapper iframe,
@@ -1463,36 +1453,29 @@ window.playLesson = function(index) {
     const lessonSection = document.querySelector('.lesson-section');
     const infoArea = document.querySelector('.lesson-info-area');
 
-    if (fileType === 'pdf' || fileType === 'ppt' || fileType === 'doc' || fileType === 'excel') {
+    if (fileType === 'pdf') {
         container.className = 'lesson-wrapper type-pdf';
-        // PDF mode: section ไม่ scroll, info อยู่ด้านล่าง
-        if (lessonSection) lessonSection.classList.add('pdf-mode');
-        if (infoArea) infoArea.style.display = 'block';
-
-        if (fileType === 'pdf') {
-            renderPDFViewer(container, fileUrl, lesson.title);
-            loadPdfContext(fileUrl);
-        } else {
-            renderDocumentViewer(container, fileUrl, lesson.title, fileType);
-        }
+        renderPDFViewer(container, fileUrl, lesson.title);
+        loadPdfContext(fileUrl);
     }
-    else if (fileType === 'youtube' || fileType === 'video') {
+    else if (fileType === 'ppt' || fileType === 'doc' || fileType === 'excel') {
+        container.className = 'lesson-wrapper type-doc';
+        renderDocumentViewer(container, fileUrl, lesson.title, fileType);
+    }
+    else if (fileType === 'youtube') {
         container.className = 'lesson-wrapper type-video';
-        // Video mode: section scroll ได้ปกติ
-        if (lessonSection) lessonSection.classList.remove('pdf-mode');
-        if (infoArea) infoArea.style.display = 'block';
-
-        if (fileType === 'youtube') renderYouTubePlayer(container, fileUrl, lesson.title);
-        else renderVideoPlayer(container, fileUrl);
+        renderYouTubePlayer(container, fileUrl, lesson.title);
+    }
+    else if (fileType === 'video') {
+        container.className = 'lesson-wrapper type-video';
+        renderVideoPlayer(container, fileUrl);
     }
     else if (fileType === 'image') {
         container.className = 'lesson-wrapper type-image';
-        if (lessonSection) lessonSection.classList.remove('pdf-mode');
         renderImageViewer(container, fileUrl, lesson.title);
     }
     else {
-        container.className = 'lesson-wrapper type-video';
-        if (lessonSection) lessonSection.classList.remove('pdf-mode');
+        container.className = 'lesson-wrapper type-doc';
         renderUnsupportedFile(container, fileUrl, lesson.title, fileType);
     }
 }
@@ -1532,30 +1515,48 @@ function renderYouTubePlayer(container, fileUrl, title) {
     let embedUrl = fileUrl;
     if (fileUrl.includes('watch?v=')) {
         const videoId = fileUrl.split('v=')[1].split('&')[0];
-        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
     } else if (fileUrl.includes('youtu.be/')) {
         const videoId = fileUrl.split('youtu.be/')[1].split('?')[0];
-        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
     }
 
     container.innerHTML = `
-        <iframe 
-            src="${embedUrl}" 
-            title="${title}" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen
-            style="width:100%; height:100%;">
-        </iframe>
+        <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#000;">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
+                background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+                border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">▶ YouTube</span>
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.5);">— ${title}</span>
+                <a href="${fileUrl}" target="_blank" style="margin-left:auto;
+                    background:rgba(255,255,255,0.1);color:white;padding:4px 10px;
+                    border-radius:6px;font-size:0.75rem;text-decoration:none;">เปิดใหม่</a>
+            </div>
+            <iframe src="${embedUrl}"
+                title="${title}" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen style="flex:1;width:100%;border:none;"></iframe>
+        </div>
     `;
 }
 
 function renderVideoPlayer(container, fileUrl) {
     container.innerHTML = `
-        <video id="lessonVideo" controls autoplay style="width:100%; height:100%;">
-            <source src="${fileUrl}">
-            เบราว์เซอร์ของคุณไม่รองรับวิดีโอ
-        </video>
+        <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#000;">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
+                background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+                border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">🎬 วิดีโอ</span>
+                <a href="${fileUrl}" download style="margin-left:auto;
+                    background:rgba(59,130,246,0.5);color:white;padding:4px 10px;
+                    border-radius:6px;font-size:0.75rem;text-decoration:none;">โหลด</a>
+            </div>
+            <video id="lessonVideo" controls autoplay
+                style="flex:1;width:100%;height:0;min-height:0;object-fit:contain;background:#000;">
+                <source src="${fileUrl}">
+                เบราว์เซอร์ของคุณไม่รองรับวิดีโอ
+            </video>
+        </div>
     `;
     // ติด event listener หลัง render
     setTimeout(() => {
@@ -1663,8 +1664,25 @@ async function saveVideoProgress(pct) {
 
 function renderImageViewer(container, fileUrl, title) {
     container.innerHTML = `
-        <div class="image-viewer">
-            <img src="${fileUrl}" alt="${title}" onerror="this.parentElement.innerHTML='<div class=\\'loading-screen\\'><div>❌ ไม่สามารถโหลดรูปภาพได้</div></div>';" />
+        <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#1a1a2e;">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
+                background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);
+                border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">🖼 รูปภาพ</span>
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.5);">— ${title}</span>
+                <a href="${fileUrl}" target="_blank" style="margin-left:auto;
+                    background:rgba(255,255,255,0.1);color:white;padding:4px 10px;
+                    border-radius:6px;font-size:0.75rem;text-decoration:none;">เปิดใหม่</a>
+                <a href="${fileUrl}" download style="
+                    background:rgba(59,130,246,0.5);color:white;padding:4px 10px;
+                    border-radius:6px;font-size:0.75rem;text-decoration:none;">โหลด</a>
+            </div>
+            <div style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:16px;">
+                <img src="${fileUrl}" alt="${title}"
+                    style="max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.5);"
+                    onerror="this.parentElement.innerHTML='<div style=\'color:#ef4444;text-align:center;\'>❌ ไม่สามารถโหลดรูปภาพได้</div>';" />
+            </div>
         </div>
     `;
 }
