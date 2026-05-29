@@ -875,6 +875,385 @@
             font-weight: 700;
             cursor: pointer;
         }
+
+        /* ════════════════════════════════
+           AI AVATAR TEACHER SYSTEM
+        ════════════════════════════════ */
+        @keyframes avatarFloat {
+            0%,100% { transform: translateY(0px); }
+            50%      { transform: translateY(-8px); }
+        }
+        @keyframes avatarBob {
+            0%,100% { transform: translateY(0) rotate(0deg); }
+            25%     { transform: translateY(-4px) rotate(-1deg); }
+            75%     { transform: translateY(-2px) rotate(1deg); }
+        }
+        @keyframes mouthTalk {
+            0%,100% { transform: scaleY(1); }
+            25%     { transform: scaleY(0.3); }
+            50%     { transform: scaleY(0.8); }
+            75%     { transform: scaleY(0.2); }
+        }
+        @keyframes eyeBlink {
+            0%,92%,100% { transform: scaleY(1); }
+            95%          { transform: scaleY(0.1); }
+        }
+        @keyframes overlayIn {
+            from { opacity:0; backdrop-filter:blur(0px); }
+            to   { opacity:1; backdrop-filter:blur(12px); }
+        }
+        @keyframes panelIn {
+            from { opacity:0; transform:scale(0.88) translateY(32px); }
+            to   { opacity:1; transform:scale(1) translateY(0); }
+        }
+        @keyframes speechBubbleIn {
+            from { opacity:0; transform:translateY(10px) scale(0.95); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+        @keyframes typingDot {
+            0%,60%,100% { opacity:0.2; transform:translateY(0); }
+            30%          { opacity:1; transform:translateY(-5px); }
+        }
+        @keyframes glowPulse {
+            0%,100% { box-shadow: 0 0 20px rgba(139,92,246,0.3); }
+            50%     { box-shadow: 0 0 40px rgba(139,92,246,0.6); }
+        }
+        @keyframes ripple {
+            0%   { transform:scale(1); opacity:0.6; }
+            100% { transform:scale(2.2); opacity:0; }
+        }
+        @keyframes fabPop {
+            0%   { transform:scale(0.5); opacity:0; }
+            70%  { transform:scale(1.1); }
+            100% { transform:scale(1); opacity:1; }
+        }
+
+        /* FAB Button */
+        .avatar-fab {
+            position: fixed;
+            bottom: 100px;
+            right: 28px;
+            z-index: 1200;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            box-shadow: 0 4px 20px rgba(124,58,237,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fabPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both, glowPulse 3s ease-in-out infinite;
+            transition: transform 0.2s;
+        }
+        .avatar-fab:hover { transform: scale(1.08); }
+        .avatar-fab-face {
+            width: 36px; height: 36px;
+            position: relative;
+        }
+        .avatar-fab-tooltip {
+            position: absolute;
+            right: 68px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            font-size: 0.75rem;
+            padding: 5px 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .avatar-fab:hover .avatar-fab-tooltip { opacity: 1; }
+        .avatar-fab-ripple {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(139,92,246,0.4);
+            animation: ripple 2s ease-out infinite;
+        }
+
+        /* Overlay */
+        .avatar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1300;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: overlayIn 0.3s ease forwards;
+        }
+        .avatar-overlay.closing {
+            animation: overlayIn 0.25s ease reverse forwards;
+        }
+
+        /* Main Panel */
+        .avatar-panel {
+            position: relative;
+            width: min(680px, 94vw);
+            max-height: 88vh;
+            background: linear-gradient(160deg, #0f0c29, #1a1040, #24243e);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 24px;
+            overflow: hidden;
+            animation: panelIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Decorative top bar */
+        .avatar-panel-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #7c3aed, #4f46e5, #06b6d4, #7c3aed);
+            background-size: 200% 100%;
+            animation: gradientSlide 3s linear infinite;
+        }
+        @keyframes gradientSlide {
+            0%   { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        /* Header */
+        .avatar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .avatar-header-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #c4b5fd;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .avatar-close-btn {
+            width: 28px; height: 28px;
+            border: none; background: rgba(255,255,255,0.06);
+            border-radius: 50%; color: #a0a0ba; cursor: pointer;
+            font-size: 0.9rem; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s;
+        }
+        .avatar-close-btn:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+
+        /* Avatar area */
+        .avatar-body {
+            display: flex;
+            gap: 0;
+            flex: 1;
+            overflow: hidden;
+        }
+        .avatar-left {
+            width: 220px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 20px 16px;
+            background: linear-gradient(180deg, rgba(124,58,237,0.05) 0%, rgba(79,70,229,0.1) 100%);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Circle glow bg */
+        .avatar-bg-glow {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px; height: 140px;
+            background: radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* SVG Avatar */
+        .avatar-svg-wrap {
+            position: relative;
+            z-index: 1;
+            animation: avatarFloat 4s ease-in-out infinite;
+        }
+        .avatar-svg-wrap.talking {
+            animation: avatarBob 0.4s ease-in-out infinite;
+        }
+
+        .avatar-name-tag {
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: #c4b5fd;
+            font-weight: 600;
+            background: rgba(124,58,237,0.2);
+            padding: 3px 12px;
+            border-radius: 99px;
+            border: 1px solid rgba(124,58,237,0.3);
+        }
+        .avatar-status {
+            font-size: 0.7rem;
+            color: #a0a0ba;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .avatar-status-dot {
+            width: 6px; height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: glowPulse 2s infinite;
+        }
+
+        /* Chat area */
+        .avatar-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        /* Speech bubble */
+        .avatar-speech {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(139,92,246,0.2);
+            border-radius: 16px 16px 16px 4px;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            color: #e2e8f0;
+            line-height: 1.7;
+            min-height: 60px;
+            max-height: 140px;
+            overflow-y: auto;
+            animation: speechBubbleIn 0.3s ease;
+            flex-shrink: 0;
+        }
+        .avatar-speech.typing {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .avatar-typing-dot {
+            width: 7px; height: 7px;
+            background: #8b5cf6;
+            border-radius: 50%;
+        }
+        .avatar-typing-dot:nth-child(1) { animation: typingDot 1s 0.0s infinite; }
+        .avatar-typing-dot:nth-child(2) { animation: typingDot 1s 0.15s infinite; }
+        .avatar-typing-dot:nth-child(3) { animation: typingDot 1s 0.3s infinite; }
+
+        /* Chat history */
+        .avatar-chat-history {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+        .avatar-chat-history::-webkit-scrollbar { width: 3px; }
+        .avatar-chat-history::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.4); border-radius: 99px; }
+
+        .avatar-msg-user {
+            align-self: flex-end;
+            background: rgba(59,130,246,0.2);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: #bfdbfe;
+            padding: 8px 12px;
+            border-radius: 12px 12px 2px 12px;
+            font-size: 0.83rem;
+            max-width: 85%;
+            line-height: 1.5;
+        }
+        .avatar-msg-ai {
+            align-self: flex-start;
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.2);
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 2px 12px 12px 12px;
+            font-size: 0.83rem;
+            max-width: 85%;
+            line-height: 1.5;
+        }
+
+        /* Input row */
+        .avatar-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .avatar-input {
+            flex: 1;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 22px;
+            padding: 9px 16px;
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .avatar-input:focus { border-color: rgba(139,92,246,0.6); background: rgba(139,92,246,0.05); }
+        .avatar-input::placeholder { color: #4a4a6a; }
+        .avatar-send-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .avatar-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 16px rgba(124,58,237,0.5); }
+        .avatar-send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+        .avatar-voice-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.07);
+            color: #a0a0ba;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .avatar-voice-btn:hover { background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981; }
+        .avatar-voice-btn.recording { background: rgba(239,68,68,0.2); color: #f87171; border-color: #f87171; animation: glowPulse 1s infinite; }
+
+        /* Quick prompts */
+        .avatar-quick-prompts {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .avatar-quick-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #a0a0ba;
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .avatar-quick-btn:hover { background: rgba(139,92,246,0.2); color: #c4b5fd; border-color: rgba(139,92,246,0.4); }
+
+        /* Lip sync mouth shape */
+        .avatar-mouth { transition: d 0.05s; }
     </style>
 </head>
 <body>
@@ -1274,6 +1653,274 @@ async function initCourseContent() {
         }
     }
 }
+// ═══════════════════════════════════════════
+//  AI AVATAR TEACHER SYSTEM
+// ═══════════════════════════════════════════
+let avatarChatHistory = [];
+let avatarSpeaking    = false;
+let avatarSynth       = window.speechSynthesis;
+let avatarRecognition = null;
+let avatarTalkInterval = null;
+
+// ── Open / Close ──
+window.openAvatarTeacher = function() {
+    const overlay = document.getElementById('avatarOverlay');
+    overlay.style.display = 'flex';
+    overlay.classList.remove('closing');
+
+    // Update course tag
+    const tag = document.getElementById('avatarCourseTag');
+    if (tag && currentCourse) tag.textContent = currentCourse.title || '';
+
+    // Greet with TTS
+    setTimeout(() => {
+        const greeting = currentCourse
+            ? `สวัสดีครับ! ผมคืออาจารย์ AI สำหรับวิชา ${currentCourse.title} ครับ มีคำถามอะไรไหมครับ?`
+            : 'สวัสดีครับ! มีคำถามอะไรให้ผมช่วยไหมครับ?';
+        avatarSpeak(greeting, false);
+    }, 400);
+};
+
+window.closeAvatarTeacher = function() {
+    const overlay = document.getElementById('avatarOverlay');
+    overlay.classList.add('closing');
+    avatarStopSpeaking();
+    setTimeout(() => { overlay.style.display = 'none'; }, 250);
+};
+
+// Close on overlay click
+document.getElementById('avatarOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAvatarTeacher();
+});
+
+// ── Lip Sync Animation ──
+function startTalking() {
+    const wrap = document.getElementById('avatarSvgWrap');
+    const mouth = document.getElementById('avatarMouthPath');
+    const status = document.getElementById('avatarStatusText');
+    if (wrap) wrap.classList.add('talking');
+    if (status) status.textContent = 'กำลังอธิบาย...';
+
+    const mouthShapes = [
+        'M62 104 Q70 112 78 104',   // open wide
+        'M63 105 Q70 109 77 105',   // half
+        'M62 104 Q70 110 78 104',   // normal smile
+        'M64 106 Q70 108 76 106',   // small
+        'M62 104 Q70 107 78 104',   // slight
+    ];
+    let i = 0;
+    avatarTalkInterval = setInterval(() => {
+        if (mouth) mouth.setAttribute('d', mouthShapes[i % mouthShapes.length]);
+        i++;
+    }, 120);
+}
+
+function stopTalking() {
+    const wrap = document.getElementById('avatarSvgWrap');
+    const mouth = document.getElementById('avatarMouthPath');
+    const status = document.getElementById('avatarStatusText');
+    if (wrap) wrap.classList.remove('talking');
+    if (mouth) mouth.setAttribute('d', 'M62 104 Q70 110 78 104');
+    if (status) status.textContent = 'พร้อมสอน';
+    if (avatarTalkInterval) { clearInterval(avatarTalkInterval); avatarTalkInterval = null; }
+}
+
+// ── Eye Blink ──
+setInterval(() => {
+    const eyeL = document.getElementById('avatarEyeL');
+    const eyeR = document.getElementById('avatarEyeR');
+    if (!eyeL || !eyeR || avatarSpeaking) return;
+    eyeL.style.transform = 'scaleY(0.1)';
+    eyeR.style.transform = 'scaleY(0.1)';
+    setTimeout(() => {
+        eyeL.style.transform = 'scaleY(1)';
+        eyeR.style.transform = 'scaleY(1)';
+    }, 120);
+}, 3500 + Math.random() * 2000);
+
+// ── Text-to-Speech ──
+function avatarSpeak(text, addToHistory = true) {
+    avatarStopSpeaking();
+
+    // Update speech bubble
+    const bubble = document.getElementById('avatarSpeech');
+    if (bubble) {
+        bubble.classList.remove('typing');
+        bubble.textContent = text;
+    }
+
+    if (addToHistory) {
+        addAvatarMsg('ai', text);
+    }
+
+    if (!avatarSynth) return;
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'th-TH';
+    utter.rate = 0.92;
+    utter.pitch = 1.05;
+
+    // Try to pick a Thai voice
+    const voices = avatarSynth.getVoices();
+    const thVoice = voices.find(v => v.lang.startsWith('th')) ||
+                    voices.find(v => v.lang.startsWith('en-US'));
+    if (thVoice) utter.voice = thVoice;
+
+    utter.onstart = () => { avatarSpeaking = true; startTalking(); };
+    utter.onend   = () => { avatarSpeaking = false; stopTalking(); };
+    utter.onerror = () => { avatarSpeaking = false; stopTalking(); };
+
+    avatarSynth.speak(utter);
+}
+
+function avatarStopSpeaking() {
+    if (avatarSynth) avatarSynth.cancel();
+    avatarSpeaking = false;
+    stopTalking();
+}
+
+// ── Send Message ──
+window.sendAvatarMessage = async function() {
+    const input = document.getElementById('avatarInput');
+    const text = input?.value?.trim();
+    if (!text) return;
+    input.value = '';
+    await avatarProcessQuestion(text);
+};
+
+window.avatarAskQuick = async function(question) {
+    document.getElementById('avatarInput').value = question;
+    await avatarProcessQuestion(question);
+};
+
+async function avatarProcessQuestion(question) {
+    addAvatarMsg('user', question);
+    avatarChatHistory.push({ role: 'user', content: question });
+
+    // Show typing bubble
+    const bubble = document.getElementById('avatarSpeech');
+    bubble.innerHTML = `
+        <div class="avatar-typing-dot"></div>
+        <div class="avatar-typing-dot"></div>
+        <div class="avatar-typing-dot"></div>`;
+    bubble.classList.add('typing');
+
+    const sendBtn = document.getElementById('avatarSendBtn');
+    if (sendBtn) sendBtn.disabled = true;
+
+    // Status
+    const status = document.getElementById('avatarStatusText');
+    if (status) status.textContent = 'กำลังคิด...';
+
+    try {
+        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนปัจจุบัน';
+        const courseTitle = currentCourse?.title || 'คอร์สนี้';
+
+        let sysPrompt = `คุณคืออาจารย์ AI สอนวิชา "${courseTitle}" บทเรียน "${lessonTitle}"
+ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย เหมาะกับการอ่านออกเสียง ไม่ใช้ตัวหนา ไม่ใช้ markdown
+ตอบไม่เกิน 3-4 ประโยค พูดเหมือนอาจารย์จริงๆ`;
+
+        if (lessonPdfContext) {
+            sysPrompt += `
+
+เนื้อหาบทเรียน:
+${lessonPdfContext.slice(0, 2000)}`;
+        }
+
+        const res = await fetch('/api/groq-analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt: question,
+                systemPrompt: sysPrompt,
+                messages: avatarChatHistory.slice(-8)
+            })
+        });
+
+        const data = await res.json();
+        const answer = data.text || 'ขอโทษครับ ตอบไม่ได้ในขณะนี้';
+
+        avatarChatHistory.push({ role: 'assistant', content: answer });
+        if (avatarChatHistory.length > 20) avatarChatHistory = avatarChatHistory.slice(-20);
+
+        bubble.classList.remove('typing');
+        avatarSpeak(answer, false);
+        bubble.textContent = answer;
+
+    } catch(e) {
+        bubble.classList.remove('typing');
+        bubble.textContent = 'ขอโทษครับ เกิดข้อผิดพลาด ลองใหม่อีกครั้งนะครับ';
+        stopTalking();
+    }
+
+    if (sendBtn) sendBtn.disabled = false;
+}
+
+// ── Add chat message ──
+function addAvatarMsg(role, text) {
+    const history = document.getElementById('avatarChatHistory');
+    if (!history) return;
+    const div = document.createElement('div');
+    div.className = role === 'user' ? 'avatar-msg-user' : 'avatar-msg-ai';
+    div.textContent = text;
+    history.appendChild(div);
+    history.scrollTop = history.scrollHeight;
+}
+
+// ── Voice Input ──
+window.toggleAvatarVoice = function() {
+    const btn = document.getElementById('avatarVoiceBtn');
+
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('เบราว์เซอร์ของคุณไม่รองรับการพูด กรุณาพิมพ์แทนครับ');
+        return;
+    }
+
+    if (avatarRecognition) {
+        avatarRecognition.stop();
+        avatarRecognition = null;
+        if (btn) btn.classList.remove('recording');
+        return;
+    }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    avatarRecognition = new SR();
+    avatarRecognition.lang = 'th-TH';
+    avatarRecognition.interimResults = false;
+
+    avatarRecognition.onstart = () => {
+        if (btn) { btn.classList.add('recording'); btn.textContent = '🔴'; }
+        const status = document.getElementById('avatarStatusText');
+        if (status) status.textContent = 'กำลังฟัง...';
+    };
+
+    avatarRecognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        const input = document.getElementById('avatarInput');
+        if (input) input.value = text;
+        avatarProcessQuestion(text);
+    };
+
+    avatarRecognition.onend = () => {
+        avatarRecognition = null;
+        if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+    };
+
+    avatarRecognition.onerror = () => {
+        avatarRecognition = null;
+        if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+    };
+
+    avatarRecognition.start();
+};
+
+// Spacebar shortcut เมื่อ overlay เปิด
+document.addEventListener('keydown', (e) => {
+    const overlay = document.getElementById('avatarOverlay');
+    if (!overlay || overlay.style.display === 'none') return;
+    if (e.key === 'Escape') closeAvatarTeacher();
+});
+
 supabase.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_OUT') window.location.href = '../login-page/login.html';
 });
@@ -2458,6 +3105,140 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
 });
 
 </script>
+
+
+    <!-- ════ AI AVATAR TEACHER ════ -->
+
+    <!-- FAB Button -->
+    <button class="avatar-fab" id="avatarFab" onclick="openAvatarTeacher()" title="">
+        <div class="avatar-fab-ripple"></div>
+        <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
+            <!-- face -->
+            <circle cx="40" cy="38" r="22" fill="#7c3aed"/>
+            <circle cx="40" cy="38" r="20" fill="#9333ea"/>
+            <!-- eyes -->
+            <ellipse cx="33" cy="34" rx="3.5" ry="4" fill="white"/>
+            <ellipse cx="47" cy="34" rx="3.5" ry="4" fill="white"/>
+            <circle cx="34" cy="35" r="2" fill="#1a1a3e"/>
+            <circle cx="48" cy="35" r="2" fill="#1a1a3e"/>
+            <!-- smile -->
+            <path d="M33 43 Q40 49 47 43" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- hat/hair -->
+            <rect x="20" y="18" width="40" height="6" rx="3" fill="#4f46e5"/>
+            <rect x="26" y="12" width="28" height="10" rx="5" fill="#4f46e5"/>
+        </svg>
+        <div class="avatar-fab-tooltip">🎓 เรียกอาจารย์ AI</div>
+    </button>
+
+    <!-- Avatar Overlay -->
+    <div class="avatar-overlay" id="avatarOverlay" style="display:none;">
+        <div class="avatar-panel" id="avatarPanel">
+            <div class="avatar-panel-bar"></div>
+
+            <!-- Header -->
+            <div class="avatar-header">
+                <div class="avatar-header-title">
+                    <span>🎓</span>
+                    <span>AI อาจารย์ผู้ช่วย</span>
+                    <span id="avatarCourseTag" style="font-size:0.72rem;background:rgba(59,130,246,0.2);
+                        color:#93c5fd;padding:2px 8px;border-radius:99px;font-weight:400;"></span>
+                </div>
+                <button class="avatar-close-btn" onclick="closeAvatarTeacher()">✕</button>
+            </div>
+
+            <!-- Body -->
+            <div class="avatar-body">
+                <!-- Left: Avatar -->
+                <div class="avatar-left">
+                    <div class="avatar-bg-glow"></div>
+
+                    <div class="avatar-svg-wrap" id="avatarSvgWrap">
+                        <svg id="avatarSvg" width="140" height="180" viewBox="0 0 140 180" fill="none">
+                            <!-- Body / Robe -->
+                            <ellipse cx="70" cy="155" rx="45" ry="30" fill="#4f46e5" opacity="0.6"/>
+                            <path d="M30 140 Q70 160 110 140 L115 180 L25 180 Z" fill="#4338ca"/>
+                            <path d="M55 130 L45 180 L95 180 L85 130" fill="#6d28d9"/>
+                            <!-- Collar / tie detail -->
+                            <path d="M60 118 L70 128 L80 118" fill="#7c3aed" opacity="0.8"/>
+                            <!-- Neck -->
+                            <rect x="63" y="110" width="14" height="16" rx="4" fill="#fbbf24"/>
+                            <!-- Head -->
+                            <ellipse cx="70" cy="90" rx="30" ry="32" fill="#fbbf24"/>
+                            <!-- Hair -->
+                            <path d="M40 80 Q42 60 70 58 Q98 60 100 80 Q95 65 70 63 Q45 65 40 80Z" fill="#1e1b4b"/>
+                            <rect x="40" y="70" width="6" height="14" rx="3" fill="#1e1b4b"/>
+                            <rect x="94" y="70" width="6" height="14" rx="3" fill="#1e1b4b"/>
+                            <!-- Ears -->
+                            <ellipse cx="40" cy="90" rx="5" ry="7" fill="#f59e0b"/>
+                            <ellipse cx="100" cy="90" rx="5" ry="7" fill="#f59e0b"/>
+                            <!-- Eyes -->
+                            <g id="avatarEyeL">
+                                <ellipse cx="58" cy="87" rx="6" ry="7" fill="white"/>
+                                <circle cx="59" cy="88" r="4" fill="#1e1b4b"/>
+                                <circle cx="60" cy="87" r="1.5" fill="white"/>
+                            </g>
+                            <g id="avatarEyeR">
+                                <ellipse cx="82" cy="87" rx="6" ry="7" fill="white"/>
+                                <circle cx="83" cy="88" r="4" fill="#1e1b4b"/>
+                                <circle cx="84" cy="87" r="1.5" fill="white"/>
+                            </g>
+                            <!-- Eyebrows -->
+                            <path d="M52 79 Q58 76 64 78" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            <path d="M76 78 Q82 76 88 79" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            <!-- Nose -->
+                            <path d="M68 93 Q70 97 72 93" stroke="#e07b39" stroke-width="1.5" fill="none"/>
+                            <!-- Mouth -->
+                            <g id="avatarMouth">
+                                <path id="avatarMouthPath" d="M62 104 Q70 110 78 104"
+                                    stroke="#c2410c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            </g>
+                            <!-- Glasses -->
+                            <rect x="50" y="82" width="16" height="12" rx="5" stroke="#4f46e5" stroke-width="2" fill="rgba(79,70,229,0.1)"/>
+                            <rect x="74" y="82" width="16" height="12" rx="5" stroke="#4f46e5" stroke-width="2" fill="rgba(79,70,229,0.1)"/>
+                            <line x1="66" y1="88" x2="74" y2="88" stroke="#4f46e5" stroke-width="2"/>
+                            <line x1="42" y1="88" x2="50" y2="88" stroke="#4f46e5" stroke-width="2" opacity="0.6"/>
+                            <line x1="90" y1="88" x2="98" y2="88" stroke="#4f46e5" stroke-width="2" opacity="0.6"/>
+                        </svg>
+                    </div>
+
+                    <div class="avatar-name-tag" id="avatarNameTag">อ.AI Assistant</div>
+                    <div class="avatar-status">
+                        <div class="avatar-status-dot"></div>
+                        <span id="avatarStatusText">พร้อมสอน</span>
+                    </div>
+                </div>
+
+                <!-- Right: Chat -->
+                <div class="avatar-right">
+                    <!-- Speech bubble (latest response) -->
+                    <div class="avatar-speech" id="avatarSpeech">
+                        สวัสดีครับ! ผมคืออาจารย์ AI คอยช่วยสอนเนื้อหาในคอร์สนี้ 😊
+                        <br>มีคำถามอะไรไหมครับ?
+                    </div>
+
+                    <!-- Quick prompts -->
+                    <div class="avatar-quick-prompts" id="avatarQuickPrompts">
+                        <button class="avatar-quick-btn" onclick="avatarAskQuick('สรุปเนื้อหาบทนี้ให้หน่อย')">📝 สรุปเนื้อหา</button>
+                        <button class="avatar-quick-btn" onclick="avatarAskQuick('อธิบายแนวคิดหลักของบทนี้')">💡 แนวคิดหลัก</button>
+                        <button class="avatar-quick-btn" onclick="avatarAskQuick('ออกตัวอย่างโจทย์ให้ฝึกทำหน่อย')">📋 ตัวอย่างโจทย์</button>
+                        <button class="avatar-quick-btn" onclick="avatarAskQuick('มีข้อสงสัยไหมที่ควรทบทวน')">🔍 จุดที่ควรทบทวน</button>
+                    </div>
+
+                    <!-- Chat history -->
+                    <div class="avatar-chat-history" id="avatarChatHistory"></div>
+
+                    <!-- Input -->
+                    <div class="avatar-input-row">
+                        <button class="avatar-voice-btn" id="avatarVoiceBtn" onclick="toggleAvatarVoice()" title="พูดด้วยเสียง">🎤</button>
+                        <input class="avatar-input" id="avatarInput"
+                            placeholder="ถามอาจารย์..."
+                            onkeydown="if(event.key==='Enter')sendAvatarMessage()">
+                        <button class="avatar-send-btn" id="avatarSendBtn" onclick="sendAvatarMessage()">➤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
