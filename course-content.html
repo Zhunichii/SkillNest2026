@@ -1606,33 +1606,81 @@ function showAvatarToast(msg) {
 
 // ── Avatar อธิบายหน้า PDF ที่กำลังดูอยู่ ──
 async function avatarExplainCurrentPage(pageNum) {
-    if (!_pdfDoc || !lessonPdfContext || avatarSpeaking) return;
-    try {
-        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนนี้';
-        const pageContext = lessonPdfContext
-            .split('')
-            .filter(l => l.includes(`[หน้า ${pageNum}]`))
-            .join(' ')
-            .slice(0, 600);
+    if (!_pdfDoc || avatarSpeaking) return;
 
-        if (!pageContext.trim()) return;
+    const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนนี้';
+    const bubble  = document.getElementById('avatarSpeech');
+    const status  = document.getElementById('avatarStatusText');
+
+    if (bubble) {
+        bubble.innerHTML = '<div class="avatar-typing-dot"></div><div class="avatar-typing-dot"></div><div class="avatar-typing-dot"></div>';
+        bubble.classList.add('typing');
+    }
+    if (status) status.textContent = 'กำลังอ่านหน้า ' + pageNum + '...';
+
+    try {
+        // ดึง text จากหน้าปัจจุบันโดยตรงจาก PDF.js
+        let pageText = '';
+        try {
+            const page        = await _pdfDoc.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            pageText = textContent.items.map(i => i.str).join(' ').trim().slice(0, 900);
+        } catch(e) { console.warn('getPageText error:', e); }
+
+        // fallback ใช้ lessonPdfContext
+        if (!pageText && lessonPdfContext) {
+            const lines   = lessonPdfContext.split('\n');
+            const pageLine = lines.find(l => l.startsWith(`[หน้า ${pageNum}]`));
+            if (pageLine) pageText = pageLine.replace(`[หน้า ${pageNum}]`, '').trim().slice(0, 900);
+        }
+
+        if (!pageText) {
+            if (bubble) { bubble.classList.remove('typing'); bubble.textContent = `หน้า ${pageNum} ไม่มีข้อความที่อ่านได้ครับ`; }
+            if (status) status.textContent = 'พร้อมสอน';
+            return;
+        }
 
         const res  = await fetch('/api/groq-analyze', {
-            method:'POST', headers:{'Content-Type':'application/json'},
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                prompt: `สรุปเนื้อหาหน้า ${pageNum} ของ "${lessonTitle}" แบบกระชับ 2 ประโยค`,
-                systemPrompt: `คุณคืออาจารย์ AI ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง
-เนื้อหา: ${pageContext}`,
+                prompt: `อธิบายเนื้อหาหน้า ${pageNum} ให้นักเรียนเข้าใจ 2-3 ประโยค ไม่ต้องบอกว่า "หน้า X" ในประโยคแรก`,
+                systemPrompt: `คุณคืออาจารย์ AI สอนวิชา "${lessonTitle}"
+ตอบเป็นภาษาไทย กระชับ เหมือนอาจารย์อธิบายในห้องเรียน ไม่ใช้ markdown
+เนื้อหาหน้า ${pageNum}: ${pageText}`,
                 messages: []
             })
         });
         const data = await res.json();
-        const text = data.text || '';
-        if (text && !avatarSpeaking) {
-            avatarSpeak(`หน้า ${pageNum}: ${text}`, true);
+        const text = (data.text || '').trim();
+
+        if (bubble) bubble.classList.remove('typing');
+        if (text) {
+            avatarSpeak(text, true);
+        } else {
+            if (bubble) bubble.textContent = 'ไม่สามารถอธิบายหน้านี้ได้ครับ';
+            if (status) status.textContent = 'พร้อมสอน';
         }
-    } catch(e) { console.warn('avatarExplainCurrentPage error:', e); }
+    } catch(e) {
+        console.warn('avatarExplainCurrentPage error:', e);
+        if (bubble) { bubble.classList.remove('typing'); bubble.textContent = 'เกิดข้อผิดพลาด ลองใหม่ครับ'; }
+        if (status) status.textContent = 'พร้อมสอน';
+    }
 }
+
+// ── กดปุ่มอธิบายหน้าใน PDF toolbar ──
+window.onAvatarExplainPage = function() {
+    const scene = document.getElementById('avatarScene');
+    // ถ้า Avatar ยังไม่เปิด ให้เปิดก่อน
+    if (!scene?.classList.contains('open')) {
+        openAvatarTeacher();
+        // รอให้ Avatar เปิดแล้วค่อยอธิบาย
+        setTimeout(() => avatarExplainCurrentPage(_pdfCurPage), 1200);
+    } else {
+        // Avatar เปิดอยู่แล้ว อธิบายได้เลย
+        avatarStopSpeaking();
+        avatarExplainCurrentPage(_pdfCurPage);
+    }
+};
 
 // ── Open ──
 window.openAvatarTeacher = function() {
@@ -2364,6 +2412,17 @@ async function renderPDFViewer(container, fileUrl, title) {
                 <span id="pdfProgressLabel" style="font-size:0.78rem;color:#8b5cf6;font-weight:600;"></span>
 
                 <div style="margin-left:auto;display:flex;gap:6px;">
+                    <button onclick="onAvatarExplainPage()"
+                        id="btnAvatarExplain"
+                        title="ให้อาจารย์ AI อธิบายหน้านี้"
+                        style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.5);
+                        color:#c4b5fd;padding:4px 10px;height:32px;border-radius:6px;
+                        cursor:pointer;font-size:0.75rem;display:flex;align-items:center;gap:4px;
+                        transition:background 0.2s;"
+                        onmouseover="this.style.background='rgba(139,92,246,0.45)'"
+                        onmouseout="this.style.background='rgba(139,92,246,0.25)'">
+                        🎓 อธิบายหน้านี้
+                    </button>
                     <a href="${fileUrl}" target="_blank"
                         style="background:rgba(255,255,255,0.1);border:none;color:white;
                         padding:4px 10px;height:32px;border-radius:6px;cursor:pointer;font-size:0.75rem;
@@ -2495,14 +2554,12 @@ async function pdfRenderPage(pageNum) {
         updateLessonProgress(pct);
         if (pct >= 90) autoMarkLessonDone();
 
-        // Avatar อธิบายหน้าที่กำลังดูอยู่ (ทุก 5 หน้า หรือหน้าแรก)
-        if ((_pdfCurPage === 1 || _pdfCurPage % 5 === 0) &&
-            document.getElementById('avatarScene')?.classList.contains('open') &&
-            !avatarSpeaking && lessonPdfContext) {
+        // Avatar อธิบายหน้าที่กำลังดูอยู่ (debounce 2 วิ)
+        if (document.getElementById('avatarScene')?.classList.contains('open') && !avatarSpeaking) {
             clearTimeout(window._avatarPageTimer);
             window._avatarPageTimer = setTimeout(() => {
                 avatarExplainCurrentPage(_pdfCurPage);
-            }, 1500);
+            }, 2000);
         }
 
     } catch(e) { console.error('pdfRenderPage error:', e); }
@@ -3052,8 +3109,7 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
 
 </script>
 
-
-    <!-- ════ AI AVATAR TEACHER ════ -->
+<!-- ════ AI AVATAR TEACHER ════ -->
 
     <!-- FAB -->
     <button class="avatar-fab" id="avatarFab" onclick="openAvatarTeacher()">
