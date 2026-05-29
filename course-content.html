@@ -1783,15 +1783,149 @@ function avatarSpeak(text, addToHistory = true) {
     if (!avatarSynth) return;
 
     const utter  = new SpeechSynthesisUtterance(text);
-    utter.lang   = 'th-TH'; utter.rate = 0.92; utter.pitch = 1.05;
-    const voices = avatarSynth.getVoices();
-    const voice  = voices.find(v => v.lang.startsWith('th')) || voices.find(v => v.lang.startsWith('en-US'));
-    if (voice) utter.voice = voice;
+    const saved  = getAvatarVoiceSettings();
+    utter.lang   = 'th-TH';
+    utter.rate   = saved.rate;
+    utter.pitch  = saved.pitch;
+    utter.volume = saved.volume;
+
+    // ใช้ voice ที่ user เลือก หรือ auto-select
+    const voices     = avatarSynth.getVoices();
+    const savedVoice = saved.voiceName
+        ? voices.find(v => v.name === saved.voiceName)
+        : null;
+    const autoVoice  = voices.find(v => v.lang.startsWith('th'))
+                    || voices.find(v => v.lang.startsWith('en-US'));
+    utter.voice = savedVoice || autoVoice || null;
+
     utter.onstart = () => { avatarSpeaking = true; startTalking(); };
     utter.onend   = () => { avatarSpeaking = false; stopTalking(); };
     utter.onerror = () => { avatarSpeaking = false; stopTalking(); };
     avatarSynth.speak(utter);
 }
+
+// เก็บ/โหลด voice settings
+function saveAvatarVoiceSettings(settings) {
+    try { localStorage.setItem('avatarVoiceSettings', JSON.stringify(settings)); } catch(e) {}
+}
+function getAvatarVoiceSettings() {
+    try {
+        const s = JSON.parse(localStorage.getItem('avatarVoiceSettings') || '{}');
+        return { rate: s.rate ?? 0.92, pitch: s.pitch ?? 1.05, volume: s.volume ?? 1.0, voiceName: s.voiceName || null };
+    } catch(e) { return { rate: 0.92, pitch: 1.05, volume: 1.0, voiceName: null }; }
+}
+
+// เปิด/ปิด voice settings panel
+window.toggleAvatarVoiceSettings = function() {
+    const panel = document.getElementById('avatarVoiceSettingsPanel');
+    if (!panel) { buildVoiceSettingsPanel(); return; }
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+};
+
+function buildVoiceSettingsPanel() {
+    const voices  = avatarSynth.getVoices();
+    const saved   = getAvatarVoiceSettings();
+    const thVoices = voices.filter(v => v.lang.startsWith('th'));
+    const enVoices = voices.filter(v => v.lang.startsWith('en'));
+
+    // สร้าง options
+    const voiceOptions = [
+        '<option value="">-- Auto (ภาษาไทย) --</option>',
+        ...thVoices.map(v => `<option value="${v.name}" ${saved.voiceName===v.name?'selected':''}>${v.name} (TH)</option>`),
+        ...enVoices.slice(0,5).map(v => `<option value="${v.name}" ${saved.voiceName===v.name?'selected':''}>${v.name} (EN)</option>`)
+    ].join('');
+
+    const panel = document.createElement('div');
+    panel.id    = 'avatarVoiceSettingsPanel';
+    panel.style.cssText = `
+        position:absolute; bottom:100%; right:0; margin-bottom:8px;
+        background:rgba(10,8,28,0.96); backdrop-filter:blur(20px);
+        border:1px solid rgba(139,92,246,0.35); border-radius:14px;
+        padding:16px; width:260px; z-index:10;
+        box-shadow:0 8px 32px rgba(0,0,0,0.5);`;
+
+    panel.innerHTML = `
+        <div style="font-size:0.82rem;font-weight:600;color:#c4b5fd;margin-bottom:12px;">
+            🔊 ตั้งค่าเสียงอาจารย์
+        </div>
+
+        <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">เลือกเสียง</label>
+        <select id="voiceSelect" style="width:100%;background:#1a1a3e;border:1px solid rgba(255,255,255,0.15);
+            color:white;padding:6px 8px;border-radius:8px;font-size:0.78rem;margin-bottom:10px;"
+            onchange="previewVoice(this.value)">
+            ${voiceOptions}
+        </select>
+
+        <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">
+            ความเร็ว: <span id="rateVal">${saved.rate}</span>x
+        </label>
+        <input type="range" min="0.5" max="1.8" step="0.1" value="${saved.rate}"
+            style="width:100%;accent-color:#8b5cf6;margin-bottom:10px;"
+            oninput="document.getElementById('rateVal').textContent=this.value"
+            id="rateSlider">
+
+        <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">
+            ระดับเสียง: <span id="pitchVal">${saved.pitch}</span>
+        </label>
+        <input type="range" min="0.5" max="2.0" step="0.1" value="${saved.pitch}"
+            style="width:100%;accent-color:#8b5cf6;margin-bottom:10px;"
+            oninput="document.getElementById('pitchVal').textContent=this.value"
+            id="pitchSlider">
+
+        <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">
+            ความดัง: <span id="volumeVal">${saved.volume}</span>
+        </label>
+        <input type="range" min="0" max="1" step="0.1" value="${saved.volume}"
+            style="width:100%;accent-color:#8b5cf6;margin-bottom:14px;"
+            oninput="document.getElementById('volumeVal').textContent=this.value"
+            id="volumeSlider">
+
+        <div style="display:flex;gap:8px;">
+            <button onclick="applyVoiceSettings()"
+                style="flex:1;background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;
+                color:white;padding:7px;border-radius:8px;cursor:pointer;font-size:0.78rem;">
+                ✅ บันทึก
+            </button>
+            <button onclick="previewVoice(document.getElementById('voiceSelect').value)"
+                style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
+                color:#a0a0ba;padding:7px;border-radius:8px;cursor:pointer;font-size:0.78rem;">
+                ▶ ทดสอบ
+            </button>
+        </div>`;
+
+    // แนบไว้ใน input-row
+    const inputRow = document.querySelector('.avatar-input-row');
+    if (inputRow) { inputRow.style.position = 'relative'; inputRow.appendChild(panel); }
+}
+
+window.previewVoice = function(voiceName) {
+    const rate   = parseFloat(document.getElementById('rateSlider')?.value || 0.92);
+    const pitch  = parseFloat(document.getElementById('pitchSlider')?.value || 1.05);
+    const volume = parseFloat(document.getElementById('volumeSlider')?.value || 1.0);
+    avatarStopSpeaking();
+    const utter  = new SpeechSynthesisUtterance('สวัสดีครับ ผมอาจารย์ AI ยินดีช่วยสอนครับ');
+    utter.lang   = 'th-TH';
+    utter.rate   = rate; utter.pitch = pitch; utter.volume = volume;
+    const voices = avatarSynth.getVoices();
+    const voice  = voiceName ? voices.find(v => v.name === voiceName) : voices.find(v => v.lang.startsWith('th'));
+    if (voice) utter.voice = voice;
+    utter.onstart = () => startTalking();
+    utter.onend   = () => stopTalking();
+    avatarSynth.speak(utter);
+};
+
+window.applyVoiceSettings = function() {
+    const settings = {
+        voiceName: document.getElementById('voiceSelect')?.value || null,
+        rate:      parseFloat(document.getElementById('rateSlider')?.value || 0.92),
+        pitch:     parseFloat(document.getElementById('pitchSlider')?.value || 1.05),
+        volume:    parseFloat(document.getElementById('volumeSlider')?.value || 1.0),
+    };
+    saveAvatarVoiceSettings(settings);
+    document.getElementById('avatarVoiceSettingsPanel').style.display = 'none';
+    // ทดสอบ
+    avatarSpeak('บันทึกการตั้งค่าเสร็จแล้วครับ!', false);
+};
 
 function avatarStopSpeaking() {
     if (avatarSynth) avatarSynth.cancel();
@@ -3142,7 +3276,15 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
                         style="font-size:0.65rem;background:rgba(59,130,246,0.2);color:#93c5fd;
                         padding:1px 7px;border-radius:99px;font-weight:400;"></span>
                 </div>
-                <button class="avatar-chat-close" onclick="closeAvatarTeacher()">✕</button>
+                <div style="display:flex;gap:4px;">
+                    <button onclick="toggleAvatarVoiceSettings()" title="ตั้งค่าเสียง"
+                        style="width:22px;height:22px;border-radius:50%;border:none;
+                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
+                        font-size:0.75rem;display:flex;align-items:center;justify-content:center;
+                        transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)';this.style.color='#c4b5fd'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='#a0a0ba'">⚙️</button>
+                    <button class="avatar-chat-close" onclick="closeAvatarTeacher()">✕</button>
+                </div>
             </div>
 
             <div class="avatar-speech" id="avatarSpeech">
