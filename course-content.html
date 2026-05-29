@@ -1786,9 +1786,9 @@ async function renderPDFViewer(container, fileUrl, title) {
 
             <!-- Canvas area -->
             <div id="pdfCanvasWrap" style="
-                flex:1; overflow-y:auto; overflow-x:auto;
+                flex:1; overflow-y:auto; overflow-x:hidden;
                 display:flex; justify-content:center; align-items:flex-start;
-                padding:12px 8px; background:#1e1e2e;">
+                padding:0; background:#1e1e2e;">
                 <canvas id="pdfCanvas" style="
                     box-shadow:0 4px 32px rgba(0,0,0,0.6);
                     border-radius:2px; display:block;"></canvas>
@@ -1854,13 +1854,11 @@ async function pdfAutoFit() {
         const page      = await _pdfDoc.getPage(_pdfCurPage || 1);
         const viewport0 = page.getViewport({ scale: 1 });
         const wrap      = document.getElementById('pdfCanvasWrap');
-        // ใช้ width จริงของ container ลบแค่ 20px สำหรับ scrollbar
-        const availW    = (wrap?.clientWidth || 900) - 20;
-        const availH    = (wrap?.clientHeight || 600) - 24;
-        // fit-width หรือ fit-height แล้วแต่อันไหนเล็กกว่า เพื่อให้เห็นหน้าเต็ม
-        const scaleW    = availW / viewport0.width;
-        const scaleH    = availH / viewport0.height;
-        _pdfScale       = Math.min(scaleW, scaleH, 2.5);
+        if (!wrap) return;
+
+        // ใช้ fit-width เป็นหลัก — ให้ canvas กว้างเท่า container
+        const availW = wrap.clientWidth - 16; // ลบแค่ scrollbar
+        _pdfScale    = Math.min(availW / viewport0.width, 3.0);
         updateZoomLabel();
         await pdfRenderPage(_pdfCurPage || 1);
     } catch(e) { console.warn('autoFit error:', e); }
@@ -1882,6 +1880,8 @@ async function pdfRenderPage(pageNum) {
         canvas.height       = viewport.height * dpr;
         canvas.style.width  = viewport.width  + 'px';
         canvas.style.height = viewport.height + 'px';
+        canvas.style.display = 'block';
+        canvas.style.margin  = '0 auto';
 
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
