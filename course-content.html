@@ -990,6 +990,10 @@
             top: 50%; right: 210px;
             transform: translateY(-50%);
             width: 290px;
+            min-width: 240px;
+            max-width: 480px;
+            min-height: 200px;
+            max-height: calc(100vh - 120px);
             background: rgba(10,8,28,0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -997,9 +1001,19 @@
             border-radius: 18px 18px 4px 18px;
             box-shadow: 0 16px 48px rgba(0,0,0,0.5);
             display: flex; flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
             pointer-events: all;
             animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+            resize: both;
+        }
+
+        /* ป้องกัน content ล้น แต่ให้ settings panel โผล่ออกได้ */
+        .avatar-chat-panel > *:not(#avatarVoiceSettingsPanel):not(.avatar-chat-bar) {
+            overflow: hidden;
+        }
+        .avatar-chat-panel > .avatar-chat-bar {
+            border-radius: 18px 18px 0 0;
+            flex-shrink: 0;
         }
         .avatar-chat-panel.closing {
             animation: bubbleIn 0.25s ease reverse forwards;
@@ -1816,10 +1830,29 @@ function getAvatarVoiceSettings() {
 }
 
 // เปิด/ปิด voice settings panel
+window.resizeAvatarPanel = function(size) {
+    const panel = document.getElementById('avatarChatPanel');
+    if (!panel) return;
+    panel.style.transition = 'width 0.3s ease, height 0.3s ease';
+    const sizes = {
+        sm: { width: '240px', height: '220px' },
+        md: { width: '290px', height: ''       },
+        lg: { width: '420px', height: '520px'  },
+    };
+    const s = sizes[size] || sizes.md;
+    panel.style.width  = s.width;
+    panel.style.height = s.height || '';
+    setTimeout(() => { panel.style.transition = ''; }, 350);
+};
+
 window.toggleAvatarVoiceSettings = function() {
-    const panel = document.getElementById('avatarVoiceSettingsPanel');
-    if (!panel) { buildVoiceSettingsPanel(); return; }
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    const existing = document.getElementById('avatarVoiceSettingsPanel');
+    if (existing) {
+        existing.remove();
+        return; // toggle off
+    }
+    // rebuild ทุกครั้งเพื่อ position ที่ถูกต้อง
+    buildVoiceSettingsPanel();
 };
 
 function buildVoiceSettingsPanel() {
@@ -1838,11 +1871,11 @@ function buildVoiceSettingsPanel() {
     const panel = document.createElement('div');
     panel.id    = 'avatarVoiceSettingsPanel';
     panel.style.cssText = `
-        position:absolute; bottom:100%; right:0; margin-bottom:8px;
         background:rgba(10,8,28,0.96); backdrop-filter:blur(20px);
-        border:1px solid rgba(139,92,246,0.35); border-radius:14px;
-        padding:16px; width:260px; z-index:10;
-        box-shadow:0 8px 32px rgba(0,0,0,0.5);`;
+        border:1px solid rgba(139,92,246,0.35); border-radius:16px;
+        padding:18px; width:300px; z-index:9999;
+        box-shadow:0 12px 48px rgba(0,0,0,0.7);
+        pointer-events:all;`;
 
     panel.innerHTML = `
         <div style="font-size:0.82rem;font-weight:600;color:#c4b5fd;margin-bottom:12px;">
@@ -1893,9 +1926,19 @@ function buildVoiceSettingsPanel() {
             </button>
         </div>`;
 
-    // แนบไว้ใน input-row
-    const inputRow = document.querySelector('.avatar-input-row');
-    if (inputRow) { inputRow.style.position = 'relative'; inputRow.appendChild(panel); }
+    // append ที่ avatar-scene แทน เพื่อให้โผล่เหนือ overflow ได้
+    const scene = document.getElementById('avatarScene');
+    if (scene) scene.appendChild(panel);
+    // คำนวณตำแหน่งให้อยู่เหนือ input row
+    const chatPanel = document.getElementById('avatarChatPanel');
+    if (chatPanel) {
+        const rect = chatPanel.getBoundingClientRect();
+        panel.style.cssText += `
+            position:fixed;
+            bottom:${window.innerHeight - rect.bottom + chatPanel.offsetHeight - 60}px;
+            right:${window.innerWidth - rect.right + 8}px;
+            margin:0;`;
+    }
 }
 
 window.previewVoice = function(voiceName) {
@@ -1922,7 +1965,7 @@ window.applyVoiceSettings = function() {
         volume:    parseFloat(document.getElementById('volumeSlider')?.value || 1.0),
     };
     saveAvatarVoiceSettings(settings);
-    document.getElementById('avatarVoiceSettingsPanel').style.display = 'none';
+    document.getElementById('avatarVoiceSettingsPanel')?.remove();
     // ทดสอบ
     avatarSpeak('บันทึกการตั้งค่าเสร็จแล้วครับ!', false);
 };
@@ -3276,7 +3319,27 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
                         style="font-size:0.65rem;background:rgba(59,130,246,0.2);color:#93c5fd;
                         padding:1px 7px;border-radius:99px;font-weight:400;"></span>
                 </div>
-                <div style="display:flex;gap:4px;">
+                <div style="display:flex;gap:4px;align-items:center;">
+                    <!-- Resize presets -->
+                    <button onclick="resizeAvatarPanel('sm')" title="ย่อ"
+                        style="width:22px;height:22px;border-radius:6px;border:none;
+                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
+                        font-size:0.65rem;display:flex;align-items:center;justify-content:center;
+                        transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.06)'">▫</button>
+                    <button onclick="resizeAvatarPanel('md')" title="ปกติ"
+                        style="width:22px;height:22px;border-radius:6px;border:none;
+                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
+                        font-size:0.65rem;display:flex;align-items:center;justify-content:center;
+                        transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.06)'">▪</button>
+                    <button onclick="resizeAvatarPanel('lg')" title="ขยาย"
+                        style="width:22px;height:22px;border-radius:6px;border:none;
+                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
+                        font-size:0.65rem;display:flex;align-items:center;justify-content:center;
+                        transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.06)'">⬛</button>
+                    <div style="width:1px;height:14px;background:rgba(255,255,255,0.1);margin:0 2px;"></div>
                     <button onclick="toggleAvatarVoiceSettings()" title="ตั้งค่าเสียง"
                         style="width:22px;height:22px;border-radius:50%;border:none;
                         background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
