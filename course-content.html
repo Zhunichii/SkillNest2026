@@ -877,397 +877,266 @@
         }
 
         /* ════════════════════════════════
-           AI AVATAR TEACHER SYSTEM
+           AI AVATAR TEACHER — Floating style
         ════════════════════════════════ */
         @keyframes avatarFloat {
             0%,100% { transform: translateY(0px); }
-            50%      { transform: translateY(-8px); }
+            50%      { transform: translateY(-10px); }
         }
         @keyframes avatarBob {
-            0%,100% { transform: translateY(0) rotate(0deg); }
-            25%     { transform: translateY(-4px) rotate(-1deg); }
-            75%     { transform: translateY(-2px) rotate(1deg); }
+            0%,100% { transform: translateY(0) rotate(0deg) scaleX(1); }
+            25%     { transform: translateY(-5px) rotate(-1.5deg) scaleX(1.02); }
+            75%     { transform: translateY(-3px) rotate(1.5deg) scaleX(0.98); }
         }
-        @keyframes mouthTalk {
-            0%,100% { transform: scaleY(1); }
-            25%     { transform: scaleY(0.3); }
-            50%     { transform: scaleY(0.8); }
-            75%     { transform: scaleY(0.2); }
+        @keyframes glowPulse {
+            0%,100% { filter: drop-shadow(0 0 12px rgba(139,92,246,0.4)); }
+            50%      { filter: drop-shadow(0 0 28px rgba(139,92,246,0.8)); }
         }
-        @keyframes eyeBlink {
-            0%,92%,100% { transform: scaleY(1); }
-            95%          { transform: scaleY(0.1); }
+        @keyframes bubbleIn {
+            from { opacity:0; transform:translateX(20px) scale(0.9); }
+            to   { opacity:1; transform:translateX(0) scale(1); }
         }
-        @keyframes overlayIn {
-            from { opacity:0; backdrop-filter:blur(0px); }
-            to   { opacity:1; backdrop-filter:blur(12px); }
-        }
-        @keyframes panelIn {
-            from { opacity:0; transform:scale(0.88) translateY(32px); }
-            to   { opacity:1; transform:scale(1) translateY(0); }
-        }
-        @keyframes speechBubbleIn {
-            from { opacity:0; transform:translateY(10px) scale(0.95); }
+        @keyframes avatarEnter {
+            from { opacity:0; transform:translateY(80px) scale(0.7); }
             to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+        @keyframes avatarLeave {
+            from { opacity:1; transform:translateY(0) scale(1); }
+            to   { opacity:0; transform:translateY(80px) scale(0.7); }
         }
         @keyframes typingDot {
             0%,60%,100% { opacity:0.2; transform:translateY(0); }
             30%          { opacity:1; transform:translateY(-5px); }
-        }
-        @keyframes glowPulse {
-            0%,100% { box-shadow: 0 0 20px rgba(139,92,246,0.3); }
-            50%     { box-shadow: 0 0 40px rgba(139,92,246,0.6); }
-        }
-        @keyframes ripple {
-            0%   { transform:scale(1); opacity:0.6; }
-            100% { transform:scale(2.2); opacity:0; }
         }
         @keyframes fabPop {
             0%   { transform:scale(0.5); opacity:0; }
             70%  { transform:scale(1.1); }
             100% { transform:scale(1); opacity:1; }
         }
-
-        /* FAB Button */
-        .avatar-fab {
-            position: fixed;
-            bottom: 104px;
-            right: 28px;
-            z-index: 1200;
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            background: linear-gradient(135deg, #7c3aed, #4f46e5);
-            box-shadow: 0 4px 20px rgba(124,58,237,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fabPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both, glowPulse 3s ease-in-out infinite;
-            transition: transform 0.2s;
-        }
-        .avatar-fab:hover { transform: scale(1.08); }
-        .avatar-fab-face {
-            width: 36px; height: 36px;
-            position: relative;
-        }
-        .avatar-fab-tooltip {
-            position: absolute;
-            right: 68px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            font-size: 0.75rem;
-            padding: 5px 10px;
-            border-radius: 8px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .avatar-fab:hover .avatar-fab-tooltip { opacity: 1; }
-        .avatar-fab-ripple {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: rgba(139,92,246,0.4);
-            animation: ripple 2s ease-out infinite;
-        }
-
-        /* Overlay — โปร่งใส เห็นเนื้อหาด้านหลัง */
-        .avatar-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1300;
-            background: transparent;
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-            padding: 80px 24px 24px;
-            pointer-events: none;
-        }
-
-        /* Main Panel — ลอยมุมขวาล่าง */
-        .avatar-panel {
-            position: relative;
-            width: min(420px, 94vw);
-            max-height: calc(100vh - 120px);
-            background: rgba(10, 8, 28, 0.82);
-            backdrop-filter: blur(20px) saturate(1.4);
-            -webkit-backdrop-filter: blur(20px) saturate(1.4);
-            border: 1px solid rgba(139,92,246,0.35);
-            border-radius: 20px;
-            overflow: hidden;
-            animation: panelSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
-            pointer-events: all;
-        }
-        @keyframes panelSlideUp {
-            from { opacity:0; transform:translateY(40px) scale(0.93); }
-            to   { opacity:1; transform:translateY(0) scale(1); }
-        }
-        .avatar-panel.closing {
-            animation: panelSlideDown 0.25s ease forwards;
-        }
-        @keyframes panelSlideDown {
-            from { opacity:1; transform:translateY(0) scale(1); }
-            to   { opacity:0; transform:translateY(40px) scale(0.93); }
-        }
-
-        /* Decorative top bar */
-        .avatar-panel-bar {
-            height: 3px;
-            background: linear-gradient(90deg, #7c3aed, #4f46e5, #06b6d4, #7c3aed);
-            background-size: 200% 100%;
-            animation: gradientSlide 3s linear infinite;
+        @keyframes ripple {
+            0%   { transform:scale(1); opacity:0.5; }
+            100% { transform:scale(2.4); opacity:0; }
         }
         @keyframes gradientSlide {
             0%   { background-position: 0% 0%; }
             100% { background-position: 200% 0%; }
         }
 
-        /* Header */
-        .avatar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 20px 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+        /* ── FAB ── */
+        .avatar-fab {
+            position: fixed; bottom: 104px; right: 28px;
+            z-index: 1200; width: 58px; height: 58px;
+            border-radius: 50%; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            box-shadow: 0 4px 20px rgba(124,58,237,0.5);
+            display: flex; align-items: center; justify-content: center;
+            animation: fabPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both,
+                       glowPulse 3s ease-in-out infinite;
+            transition: transform 0.2s;
         }
-        .avatar-header-title {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: #c4b5fd;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .avatar-fab:hover { transform: scale(1.08); }
+        .avatar-fab-ripple {
+            position: absolute; inset: 0; border-radius: 50%;
+            background: rgba(139,92,246,0.35);
+            animation: ripple 2s ease-out infinite;
         }
-        .avatar-close-btn {
-            width: 28px; height: 28px;
-            border: none; background: rgba(255,255,255,0.06);
-            border-radius: 50%; color: #a0a0ba; cursor: pointer;
-            font-size: 0.9rem; display: flex; align-items: center;
-            justify-content: center; transition: all 0.2s;
+        .avatar-fab-tooltip {
+            position: absolute; right: 68px; top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.85); color: white;
+            font-size: 0.75rem; padding: 5px 10px;
+            border-radius: 8px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
         }
-        .avatar-close-btn:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+        .avatar-fab:hover .avatar-fab-tooltip { opacity: 1; }
 
-        /* Avatar area */
-        .avatar-body {
-            display: flex;
-            gap: 0;
-            flex: 1;
-            overflow: hidden;
+        /* ── Wrapper (ไม่บล็อก pointer events) ── */
+        .avatar-scene {
+            position: fixed; inset: 0;
+            z-index: 1300;
+            pointer-events: none;
+            display: none;
         }
-        .avatar-left {
-            width: 140px;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 14px 10px;
-            background: linear-gradient(180deg, rgba(124,58,237,0.08) 0%, rgba(79,70,229,0.15) 100%);
-            border-right: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-            overflow: hidden;
-        }
+        .avatar-scene.open { display: block; }
 
-        /* Circle glow bg */
-        .avatar-bg-glow {
+        /* ── Avatar ลอยขวาล่าง ── */
+        .avatar-character {
             position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 140px; height: 140px;
-            background: radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%);
-            border-radius: 50%;
+            bottom: 0; right: 200px;
+            pointer-events: all;
+            animation: avatarEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            cursor: pointer;
+            transform-origin: bottom center;
+        }
+        .avatar-character:hover .avatar-svg-wrap { filter: brightness(1.1); }
+        .avatar-character.closing {
+            animation: avatarLeave 0.35s ease forwards;
         }
 
-        /* SVG Avatar */
         .avatar-svg-wrap {
-            position: relative;
-            z-index: 1;
             animation: avatarFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
         }
         .avatar-svg-wrap.talking {
-            animation: avatarBob 0.4s ease-in-out infinite;
+            animation: avatarBob 0.35s ease-in-out infinite;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5))
+                    drop-shadow(0 0 20px rgba(139,92,246,0.6));
         }
 
-        .avatar-name-tag {
-            margin-top: 10px;
-            font-size: 0.78rem;
-            color: #c4b5fd;
-            font-weight: 600;
-            background: rgba(124,58,237,0.2);
-            padding: 3px 12px;
-            border-radius: 99px;
-            border: 1px solid rgba(124,58,237,0.3);
-        }
-        .avatar-status {
-            font-size: 0.7rem;
-            color: #a0a0ba;
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .avatar-status-dot {
-            width: 6px; height: 6px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: glowPulse 2s infinite;
-        }
-
-        /* Chat area */
-        .avatar-right {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 12px;
-            gap: 8px;
+        /* ── Chat Panel ข้างอาจารย์ ── */
+        .avatar-chat-panel {
+            position: absolute;
+            bottom: 180px; right: 340px;
+            width: 300px;
+            background: rgba(10,8,28,0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
             overflow: hidden;
-            min-width: 0;
+            pointer-events: all;
+            animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+        }
+        .avatar-chat-panel.closing {
+            animation: bubbleIn 0.25s ease reverse forwards;
         }
 
-        /* Speech bubble */
+        /* top bar */
+        .avatar-chat-bar {
+            height: 3px;
+            background: linear-gradient(90deg,#7c3aed,#4f46e5,#06b6d4,#7c3aed);
+            background-size: 200%;
+            animation: gradientSlide 3s linear infinite;
+        }
+
+        /* header */
+        .avatar-chat-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .avatar-chat-header-title {
+            font-size: 0.78rem; font-weight: 600; color: #c4b5fd;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .avatar-chat-close {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: none; background: rgba(255,255,255,0.06);
+            color: #a0a0ba; cursor: pointer; font-size: 0.75rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .avatar-chat-close:hover { background:rgba(239,68,68,0.2); color:#f87171; }
+
+        /* speech bubble */
         .avatar-speech {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(139,92,246,0.2);
-            border-radius: 12px 12px 12px 4px;
             padding: 10px 12px;
-            font-size: 0.82rem;
-            color: #e2e8f0;
-            line-height: 1.6;
-            min-height: 48px;
-            max-height: 100px;
-            overflow-y: auto;
-            animation: speechBubbleIn 0.3s ease;
+            font-size: 0.82rem; color: #e2e8f0; line-height: 1.6;
+            min-height: 48px; max-height: 90px; overflow-y: auto;
+            background: rgba(139,92,246,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             flex-shrink: 0;
         }
-        .avatar-speech.typing {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+        .avatar-speech.typing { display:flex; align-items:center; gap:4px; }
         .avatar-typing-dot {
-            width: 7px; height: 7px;
-            background: #8b5cf6;
-            border-radius: 50%;
+            width:7px; height:7px; background:#8b5cf6; border-radius:50%;
         }
-        .avatar-typing-dot:nth-child(1) { animation: typingDot 1s 0.0s infinite; }
-        .avatar-typing-dot:nth-child(2) { animation: typingDot 1s 0.15s infinite; }
-        .avatar-typing-dot:nth-child(3) { animation: typingDot 1s 0.3s infinite; }
+        .avatar-typing-dot:nth-child(1) { animation:typingDot 1s 0.0s infinite; }
+        .avatar-typing-dot:nth-child(2) { animation:typingDot 1s 0.15s infinite; }
+        .avatar-typing-dot:nth-child(3) { animation:typingDot 1s 0.3s infinite; }
 
-        /* Chat history */
+        /* history */
         .avatar-chat-history {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding-right: 4px;
+            flex: 1; overflow-y: auto; max-height: 160px;
+            display: flex; flex-direction: column; gap: 6px;
+            padding: 8px 10px;
         }
-        .avatar-chat-history::-webkit-scrollbar { width: 3px; }
-        .avatar-chat-history::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.4); border-radius: 99px; }
-
+        .avatar-chat-history::-webkit-scrollbar { width:3px; }
+        .avatar-chat-history::-webkit-scrollbar-thumb { background:rgba(139,92,246,0.4); border-radius:99px; }
         .avatar-msg-user {
-            align-self: flex-end;
-            background: rgba(59,130,246,0.2);
-            border: 1px solid rgba(59,130,246,0.3);
-            color: #bfdbfe;
-            padding: 8px 12px;
-            border-radius: 12px 12px 2px 12px;
-            font-size: 0.83rem;
-            max-width: 85%;
-            line-height: 1.5;
+            align-self:flex-end; background:rgba(59,130,246,0.2);
+            border:1px solid rgba(59,130,246,0.3); color:#bfdbfe;
+            padding:6px 10px; border-radius:10px 10px 2px 10px;
+            font-size:0.78rem; max-width:90%; line-height:1.5;
         }
         .avatar-msg-ai {
-            align-self: flex-start;
-            background: rgba(139,92,246,0.1);
-            border: 1px solid rgba(139,92,246,0.2);
-            color: #e2e8f0;
-            padding: 8px 12px;
-            border-radius: 2px 12px 12px 12px;
-            font-size: 0.83rem;
-            max-width: 85%;
-            line-height: 1.5;
+            align-self:flex-start; background:rgba(139,92,246,0.1);
+            border:1px solid rgba(139,92,246,0.2); color:#e2e8f0;
+            padding:6px 10px; border-radius:2px 10px 10px 10px;
+            font-size:0.78rem; max-width:90%; line-height:1.5;
         }
 
-        /* Input row */
-        .avatar-input-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .avatar-input {
-            flex: 1;
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 22px;
-            padding: 9px 16px;
-            color: white;
-            font-size: 0.85rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .avatar-input:focus { border-color: rgba(139,92,246,0.6); background: rgba(139,92,246,0.05); }
-        .avatar-input::placeholder { color: #4a4a6a; }
-        .avatar-send-btn {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, #7c3aed, #4f46e5);
-            color: white;
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .avatar-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 16px rgba(124,58,237,0.5); }
-        .avatar-send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
-        .avatar-voice-btn {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.07);
-            color: #a0a0ba;
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.2s;
-        }
-        .avatar-voice-btn:hover { background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981; }
-        .avatar-voice-btn.recording { background: rgba(239,68,68,0.2); color: #f87171; border-color: #f87171; animation: glowPulse 1s infinite; }
-
-        /* Quick prompts */
+        /* quick prompts */
         .avatar-quick-prompts {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            flex-shrink: 0;
+            display:flex; gap:4px; flex-wrap:wrap;
+            padding:6px 10px 4px; flex-shrink:0;
         }
         .avatar-quick-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #a0a0ba;
-            font-size: 0.68rem;
-            padding: 3px 8px;
-            border-radius: 99px;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.1);
+            color:#a0a0ba; font-size:0.65rem; padding:3px 7px;
+            border-radius:99px; cursor:pointer; transition:all 0.2s;
+            white-space:nowrap;
         }
-        .avatar-quick-btn:hover { background: rgba(139,92,246,0.2); color: #c4b5fd; border-color: rgba(139,92,246,0.4); }
+        .avatar-quick-btn:hover { background:rgba(139,92,246,0.2); color:#c4b5fd; border-color:rgba(139,92,246,0.4); }
 
-        /* Lip sync mouth shape */
-        .avatar-mouth { transition: d 0.05s; }
+        /* input row */
+        .avatar-input-row {
+            display:flex; gap:6px; align-items:center;
+            padding:8px 10px; flex-shrink:0;
+            border-top:1px solid rgba(255,255,255,0.06);
+        }
+        .avatar-input {
+            flex:1; background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.12);
+            border-radius:18px; padding:7px 12px;
+            color:white; font-size:0.8rem; outline:none;
+            transition:border-color 0.2s;
+        }
+        .avatar-input:focus { border-color:rgba(139,92,246,0.6); }
+        .avatar-input::placeholder { color:#4a4a6a; }
+        .avatar-send-btn {
+            width:32px; height:32px; border-radius:50%; border:none;
+            background:linear-gradient(135deg,#7c3aed,#4f46e5);
+            color:white; cursor:pointer; font-size:0.85rem;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; transition:transform 0.15s;
+        }
+        .avatar-send-btn:hover { transform:scale(1.1); }
+        .avatar-send-btn:disabled { opacity:0.4; cursor:default; transform:none; }
+        .avatar-voice-btn {
+            width:32px; height:32px; border-radius:50%;
+            border:1px solid rgba(255,255,255,0.15);
+            background:rgba(255,255,255,0.07); color:#a0a0ba;
+            cursor:pointer; font-size:0.85rem;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; transition:all 0.2s;
+        }
+        .avatar-voice-btn:hover { background:rgba(16,185,129,0.2); color:#10b981; }
+        .avatar-voice-btn.recording { background:rgba(239,68,68,0.2); color:#f87171; animation:glowPulse 1s infinite; }
+
+        /* name tag ใต้อาจารย์ */
+        .avatar-name-tag {
+            text-align:center; font-size:0.7rem; color:#c4b5fd;
+            font-weight:600; background:rgba(124,58,237,0.25);
+            padding:2px 10px; border-radius:99px;
+            border:1px solid rgba(124,58,237,0.3);
+            margin-top:4px; display:inline-block;
+        }
+        .avatar-status {
+            font-size:0.65rem; color:#a0a0ba; margin-top:3px;
+            display:flex; align-items:center; justify-content:center; gap:4px;
+        }
+        .avatar-status-dot {
+            width:5px; height:5px; background:#10b981;
+            border-radius:50%; animation:glowPulse 2s infinite;
+        }
+        .avatar-bottom-info {
+            display:flex; flex-direction:column; align-items:center; padding-bottom:12px;
+        }
     </style>
 </head>
 <body>
@@ -1668,277 +1537,206 @@ async function initCourseContent() {
     }
 }
 // ═══════════════════════════════════════════
-//  AI AVATAR TEACHER SYSTEM
+//  AI AVATAR TEACHER — Floating Character
 // ═══════════════════════════════════════════
-let avatarChatHistory = [];
-let avatarSpeaking    = false;
-let avatarSynth       = window.speechSynthesis;
-let avatarRecognition = null;
+let avatarChatHistory  = [];
+let avatarSpeaking     = false;
+let avatarSynth        = window.speechSynthesis;
+let avatarRecognition  = null;
 let avatarTalkInterval = null;
 
-// ── Open / Close ──
+// ── Open ──
 window.openAvatarTeacher = function() {
-    const overlay = document.getElementById('avatarOverlay');
-    const panel   = document.getElementById('avatarPanel');
-    overlay.style.display = 'flex';
+    const scene = document.getElementById('avatarScene');
+    const fab   = document.getElementById('avatarFab');
+    const char  = document.getElementById('avatarCharacter');
+    const panel = document.getElementById('avatarChatPanel');
+    if (!scene) return;
+
+    scene.classList.add('open');
+    if (char)  char.classList.remove('closing');
     if (panel) panel.classList.remove('closing');
-    const fab = document.getElementById('avatarFab');
-    if (fab) fab.style.display = 'none';
+    if (fab)   fab.style.display = 'none';
 
     // Update course tag
     const tag = document.getElementById('avatarCourseTag');
     if (tag && currentCourse) tag.textContent = currentCourse.title || '';
 
-    // Greet with TTS
+    // Greet
     setTimeout(() => {
+        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || '';
         const greeting = currentCourse
-            ? `สวัสดีครับ! ผมคืออาจารย์ AI สำหรับวิชา ${currentCourse.title} ครับ มีคำถามอะไรไหมครับ?`
-            : 'สวัสดีครับ! มีคำถามอะไรให้ผมช่วยไหมครับ?';
+            ? `สวัสดีครับ! ผมอาจารย์ AI ยินดีช่วยสอน${lessonTitle ? ' เรื่อง ' + lessonTitle : ''} ครับ`
+            : 'สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?';
         avatarSpeak(greeting, false);
-    }, 400);
+    }, 500);
 };
 
+// ── Close ──
 window.closeAvatarTeacher = function() {
-    const overlay = document.getElementById('avatarOverlay');
-    const panel   = document.getElementById('avatarPanel');
+    const scene = document.getElementById('avatarScene');
+    const fab   = document.getElementById('avatarFab');
+    const char  = document.getElementById('avatarCharacter');
+    const panel = document.getElementById('avatarChatPanel');
     avatarStopSpeaking();
+    if (char)  char.classList.add('closing');
     if (panel) panel.classList.add('closing');
     setTimeout(() => {
-        overlay.style.display = 'none';
+        scene.classList.remove('open');
+        if (char)  char.classList.remove('closing');
         if (panel) panel.classList.remove('closing');
-        const fab = document.getElementById('avatarFab');
-        if (fab) fab.style.display = 'flex';
-    }, 260);
+        if (fab)   fab.style.display = 'flex';
+    }, 360);
 };
 
-// overlay ไม่ block คลิกแล้ว — ปิดด้วย close button หรือ Escape เท่านั้น
-
-// ── Lip Sync Animation ──
+// ── Lip Sync ──
 function startTalking() {
-    const wrap = document.getElementById('avatarSvgWrap');
-    const mouth = document.getElementById('avatarMouthPath');
+    const wrap   = document.getElementById('avatarSvgWrap');
+    const mouth  = document.getElementById('avatarMouthPath');
     const status = document.getElementById('avatarStatusText');
-    if (wrap) wrap.classList.add('talking');
+    if (wrap)   wrap.classList.add('talking');
     if (status) status.textContent = 'กำลังอธิบาย...';
-
-    const mouthShapes = [
-        'M62 104 Q70 112 78 104',   // open wide
-        'M63 105 Q70 109 77 105',   // half
-        'M62 104 Q70 110 78 104',   // normal smile
-        'M64 106 Q70 108 76 106',   // small
-        'M62 104 Q70 107 78 104',   // slight
+    const shapes = [
+        'M62 116 Q70 126 78 116',
+        'M63 117 Q70 122 77 117',
+        'M62 116 Q70 123 78 116',
+        'M64 118 Q70 121 76 118',
     ];
     let i = 0;
     avatarTalkInterval = setInterval(() => {
-        if (mouth) mouth.setAttribute('d', mouthShapes[i % mouthShapes.length]);
-        i++;
-    }, 120);
+        if (mouth) mouth.setAttribute('d', shapes[i++ % shapes.length]);
+    }, 110);
 }
 
 function stopTalking() {
-    const wrap = document.getElementById('avatarSvgWrap');
-    const mouth = document.getElementById('avatarMouthPath');
+    const wrap   = document.getElementById('avatarSvgWrap');
+    const mouth  = document.getElementById('avatarMouthPath');
     const status = document.getElementById('avatarStatusText');
-    if (wrap) wrap.classList.remove('talking');
-    if (mouth) mouth.setAttribute('d', 'M62 104 Q70 110 78 104');
+    if (wrap)   wrap.classList.remove('talking');
+    if (mouth)  mouth.setAttribute('d', 'M62 116 Q70 123 78 116');
     if (status) status.textContent = 'พร้อมสอน';
-    if (avatarTalkInterval) { clearInterval(avatarTalkInterval); avatarTalkInterval = null; }
+    clearInterval(avatarTalkInterval);
+    avatarTalkInterval = null;
 }
 
 // ── Eye Blink ──
 setInterval(() => {
-    const eyeL = document.getElementById('avatarEyeL');
-    const eyeR = document.getElementById('avatarEyeR');
-    if (!eyeL || !eyeR || avatarSpeaking) return;
-    eyeL.style.transform = 'scaleY(0.1)';
-    eyeR.style.transform = 'scaleY(0.1)';
-    setTimeout(() => {
-        eyeL.style.transform = 'scaleY(1)';
-        eyeR.style.transform = 'scaleY(1)';
-    }, 120);
-}, 3500 + Math.random() * 2000);
+    if (avatarSpeaking) return;
+    ['avatarEyeL','avatarEyeR'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.transform = 'scaleY(0.08)'; setTimeout(() => { el.style.transform = 'scaleY(1)'; }, 110); }
+    });
+}, 3200 + Math.random() * 2400);
 
-// ── Text-to-Speech ──
+// ── TTS ──
 function avatarSpeak(text, addToHistory = true) {
     avatarStopSpeaking();
-
-    // Update speech bubble
     const bubble = document.getElementById('avatarSpeech');
-    if (bubble) {
-        bubble.classList.remove('typing');
-        bubble.textContent = text;
-    }
-
-    if (addToHistory) {
-        addAvatarMsg('ai', text);
-    }
-
+    if (bubble) { bubble.classList.remove('typing'); bubble.textContent = text; }
+    if (addToHistory) addAvatarMsg('ai', text);
     if (!avatarSynth) return;
 
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'th-TH';
-    utter.rate = 0.92;
-    utter.pitch = 1.05;
-
-    // Try to pick a Thai voice
+    const utter  = new SpeechSynthesisUtterance(text);
+    utter.lang   = 'th-TH'; utter.rate = 0.92; utter.pitch = 1.05;
     const voices = avatarSynth.getVoices();
-    const thVoice = voices.find(v => v.lang.startsWith('th')) ||
-                    voices.find(v => v.lang.startsWith('en-US'));
-    if (thVoice) utter.voice = thVoice;
-
+    const voice  = voices.find(v => v.lang.startsWith('th')) || voices.find(v => v.lang.startsWith('en-US'));
+    if (voice) utter.voice = voice;
     utter.onstart = () => { avatarSpeaking = true; startTalking(); };
     utter.onend   = () => { avatarSpeaking = false; stopTalking(); };
     utter.onerror = () => { avatarSpeaking = false; stopTalking(); };
-
     avatarSynth.speak(utter);
 }
 
 function avatarStopSpeaking() {
     if (avatarSynth) avatarSynth.cancel();
-    avatarSpeaking = false;
-    stopTalking();
+    avatarSpeaking = false; stopTalking();
 }
 
-// ── Send Message ──
+// ── Send ──
 window.sendAvatarMessage = async function() {
     const input = document.getElementById('avatarInput');
-    const text = input?.value?.trim();
+    const text  = input?.value?.trim();
     if (!text) return;
     input.value = '';
     await avatarProcessQuestion(text);
 };
 
-window.avatarAskQuick = async function(question) {
-    document.getElementById('avatarInput').value = question;
-    await avatarProcessQuestion(question);
+window.avatarAskQuick = async function(q) {
+    document.getElementById('avatarInput').value = q;
+    await avatarProcessQuestion(q);
 };
 
 async function avatarProcessQuestion(question) {
     addAvatarMsg('user', question);
     avatarChatHistory.push({ role: 'user', content: question });
 
-    // Show typing bubble
-    const bubble = document.getElementById('avatarSpeech');
-    bubble.innerHTML = `
-        <div class="avatar-typing-dot"></div>
-        <div class="avatar-typing-dot"></div>
-        <div class="avatar-typing-dot"></div>`;
-    bubble.classList.add('typing');
-
+    const bubble  = document.getElementById('avatarSpeech');
     const sendBtn = document.getElementById('avatarSendBtn');
+    const status  = document.getElementById('avatarStatusText');
+    bubble.innerHTML = '<div class="avatar-typing-dot"></div><div class="avatar-typing-dot"></div><div class="avatar-typing-dot"></div>';
+    bubble.classList.add('typing');
     if (sendBtn) sendBtn.disabled = true;
-
-    // Status
-    const status = document.getElementById('avatarStatusText');
-    if (status) status.textContent = 'กำลังคิด...';
+    if (status)  status.textContent = 'กำลังคิด...';
 
     try {
         const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนปัจจุบัน';
         const courseTitle = currentCourse?.title || 'คอร์สนี้';
+        let sys = `คุณคืออาจารย์ AI สอนวิชา "${courseTitle}" บทเรียน "${lessonTitle}"
+ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง ไม่เกิน 3-4 ประโยค ไม่ใช้ markdown พูดเหมือนอาจารย์จริงๆ`;
+        if (lessonPdfContext) sys += `
 
-        let sysPrompt = `คุณคืออาจารย์ AI สอนวิชา "${courseTitle}" บทเรียน "${lessonTitle}"
-ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย เหมาะกับการอ่านออกเสียง ไม่ใช้ตัวหนา ไม่ใช้ markdown
-ตอบไม่เกิน 3-4 ประโยค พูดเหมือนอาจารย์จริงๆ`;
-
-        if (lessonPdfContext) {
-            sysPrompt += `
-
-เนื้อหาบทเรียน:
+เนื้อหา:
 ${lessonPdfContext.slice(0, 2000)}`;
-        }
 
-        const res = await fetch('/api/groq-analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                prompt: question,
-                systemPrompt: sysPrompt,
-                messages: avatarChatHistory.slice(-8)
-            })
+        const res  = await fetch('/api/groq-analyze', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: question, systemPrompt: sys, messages: avatarChatHistory.slice(-8) })
         });
-
         const data = await res.json();
-        const answer = data.text || 'ขอโทษครับ ตอบไม่ได้ในขณะนี้';
-
-        avatarChatHistory.push({ role: 'assistant', content: answer });
+        const ans  = data.text || 'ขอโทษครับ ตอบไม่ได้ในขณะนี้';
+        avatarChatHistory.push({ role: 'assistant', content: ans });
         if (avatarChatHistory.length > 20) avatarChatHistory = avatarChatHistory.slice(-20);
 
         bubble.classList.remove('typing');
-        avatarSpeak(answer, false);
-        bubble.textContent = answer;
-
+        avatarSpeak(ans, false);
+        bubble.textContent = ans;
     } catch(e) {
         bubble.classList.remove('typing');
-        bubble.textContent = 'ขอโทษครับ เกิดข้อผิดพลาด ลองใหม่อีกครั้งนะครับ';
+        bubble.textContent = 'ขอโทษครับ เกิดข้อผิดพลาด';
         stopTalking();
     }
-
     if (sendBtn) sendBtn.disabled = false;
 }
 
-// ── Add chat message ──
 function addAvatarMsg(role, text) {
-    const history = document.getElementById('avatarChatHistory');
-    if (!history) return;
-    const div = document.createElement('div');
-    div.className = role === 'user' ? 'avatar-msg-user' : 'avatar-msg-ai';
-    div.textContent = text;
-    history.appendChild(div);
-    history.scrollTop = history.scrollHeight;
+    const h = document.getElementById('avatarChatHistory');
+    if (!h) return;
+    const d = document.createElement('div');
+    d.className = role === 'user' ? 'avatar-msg-user' : 'avatar-msg-ai';
+    d.textContent = text;
+    h.appendChild(d);
+    h.scrollTop = h.scrollHeight;
 }
 
-// ── Voice Input ──
+// ── Voice ──
 window.toggleAvatarVoice = function() {
     const btn = document.getElementById('avatarVoiceBtn');
-
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('เบราว์เซอร์ของคุณไม่รองรับการพูด กรุณาพิมพ์แทนครับ');
-        return;
+        alert('เบราว์เซอร์ไม่รองรับ กรุณาพิมพ์แทนครับ'); return;
     }
-
-    if (avatarRecognition) {
-        avatarRecognition.stop();
-        avatarRecognition = null;
-        if (btn) btn.classList.remove('recording');
-        return;
-    }
-
+    if (avatarRecognition) { avatarRecognition.stop(); avatarRecognition = null; if (btn) btn.classList.remove('recording'); return; }
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     avatarRecognition = new SR();
-    avatarRecognition.lang = 'th-TH';
-    avatarRecognition.interimResults = false;
-
-    avatarRecognition.onstart = () => {
-        if (btn) { btn.classList.add('recording'); btn.textContent = '🔴'; }
-        const status = document.getElementById('avatarStatusText');
-        if (status) status.textContent = 'กำลังฟัง...';
-    };
-
-    avatarRecognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        const input = document.getElementById('avatarInput');
-        if (input) input.value = text;
-        avatarProcessQuestion(text);
-    };
-
-    avatarRecognition.onend = () => {
-        avatarRecognition = null;
-        if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
-    };
-
-    avatarRecognition.onerror = () => {
-        avatarRecognition = null;
-        if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
-    };
-
+    avatarRecognition.lang = 'th-TH'; avatarRecognition.interimResults = false;
+    avatarRecognition.onstart  = () => { if (btn) { btn.classList.add('recording'); btn.textContent = '🔴'; } };
+    avatarRecognition.onresult = (e) => { const t = e.results[0][0].transcript; document.getElementById('avatarInput').value = t; avatarProcessQuestion(t); };
+    avatarRecognition.onend    = () => { avatarRecognition = null; if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; } };
+    avatarRecognition.onerror  = () => { avatarRecognition = null; if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; } };
     avatarRecognition.start();
 };
 
-// Spacebar shortcut เมื่อ overlay เปิด
 document.addEventListener('keydown', (e) => {
-    const overlay = document.getElementById('avatarOverlay');
-    if (!overlay || overlay.style.display === 'none') return;
-    if (e.key === 'Escape') closeAvatarTeacher();
+    if (e.key === 'Escape' && document.getElementById('avatarScene')?.classList.contains('open')) closeAvatarTeacher();
 });
 
 supabase.auth.onAuthStateChange((event) => {
@@ -3129,134 +2927,131 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
 
     <!-- ════ AI AVATAR TEACHER ════ -->
 
-    <!-- FAB Button -->
-    <button class="avatar-fab" id="avatarFab" onclick="openAvatarTeacher()" title="">
+    <!-- FAB -->
+    <button class="avatar-fab" id="avatarFab" onclick="openAvatarTeacher()">
         <div class="avatar-fab-ripple"></div>
-        <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
-            <!-- face -->
+        <svg width="30" height="30" viewBox="0 0 80 80" fill="none">
             <circle cx="40" cy="38" r="22" fill="#7c3aed"/>
             <circle cx="40" cy="38" r="20" fill="#9333ea"/>
-            <!-- eyes -->
             <ellipse cx="33" cy="34" rx="3.5" ry="4" fill="white"/>
             <ellipse cx="47" cy="34" rx="3.5" ry="4" fill="white"/>
             <circle cx="34" cy="35" r="2" fill="#1a1a3e"/>
             <circle cx="48" cy="35" r="2" fill="#1a1a3e"/>
-            <!-- smile -->
             <path d="M33 43 Q40 49 47 43" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <!-- hat/hair -->
             <rect x="20" y="18" width="40" height="6" rx="3" fill="#4f46e5"/>
             <rect x="26" y="12" width="28" height="10" rx="5" fill="#4f46e5"/>
         </svg>
         <div class="avatar-fab-tooltip">🎓 เรียกอาจารย์ AI</div>
     </button>
 
-    <!-- Avatar Overlay -->
-    <div class="avatar-overlay" id="avatarOverlay" style="display:none;">
-        <div class="avatar-panel" id="avatarPanel">
-            <div class="avatar-panel-bar"></div>
+    <!-- Avatar Scene (ไม่บล็อก pointer events) -->
+    <div class="avatar-scene" id="avatarScene">
 
-            <!-- Header -->
-            <div class="avatar-header">
-                <div class="avatar-header-title">
+        <!-- Chat Panel ข้างอาจารย์ -->
+        <div class="avatar-chat-panel" id="avatarChatPanel">
+            <div class="avatar-chat-bar"></div>
+            <div class="avatar-chat-header">
+                <div class="avatar-chat-header-title">
                     <span>🎓</span>
-                    <span>AI อาจารย์ผู้ช่วย</span>
-                    <span id="avatarCourseTag" style="font-size:0.72rem;background:rgba(59,130,246,0.2);
-                        color:#93c5fd;padding:2px 8px;border-radius:99px;font-weight:400;"></span>
+                    <span>อ.AI Assistant</span>
+                    <span id="avatarCourseTag"
+                        style="font-size:0.65rem;background:rgba(59,130,246,0.2);color:#93c5fd;
+                        padding:1px 7px;border-radius:99px;font-weight:400;"></span>
                 </div>
-                <button class="avatar-close-btn" onclick="closeAvatarTeacher()">✕</button>
+                <button class="avatar-chat-close" onclick="closeAvatarTeacher()">✕</button>
             </div>
 
-            <!-- Body -->
-            <div class="avatar-body">
-                <!-- Left: Avatar -->
-                <div class="avatar-left">
-                    <div class="avatar-svg-wrap" id="avatarSvgWrap">
-                        <svg id="avatarSvg" width="100" height="128" viewBox="0 0 140 180" fill="none">
-                            <!-- Body / Robe -->
-                            <ellipse cx="70" cy="155" rx="45" ry="30" fill="#4f46e5" opacity="0.6"/>
-                            <path d="M30 140 Q70 160 110 140 L115 180 L25 180 Z" fill="#4338ca"/>
-                            <path d="M55 130 L45 180 L95 180 L85 130" fill="#6d28d9"/>
-                            <!-- Collar / tie detail -->
-                            <path d="M60 118 L70 128 L80 118" fill="#7c3aed" opacity="0.8"/>
-                            <!-- Neck -->
-                            <rect x="63" y="110" width="14" height="16" rx="4" fill="#fbbf24"/>
-                            <!-- Head -->
-                            <ellipse cx="70" cy="90" rx="30" ry="32" fill="#fbbf24"/>
-                            <!-- Hair -->
-                            <path d="M40 80 Q42 60 70 58 Q98 60 100 80 Q95 65 70 63 Q45 65 40 80Z" fill="#1e1b4b"/>
-                            <rect x="40" y="70" width="6" height="14" rx="3" fill="#1e1b4b"/>
-                            <rect x="94" y="70" width="6" height="14" rx="3" fill="#1e1b4b"/>
-                            <!-- Ears -->
-                            <ellipse cx="40" cy="90" rx="5" ry="7" fill="#f59e0b"/>
-                            <ellipse cx="100" cy="90" rx="5" ry="7" fill="#f59e0b"/>
-                            <!-- Eyes -->
-                            <g id="avatarEyeL">
-                                <ellipse cx="58" cy="87" rx="6" ry="7" fill="white"/>
-                                <circle cx="59" cy="88" r="4" fill="#1e1b4b"/>
-                                <circle cx="60" cy="87" r="1.5" fill="white"/>
-                            </g>
-                            <g id="avatarEyeR">
-                                <ellipse cx="82" cy="87" rx="6" ry="7" fill="white"/>
-                                <circle cx="83" cy="88" r="4" fill="#1e1b4b"/>
-                                <circle cx="84" cy="87" r="1.5" fill="white"/>
-                            </g>
-                            <!-- Eyebrows -->
-                            <path d="M52 79 Q58 76 64 78" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                            <path d="M76 78 Q82 76 88 79" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                            <!-- Nose -->
-                            <path d="M68 93 Q70 97 72 93" stroke="#e07b39" stroke-width="1.5" fill="none"/>
-                            <!-- Mouth -->
-                            <g id="avatarMouth">
-                                <path id="avatarMouthPath" d="M62 104 Q70 110 78 104"
-                                    stroke="#c2410c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                            </g>
-                            <!-- Glasses -->
-                            <rect x="50" y="82" width="16" height="12" rx="5" stroke="#4f46e5" stroke-width="2" fill="rgba(79,70,229,0.1)"/>
-                            <rect x="74" y="82" width="16" height="12" rx="5" stroke="#4f46e5" stroke-width="2" fill="rgba(79,70,229,0.1)"/>
-                            <line x1="66" y1="88" x2="74" y2="88" stroke="#4f46e5" stroke-width="2"/>
-                            <line x1="42" y1="88" x2="50" y2="88" stroke="#4f46e5" stroke-width="2" opacity="0.6"/>
-                            <line x1="90" y1="88" x2="98" y2="88" stroke="#4f46e5" stroke-width="2" opacity="0.6"/>
-                        </svg>
-                    </div>
+            <div class="avatar-speech" id="avatarSpeech">
+                สวัสดีครับ! มีคำถามอะไรไหมครับ? 😊
+            </div>
 
-                    <div class="avatar-name-tag" id="avatarNameTag">อ.AI Assistant</div>
-                    <div class="avatar-status">
-                        <div class="avatar-status-dot"></div>
-                        <span id="avatarStatusText">พร้อมสอน</span>
-                    </div>
-                </div>
+            <div class="avatar-chat-history" id="avatarChatHistory"></div>
 
-                <!-- Right: Chat -->
-                <div class="avatar-right">
-                    <!-- Speech bubble (latest response) -->
-                    <div class="avatar-speech" id="avatarSpeech">
-                        สวัสดีครับ! ผมคืออาจารย์ AI คอยช่วยสอนเนื้อหาในคอร์สนี้ 😊
-                        <br>มีคำถามอะไรไหมครับ?
-                    </div>
+            <div class="avatar-quick-prompts">
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('สรุปเนื้อหาบทนี้')">📝 สรุป</button>
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('อธิบายแนวคิดหลัก')">💡 แนวคิด</button>
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('ออกตัวอย่างโจทย์ให้ฝึก')">📋 โจทย์</button>
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('จุดที่ควรทบทวน')">🔍 ทบทวน</button>
+            </div>
 
-                    <!-- Quick prompts -->
-                    <div class="avatar-quick-prompts" id="avatarQuickPrompts">
-                        <button class="avatar-quick-btn" onclick="avatarAskQuick('สรุปเนื้อหาบทนี้ให้หน่อย')">📝 สรุปเนื้อหา</button>
-                        <button class="avatar-quick-btn" onclick="avatarAskQuick('อธิบายแนวคิดหลักของบทนี้')">💡 แนวคิดหลัก</button>
-                        <button class="avatar-quick-btn" onclick="avatarAskQuick('ออกตัวอย่างโจทย์ให้ฝึกทำหน่อย')">📋 ตัวอย่างโจทย์</button>
-                        <button class="avatar-quick-btn" onclick="avatarAskQuick('มีข้อสงสัยไหมที่ควรทบทวน')">🔍 จุดที่ควรทบทวน</button>
-                    </div>
+            <div class="avatar-input-row">
+                <button class="avatar-voice-btn" id="avatarVoiceBtn" onclick="toggleAvatarVoice()">🎤</button>
+                <input class="avatar-input" id="avatarInput"
+                    placeholder="ถามอาจารย์..."
+                    onkeydown="if(event.key==='Enter')sendAvatarMessage()">
+                <button class="avatar-send-btn" id="avatarSendBtn" onclick="sendAvatarMessage()">➤</button>
+            </div>
+        </div>
 
-                    <!-- Chat history -->
-                    <div class="avatar-chat-history" id="avatarChatHistory"></div>
-
-                    <!-- Input -->
-                    <div class="avatar-input-row">
-                        <button class="avatar-voice-btn" id="avatarVoiceBtn" onclick="toggleAvatarVoice()" title="พูดด้วยเสียง">🎤</button>
-                        <input class="avatar-input" id="avatarInput"
-                            placeholder="ถามอาจารย์..."
-                            onkeydown="if(event.key==='Enter')sendAvatarMessage()">
-                        <button class="avatar-send-btn" id="avatarSendBtn" onclick="sendAvatarMessage()">➤</button>
-                    </div>
+        <!-- Avatar Character ลอยอยู่หน้าจอ -->
+        <div class="avatar-character" id="avatarCharacter">
+            <div class="avatar-svg-wrap" id="avatarSvgWrap">
+                <svg id="avatarSvg" width="130" height="200" viewBox="0 0 140 220" fill="none">
+                    <!-- Shadow -->
+                    <ellipse cx="70" cy="215" rx="35" ry="6" fill="rgba(0,0,0,0.3)"/>
+                    <!-- Body / Robe -->
+                    <path d="M30 165 Q70 185 110 165 L118 215 L22 215 Z" fill="#3730a3"/>
+                    <path d="M50 148 L38 215 L102 215 L90 148" fill="#4338ca"/>
+                    <!-- Collar detail -->
+                    <path d="M58 132 L70 145 L82 132" fill="#6d28d9" opacity="0.9"/>
+                    <rect x="64" y="125" width="12" height="18" rx="4" fill="#fbbf24"/>
+                    <!-- Head -->
+                    <ellipse cx="70" cy="98" rx="32" ry="34" fill="#fbbf24"/>
+                    <!-- Hair -->
+                    <path d="M38 88 Q42 64 70 61 Q98 64 102 88 Q96 70 70 67 Q44 70 38 88Z" fill="#1e1b4b"/>
+                    <rect x="37" y="76" width="7" height="16" rx="3" fill="#1e1b4b"/>
+                    <rect x="96" y="76" width="7" height="16" rx="3" fill="#1e1b4b"/>
+                    <!-- Ears -->
+                    <ellipse cx="38" cy="98" rx="5" ry="7" fill="#f59e0b"/>
+                    <ellipse cx="102" cy="98" rx="5" ry="7" fill="#f59e0b"/>
+                    <!-- Eyes -->
+                    <g id="avatarEyeL" style="transform-origin:58px 95px;transition:transform 0.1s;">
+                        <ellipse cx="58" cy="95" rx="7" ry="8" fill="white"/>
+                        <circle cx="59" cy="96" r="4.5" fill="#1e1b4b"/>
+                        <circle cx="60.5" cy="94.5" r="1.8" fill="white"/>
+                    </g>
+                    <g id="avatarEyeR" style="transform-origin:82px 95px;transition:transform 0.1s;">
+                        <ellipse cx="82" cy="95" rx="7" ry="8" fill="white"/>
+                        <circle cx="83" cy="96" r="4.5" fill="#1e1b4b"/>
+                        <circle cx="84.5" cy="94.5" r="1.8" fill="white"/>
+                    </g>
+                    <!-- Eyebrows -->
+                    <path d="M50 84 Q58 80 66 83" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <path d="M74 83 Q82 80 90 84" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <!-- Nose -->
+                    <path d="M67 103 Q70 108 73 103" stroke="#e07b39" stroke-width="1.5" fill="none"/>
+                    <!-- Mouth -->
+                    <g id="avatarMouth">
+                        <path id="avatarMouthPath" d="M62 116 Q70 123 78 116"
+                            stroke="#c2410c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    </g>
+                    <!-- Glasses -->
+                    <rect x="49" y="89" width="18" height="13" rx="5" stroke="#4f46e5" stroke-width="2.2" fill="rgba(79,70,229,0.12)"/>
+                    <rect x="73" y="89" width="18" height="13" rx="5" stroke="#4f46e5" stroke-width="2.2" fill="rgba(79,70,229,0.12)"/>
+                    <line x1="67" y1="95.5" x2="73" y2="95.5" stroke="#4f46e5" stroke-width="2.2"/>
+                    <line x1="40" y1="95.5" x2="49" y2="95.5" stroke="#4f46e5" stroke-width="1.5" opacity="0.6"/>
+                    <line x1="91" y1="95.5" x2="100" y2="95.5" stroke="#4f46e5" stroke-width="1.5" opacity="0.6"/>
+                    <!-- Arms -->
+                    <path d="M38 155 Q28 170 32 185" stroke="#4338ca" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    <path d="M102 155 Q112 170 108 185" stroke="#4338ca" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    <!-- Hand holding book -->
+                    <rect x="96" y="175" width="22" height="28" rx="3" fill="#7c3aed" opacity="0.9"/>
+                    <rect x="98" y="177" width="18" height="24" rx="2" fill="#a78bfa" opacity="0.5"/>
+                    <line x1="101" y1="181" x2="113" y2="181" stroke="white" stroke-width="1" opacity="0.5"/>
+                    <line x1="101" y1="185" x2="113" y2="185" stroke="white" stroke-width="1" opacity="0.5"/>
+                    <line x1="101" y1="189" x2="113" y2="189" stroke="white" stroke-width="1" opacity="0.5"/>
+                    <line x1="101" y1="193" x2="113" y2="193" stroke="white" stroke-width="1" opacity="0.5"/>
+                </svg>
+            </div>
+            <div class="avatar-bottom-info">
+                <div class="avatar-name-tag" id="avatarNameTag">อ.AI Assistant</div>
+                <div class="avatar-status">
+                    <div class="avatar-status-dot"></div>
+                    <span id="avatarStatusText">พร้อมสอน</span>
                 </div>
             </div>
         </div>
-    </div>
 
+    </div>
 </body>
 </html>
