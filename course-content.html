@@ -1001,19 +1001,10 @@
             border-radius: 18px 18px 4px 18px;
             box-shadow: 0 16px 48px rgba(0,0,0,0.5);
             display: flex; flex-direction: column;
-            overflow: visible;
+            overflow: clip;
             pointer-events: all;
             animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
             resize: both;
-        }
-
-        /* ป้องกัน content ล้น แต่ให้ settings panel โผล่ออกได้ */
-        .avatar-chat-panel > *:not(#avatarVoiceSettingsPanel):not(.avatar-chat-bar) {
-            overflow: hidden;
-        }
-        .avatar-chat-panel > .avatar-chat-bar {
-            border-radius: 18px 18px 0 0;
-            flex-shrink: 0;
         }
         .avatar-chat-panel.closing {
             animation: bubbleIn 0.25s ease reverse forwards;
@@ -1021,10 +1012,12 @@
 
         /* top bar */
         .avatar-chat-bar {
-            height: 3px;
+            height: 4px;
+            flex-shrink: 0;
             background: linear-gradient(90deg,#7c3aed,#4f46e5,#06b6d4,#7c3aed);
             background-size: 200%;
             animation: gradientSlide 3s linear infinite;
+            border-radius: 18px 18px 0 0;
         }
 
         /* header */
@@ -1143,8 +1136,12 @@
 
         /* history */
         .avatar-chat-history {
-            flex: 1; overflow-y: auto; max-height: 160px;
-            display: flex; flex-direction: column; gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
             padding: 8px 10px;
         }
         .avatar-chat-history::-webkit-scrollbar { width:3px; }
