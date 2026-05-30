@@ -1048,14 +1048,81 @@
             text-overflow: ellipsis;
             max-width: 100px;
         }
-        .avatar-chat-close {
-            width: 22px; height: 22px; border-radius: 50%;
-            border: none; background: rgba(255,255,255,0.06);
-            color: #a0a0ba; cursor: pointer; font-size: 0.75rem;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
+        /* --- Window Controls --- */
+        .avatar-win-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-shrink: 0;
         }
-        .avatar-chat-close:hover { background:rgba(239,68,68,0.2); color:#f87171; }
+
+        .avatar-win-btn {
+            width: 22px; height: 22px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.05);
+            color: rgba(160,160,186,0.7);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.18s ease;
+            padding: 0;
+            position: relative;
+        }
+
+        .avatar-win-btn svg { transition: all 0.18s ease; }
+
+        /* ย่อ — amber */
+        .avatar-win-minimize:hover {
+            background: rgba(251,191,36,0.18);
+            border-color: rgba(251,191,36,0.35);
+            color: #fbbf24;
+            box-shadow: 0 0 8px rgba(251,191,36,0.25);
+        }
+        /* ปกติ — blue */
+        .avatar-win-restore:hover {
+            background: rgba(59,130,246,0.18);
+            border-color: rgba(59,130,246,0.35);
+            color: #60a5fa;
+            box-shadow: 0 0 8px rgba(59,130,246,0.25);
+        }
+        /* ขยาย — green */
+        .avatar-win-expand:hover {
+            background: rgba(52,211,153,0.18);
+            border-color: rgba(52,211,153,0.35);
+            color: #34d399;
+            box-shadow: 0 0 8px rgba(52,211,153,0.25);
+        }
+        /* settings — neutral */
+        .avatar-win-settings {
+            border-radius: 50%;
+        }
+        .avatar-win-settings:hover {
+            background: rgba(139,92,246,0.18);
+            border-color: rgba(139,92,246,0.35);
+            color: #a78bfa;
+            box-shadow: 0 0 8px rgba(139,92,246,0.2);
+        }
+        .avatar-win-settings:hover svg {
+            transform: rotate(45deg);
+        }
+
+        /* ปิด — red */
+        .avatar-chat-close {
+            width: 22px; height: 22px; border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.05);
+            color: rgba(160,160,186,0.7);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.18s ease;
+            padding: 0;
+        }
+        .avatar-chat-close:hover {
+            background: rgba(239,68,68,0.18);
+            border-color: rgba(239,68,68,0.35);
+            color: #f87171;
+            box-shadow: 0 0 8px rgba(239,68,68,0.25);
+        }
 
         /* speech bubble */
         .avatar-speech {
@@ -3336,25 +3403,37 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
                         style="font-size:0.65rem;background:rgba(59,130,246,0.2);color:#93c5fd;
                         padding:1px 7px;border-radius:99px;font-weight:400;"></span>
                 </div>
-                <div style="display:flex;gap:3px;align-items:center;flex-shrink:0;">
-                    <button onclick="resizeAvatarPanel('sm')" title="ย่อ"
-                        style="width:20px;height:20px;border-radius:5px;border:none;
-                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.6rem;display:flex;align-items:center;justify-content:center;">▫</button>
-                    <button onclick="resizeAvatarPanel('md')" title="ปกติ"
-                        style="width:20px;height:20px;border-radius:5px;border:none;
-                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.6rem;display:flex;align-items:center;justify-content:center;">▪</button>
-                    <button onclick="resizeAvatarPanel('lg')" title="ขยาย"
-                        style="width:20px;height:20px;border-radius:5px;border:none;
-                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.6rem;display:flex;align-items:center;justify-content:center;">⬛</button>
-                    <div style="width:1px;height:14px;background:rgba(255,255,255,0.1);margin:0 1px;flex-shrink:0;"></div>
-                    <button onclick="toggleAvatarVoiceSettings()" title="ตั้งค่าเสียง"
-                        style="width:20px;height:20px;border-radius:50%;border:none;
-                        background:rgba(255,255,255,0.06);color:#a0a0ba;cursor:pointer;
-                        font-size:0.7rem;display:flex;align-items:center;justify-content:center;">⚙️</button>
-                    <button class="avatar-chat-close" onclick="closeAvatarTeacher()">✕</button>
+                <div class="avatar-win-controls">
+                    <!-- ย่อ -->
+                    <button onclick="resizeAvatarPanel('sm')" class="avatar-win-btn avatar-win-minimize" title="ย่อ">
+                        <svg width="8" height="2" viewBox="0 0 8 2" fill="none">
+                            <rect x="0" y="0.5" width="8" height="1" rx="0.5" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <!-- ปกติ -->
+                    <button onclick="resizeAvatarPanel('md')" class="avatar-win-btn avatar-win-restore" title="ปกติ">
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                            <rect x="0.5" y="0.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1"/>
+                        </svg>
+                    </button>
+                    <!-- ขยาย -->
+                    <button onclick="resizeAvatarPanel('lg')" class="avatar-win-btn avatar-win-expand" title="ขยาย">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                            <path d="M1 4V1h3M5 1h3v3M8 5v3H5M4 8H1V5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div style="width:1px;height:14px;background:rgba(255,255,255,0.1);margin:0 2px;flex-shrink:0;"></div>
+                    <button onclick="toggleAvatarVoiceSettings()" class="avatar-win-btn avatar-win-settings" title="ตั้งค่าเสียง">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <circle cx="5" cy="5" r="1.5" stroke="currentColor" stroke-width="1"/>
+                            <path d="M5 1v1M5 8v1M1 5h1M8 5h1M2.05 2.05l.7.7M7.25 7.25l.7.7M7.95 2.05l-.7.7M2.75 7.25l-.7.7" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <button class="avatar-chat-close avatar-win-close" onclick="closeAvatarTeacher()" title="ปิด">
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                            <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
