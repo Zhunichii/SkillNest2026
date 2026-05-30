@@ -956,19 +956,26 @@
             z-index: 1300;
             pointer-events: none;
             display: none;
-            padding-bottom: 16px;
         }
         .avatar-scene.open { display: block; }
 
-        /* ── Avatar กลางขวาของจอ ── */
-        .avatar-character {
+        /* ── Avatar + Panel อยู่ข้างกัน (row) ── */
+        .avatar-row {
             position: absolute;
-            top: 50%; right: 24px;
+            top: 50%; right: 16px;
             transform: translateY(-50%);
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            gap: 12px;
+            pointer-events: none;
+        }
+        .avatar-character {
             pointer-events: all;
             animation: avatarEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
             cursor: pointer;
             transform-origin: center right;
+            flex-shrink: 0;
         }
         .avatar-character:hover .avatar-svg-wrap { filter: brightness(1.1); }
         .avatar-character.closing {
@@ -985,16 +992,14 @@
                     drop-shadow(0 0 20px rgba(139,92,246,0.6));
         }
 
-        /* ── Chat Panel ซ้ายของ avatar ── */
+        /* ── Chat Panel อยู่ข้างๆ Avatar ── */
         .avatar-chat-panel {
-            position: absolute;
-            top: 50%; right: 210px;
-            transform: translateY(-50%);
-            width: 310px;
+            position: relative;
+            width: 300px;
             min-width: 260px;
-            max-width: 480px;
-            min-height: 240px;
-            max-height: calc(100vh - 100px);
+            max-width: 360px;
+            min-height: 300px;
+            max-height: calc(100vh - 120px);
             background: rgba(10,8,28,0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -1005,7 +1010,6 @@
             overflow: clip;
             pointer-events: all;
             animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
-            resize: both;
         }
         .avatar-chat-panel.closing {
             animation: bubbleIn 0.25s ease reverse forwards;
@@ -3395,7 +3399,9 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
     <!-- Avatar Scene (ไม่บล็อก pointer events) -->
     <div class="avatar-scene" id="avatarScene">
 
-        <!-- Chat Panel ข้างอาจารย์ -->
+        <div class="avatar-row" id="avatarRow">
+
+        <!-- Chat Panel ข้างๆ Avatar -->
         <div class="avatar-chat-panel" id="avatarChatPanel">
             <div class="avatar-chat-bar"></div>
             <div class="avatar-chat-header">
@@ -3407,25 +3413,6 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
                         padding:1px 7px;border-radius:99px;font-weight:400;"></span>
                 </div>
                 <div class="avatar-win-controls">
-                    <!-- ย่อ -->
-                    <button onclick="resizeAvatarPanel('sm')" class="avatar-win-btn avatar-win-minimize" title="ย่อ">
-                        <svg width="8" height="2" viewBox="0 0 8 2" fill="none">
-                            <rect x="0" y="0.5" width="8" height="1" rx="0.5" fill="currentColor"/>
-                        </svg>
-                    </button>
-                    <!-- ปกติ -->
-                    <button onclick="resizeAvatarPanel('md')" class="avatar-win-btn avatar-win-restore" title="ปกติ">
-                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                            <rect x="0.5" y="0.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1"/>
-                        </svg>
-                    </button>
-                    <!-- ขยาย -->
-                    <button onclick="resizeAvatarPanel('lg')" class="avatar-win-btn avatar-win-expand" title="ขยาย">
-                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                            <path d="M1 4V1h3M5 1h3v3M8 5v3H5M4 8H1V5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <div style="width:1px;height:14px;background:rgba(255,255,255,0.1);margin:0 2px;flex-shrink:0;"></div>
                     <button onclick="toggleAvatarVoiceSettings()" class="avatar-win-btn avatar-win-settings" title="ตั้งค่าเสียง">
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                             <circle cx="5" cy="5" r="1.5" stroke="currentColor" stroke-width="1"/>
@@ -3531,6 +3518,7 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
             </div>
         </div>
 
+        </div><!-- end avatar-row -->
     </div>
 </body>
 </html>
