@@ -192,6 +192,40 @@
         .danger-zone { border-color:rgba(239,68,68,0.2); }
         .danger-zone .section-title { color:#f87171; }
 
+
+        /* ── Avatar Customizer ── */
+        .avatar-preview-wrap {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 24px; background: rgba(139,92,246,0.06);
+            border: 1px solid rgba(139,92,246,0.2); border-radius: 16px;
+            margin-bottom: 24px;
+        }
+        .avatar-preview-svg { margin-bottom: 12px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4)); }
+        .color-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .color-swatch {
+            width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+            border: 3px solid transparent; transition: 0.2s;
+        }
+        .color-swatch.selected { border-color: white; transform: scale(1.15); }
+        .char-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 8px; }
+        .char-option {
+            background: rgba(255,255,255,0.04); border: 2px solid var(--border);
+            border-radius: 12px; padding: 14px 8px; cursor: pointer;
+            text-align: center; transition: 0.2s; font-size: 0.78rem; color: var(--text-dim);
+        }
+        .char-option:hover { border-color: rgba(139,92,246,0.5); background: rgba(139,92,246,0.08); }
+        .char-option.selected { border-color: var(--primary); background: rgba(139,92,246,0.15); color: var(--text); }
+        .char-option .char-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+        .personality-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+        .p-option {
+            padding: 10px 8px; border-radius: 10px; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04); cursor: pointer; text-align: center;
+            font-size: 0.78rem; color: var(--text-dim); transition: 0.2s;
+        }
+        .p-option:hover { border-color: rgba(139,92,246,0.5); color: var(--text); }
+        .p-option.selected { border-color: var(--primary); background: rgba(139,92,246,0.15); color: var(--text); font-weight: 600; }
+        .p-option .p-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        .teacher-only-tab { display: none; }
         @media(max-width:768px) {
             .page { grid-template-columns:1fr; }
             .sidebar { display:none; }
@@ -229,6 +263,10 @@
             <div class="sidebar-item" data-tab="notifications" onclick="switchTab('notifications',this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 การแจ้งเตือน
+            </div>
+            <div class="sidebar-item teacher-only-tab" id="avatarTab" data-tab="avatar" onclick="switchTab('avatar',this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><circle cx="18" cy="18" r="3"/><path d="m19.5 16.5-1 1-1-1"/></svg>
+                Avatar AI ของฉัน
             </div>
         </div>
     </aside>
@@ -431,6 +469,140 @@
             </div>
         </div>
 
+        <!-- ── Avatar AI Tab ── -->
+        <div id="tab-avatar" class="tab-panel">
+            <div class="page-header">
+                <div class="page-title">🎭 Avatar AI ของฉัน</div>
+                <div class="page-sub">ปรับแต่งตัวละคร AI ที่จะสอนในคอร์สของคุณ</div>
+            </div>
+
+            <div class="two-col">
+            <div class="two-col-main">
+
+                <!-- Character selection -->
+                <div class="section-card">
+                    <div class="section-title">🧑‍🎨 เลือกตัวละคร</div>
+                    <div class="section-desc">เลือกรูปร่างหน้าตาของ Avatar AI ที่จะแสดงในคอร์สของคุณ</div>
+                    <div class="char-grid" id="charGrid">
+                        <div class="char-option selected" data-char="professor" onclick="selectChar('professor',this)">
+                            <span class="char-icon">🧑‍🏫</span>อาจารย์
+                        </div>
+                        <div class="char-option" data-char="scientist" onclick="selectChar('scientist',this)">
+                            <span class="char-icon">🧑‍🔬</span>นักวิทยาศาสตร์
+                        </div>
+                        <div class="char-option" data-char="programmer" onclick="selectChar('programmer',this)">
+                            <span class="char-icon">🧑‍💻</span>โปรแกรมเมอร์
+                        </div>
+                        <div class="char-option" data-char="doctor" onclick="selectChar('doctor',this)">
+                            <span class="char-icon">🧑‍⚕️</span>หมอ/พยาบาล
+                        </div>
+                        <div class="char-option" data-char="artist" onclick="selectChar('artist',this)">
+                            <span class="char-icon">🧑‍🎨</span>ศิลปิน
+                        </div>
+                        <div class="char-option" data-char="chef" onclick="selectChar('chef',this)">
+                            <span class="char-icon">🧑‍🍳</span>เชฟ
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme color -->
+                <div class="section-card">
+                    <div class="section-title">🎨 สีธีม Avatar</div>
+                    <div class="section-desc">สีที่ใช้กับกรอบ chat และ glow ของ Avatar</div>
+                    <div class="color-grid" id="colorGrid">
+                        <div class="color-swatch selected" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectColor('#8b5cf6',this)" title="ม่วง"></div>
+                        <div class="color-swatch" data-color="#3b82f6" style="background:#3b82f6" onclick="selectColor('#3b82f6',this)" title="น้ำเงิน"></div>
+                        <div class="color-swatch" data-color="#10b981" style="background:#10b981" onclick="selectColor('#10b981',this)" title="เขียว"></div>
+                        <div class="color-swatch" data-color="#f59e0b" style="background:#f59e0b" onclick="selectColor('#f59e0b',this)" title="เหลือง"></div>
+                        <div class="color-swatch" data-color="#ef4444" style="background:#ef4444" onclick="selectColor('#ef4444',this)" title="แดง"></div>
+                        <div class="color-swatch" data-color="#06b6d4" style="background:#06b6d4" onclick="selectColor('#06b6d4',this)" title="ฟ้า"></div>
+                        <div class="color-swatch" data-color="#ec4899" style="background:#ec4899" onclick="selectColor('#ec4899',this)" title="ชมพู"></div>
+                        <div class="color-swatch" data-color="#f97316" style="background:#f97316" onclick="selectColor('#f97316',this)" title="ส้ม"></div>
+                    </div>
+                </div>
+
+                <!-- Personality -->
+                <div class="section-card">
+                    <div class="section-title">💬 บุคลิกของ Avatar</div>
+                    <div class="section-desc">กำหนดสไตล์การสอนและโทนการพูด</div>
+                    <div class="personality-grid" id="personalityGrid">
+                        <div class="p-option selected" data-p="friendly" onclick="selectPersonality('friendly',this)">
+                            <span class="p-icon">😊</span>เป็นกันเอง
+                        </div>
+                        <div class="p-option" data-p="strict" onclick="selectPersonality('strict',this)">
+                            <span class="p-icon">📋</span>เป็นทางการ
+                        </div>
+                        <div class="p-option" data-p="funny" onclick="selectPersonality('funny',this)">
+                            <span class="p-icon">😄</span>ตลก/สนุก
+                        </div>
+                        <div class="p-option" data-p="socratic" onclick="selectPersonality('socratic',this)">
+                            <span class="p-icon">🤔</span>ถาม-ตอบ
+                        </div>
+                        <div class="p-option" data-p="motivator" onclick="selectPersonality('motivator',this)">
+                            <span class="p-icon">💪</span>กระตุ้น
+                        </div>
+                        <div class="p-option" data-p="simple" onclick="selectPersonality('simple',this)">
+                            <span class="p-icon">✨</span>เรียบง่าย
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Name & greeting -->
+                <div class="section-card">
+                    <div class="section-title">✍️ ชื่อและคำทักทาย</div>
+                    <div class="section-desc">กำหนดชื่อ Avatar และประโยคแนะนำตัวที่นักเรียนจะได้ยิน</div>
+                    <div class="form-grid" style="grid-template-columns:1fr;">
+                        <div class="form-group">
+                            <label>ชื่อ Avatar (แสดงในห้องเรียน)</label>
+                            <input type="text" id="avatarName" placeholder="เช่น อ.สมชาย, ดร.AI, มาสเตอร์">
+                        </div>
+                        <div class="form-group">
+                            <label>คำทักทายเมื่อนักเรียนเปิด Avatar</label>
+                            <textarea id="avatarGreeting" rows="2" placeholder="เช่น สวัสดีครับ! ผมพร้อมช่วยสอนแล้ว มีคำถามอะไรไหมครับ?"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="avatarMsg" class="msg"></div>
+                <button class="btn btn-primary" onclick="saveAvatarConfig()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    บันทึก Avatar ของฉัน
+                </button>
+
+            </div><!-- end two-col-main -->
+
+            <!-- Side preview -->
+            <div class="two-col-side">
+                <div class="stat-card" style="text-align:center;">
+                    <div class="stat-card-title">ตัวอย่าง Avatar</div>
+                    <div class="avatar-preview-wrap">
+                        <div id="avatarPreviewIcon" style="font-size:5rem;line-height:1;margin-bottom:8px;">🧑‍🏫</div>
+                        <div id="avatarPreviewName" style="font-size:0.88rem;font-weight:600;color:#c4b5fd;
+                            background:rgba(139,92,246,0.2);padding:3px 14px;border-radius:99px;
+                            border:1px solid rgba(139,92,246,0.3);margin-bottom:6px;">อ. ชื่อของคุณ</div>
+                        <div id="avatarPreviewPersonality" style="font-size:0.72rem;color:var(--text-dim);">😊 เป็นกันเอง</div>
+                    </div>
+                    <div id="avatarPreviewGreeting"
+                        style="font-size:0.82rem;color:var(--text-dim);line-height:1.6;
+                        background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:left;">
+                        สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-title">คำแนะนำ</div>
+                    <div style="font-size:0.8rem;color:var(--text-dim);line-height:1.8;">
+                        <div style="margin-bottom:8px;">🎯 <strong style="color:var(--text);">บุคลิก</strong> กำหนดวิธีที่ AI ตอบคำถาม</div>
+                        <div style="margin-bottom:8px;">🎨 <strong style="color:var(--text);">สีธีม</strong> เปลี่ยนสีกรอบ chat ในห้องเรียน</div>
+                        <div style="margin-bottom:8px;">✍️ <strong style="color:var(--text);">ชื่อ</strong> แสดงใต้ตัวละครตอนสอน</div>
+                        <div>🔒 เฉพาะ<strong style="color:#c4b5fd;">ครู/ผู้สร้างคอร์ส</strong>เท่านั้นที่ปรับแต่งได้</div>
+                    </div>
+                </div>
+            </div>
+
+            </div><!-- end two-col -->
+        </div>
+
     </main>
 </div>
 
@@ -460,6 +632,14 @@ async function loadProfile(user) {
     const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'ผู้ใช้';
     document.getElementById('profileDisplayName').textContent = fullName;
     document.getElementById('profileEmail').textContent = data.email || user.email || '';
+
+    // Avatar config (ครูเท่านั้น)
+    if (data.user_type === 'teacher') {
+        document.querySelectorAll('.teacher-only-tab').forEach(el => el.style.display = 'flex');
+        if (data.avatar_config) {
+            loadAvatarConfigToUI(data.avatar_config);
+        }
+    }
 
     // Side panel info
     const sideType   = document.getElementById('sideUserType');
@@ -597,6 +777,113 @@ async function init() {
     currentUser = user;
     await loadProfile(user);
 }
+
+// ═══════════════════════════════════════
+//  AVATAR CUSTOMIZER
+// ═══════════════════════════════════════
+const PERSONALITIES = {
+    friendly:  { label:'😊 เป็นกันเอง',  prompt:'ตอบแบบเป็นกันเอง อบอุ่น ใช้ภาษาที่เข้าใจง่าย' },
+    strict:    { label:'📋 เป็นทางการ',  prompt:'ตอบแบบเป็นทางการ ชัดเจน ตรงประเด็น' },
+    funny:     { label:'😄 ตลก/สนุก',   prompt:'ตอบแบบสนุกสนาน ใช้อารมณ์ขัน ทำให้การเรียนสนุก' },
+    socratic:  { label:'🤔 ถาม-ตอบ',   prompt:'ใช้วิธีถามนำให้นักเรียนคิด ไม่บอกคำตอบตรงๆ' },
+    motivator: { label:'💪 กระตุ้น',    prompt:'กระตุ้น ให้กำลังใจ ชมเชยเมื่อนักเรียนทำถูก' },
+    simple:    { label:'✨ เรียบง่าย',  prompt:'ตอบกระชับ เรียบง่าย ไม่ซับซ้อน' },
+};
+
+const CHARS = {
+    professor:  { icon:'🧑‍🏫', label:'อาจารย์' },
+    scientist:  { icon:'🧑‍🔬', label:'นักวิทย์' },
+    programmer: { icon:'🧑‍💻', label:'โปรแกรมเมอร์' },
+    doctor:     { icon:'🧑‍⚕️', label:'หมอ' },
+    artist:     { icon:'🧑‍🎨', label:'ศิลปิน' },
+    chef:       { icon:'🧑‍🍳', label:'เชฟ' },
+};
+
+let avatarConfig = {
+    char: 'professor', color: '#8b5cf6',
+    personality: 'friendly', name: '', greeting: ''
+};
+
+function loadAvatarConfigToUI(cfg) {
+    avatarConfig = { ...avatarConfig, ...cfg };
+
+    // char
+    document.querySelectorAll('#charGrid .char-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.char === avatarConfig.char);
+    });
+    // color
+    document.querySelectorAll('#colorGrid .color-swatch').forEach(el => {
+        el.classList.toggle('selected', el.dataset.color === avatarConfig.color);
+    });
+    // personality
+    document.querySelectorAll('#personalityGrid .p-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.p === avatarConfig.personality);
+    });
+    // name & greeting
+    document.getElementById('avatarName').value     = avatarConfig.name || '';
+    document.getElementById('avatarGreeting').value = avatarConfig.greeting || '';
+
+    updatePreview();
+}
+
+function updatePreview() {
+    const char   = CHARS[avatarConfig.char] || CHARS.professor;
+    const pLabel = PERSONALITIES[avatarConfig.personality]?.label || '😊 เป็นกันเอง';
+    const name   = document.getElementById('avatarName')?.value || 'อ. ชื่อของคุณ';
+    const greet  = document.getElementById('avatarGreeting')?.value || 'สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?';
+    const color  = avatarConfig.color;
+
+    const iconEl = document.getElementById('avatarPreviewIcon');
+    const nameEl = document.getElementById('avatarPreviewName');
+    const pEl    = document.getElementById('avatarPreviewPersonality');
+    const greetEl= document.getElementById('avatarPreviewGreeting');
+
+    if (iconEl)  iconEl.textContent  = char.icon;
+    if (nameEl)  { nameEl.textContent = name; nameEl.style.background = color + '33'; nameEl.style.color = color; nameEl.style.borderColor = color + '66'; }
+    if (pEl)     pEl.textContent     = pLabel;
+    if (greetEl) greetEl.textContent = greet;
+}
+
+window.selectChar = function(char, el) {
+    avatarConfig.char = char;
+    document.querySelectorAll('#charGrid .char-option').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    updatePreview();
+};
+
+window.selectColor = function(color, el) {
+    avatarConfig.color = color;
+    document.querySelectorAll('#colorGrid .color-swatch').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    updatePreview();
+};
+
+window.selectPersonality = function(p, el) {
+    avatarConfig.personality = p;
+    document.querySelectorAll('#personalityGrid .p-option').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    updatePreview();
+};
+
+// live preview on name/greeting input
+document.getElementById('avatarName')?.addEventListener('input', updatePreview);
+document.getElementById('avatarGreeting')?.addEventListener('input', updatePreview);
+
+window.saveAvatarConfig = async function() {
+    const cfg = {
+        char:        avatarConfig.char,
+        color:       avatarConfig.color,
+        personality: avatarConfig.personality,
+        name:        document.getElementById('avatarName').value.trim(),
+        greeting:    document.getElementById('avatarGreeting').value.trim(),
+        prompt:      PERSONALITIES[avatarConfig.personality]?.prompt || '',
+    };
+    const { error } = await supabase.from('users')
+        .update({ avatar_config: cfg }).eq('id', currentUser.id);
+    if (error) { showMsg('avatarMsg', '❌ ' + error.message, 'error'); return; }
+    showMsg('avatarMsg', '✅ บันทึก Avatar เรียบร้อยแล้ว', 'success');
+    avatarConfig = cfg;
+};
 
 supabase.auth.onAuthStateChange(e => { if (e === 'SIGNED_OUT') window.location.href = 'login-page/login.html'; });
 init();

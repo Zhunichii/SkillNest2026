@@ -1807,9 +1807,10 @@ window.openAvatarTeacher = function() {
     setTimeout(() => {
         const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || '';
         const instructor = currentCourse?.instructor || 'AI';
-        const greeting = currentCourse
-            ? `สวัสดีครับ! ผมอาจารย์ ${instructor} ยินดีช่วยสอน${lessonTitle ? ' เรื่อง ' + lessonTitle : ''} ครับ`
-            : 'สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?';
+        const greeting = window._avatarCustomGreeting
+            || (currentCourse
+                ? `สวัสดีครับ! ผมอาจารย์ ${instructor} ยินดีช่วยสอน${lessonTitle ? ' เรื่อง ' + lessonTitle : ''} ครับ`
+                : 'สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?');
         avatarSpeak(greeting, false);
     }, 500);
 };
@@ -2158,6 +2159,61 @@ supabase.auth.onAuthStateChange((event) => {
 });
 initCourseContent();
 
+async function loadAvatarConfig(creatorId) {
+    if (!creatorId) return;
+    try {
+        const { data } = await supabase.from('users')
+            .select('avatar_config,first_name,last_name').eq('id', creatorId).single();
+        if (!data?.avatar_config) return;
+        const cfg = data.avatar_config;
+
+        const CHARS = { professor:'🧑‍🏫',scientist:'🧑‍🔬',programmer:'🧑‍💻',doctor:'🧑‍⚕️',artist:'🧑‍🎨',chef:'🧑‍🍳' };
+        const P_PROMPTS = {
+            friendly:'ตอบแบบเป็นกันเอง อบอุ่น', strict:'ตอบแบบเป็นทางการ ชัดเจน',
+            funny:'ตอบแบบสนุกสนาน อารมณ์ขัน', socratic:'ถามนำให้นักเรียนคิด',
+            motivator:'กระตุ้นให้กำลังใจ', simple:'ตอบกระชับ เรียบง่าย',
+        };
+
+        // ชื่อ
+        const name = cfg.name || `${data.first_name||''} ${data.last_name||''}`.trim() || 'AI';
+        ['avatarNameTag','avatarHeaderName'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = `อ. ${name}`;
+        });
+
+        // สีธีม
+        if (cfg.color) {
+            const panel = document.getElementById('avatarChatPanel');
+            if (panel) panel.style.borderColor = cfg.color + '66';
+            const bar = panel?.querySelector('.avatar-chat-bar');
+            if (bar) bar.style.background = `linear-gradient(90deg,${cfg.color},${cfg.color}99,${cfg.color}cc,${cfg.color})`;
+            const fab = document.getElementById('avatarFab');
+            if (fab) fab.style.background = `linear-gradient(135deg,${cfg.color},${cfg.color}bb)`;
+            const nameTags = document.querySelectorAll('.avatar-name-tag');
+            nameTags.forEach(el => { el.style.background = cfg.color+'22'; el.style.color = cfg.color; el.style.borderColor = cfg.color+'44'; });
+        }
+
+        // Character icon
+        if (cfg.char && CHARS[cfg.char] && cfg.char !== 'professor') {
+            const svgWrap = document.getElementById('avatarSvgWrap');
+            if (svgWrap) {
+                const oldSvg = svgWrap.querySelector('svg');
+                if (oldSvg) {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'font-size:8rem;line-height:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.5));text-align:center;';
+                    div.textContent = CHARS[cfg.char];
+                    oldSvg.replaceWith(div);
+                }
+            }
+        }
+
+        // Personality & greeting
+        window._avatarPersonalityPrompt = P_PROMPTS[cfg.personality] || '';
+        if (cfg.greeting) window._avatarCustomGreeting = cfg.greeting;
+
+    } catch(e) { console.warn('loadAvatarConfig:', e); }
+}
+
 async function loadCourseData() {
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get('id');
@@ -2180,6 +2236,9 @@ async function loadCourseData() {
         }
 
         currentCourse = course;
+
+        // โหลด avatar config ของครูผู้สร้างคอร์ส
+        if (course.creator_id) loadAvatarConfig(course.creator_id);
 
         document.getElementById("courseTitle").innerText = currentCourse.title || "ไม่มีชื่อคอร์ส";
         document.title = (currentCourse.title || "คอร์สเรียน") + " - SkillNest";
