@@ -918,7 +918,7 @@
                         <span id="userName">Loading...</span>
                     </button>
                     <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="setting.html" class="dropdown-item" id="settingsItem">⚙️ ตั้งค่า & โปรไฟล์</a>
+                        <a href="setting.html" class="dropdown-item" id="settingsItem">การตั้งค่า</a>
                         <a href="manage-courses.html" class="dropdown-item teacher-only" id="manageCourseItem" style="display: none;">จัดการคอร์สของฉัน</a>
                         <a class="dropdown-item" id="logoutItem">ออกจากระบบ</a>
                     </div>
@@ -1351,6 +1351,7 @@
                 if (userData) {
                     const firstName = userData.first_name || 'User';
                     const userType = userData.user_type || 'student';
+                    window._currentUserType = userType; // เก็บไว้ใช้ globally
                     const profileImageUrl = userData.profile_picture || null;
                     document.getElementById('userName').textContent = firstName;
                     document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName} 🚀`;
@@ -1378,6 +1379,16 @@
             } catch(e) { console.error('Error fetching user data:', e); }
 
             await loadEnrollments();
+
+            // โหลด courses ที่ครูสร้างเอง เก็บไว้ใช้ check ตอน enroll
+            if (window._currentUserType === 'teacher') {
+                const { data: createdCourses } = await supabase
+                    .from('courses').select('id').eq('creator_id', user.id);
+                window._createdCourseIds = new Set((createdCourses || []).map(c => c.id));
+            } else {
+                window._createdCourseIds = new Set();
+            }
+
             startNotificationListener(user.id);
 
             const urlPage = new URLSearchParams(window.location.search).get('page');
@@ -1434,47 +1445,110 @@
             const courseGrid = document.getElementById('courseGrid');
             courseGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
             if (!currentUser) return;
+
+            const isTeacher = window._currentUserType === 'teacher';
+
             try {
-                const { data: enrollSnap } = await supabase.from('enrollments').select('course_id').eq('user_id', currentUser.id);
-                if (!enrollSnap || enrollSnap.length === 0) {
-                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div><h3>ยังไม่มีคอร์สที่สมัคร</h3><p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อเลือกสมัครเรียนคอร์สที่สนใจ</p></div>`;
+                // ดึงคอร์สที่สมัคร
+                const { data: enrollSnap } = await supabase
+                    .from('enrollments').select('course_id').eq('user_id', currentUser.id);
+                const enrolledIds = (enrollSnap || []).map(e => e.course_id);
+
+                // ถ้าเป็นครู ดึงคอร์สที่สร้างด้วย
+                let createdCourses = [];
+                if (isTeacher) {
+                    const { data: cc } = await supabase
+                        .from('courses').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false });
+                    createdCourses = cc || [];
+                    window._createdCourseIds = new Set(createdCourses.map(c => c.id));
+                }
+
+                // ถ้าไม่มีทั้งสองส่วน
+                if (enrolledIds.length === 0 && createdCourses.length === 0) {
+                    const msg = isTeacher
+                        ? '<h3>ยังไม่มีคอร์ส</h3><p>สร้างคอร์สแรกของคุณได้เลย!</p>'
+                        : '<h3>ยังไม่มีคอร์สที่สมัคร</h3><p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อสมัครเรียน</p>';
+                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div>${msg}</div>`;
                     return;
                 }
+
                 courseGrid.innerHTML = '';
-                for (const enrollDoc of enrollSnap) {
-                    const courseId = enrollDoc.course_id;
+
+                // helper สร้าง card
+                async function buildCourseCard(course, tagHtml, btnHtml) {
+                    const lessonCount  = course.lessons?.length || 0;
+                    const randomColor  = courseColors[Math.floor(Math.random() * courseColors.length)];
+                    const thumbStyle   = course.thumbnail
+                        ? `background-image:url('${course.thumbnail}');background-size:cover;background-position:center;`
+                        : `background:${randomColor};`;
+                    let creatorName = 'ไม่ทราบชื่อ';
                     try {
-                        const { data: course } = await supabase.from('courses').select('*').eq('id', courseId).single();
-                        if (!course) continue;
-                        const lessonCount = course.lessons ? course.lessons.length : 0;
-                        const randomColor = courseColors[Math.floor(Math.random() * courseColors.length)];
-                        let creatorName = 'ไม่ทราบชื่อ';
-                        try {
-                            const { data: cd } = await supabase.from('users').select('first_name,last_name,email').eq('id', course.creator_id).single();
-                            if (cd) creatorName = `${cd.first_name||''} ${cd.last_name||''}`.trim() || cd.email;
-                        } catch(e) {}
-                        const thumbnailStyle = course.thumbnail ? `background-image:url('${course.thumbnail}');background-size:cover;background-position:center;` : `background:${randomColor};`;
-                        const courseCard = document.createElement('div');
-                        courseCard.className = 'course-card';
-                        courseCard.innerHTML = `
-                            <div class="course-image" style="${thumbnailStyle}" id="course-img-${courseId}">
-                                ${!course.thumbnail ? course.title.substring(0,15) : ''}
-                                <div class="course-duration">⏱ ${lessonCount} บท</div>
-                                <div class="enrolled-tag">✅ สมัครแล้ว</div>
-                            </div>
-                            <div class="course-info">
-                                <div class="course-title">${course.title}</div>
-                                <div class="course-subtitle">${categoryMap[course.category]||course.category} • ${levelMap[course.level]||course.level}</div>
-                                <div class="course-author">${creatorName}</div>
-                                <div style="margin-top:0.75rem;">
-                                    <button onclick="event.stopPropagation();window.location.href='course-content.html?id=${courseId}'" style="width:100%;padding:0.6rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">▶️ เข้าสู่บทเรียน</button>
-                                </div>
-                            </div>`;
-                        courseCard.addEventListener('click', () => window.location.href = `course-content.html?id=${courseId}`);
-                        courseGrid.appendChild(courseCard);
-                    } catch(e) { console.error('Error loading enrolled course:', e); }
+                        const { data: cd } = await supabase.from('users').select('first_name,last_name,email').eq('id', course.creator_id).single();
+                        if (cd) creatorName = `${cd.first_name||''} ${cd.last_name||''}`.trim() || cd.email;
+                    } catch(e) {}
+
+                    const card = document.createElement('div');
+                    card.className = 'course-card';
+                    card.innerHTML = `
+                        <div class="course-image" style="${thumbStyle}">
+                            ${!course.thumbnail ? course.title.substring(0,15) : ''}
+                            <div class="course-duration">⏱ ${lessonCount} บท</div>
+                            ${tagHtml}
+                        </div>
+                        <div class="course-info">
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-subtitle">${categoryMap[course.category]||course.category} • ${levelMap[course.level]||course.level}</div>
+                            <div class="course-author">${creatorName}</div>
+                            <div style="margin-top:0.75rem;">${btnHtml}</div>
+                        </div>`;
+                    card.addEventListener('click', () => window.location.href = `course-content.html?id=${course.id}`);
+                    courseGrid.appendChild(card);
                 }
+
+                const enterBtn = (id) => `<button onclick="event.stopPropagation();window.location.href='course-content.html?id=${id}'"
+                    style="width:100%;padding:0.6rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">▶️ เข้าสู่บทเรียน</button>`;
+
+                // ── ส่วน 1: คอร์สที่ครูสร้าง ──
+                if (createdCourses.length > 0) {
+                    const section = document.createElement('div');
+                    section.style.cssText = 'grid-column:1/-1;color:#c4b5fd;font-weight:600;font-size:0.9rem;margin-bottom:4px;display:flex;align-items:center;gap:8px;';
+                    section.innerHTML = '<span style="width:3px;height:18px;background:#8b5cf6;border-radius:99px;display:inline-block;"></span>คอร์สที่ฉันสร้าง';
+                    courseGrid.appendChild(section);
+
+                    for (const course of createdCourses) {
+                        const manageBtn = `
+                            <div style="display:flex;gap:6px;">
+                                ${enterBtn(course.id)}
+                                <button onclick="event.stopPropagation();window.location.href='edit-course.html?id=${course.id}'"
+                                    style="padding:0.6rem 0.8rem;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#c4b5fd;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;">✏️ แก้ไข</button>
+                            </div>`;
+                        await buildCourseCard(course,
+                            `<div style="position:absolute;top:8px;left:8px;background:rgba(139,92,246,0.85);color:white;font-size:0.7rem;padding:2px 8px;border-radius:99px;font-weight:600;">👨‍🏫 คอร์สของฉัน</div>`,
+                            manageBtn);
+                    }
+                }
+
+                // ── ส่วน 2: คอร์สที่สมัครเรียน (กรองคอร์สตัวเองออก) ──
+                const filteredEnrolled = enrolledIds.filter(id => !window._createdCourseIds?.has(id));
+                if (filteredEnrolled.length > 0) {
+                    const section2 = document.createElement('div');
+                    section2.style.cssText = 'grid-column:1/-1;color:#6ee7b7;font-weight:600;font-size:0.9rem;margin-top:8px;margin-bottom:4px;display:flex;align-items:center;gap:8px;';
+                    section2.innerHTML = '<span style="width:3px;height:18px;background:#10b981;border-radius:99px;display:inline-block;"></span>คอร์สที่ฉันสมัคร';
+                    courseGrid.appendChild(section2);
+
+                    for (const courseId of filteredEnrolled) {
+                        try {
+                            const { data: course } = await supabase.from('courses').select('*').eq('id', courseId).single();
+                            if (!course) continue;
+                            await buildCourseCard(course,
+                                `<div class="enrolled-tag">✅ สมัครแล้ว</div>`,
+                                enterBtn(courseId));
+                        } catch(e) {}
+                    }
+                }
+
             } catch(e) {
+                console.error(e);
                 courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3></div>`;
             }
         }
@@ -1848,9 +1922,10 @@
             document.getElementById('enrollModalDesc').textContent = course.description || '';
             const lessonCount = course.lessons ? course.lessons.length : 0;
             document.getElementById('enrollModalLessons').innerHTML = `📖 ${lessonCount} บทเรียน${course.quiz?.length > 0 ? ` &nbsp;•&nbsp; 📝 ${course.quiz.length} แบบทดสอบ` : ''}`;
-            const actionsEl = document.getElementById('enrollModalActions');
-            actionsEl.innerHTML = isEnrolled
-                ? `<button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`
+            const actionsEl  = document.getElementById('enrollModalActions');
+            const isOwner    = window._createdCourseIds?.has(courseId);
+            actionsEl.innerHTML = (isEnrolled || isOwner)
+                ? `<button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน${isOwner && !isEnrolled ? ' (คอร์สของฉัน)' : ''}</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`
                 : `<button class="btn-enroll" onclick="enrollCourse('${courseId}')">🎓 สมัครเข้าเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
             document.getElementById('enrollModalOverlay').classList.add('show');
         };
@@ -1862,6 +1937,12 @@
 
         window.enrollCourse = async function(courseId) {
             if (!currentUser) { alert('กรุณาล็อกอินก่อน'); return; }
+
+            // ครูไม่สามารถสมัครคอร์สที่ตัวเองสร้างได้
+            if (window._createdCourseIds?.has(courseId)) {
+                window.location.href = `course-content.html?id=${courseId}`;
+                return;
+            }
             try {
                 await supabase.from('enrollments').upsert({
                     id: `${currentUser.id}_${courseId}`,
