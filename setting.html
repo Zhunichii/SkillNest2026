@@ -3,644 +3,505 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตั้งค่าบัญชี - SkillNest</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <title>โปรไฟล์ & ตั้งค่า - SkillNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* ธีมปกติ (ม่วงสลับน้ำเงิน ไม่มีพื้นหลังสีขาว) */
-            --bg-main: linear-gradient(135deg, #2e1065 0%, #1e3a8a 100%);
-            --header-bg: rgba(15, 23, 42, 0.8);
-            --card-bg: rgba(30, 27, 75, 0.7);
-            --card-hover: rgba(46, 16, 101, 0.9);
-            --text-main: #e2e8f0; /* สีเทาสว่างแทนสีขาวล้วนเพื่อให้มองเห็นชัด */
-            --text-muted: #94a3b8;
-            --primary-color: #a78bfa;
-            --primary-hover: #c4b5fd;
-            --primary-active: rgba(167, 139, 250, 0.2);
-            --border-color: #4c1d95;
-            --input-bg: rgba(15, 23, 42, 0.7);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --backdrop: blur(12px);
-            --toggle-circle: #c4b5fd; /* วงกลมสวิตช์สีม่วงอ่อน */
+            --bg: #020418;
+            --bg-grad: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            --card: rgba(255,255,255,0.05);
+            --card-hover: rgba(255,255,255,0.08);
+            --border: rgba(255,255,255,0.1);
+            --border-focus: rgba(139,92,246,0.6);
+            --text: #ffffff;
+            --text-dim: #a0a0ba;
+            --primary: #8b5cf6;
+            --primary-2: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --nav-h: 70px;
         }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        body { background: var(--bg-grad); color: var(--text); min-height:100vh; }
 
-        [data-theme="light"] {
-            /* ธีมสว่าง (พื้นหลังสีขาว/สว่าง) */
-            --bg-main: #f8fafc;
-            --header-bg: #ffffff;
-            --card-bg: #ffffff;
-            --card-hover: #f1f5f9;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --primary-color: #8b5cf6;
-            --primary-hover: #7c3aed;
-            --primary-active: #eef2ff;
-            --border-color: #e2e8f0;
-            --input-bg: #f8fafc;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-            --backdrop: none;
-            --toggle-circle: #ffffff;
+        /* ── Nav ── */
+        .top-nav {
+            position:fixed; top:0; left:0; right:0; height:var(--nav-h);
+            background:rgba(255,255,255,0.03); backdrop-filter:blur(15px);
+            border-bottom:1px solid var(--border);
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 32px; z-index:100;
         }
+        .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); font-weight:600; font-size:1.1rem; cursor:pointer; }
+        .logo-icon { background:var(--primary); padding:4px 8px; border-radius:6px; font-size:0.9rem; }
+        .nav-back { background:var(--card); border:1px solid var(--border); color:var(--text-dim); padding:8px 16px; border-radius:8px; cursor:pointer; font-size:0.9rem; text-decoration:none; transition:0.2s; }
+        .nav-back:hover { border-color:var(--primary); color:var(--text); }
 
-        body {
-            background: var(--bg-main);
-            background-attachment: fixed;
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-            transition: all 0.3s ease;
+        /* ── Layout ── */
+        .page { display:grid; grid-template-columns:240px 1fr; gap:0; margin-top:var(--nav-h); min-height:calc(100vh - var(--nav-h)); }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            background:rgba(255,255,255,0.02); border-right:1px solid var(--border);
+            padding:32px 16px; position:sticky; top:var(--nav-h); height:calc(100vh - var(--nav-h));
         }
-
-        /* --- Header --- */
-        .top-navbar {
-            background: var(--header-bg);
-            backdrop-filter: var(--backdrop);
-            padding: 15px 50px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
+        .sidebar-section { margin-bottom:8px; }
+        .sidebar-label { font-size:0.7rem; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; padding:0 12px; margin-bottom:6px; }
+        .sidebar-item {
+            display:flex; align-items:center; gap:10px; padding:10px 12px;
+            border-radius:10px; cursor:pointer; color:var(--text-dim);
+            font-size:0.88rem; transition:0.2s; margin-bottom:2px;
         }
+        .sidebar-item:hover { background:rgba(139,92,246,0.1); color:var(--text); }
+        .sidebar-item.active { background:rgba(139,92,246,0.15); color:var(--text); border-left:3px solid var(--primary); padding-left:9px; }
+        .sidebar-item svg { width:18px; height:18px; flex-shrink:0; }
 
-        .brand-logo {
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: var(--primary-color);
-            text-decoration: none;
-            letter-spacing: -1px;
+        /* ── Content ── */
+        .content { padding:40px 48px; max-width:760px; }
+        .page-header { margin-bottom:36px; }
+        .page-title { font-size:1.6rem; font-weight:700; margin-bottom:4px; }
+        .page-sub { color:var(--text-dim); font-size:0.9rem; }
+
+        /* ── Tab Panel ── */
+        .tab-panel { display:none; }
+        .tab-panel.active { display:block; }
+
+        /* ── Section Card ── */
+        .section-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:16px; padding:28px; margin-bottom:24px;
         }
+        .section-title { font-size:1rem; font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+        .section-desc { font-size:0.82rem; color:var(--text-dim); margin-bottom:24px; }
 
-        .nav-links {
-            gap: 25px;
-            display: flex;
-            align-items: center;
+        /* ── Avatar ── */
+        .avatar-section { display:flex; align-items:center; gap:24px; margin-bottom:28px; }
+        .avatar-wrap { position:relative; flex-shrink:0; }
+        .avatar-img {
+            width:90px; height:90px; border-radius:50%; object-fit:cover;
+            border:3px solid rgba(139,92,246,0.4);
         }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: color 0.2s;
+        .avatar-badge {
+            position:absolute; bottom:0; right:0;
+            width:28px; height:28px; border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--primary-2));
+            border:2px solid #020418; display:flex; align-items:center; justify-content:center;
+            cursor:pointer; font-size:0.75rem;
         }
+        .avatar-info h3 { font-size:1.1rem; font-weight:600; margin-bottom:4px; }
+        .avatar-info p { font-size:0.82rem; color:var(--text-dim); }
+        .user-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.72rem; padding:3px 10px; border-radius:99px; margin-top:6px; font-weight:600; }
+        .badge-teacher { background:rgba(139,92,246,0.2); color:#c4b5fd; border:1px solid rgba(139,92,246,0.3); }
+        .badge-student { background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
 
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--primary-color);
+        /* ── Form ── */
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        .form-full { grid-column:1/-1; }
+        .form-group { display:flex; flex-direction:column; gap:6px; }
+        label { font-size:0.82rem; font-weight:500; color:var(--text-dim); }
+        input, textarea, select {
+            background:rgba(255,255,255,0.06); border:1px solid var(--border);
+            border-radius:10px; padding:10px 14px; color:var(--text);
+            font-size:0.88rem; outline:none; transition:0.2s; font-family:inherit;
+            width:100%;
         }
+        input:focus, textarea:focus, select:focus { border-color:var(--border-focus); background:rgba(139,92,246,0.06); }
+        input:disabled { opacity:0.5; cursor:not-allowed; }
+        input::placeholder, textarea::placeholder { color:rgba(255,255,255,0.2); }
+        textarea { resize:vertical; min-height:90px; }
 
-        .theme-btn {
-            background: var(--card-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        .theme-btn:hover {
-            background: var(--primary-active);
-            border-color: var(--primary-color);
-        }
-
-        /* --- Wrapper & Layout --- */
-        .settings-wrapper {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 30px;
-            display: flex;
-            gap: 30px;
-            align-items: flex-start;
-        }
-
-        /* --- Sidebar --- */
-        .settings-sidebar {
-            width: 280px;
-            background: var(--card-bg);
-            backdrop-filter: var(--backdrop);
-            padding: 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 100px;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-header {
-            margin-top: 0;
-            color: var(--text-main);
-            font-size: 1.3rem;
-            margin-bottom: 24px;
-            font-weight: 800;
-        }
-
-        .settings-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .settings-menu li {
-            margin-bottom: 8px;
-        }
-
-        .settings-menu a {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            text-decoration: none;
-            color: var(--text-muted);
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .settings-menu a:hover, .settings-menu a.active {
-            background-color: var(--primary-active);
-            color: var(--primary-color);
-        }
-
-        /* --- Content Area --- */
-        .settings-content-area {
-            flex: 1;
-        }
-
-        .tab-content {
-            display: none;
-            background: var(--card-bg);
-            backdrop-filter: var(--backdrop);
-            padding: 40px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .section-header {
-            margin-top: 0;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 1.7rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        /* --- Forms --- */
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: var(--text-main);
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 14px 18px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: all 0.2s ease;
-            background-color: var(--input-bg);
-            color: var(--text-main);
-        }
-
-        .form-control::placeholder {
-            color: var(--text-muted);
-            opacity: 0.6;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px var(--primary-active);
-        }
-
-        textarea.form-control {
-            resize: vertical;
-        }
-
-        /* --- Profile Upload --- */
-        .profile-upload {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 35px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .profile-upload img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary-color);
-            box-shadow: var(--shadow);
-        }
-
-        /* --- Buttons --- */
+        /* ── Buttons ── */
         .btn {
-            padding: 14px 28px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+            display:inline-flex; align-items:center; gap:8px;
+            padding:10px 20px; border-radius:10px; border:none;
+            font-size:0.88rem; font-weight:500; cursor:pointer; transition:0.2s;
         }
+        .btn-primary { background:linear-gradient(135deg,var(--primary),var(--primary-2)); color:white; }
+        .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
+        .btn-ghost { background:var(--card); border:1px solid var(--border); color:var(--text-dim); }
+        .btn-ghost:hover { border-color:var(--primary); color:var(--text); }
+        .btn-danger { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; }
+        .btn-danger:hover { background:rgba(239,68,68,0.25); }
 
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: #111827; 
-            width: 100%;
-            justify-content: center;
-        }
-
-        [data-theme="light"] .btn-primary {
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(167, 139, 250, 0.4);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 10px 20px;
-            border-radius: 8px;
-        }
-
-        .btn-outline:hover {
-            background: var(--primary-active);
-        }
-
-        /* --- Toggle Switch --- */
-        .toggle-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .toggle-item:last-child {
-            border-bottom: none;
-        }
-
-        .toggle-label-title {
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        .toggle-label-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 52px;
-            height: 28px;
-        }
-
-        .switch input { opacity: 0; width: 0; height: 0; }
-
+        /* ── Toggle ── */
+        .toggle-item { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--border); }
+        .toggle-item:last-child { border-bottom:none; }
+        .toggle-label { font-size:0.88rem; font-weight:500; margin-bottom:2px; }
+        .toggle-desc { font-size:0.78rem; color:var(--text-dim); }
+        .switch { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
+        .switch input { opacity:0; width:0; height:0; }
         .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: .3s;
-            border-radius: 28px;
-            border: 1px solid var(--border-color);
+            position:absolute; inset:0; border-radius:99px;
+            background:rgba(255,255,255,0.1); cursor:pointer; transition:0.3s;
         }
-
-        [data-theme="light"] .slider {
-            background-color: #cbd5e1;
+        .slider::before {
+            content:''; position:absolute; width:18px; height:18px;
+            left:3px; top:3px; border-radius:50%; background:rgba(255,255,255,0.5);
+            transition:0.3s;
         }
+        .switch input:checked + .slider { background:linear-gradient(135deg,var(--primary),var(--primary-2)); }
+        .switch input:checked + .slider::before { transform:translateX(20px); background:white; }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: var(--toggle-circle);
-            transition: .3s;
-            border-radius: 50%;
-        }
+        /* ── Password strength ── */
+        .pw-strength { height:4px; border-radius:99px; margin-top:6px; background:rgba(255,255,255,0.08); overflow:hidden; }
+        .pw-bar { height:100%; border-radius:99px; width:0; transition:0.3s; }
 
-        input:checked + .slider {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
+        /* ── Message ── */
+        .msg { font-size:0.82rem; padding:10px 14px; border-radius:8px; margin-top:12px; display:none; }
+        .msg.success { background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); color:var(--success); }
+        .msg.error   { background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); color:var(--danger); }
 
-        input:checked + .slider:before {
-            transform: translateX(24px);
-            background-color: #ffffff; /* วงกลมเป็นสีขาวเมื่อเปิดใช้งาน */
+        /* ── Divider ── */
+        .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+
+        /* ── Danger zone ── */
+        .danger-zone { border-color:rgba(239,68,68,0.2); }
+        .danger-zone .section-title { color:#f87171; }
+
+        @media(max-width:768px) {
+            .page { grid-template-columns:1fr; }
+            .sidebar { display:none; }
+            .content { padding:24px 20px; }
+            .form-grid { grid-template-columns:1fr; }
         }
     </style>
 </head>
 <body>
 
-    <header class="top-navbar">
-        <a href="dashboard.html" class="brand-logo">SKILLNEST</a>
-        <nav class="nav-links">
-            <a href="dashboard.html"><i class="fas fa-home"></i> แดชบอร์ด</a>
-            <a href="profile.html"><i class="fas fa-user-circle"></i> โปรไฟล์</a>
-            <a href="#" class="active"><i class="fas fa-cog"></i> การตั้งค่า</a>
-            <button class="theme-btn" id="themeToggleBtn">
-                <i class="fas fa-sun"></i> ธีมสว่าง
-            </button>
-        </nav>
-    </header>
+<!-- Nav -->
+<nav class="top-nav">
+    <div class="logo" onclick="window.location.href='dashboard.html'">
+        <span class="logo-icon">W</span> SkillNest
+    </div>
+    <a href="dashboard.html" class="nav-back">← กลับหน้าหลัก</a>
+</nav>
 
-    <div class="settings-wrapper">
-        <aside class="settings-sidebar">
-            <h3 class="sidebar-header">การตั้งค่า</h3>
-            <ul class="settings-menu" id="settingsMenu">
-                <li><a class="active" data-tab="tab-profile"><i class="fas fa-user"></i> ข้อมูลส่วนตัว</a></li>
-                <li><a data-tab="tab-security"><i class="fas fa-lock"></i> ความปลอดภัย</a></li>
-                <li><a data-tab="tab-notifications"><i class="fas fa-bell"></i> การแจ้งเตือน</a></li>
-            </ul>
-        </aside>
+<div class="page">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-label">บัญชี</div>
+            <div class="sidebar-item active" data-tab="profile" onclick="switchTab('profile',this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                โปรไฟล์
+            </div>
+            <div class="sidebar-item" data-tab="security" onclick="switchTab('security',this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                ความปลอดภัย
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">การตั้งค่า</div>
+            <div class="sidebar-item" data-tab="notifications" onclick="switchTab('notifications',this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                การแจ้งเตือน
+            </div>
+        </div>
+    </aside>
 
-        <main class="settings-content-area">
-            <div id="tab-profile" class="tab-content active">
-                <h2 class="section-header">ข้อมูลส่วนตัว (Personal Info)</h2>
-                <form>
-                    <div class="profile-upload">
-                        <img id="settingProfileImg" src="https://ui-avatars.com/api/?name=U&background=a78bfa&color=111827&size=128" alt="Profile">
-                        <div>
-                            <button type="button" class="btn btn-outline"><i class="fas fa-camera"></i> อัปโหลดรูปใหม่</button>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>ชื่อจริง</label>
-                            <input type="text" id="settingFirstName" class="form-control" placeholder="กรอกชื่อ">
-                        </div>
-                        <div class="form-group">
-                            <label>นามสกุล</label>
-                            <input type="text" id="settingLastName" class="form-control" placeholder="กรอกนามสกุล">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>อีเมล (ที่ใช้นำเข้าระบบ)</label>
-                        <input type="email" id="settingEmail" class="form-control" readonly style="opacity: 0.7; cursor: not-allowed;">
-                    </div>
-                    <div class="form-group">
-                        <label>แนะนำตัวสั้นๆ (Bio)</label>
-                        <textarea id="settingBio" class="form-control" rows="5" placeholder="สนใจ Data Science, Web Development..."></textarea>
-                    </div>
-                    <p id="profileMsg" style="display:none; font-size:0.9rem; margin-bottom:0.5rem;"></p>
-                    <button type="button" id="btnSaveProfile" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกข้อมูลส่วนตัว</button>
-                </form>
+    <!-- Content -->
+    <main class="content">
+
+        <!-- ── Profile Tab ── -->
+        <div id="tab-profile" class="tab-panel active">
+            <div class="page-header">
+                <div class="page-title">โปรไฟล์</div>
+                <div class="page-sub">จัดการข้อมูลส่วนตัวและรูปโปรไฟล์</div>
             </div>
 
-            <div id="tab-security" class="tab-content">
-                <h2 class="section-header">ความปลอดภัย (Security)</h2>
-                <form>
-                    <div class="form-group">
-                        <label>รหัสผ่านปัจจุบัน</label>
-                        <input type="password" id="settingCurrentPass" class="form-control" placeholder="••••••••">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>รหัสผ่านใหม่</label>
-                            <input type="password" id="settingNewPass" class="form-control" placeholder="••••••••">
-                        </div>
-                        <div class="form-group">
-                            <label>ยืนยันรหัสผ่านใหม่</label>
-                            <input type="password" id="settingConfirmPass" class="form-control" placeholder="••••••••">
-                        </div>
-                    </div>
-                    <p id="securityMsg" style="display:none; font-size:0.9rem; margin-bottom:0.5rem;"></p>
-                    <button type="button" id="btnChangePass" class="btn btn-primary"><i class="fas fa-key"></i> อัปเดตรหัสผ่าน</button>
-                </form>
-            </div>
+            <div class="section-card">
+                <div class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    ข้อมูลส่วนตัว
+                </div>
+                <div class="section-desc">ชื่อและข้อมูลที่แสดงในโปรไฟล์ของคุณ</div>
 
-            <div id="tab-notifications" class="tab-content">
-                <h2 class="section-header">การแจ้งเตือน (Notifications)</h2>
-                <div class="notification-list">
-                    <div class="toggle-item">
-                        <div>
-                            <div class="toggle-label-title">อัปเดตคอร์สเรียน</div>
-                            <div class="toggle-label-desc">รับอีเมลเมื่อมีคอร์สใหม่ในหมวดหมู่ที่คุณสนใจ</div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="notifCourse" checked><span class="slider"></span></label>
+                <!-- Avatar -->
+                <div class="avatar-section">
+                    <div class="avatar-wrap">
+                        <img id="profileAvatar" src="" alt="Avatar" class="avatar-img">
+                        <div class="avatar-badge" onclick="document.getElementById('avatarInput').click()">✏️</div>
+                        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarChange(this)">
                     </div>
-                    <div class="toggle-item">
-                        <div>
-                            <div class="toggle-label-title">การส่งงาน (Assignments)</div>
-                            <div class="toggle-label-desc">แจ้งเตือนก่อนถึงกำหนดส่งงาน 24 ชั่วโมง</div>
-                        </div>
-                        <label class="switch"><input type="checkbox" id="notifAssign" checked><span class="slider"></span></label>
+                    <div class="avatar-info">
+                        <h3 id="profileDisplayName">กำลังโหลด...</h3>
+                        <p id="profileEmail" style="color:var(--text-dim);font-size:0.85rem;"></p>
+                        <span id="profileBadge" class="user-badge"></span>
                     </div>
                 </div>
-                <p id="notifMsg" style="display:none; font-size:0.9rem; margin: 1rem 0 0.5rem;"></p>
-                <button type="button" id="btnSaveNotif" class="btn btn-primary" style="margin-top:1rem;"><i class="fas fa-bell"></i> บันทึกการตั้งค่าแจ้งเตือน</button>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>ชื่อ</label>
+                        <input type="text" id="firstName" placeholder="ชื่อของคุณ">
+                    </div>
+                    <div class="form-group">
+                        <label>นามสกุล</label>
+                        <input type="text" id="lastName" placeholder="นามสกุล">
+                    </div>
+                    <div class="form-group form-full">
+                        <label>อีเมล</label>
+                        <input type="email" id="emailField" disabled>
+                    </div>
+                    <div class="form-group form-full">
+                        <label>แนะนำตัว (Bio)</label>
+                        <textarea id="bio" placeholder="สนใจ Data Science, Web Development..."></textarea>
+                    </div>
+                </div>
+
+                <div id="profileMsg" class="msg"></div>
+                <div style="margin-top:20px;">
+                    <button class="btn btn-primary" onclick="saveProfile()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        บันทึกข้อมูล
+                    </button>
+                </div>
             </div>
-        </main>
-    </div>
+        </div>
 
-    <script type="module">
-        import { supabase } from './supabase.js';
+        <!-- ── Security Tab ── -->
+        <div id="tab-security" class="tab-panel">
+            <div class="page-header">
+                <div class="page-title">ความปลอดภัย</div>
+                <div class="page-sub">จัดการรหัสผ่านและการเข้าสู่ระบบ</div>
+            </div>
 
-        let currentUser = null;
+            <div class="section-card">
+                <div class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    เปลี่ยนรหัสผ่าน
+                </div>
+                <div class="section-desc">รหัสผ่านควรมีอย่างน้อย 8 ตัวอักษรและมีตัวเลขปนด้วย</div>
 
-        // === โหลดข้อมูล Profile ===
-        async function loadProfile(user) {
-            const { data: userData } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', user.id)
-                .single();
+                <div class="form-grid" style="grid-template-columns:1fr;">
+                    <div class="form-group">
+                        <label>รหัสผ่านใหม่</label>
+                        <input type="password" id="newPass" placeholder="••••••••" oninput="checkStrength(this.value)">
+                        <div class="pw-strength"><div class="pw-bar" id="pwBar"></div></div>
+                        <span id="pwHint" style="font-size:0.75rem;color:var(--text-dim);"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>ยืนยันรหัสผ่านใหม่</label>
+                        <input type="password" id="confirmPass" placeholder="••••••••">
+                    </div>
+                </div>
 
-            if (!userData) return;
+                <div id="securityMsg" class="msg"></div>
+                <div style="margin-top:20px;">
+                    <button class="btn btn-primary" onclick="changePassword()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        อัปเดตรหัสผ่าน
+                    </button>
+                </div>
+            </div>
 
-            document.getElementById('settingFirstName').value = userData.first_name || '';
-            document.getElementById('settingLastName').value = userData.last_name || '';
-            document.getElementById('settingEmail').value = userData.email || user.email || '';
-            document.getElementById('settingBio').value = userData.bio || '';
+            <div class="section-card danger-zone">
+                <div class="section-title">⚠️ ออกจากระบบ</div>
+                <div class="section-desc">ออกจากระบบจากอุปกรณ์นี้</div>
+                <button class="btn btn-danger" onclick="signOut()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    ออกจากระบบ
+                </button>
+            </div>
+        </div>
 
-            if (userData.profile_picture) {
-                document.getElementById('settingProfileImg').src = userData.profile_picture;
-            } else {
-                const initials = ((userData.first_name||'U')[0] + (userData.last_name||'')[0]).toUpperCase();
-                document.getElementById('settingProfileImg').src =
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=a78bfa&color=111827&size=128`;
-            }
+        <!-- ── Notifications Tab ── -->
+        <div id="tab-notifications" class="tab-panel">
+            <div class="page-header">
+                <div class="page-title">การแจ้งเตือน</div>
+                <div class="page-sub">เลือกสิ่งที่ต้องการให้แจ้งเตือน</div>
+            </div>
 
-            // Notification prefs
-            const prefs = userData.notification_prefs || {};
-            document.getElementById('notifCourse').checked  = prefs.course_updates  !== false;
-            document.getElementById('notifAssign').checked  = prefs.assignments      !== false;
-        }
+            <div class="section-card">
+                <div class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    การแจ้งเตือน
+                </div>
+                <div class="section-desc">ตั้งค่าการแจ้งเตือนที่ต้องการรับ</div>
 
-        // === บันทึก Profile ===
-        async function saveProfile() {
-            const firstName = document.getElementById('settingFirstName').value.trim();
-            const lastName  = document.getElementById('settingLastName').value.trim();
-            const bio       = document.getElementById('settingBio').value.trim();
+                <div class="toggle-item">
+                    <div>
+                        <div class="toggle-label">อัปเดตคอร์ส</div>
+                        <div class="toggle-desc">แจ้งเตือนเมื่อมีบทเรียนใหม่หรือการอัปเดต</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="notifCourse" checked><span class="slider"></span></label>
+                </div>
+                <div class="toggle-item">
+                    <div>
+                        <div class="toggle-label">การส่งงาน</div>
+                        <div class="toggle-desc">แจ้งเตือนก่อนถึงกำหนดส่งงาน 24 ชั่วโมง</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="notifAssign" checked><span class="slider"></span></label>
+                </div>
 
-            if (!firstName || !lastName) {
-                showMsg('profileMsg', 'กรุณากรอกชื่อและนามสกุล', 'error'); return;
-            }
+                <div id="notifMsg" class="msg"></div>
+                <div style="margin-top:20px;">
+                    <button class="btn btn-primary" onclick="saveNotifications()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        บันทึกการตั้งค่า
+                    </button>
+                </div>
+            </div>
+        </div>
 
-            const { error } = await supabase
-                .from('users')
-                .update({ first_name: firstName, last_name: lastName, bio })
-                .eq('id', currentUser.id);
+    </main>
+</div>
 
-            if (error) { showMsg('profileMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
-            showMsg('profileMsg', 'บันทึกข้อมูลเรียบร้อยแล้ว ✅', 'success');
-        }
+<script type="module">
+import { supabase } from './supabase.js';
 
-        // === เปลี่ยนรหัสผ่าน ===
-        async function changePassword() {
-            const newPass    = document.getElementById('settingNewPass').value;
-            const confirmPass= document.getElementById('settingConfirmPass').value;
+let currentUser = null;
 
-            if (!newPass || newPass.length < 6) {
-                showMsg('securityMsg', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error'); return;
-            }
-            if (newPass !== confirmPass) {
-                showMsg('securityMsg', 'รหัสผ่านใหม่ไม่ตรงกัน', 'error'); return;
-            }
+// ── Tab switching ──
+window.switchTab = function(tab, el) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    el.classList.add('active');
+};
 
-            const { error } = await supabase.auth.updateUser({ password: newPass });
+// ── Load profile ──
+async function loadProfile(user) {
+    const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
+    if (!data) return;
 
-            if (error) { showMsg('securityMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
+    document.getElementById('firstName').value = data.first_name || '';
+    document.getElementById('lastName').value  = data.last_name  || '';
+    document.getElementById('emailField').value = data.email || user.email || '';
+    document.getElementById('bio').value       = data.bio || '';
 
-            showMsg('securityMsg', 'อัปเดตรหัสผ่านเรียบร้อยแล้ว ✅', 'success');
-            document.getElementById('settingCurrentPass').value = '';
-            document.getElementById('settingNewPass').value = '';
-            document.getElementById('settingConfirmPass').value = '';
-        }
+    const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'ผู้ใช้';
+    document.getElementById('profileDisplayName').textContent = fullName;
+    document.getElementById('profileEmail').textContent = data.email || user.email || '';
 
-        // === บันทึก Notification Preferences ===
-        async function saveNotifications() {
-            const prefs = {
-                course_updates: document.getElementById('notifCourse').checked,
-                assignments:    document.getElementById('notifAssign').checked,
-            };
+    // Avatar
+    const avatarEl = document.getElementById('profileAvatar');
+    if (data.profile_picture) {
+        avatarEl.src = data.profile_picture;
+    } else {
+        const initials = ((data.first_name||'U')[0] + (data.last_name||'')[0]).toUpperCase();
+        avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=8b5cf6&color=fff&size=128`;
+    }
 
-            const { error } = await supabase
-                .from('users')
-                .update({ notification_prefs: prefs })
-                .eq('id', currentUser.id);
+    // Badge
+    const badge = document.getElementById('profileBadge');
+    if (data.user_type === 'teacher') {
+        badge.textContent = '👨‍🏫 อาจารย์';
+        badge.className = 'user-badge badge-teacher';
+    } else {
+        badge.textContent = '🎓 นักเรียน';
+        badge.className = 'user-badge badge-student';
+    }
 
-            if (error) { showMsg('notifMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
-            showMsg('notifMsg', 'บันทึกการตั้งค่าแจ้งเตือนเรียบร้อยแล้ว ✅', 'success');
-        }
+    // Notifications
+    const prefs = data.notification_prefs || {};
+    document.getElementById('notifCourse').checked = prefs.course_updates !== false;
+    document.getElementById('notifAssign').checked = prefs.assignments    !== false;
+}
 
-        // === Helper: แสดง message ===
-        function showMsg(elId, text, type) {
-            const el = document.getElementById(elId);
-            if (!el) return;
-            el.textContent = text;
-            el.style.display = 'block';
-            el.style.color = type === 'error' ? '#ef4444' : '#10b981';
-            setTimeout(() => { el.style.display = 'none'; }, 4000);
-        }
+// ── Save profile ──
+window.saveProfile = async function() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName  = document.getElementById('lastName').value.trim();
+    const bio       = document.getElementById('bio').value.trim();
 
-        // === ระบบ Tab ===
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuLinks = document.querySelectorAll('#settingsMenu a');
-            const tabContents = document.querySelectorAll('.tab-content');
+    if (!firstName || !lastName) { showMsg('profileMsg', 'กรุณากรอกชื่อและนามสกุล', 'error'); return; }
 
-            menuLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    menuLinks.forEach(item => item.classList.remove('active'));
-                    this.classList.add('active');
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    document.getElementById(this.getAttribute('data-tab')).classList.add('active');
-                });
-            });
+    const { error } = await supabase.from('users').update({ first_name: firstName, last_name: lastName, bio }).eq('id', currentUser.id);
+    if (error) { showMsg('profileMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
 
-            // ผูกปุ่มต่างๆ
-            document.getElementById('btnSaveProfile').addEventListener('click', saveProfile);
-            document.getElementById('btnChangePass').addEventListener('click', changePassword);
-            document.getElementById('btnSaveNotif').addEventListener('click', saveNotifications);
+    document.getElementById('profileDisplayName').textContent = `${firstName} ${lastName}`;
+    showMsg('profileMsg', '✅ บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+};
 
-            // ธีม
-            const themeBtn = document.getElementById('themeToggleBtn');
-            const htmlTag = document.documentElement;
-            themeBtn.addEventListener('click', () => {
-                if (htmlTag.getAttribute('data-theme') !== 'light') {
-                    htmlTag.setAttribute('data-theme', 'light');
-                    themeBtn.innerHTML = '<i class="fas fa-moon"></i> ธีมปกติ';
-                } else {
-                    htmlTag.removeAttribute('data-theme');
-                    themeBtn.innerHTML = '<i class="fas fa-sun"></i> ธีมสว่าง';
-                }
-            });
-        });
+// ── Avatar change ──
+window.handleAvatarChange = async function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showMsg('profileMsg', 'รูปภาพต้องไม่เกิน 5MB', 'error'); return; }
 
-        // === Auth ===
-        async function initSettings() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                currentUser = user;
-                await loadProfile(user);
-            } else {
-                window.location.href = '../login-page/login.html';
-            }
-        }
-        supabase.auth.onAuthStateChange((event) => {
-            if (event === 'SIGNED_OUT') window.location.href = '../login-page/login.html';
-        });
-        initSettings();
-    </script>
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result;
+        document.getElementById('profileAvatar').src = base64;
+        const { error } = await supabase.from('users').update({ profile_picture: base64 }).eq('id', currentUser.id);
+        if (!error) showMsg('profileMsg', '✅ อัปเดตรูปโปรไฟล์แล้ว', 'success');
+    };
+    reader.readAsDataURL(file);
+};
+
+// ── Password strength ──
+window.checkStrength = function(pw) {
+    const bar  = document.getElementById('pwBar');
+    const hint = document.getElementById('pwHint');
+    let score  = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+    const colors = ['#ef4444','#f59e0b','#3b82f6','#10b981'];
+    const labels = ['อ่อนมาก','พอใช้','ดี','แข็งแกร่ง'];
+    bar.style.width  = (score * 25) + '%';
+    bar.style.background = colors[score-1] || '#ef4444';
+    hint.textContent = pw.length > 0 ? labels[score-1] || 'อ่อนมาก' : '';
+};
+
+// ── Change password ──
+window.changePassword = async function() {
+    const newPass     = document.getElementById('newPass').value;
+    const confirmPass = document.getElementById('confirmPass').value;
+
+    if (!newPass || newPass.length < 6) { showMsg('securityMsg', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error'); return; }
+    if (newPass !== confirmPass) { showMsg('securityMsg', 'รหัสผ่านไม่ตรงกัน', 'error'); return; }
+
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+    if (error) { showMsg('securityMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
+
+    showMsg('securityMsg', '✅ อัปเดตรหัสผ่านเรียบร้อยแล้ว', 'success');
+    document.getElementById('newPass').value     = '';
+    document.getElementById('confirmPass').value = '';
+    document.getElementById('pwBar').style.width = '0';
+    document.getElementById('pwHint').textContent = '';
+};
+
+// ── Sign out ──
+window.signOut = async function() {
+    await supabase.auth.signOut();
+    window.location.href = 'login-page/login.html';
+};
+
+// ── Save notifications ──
+window.saveNotifications = async function() {
+    const prefs = {
+        course_updates: document.getElementById('notifCourse').checked,
+        assignments:    document.getElementById('notifAssign').checked,
+    };
+    const { error } = await supabase.from('users').update({ notification_prefs: prefs }).eq('id', currentUser.id);
+    if (error) { showMsg('notifMsg', 'เกิดข้อผิดพลาด: ' + error.message, 'error'); return; }
+    showMsg('notifMsg', '✅ บันทึกการตั้งค่าแจ้งเตือนแล้ว', 'success');
+};
+
+// ── Helper ──
+function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className   = 'msg ' + type;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// ── Init ──
+async function init() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { window.location.href = 'login-page/login.html'; return; }
+    currentUser = user;
+    await loadProfile(user);
+}
+
+supabase.auth.onAuthStateChange(e => { if (e === 'SIGNED_OUT') window.location.href = 'login-page/login.html'; });
+init();
+</script>
 </body>
 </html>
