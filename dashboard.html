@@ -918,7 +918,7 @@
                         <span id="userName">Loading...</span>
                     </button>
                     <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="setting.html" class="dropdown-item" id="settingsItem">การตั้งค่า</a>
+                        <a href="setting.html" class="dropdown-item" id="settingsItem">⚙️ ตั้งค่า & โปรไฟล์</a>
                         <a href="manage-courses.html" class="dropdown-item teacher-only" id="manageCourseItem" style="display: none;">จัดการคอร์สของฉัน</a>
                         <a class="dropdown-item" id="logoutItem">ออกจากระบบ</a>
                     </div>
@@ -1280,6 +1280,8 @@
                 for (const course of querySnapshot) {
                     const courseId = course.id;
                     if (enrolledCourseIds.has(courseId)) continue;
+                    // ครูไม่เห็นคอร์สของตัวเองในหน้า explore
+                    if (window._createdCourseIds?.has(courseId)) continue;
                     visibleCount++;
                     let creatorName = 'ไม่ทราบชื่อ';
                     try {
@@ -1309,6 +1311,8 @@
                     courseGrid.appendChild(courseCard);
 
                     // เพิ่มเข้า cache สำหรับ search suggestion
+                    // ครูไม่เห็นคอร์สตัวเองใน search cache
+                    if (window._createdCourseIds?.has(courseId)) continue;
                     if (!allCourseCache.find(c => c.id === courseId)) {
                         allCourseCache.push({
                             id: courseId,
