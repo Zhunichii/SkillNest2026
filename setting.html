@@ -619,31 +619,67 @@
                     </div>
                 </div>
 
-                <!-- Voice Picker Section -->
+                <!-- Voice Cloning Section -->
                 <div class="section-card" style="margin-top:0;">
                     <div class="section-title">🎙️ เสียงของ Avatar
                         <span id="voiceStatusBadge" style="margin-left:auto;font-size:0.72rem;font-weight:400;"></span>
                     </div>
-                    <div class="section-desc">เลือกเสียงสำหรับ Avatar AI จาก ElevenLabs — มีหลายสิบเสียงให้เลือก</div>
+                    <div class="section-desc">อัดหรืออัปโหลดเสียงของคุณ — AI จะ clone เสียงให้ Avatar พูดเหมือนคุณ</div>
 
-                    <div id="voicePickerWrap">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-                            <button class="btn btn-ghost" onclick="loadVoiceList()" id="btnLoadVoices"
-                                style="font-size:0.82rem;padding:8px 14px;">
-                                🔄 โหลดรายการเสียง
+                    <!-- Sample sentences -->
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                            📋 ประโยคตัวอย่าง <span style="color:rgba(255,255,255,0.3);">— อ่านให้ครบอย่างน้อย 3 ประโยค (~30 วินาที)</span>
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 1</div>
+                            สวัสดีนักเรียนทุกคนครับ วันนี้เราจะมาเรียนเรื่องที่น่าสนใจมาก ตั้งใจฟังให้ดีนะครับ
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 2</div>
+                            ใครมีคำถามอะไรยกมือได้เลยนะครับ ไม่ต้องเกรงใจ เราอยู่ที่นี่เพื่อช่วยกันครับ
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 3</div>
+                            แนวคิดนี้สำคัญมากครับ ให้จำไว้ให้ดี ตัวอย่างเช่น ถ้าเรามีข้อมูล 10 ชุด จะคำนวณอย่างไร
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 4</div>
+                            เยี่ยมมากครับ ตอบถูกต้องเลย นักเรียนเข้าใจดีมาก บทเรียนวันนี้จบแล้วนะครับ อย่าลืมทบทวนด้วย
+                        </div>
+                        <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;">💡 กดที่ประโยคเพื่อดูข้อความ แล้วอ่านออกเสียงขณะอัด</div>
+                    </div>
+
+                    <!-- Recorder -->
+                    <div class="voice-recorder-wrap">
+                        <div class="recorder-controls">
+                            <button class="btn-record" id="btnRecord" onclick="toggleRecording()">
+                                🎙️ เริ่มอัดเสียง
                             </button>
-                            <span id="voiceLoadStatus" style="font-size:0.8rem;color:var(--text-dim);"></span>
+                            <label class="btn btn-ghost" style="cursor:pointer;margin:0;">
+                                📁 อัปโหลดไฟล์เสียง
+                                <input type="file" id="voiceFileInput" accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm"
+                                    style="display:none" onchange="handleVoiceFileUpload(this)">
+                            </label>
+                            <span class="voice-status" id="voiceStatus">ยังไม่มีเสียง</span>
                         </div>
 
-                        <!-- Search -->
-                        <input type="text" id="voiceSearch" placeholder="🔍 ค้นหาเสียง..."
-                            style="display:none;margin-bottom:10px;"
-                            oninput="filterVoices(this.value)">
+                        <div class="voice-level-bar" id="voiceLevelBar" style="display:none;">
+                            <div class="voice-level-fill" id="voiceLevelFill"></div>
+                        </div>
 
-                        <!-- Voice list -->
-                        <div id="voiceList" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;"></div>
+                        <audio id="audioPreview" class="audio-preview" controls style="display:none;"></audio>
 
                         <div id="voiceMsg" class="msg" style="margin-top:10px;"></div>
+
+                        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+                            <button class="btn btn-primary" id="btnSaveVoice" onclick="saveVoice()" style="display:none;">
+                                💾 บันทึกเสียงสำหรับ Avatar
+                            </button>
+                            <button class="btn btn-ghost" id="btnClearVoice" onclick="clearVoice()" style="display:none;">
+                                🗑 ล้างเสียง
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -724,10 +760,9 @@ async function loadProfile(user) {
             loadAvatarConfigToUI(data.avatar_config);
             // แสดง badge ถ้ามี ElevenLabs voice
             const cfg = data.avatar_config;
-            if (cfg.useElevenLabs && cfg.elevenLabsVoiceId) {
+            if (cfg.useXTTS) {
                 const badge = document.getElementById('voiceStatusBadge');
-                if (badge) badge.innerHTML = `<span class="voice-badge">🎙️ ${cfg.elevenLabsVoiceName || 'ElevenLabs'}</span>`;
-                savedVoiceId = cfg.elevenLabsVoiceId;
+                if (badge) badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียงครู (XTTS)</span>';
             }
         }
     }
@@ -870,134 +905,178 @@ async function init() {
 }
 
 // ═══════════════════════════════════════
-//  VOICE PICKER — ElevenLabs Voice Library
+//  VOICE RECORDER & XTTS CLONE
 // ═══════════════════════════════════════
-let allVoices = [];
+let mediaRecorder = null;
+let audioChunks   = [];
+let recordedBlob  = null;
+let audioContext  = null;
+let analyserNode  = null;
+let levelAnimId   = null;
+let isRecording   = false;
 
-window.loadVoiceList = async function() {
-    const btn    = document.getElementById('btnLoadVoices');
-    const status = document.getElementById('voiceLoadStatus');
-    const list   = document.getElementById('voiceList');
-    const search = document.getElementById('voiceSearch');
+window.speakSample = function(el) {
+    document.querySelectorAll('.sample-sentence').forEach(e => e.classList.remove('speaking'));
+    el.classList.add('speaking');
+};
 
+window.toggleRecording = async function() {
+    if (isRecording) stopRecording(); else await startRecording();
+};
+
+async function startRecording() {
+    try {
+        const stream   = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder  = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        audioChunks    = [];
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+            recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const url    = URL.createObjectURL(recordedBlob);
+            const preview = document.getElementById('audioPreview');
+            preview.src   = url;
+            preview.style.display = 'block';
+            document.getElementById('btnSaveVoice').style.display  = 'inline-flex';
+            document.getElementById('btnClearVoice').style.display = 'inline-flex';
+            setVoiceStatus('✅ อัดเสียงเสร็จแล้ว — กด "บันทึกเสียง" เพื่อใช้งาน', 'success');
+            stopLevelMeter();
+        };
+        mediaRecorder.start(200);
+        isRecording = true;
+        const btn = document.getElementById('btnRecord');
+        btn.textContent = '⏹ หยุดอัดเสียง';
+        btn.classList.add('recording');
+        setVoiceStatus('🔴 กำลังอัดเสียง... พูดตามประโยคตัวอย่าง', '');
+        startLevelMeter(stream);
+        document.getElementById('voiceLevelBar').style.display = 'block';
+    } catch(e) {
+        setVoiceStatus('❌ ไม่สามารถเข้าถึงไมค์: ' + e.message, 'error');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder?.state !== 'inactive') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    }
+    isRecording = false;
+    const btn = document.getElementById('btnRecord');
+    btn.textContent = '🎙️ เริ่มอัดเสียง';
+    btn.classList.remove('recording');
+    document.getElementById('voiceLevelBar').style.display = 'none';
+}
+
+function startLevelMeter(stream) {
+    audioContext = new AudioContext();
+    analyserNode = audioContext.createAnalyser();
+    analyserNode.fftSize = 256;
+    audioContext.createMediaStreamSource(stream).connect(analyserNode);
+    const buf = new Uint8Array(analyserNode.frequencyBinCount);
+    function animate() {
+        analyserNode.getByteFrequencyData(buf);
+        const avg  = buf.reduce((a, b) => a + b, 0) / buf.length;
+        const fill = document.getElementById('voiceLevelFill');
+        if (fill) fill.style.width = Math.min(100, avg * 2) + '%';
+        levelAnimId = requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+function stopLevelMeter() {
+    if (levelAnimId) cancelAnimationFrame(levelAnimId);
+    if (audioContext) audioContext.close();
+    const fill = document.getElementById('voiceLevelFill');
+    if (fill) fill.style.width = '0';
+}
+
+window.handleVoiceFileUpload = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) { setVoiceStatus('❌ ไฟล์ต้องไม่เกิน 20MB', 'error'); return; }
+    recordedBlob = file;
+    const preview = document.getElementById('audioPreview');
+    preview.src   = URL.createObjectURL(file);
+    preview.style.display = 'block';
+    document.getElementById('btnSaveVoice').style.display  = 'inline-flex';
+    document.getElementById('btnClearVoice').style.display = 'inline-flex';
+    setVoiceStatus(`✅ โหลดไฟล์ "${file.name}" แล้ว`, 'success');
+};
+
+window.saveVoice = async function() {
+    if (!recordedBlob) { showVoiceMsg('กรุณาอัดหรืออัปโหลดเสียงก่อน', 'error'); return; }
+
+    const btn = document.getElementById('btnSaveVoice');
     btn.disabled    = true;
-    btn.textContent = '⏳ กำลังโหลด...';
-    status.textContent = '';
-    list.innerHTML  = '<div style="color:var(--text-dim);font-size:0.82rem;padding:12px;">กำลังดึงรายการเสียง...</div>';
+    btn.textContent = '⏳ กำลังบันทึก...';
 
     try {
-        const res  = await fetch('/api/elevenlabs-voices');
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'โหลดไม่สำเร็จ');
+        // แปลง blob → base64
+        const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload  = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(recordedBlob);
+        });
+        const mime = recordedBlob.type || 'audio/webm';
 
-        allVoices = data.voices || [];
-        status.textContent = `พบ ${allVoices.length} เสียง`;
-        search.style.display = 'block';
-        renderVoiceList(allVoices);
+        // บันทึกลง Supabase แยก column
+        const { error } = await supabase.from('users').update({
+            speaker_audio_base64: base64,
+            speaker_audio_mime:   mime,
+            avatar_config: {
+                ...(await getAvatarCfg()),
+                useXTTS:       true,
+                useElevenLabs: false,
+                voiceProvider: 'xtts_v2',
+            }
+        }).eq('id', currentUser.id);
+
+        if (error) throw new Error(error.message);
+
+        const badge = document.getElementById('voiceStatusBadge');
+        if (badge) badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียงครู (XTTS)</span>';
+        showVoiceMsg('✅ บันทึกเสียงสำเร็จ! Avatar จะพูดด้วยเสียงของคุณ', 'success');
 
     } catch(e) {
-        list.innerHTML = `<div style="color:#ef4444;font-size:0.82rem;padding:12px;">❌ ${e.message}</div>`;
+        showVoiceMsg('❌ ' + e.message, 'error');
     }
 
     btn.disabled    = false;
-    btn.textContent = '🔄 โหลดรายการเสียง';
+    btn.textContent = '💾 บันทึกเสียงสำหรับ Avatar';
 };
 
-window.filterVoices = function(q) {
-    const filtered = q.trim()
-        ? allVoices.filter(v => v.name.toLowerCase().includes(q.toLowerCase())
-            || Object.values(v.labels || {}).join(' ').toLowerCase().includes(q.toLowerCase()))
-        : allVoices;
-    renderVoiceList(filtered);
-};
-
-// โหลด saved voice_id จาก avatar_config
-let savedVoiceId = null;
-
-function renderVoiceList(voices) {
-    const list = document.getElementById('voiceList');
-    if (!voices.length) {
-        list.innerHTML = '<div style="color:var(--text-dim);font-size:0.82rem;padding:12px;">ไม่พบเสียง</div>';
-        return;
-    }
-
-    list.innerHTML = voices.map(v => {
-        const gender  = v.labels?.gender || '';
-        const accent  = v.labels?.accent || '';
-        const age     = v.labels?.age    || '';
-        const use_case= v.labels?.use_case || '';
-        const isSelected = v.voice_id === savedVoiceId;
-
-        return `<div class="voice-card ${isSelected ? 'selected' : ''}"
-            id="vcard-${v.voice_id}"
-            onclick="selectVoice('${v.voice_id}', '${v.name.replace(/'/g,"\'")}', this)">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:36px;height:36px;border-radius:50%;
-                    background:linear-gradient(135deg,var(--primary),var(--primary-2));
-                    display:flex;align-items:center;justify-content:center;
-                    font-size:1rem;flex-shrink:0;">
-                    ${gender === 'female' ? '👩' : gender === 'male' ? '👨' : '🎙'}
-                </div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${v.name}</div>
-                    <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">
-                        ${[gender, accent, age, use_case].filter(Boolean).join(' · ')}
-                    </div>
-                </div>
-                <div style="display:flex;gap:6px;flex-shrink:0;">
-                    ${v.preview_url ? `<button onclick="event.stopPropagation();previewVoice('${v.preview_url}')"
-                        style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
-                        color:var(--text-dim);padding:4px 10px;border-radius:8px;cursor:pointer;font-size:0.75rem;">
-                        ▶ ฟัง
-                    </button>` : ''}
-                    ${isSelected ? '<span style="color:#10b981;font-size:0.75rem;font-weight:600;">✅ ใช้งาน</span>' : ''}
-                </div>
-            </div>
-        </div>`;
-    }).join('');
+async function getAvatarCfg() {
+    const { data } = await supabase.from('users')
+        .select('avatar_config').eq('id', currentUser.id).single();
+    return data?.avatar_config || {};
 }
 
-window.previewVoice = function(url) {
-    const audio = new Audio(url);
-    audio.play().catch(() => {});
-};
+window.clearVoice = async function() {
+    recordedBlob = null;
+    document.getElementById('audioPreview').style.display  = 'none';
+    document.getElementById('btnSaveVoice').style.display  = 'none';
+    document.getElementById('btnClearVoice').style.display = 'none';
+    setVoiceStatus('ล้างเสียงแล้ว', '');
 
-window.selectVoice = async function(voiceId, voiceName, el) {
-    // update UI
-    document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    savedVoiceId = voiceId;
-
-    // บันทึกลง Supabase
-    const { data: userData } = await supabase.from('users')
-        .select('avatar_config').eq('id', currentUser.id).single();
-    const cfg = userData?.avatar_config || {};
-
-    const { error } = await supabase.from('users').update({
-        avatar_config: {
-            ...cfg,
-            elevenLabsVoiceId: voiceId,
-            elevenLabsVoiceName: voiceName,
-            useElevenLabs: true,
-            useXTTS: false,
-            speakerAudioBase64: null,
-        }
+    const cfg = await getAvatarCfg();
+    delete cfg.useXTTS;
+    delete cfg.voiceProvider;
+    await supabase.from('users').update({
+        speaker_audio_base64: null,
+        speaker_audio_mime:   null,
+        avatar_config: cfg,
     }).eq('id', currentUser.id);
 
-    if (error) {
-        showVoiceMsg('❌ บันทึกไม่สำเร็จ: ' + error.message, 'error');
-        return;
-    }
-
-    // อัปเดต badge
     const badge = document.getElementById('voiceStatusBadge');
-    if (badge) badge.innerHTML = `<span class="voice-badge">🎙️ ${voiceName}</span>`;
-
-    // re-render เพื่อแสดง checkmark
-    renderVoiceList(allVoices.length ? allVoices : [{ voice_id: voiceId, name: voiceName, labels: {}, preview_url: null }]);
-
-    showVoiceMsg(`✅ เลือกเสียง "${voiceName}" แล้ว Avatar จะใช้เสียงนี้`, 'success');
+    if (badge) badge.innerHTML = '';
 };
+
+function setVoiceStatus(text, type) {
+    const el = document.getElementById('voiceStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : 'var(--text-dim)';
+}
 
 function showVoiceMsg(text, type) {
     const el = document.getElementById('voiceMsg');
@@ -1005,7 +1084,7 @@ function showVoiceMsg(text, type) {
     el.textContent   = text;
     el.className     = 'msg ' + type;
     el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 4000);
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 // ═══════════════════════════════════════
 //  AVATAR CUSTOMIZER

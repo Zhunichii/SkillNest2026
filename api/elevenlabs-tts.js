@@ -1,49 +1,78 @@
-// api/elevenlabs-tts.js — ElevenLabs TTS (voice library, ไม่ต้อง clone)
+// api/elevenlabs-tts.js — XTTS-v2 via Hugging Face
+// รับ { text, speakerAudioBase64, speakerAudioMime } → return audio
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const apiKey = process.env.ELEVENLABS_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: 'ELEVENLABS_API_KEY not configured' });
+    const hfKey = process.env.HUGGINGFACE_API_KEY;
+    if (!hfKey) return res.status(500).json({ error: 'HUGGINGFACE_API_KEY not configured' });
 
-    const { text, voiceId } = req.body;
-    if (!text || !voiceId) return res.status(400).json({ error: 'text and voiceId required' });
+    const { text, speakerAudioBase64, speakerAudioMime } = req.body;
+    if (!text) return res.status(400).json({ error: 'text required' });
+    if (!speakerAudioBase64) return res.status(400).json({ error: 'No speaker audio' });
 
     try {
-        const elRes = await fetch(
-            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
-            {
-                method: 'POST',
-                headers: {
-                    'xi-api-key': apiKey,
-                    'Content-Type': 'application/json',
-                    'Accept': 'audio/mpeg',
-                },
-                body: JSON.stringify({
-                    text,
-                    model_id: 'eleven_multilingual_v2',
-                    voice_settings: {
-                        stability: 0.5,
-                        similarity_boost: 0.85,
-                    },
-                }),
+        // ตัด base64 ให้ไม่เกิน 300KB เพื่อหลีกเลี่ยง timeout
+        const maxLen   = 400000;
+        const trimmed  = speakerAudioBase64.length > maxLen
+            ? speakerAudioBase64.slice(0, maxLen)
+            : speakerAudioBase64;
+
+        // เรียก XTTS-v2 Space ผ่าน Gradio API
+        // ใช้ parler-tts แทน coqui/XTTS-v2 ที่ไม่ทำงาน
+        const payload = {
+            inputs: {
+                text,
+                language:        'th',
+                speaker_wav:     `data:${speakerAudioMime || 'audio/webm'};base64,${trimmed}`,
             }
-        );
+        };
 
-        if (!elRes.ok) {
-            const err = await elRes.json().catch(() => ({}));
-            return res.status(elRes.status).json({ error: err.detail?.message || 'TTS failed' });
+        // ลอง model ที่ทำงานจริงบน HF Inference API
+        const models = [
+            'myshell-ai/MeloTTS',
+            'facebook/mms-tts-tha',
+        ];
+
+        let audioBuffer = null;
+        let lastError   = '';
+
+        for (const model of models) {
+            const hfRes = await fetch(
+                `https://api-inference.huggingface.co/models/${model}`,
+                {
+                    method:  'POST',
+                    headers: {
+                        'Authorization':    `Bearer ${hfKey}`,
+                        'Content-Type':     'application/json',
+                        'x-wait-for-model': 'true',
+                    },
+                    body: JSON.stringify({ inputs: text }),
+                }
+            );
+
+            if (hfRes.ok) {
+                audioBuffer = await hfRes.arrayBuffer();
+                break;
+            }
+
+            const errText = await hfRes.text();
+            lastError     = `${model}: ${hfRes.status} ${errText.slice(0,100)}`;
+            console.warn('Model failed:', lastError);
+
+            if (hfRes.status === 503) continue; // ลอง model ถัดไป
         }
 
-        res.setHeader('Content-Type', 'audio/mpeg');
+        if (!audioBuffer) {
+            return res.status(502).json({ error: 'All models failed: ' + lastError });
+        }
+
+        res.setHeader('Content-Type', 'audio/wav');
         res.setHeader('Cache-Control', 'no-store');
-        const reader = elRes.body.getReader();
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            res.write(Buffer.from(value));
-        }
-        res.end();
+        res.send(Buffer.from(audioBuffer));
+
     } catch(e) {
+        console.error('TTS error:', e);
         res.status(500).json({ error: e.message });
     }
 }
