@@ -1637,6 +1637,12 @@ window.toggleChat = function() {
 }
 
 async function initCourseContent() {
+    // โหลด Pollinations key จาก server
+    try {
+        const cfg = await fetch('/api/get-config').then(r => r.json());
+        window._pollinationsKey = cfg.pollinationsKey || '';
+    } catch(e) { window._pollinationsKey = ''; }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         window.location.href = '../login-page/login.html';
@@ -2163,7 +2169,10 @@ async function generateImage(prompt, caption) {
 
     // encode prompt ให้ปลอดภัย
     const encodedPrompt = encodeURIComponent(prompt + ', educational, clean, colorful, digital art');
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=384&nologo=true&seed=${Date.now()}`;
+    // ใช้ key จาก meta tag ที่ inject จาก server หรือ fallback ไม่มี key
+    const polKey  = window._pollinationsKey || '';
+    const keyParam = polKey ? `&key=${polKey}` : '';
+    const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?width=512&height=384&model=flux&seed=${Date.now()}${keyParam}`;
 
     // preload image ก่อนแสดง
     const img = new Image();
