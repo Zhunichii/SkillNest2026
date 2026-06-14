@@ -2167,20 +2167,24 @@ async function generateImage(prompt, caption) {
     h.scrollTop = h.scrollHeight;
 
     try {
-        const encodedPrompt = encodeURIComponent(prompt + ', educational, clean, colorful, digital art');
-        const polKey   = window._pollinationsKey || '';
-        const keyParam = polKey ? `&key=${polKey}` : '';
-        const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?width=512&height=384&model=flux&seed=${Date.now()}${keyParam}`;
+        // ส่งผ่าน backend proxy แทนเพื่อหลีกเลี่ยง CORS และ 400 error
+        const cleanPrompt = (prompt + ', educational, clean, colorful, digital art').slice(0, 300);
+        const res = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: cleanPrompt })
+        });
 
-        // fetch เป็น blob แทนการใช้ URL โดยตรง (หลีกเลี่ยง OpaqueResponseBlocking)
-        const res = await fetch(imageUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
 
         const blob    = await res.blob();
         const blobUrl = URL.createObjectURL(blob);
 
         card.innerHTML = `
-            <img src="${blobUrl}" alt="${caption}" style="border-radius:8px 8px 0 0;">
+            <img src="${blobUrl}" alt="${caption}" style="border-radius:8px 8px 0 0;width:100%;">
             <div class="img-caption">🎨 ${caption}</div>`;
         h.scrollTop = h.scrollHeight;
 
