@@ -674,7 +674,7 @@
 
                         <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
                             <button class="btn btn-primary" id="btnCloneVoice" onclick="cloneVoice()" style="display:none;">
-                                ✨ Clone เสียงด้วย ElevenLabs
+                                ✨ บันทึกเสียงสำหรับ Avatar
                             </button>
                             <button class="btn btn-ghost" id="btnClearVoice" onclick="clearVoice()" style="display:none;">
                                 🗑 ล้างเสียง
@@ -759,9 +759,9 @@ async function loadProfile(user) {
         if (data.avatar_config) {
             loadAvatarConfigToUI(data.avatar_config);
             // แสดง badge ถ้ามี ElevenLabs voice
-            if (data.avatar_config.elevenLabsVoiceId) {
+            if (data.avatar_config.useXTTS && data.avatar_config.speakerAudioBase64) {
                 const badge = document.getElementById('voiceStatusBadge');
-                if (badge) badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียง ElevenLabs</span>';
+                if (badge) badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียง XTTS-v2</span>';
             }
         }
     }
@@ -1025,65 +1025,79 @@ window.cloneVoice = async function() {
 
     const btn = document.getElementById('btnCloneVoice');
     btn.disabled    = true;
-    btn.textContent = '⏳ กำลัง Clone เสียง...';
-    setVoiceStatus('กำลังส่งข้อมูลไป ElevenLabs...', '');
+    btn.textContent = '⏳ กำลังบันทึกเสียง...';
+    setVoiceStatus('กำลังแปลงและบันทึกเสียง...', '');
 
     try {
-        const voiceName = `SkillNest_${currentUser.id.slice(0,8)}_${Date.now()}`;
-        const formData  = new FormData();
-        formData.append('name', voiceName);
-        formData.append('description', `Voice clone for SkillNest teacher ${currentUser.id}`);
-        formData.append('files', recordedBlob, 'voice_sample.webm');
-
-        const res = await fetch('/api/elevenlabs-clone', {
-            method: 'POST', body: formData
+        // แปลง audio blob เป็น base64
+        const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload  = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(recordedBlob);
         });
-        const data = await res.json();
 
-        if (!res.ok) throw new Error(data.error || data.detail || 'Clone ไม่สำเร็จ');
+        const audioMime = recordedBlob.type || 'audio/webm';
 
-        const voiceId = data.voice_id;
+        // บันทึกลง avatar_config (เก็บ base64 แทน voice_id)
+        const { data: userData } = await supabase.from('users')
+            .select('avatar_config').eq('id', currentUser.id).single();
+        const currentCfg = userData?.avatar_config || {};
 
-        // บันทึก voice_id ลง avatar_config
-        const currentCfg = (await supabase.from('users').select('avatar_config').eq('id', currentUser.id).single()).data?.avatar_config || {};
-        await supabase.from('users').update({
-            avatar_config: { ...currentCfg, elevenLabsVoiceId: voiceId, useElevenLabs: true }
+        const { error } = await supabase.from('users').update({
+            avatar_config: {
+                ...currentCfg,
+                speakerAudioBase64: base64,
+                speakerAudioMime:   audioMime,
+                useXTTS:            true,
+                voiceProvider:      'xtts_v2',
+            }
         }).eq('id', currentUser.id);
 
-        // ทดสอบเสียง
-        setVoiceStatus('✅ Clone สำเร็จ! กำลังทดสอบเสียง...', '');
-        await previewClonedVoice(voiceId, 'สวัสดีครับ! นี่คือเสียงของ Avatar AI ครับ');
+        if (error) throw new Error(error.message);
 
-        setVoiceStatus('', '');
-        setVoiceMsg('✅ Clone เสียงสำเร็จแล้ว! Avatar จะใช้เสียงของคุณในห้องเรียน', 'success');
+        // ทดสอบเสียง
+        setVoiceStatus('✅ บันทึกเสียงแล้ว! กำลังทดสอบ XTTS-v2...', '');
+        await previewClonedVoice(base64, audioMime, 'สวัสดีครับ! นี่คือเสียงของ Avatar AI ครับ');
+
+        setVoiceMsg('✅ บันทึกเสียงสำเร็จ! Avatar จะพูดด้วยเสียงของคุณในห้องเรียน', 'success');
 
         const badge = document.getElementById('voiceStatusBadge');
-        if (badge) {
-            badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียง ElevenLabs</span>';
-        }
+        if (badge) badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียง XTTS-v2</span>';
+
+        // อัปเดต avatar_config ใน memory
+        avatarConfig.speakerAudioBase64 = base64;
+        avatarConfig.speakerAudioMime   = audioMime;
+        avatarConfig.useXTTS            = true;
 
     } catch(e) {
         setVoiceMsg('❌ ' + e.message, 'error');
     }
 
     btn.disabled    = false;
-    btn.textContent = '✨ Clone เสียงด้วย ElevenLabs';
+    btn.textContent = '✨ บันทึกเสียงสำหรับ Avatar';
 };
 
-async function previewClonedVoice(voiceId, text) {
+async function previewClonedVoice(speakerAudioBase64, speakerAudioMime, text) {
     try {
+        setVoiceStatus('🔊 กำลังสร้างเสียงทดสอบ (อาจใช้เวลา 20-30 วินาที)...', '');
         const res = await fetch('/api/elevenlabs-tts', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ voiceId, text })
+            body: JSON.stringify({ text, speakerAudioBase64, speakerAudioMime })
         });
-        if (!res.ok) return;
+        if (res.status === 503) {
+            setVoiceStatus('⏳ Model กำลัง warm up... รอสักครู่แล้วลองกด Clone อีกครั้ง', '');
+            return;
+        }
+        if (!res.ok) { setVoiceStatus('', ''); return; }
         const blob  = await res.blob();
         const url   = URL.createObjectURL(blob);
         const audio = document.getElementById('clonedAudioPreview');
         audio.src   = url;
         document.getElementById('voiceCloneResult').style.display = 'block';
         audio.play().catch(() => {});
-    } catch(e) { console.warn('previewClonedVoice:', e); }
+        setVoiceStatus('', '');
+    } catch(e) { console.warn('previewClonedVoice:', e); setVoiceStatus('', ''); }
 }
 
 // ── Clear voice ──

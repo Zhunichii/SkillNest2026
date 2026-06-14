@@ -1903,9 +1903,9 @@ function avatarSpeak(text, addToHistory = true) {
     if (bubble) { bubble.classList.remove('typing'); bubble.textContent = text; }
     if (addToHistory) addAvatarMsg('ai', text);
 
-    // ใช้ ElevenLabs ถ้ามี voice_id
-    if (window._elevenLabsVoiceId) {
-        avatarSpeakElevenLabs(text);
+    // ใช้ XTTS-v2 ถ้ามี speaker audio
+    if (window._speakerAudioBase64) {
+        avatarSpeakXTTS(text);
         return;
     }
 
@@ -1927,30 +1927,43 @@ function avatarSpeak(text, addToHistory = true) {
     avatarSynth.speak(utter);
 }
 
-// ── ElevenLabs TTS ──
-let _elevenLabsAudio = null;
-async function avatarSpeakElevenLabs(text) {
+// ── XTTS-v2 TTS via Hugging Face ──
+let _xttsAudio = null;
+async function avatarSpeakXTTS(text) {
     try {
         avatarSpeaking = true; startTalking();
         const res = await fetch('/api/elevenlabs-tts', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ voiceId: window._elevenLabsVoiceId, text })
+            body: JSON.stringify({
+                text,
+                speakerAudioBase64: window._speakerAudioBase64,
+                speakerAudioMime:   window._speakerAudioMime || 'audio/webm',
+            })
         });
-        if (!res.ok) throw new Error('ElevenLabs TTS failed');
+
+        if (res.status === 503) {
+            // Model warm up — fallback ไป Web Speech
+            console.warn('XTTS model loading, fallback to Web Speech');
+            throw new Error('loading');
+        }
+        if (!res.ok) throw new Error('XTTS TTS failed');
+
         const blob = await res.blob();
         const url  = URL.createObjectURL(blob);
-        if (_elevenLabsAudio) { _elevenLabsAudio.pause(); _elevenLabsAudio = null; }
-        _elevenLabsAudio = new Audio(url);
-        _elevenLabsAudio.onended  = () => { avatarSpeaking = false; stopTalking(); };
-        _elevenLabsAudio.onerror  = () => { avatarSpeaking = false; stopTalking(); };
-        await _elevenLabsAudio.play();
+        if (_xttsAudio) { _xttsAudio.pause(); _xttsAudio = null; }
+        _xttsAudio = new Audio(url);
+        _xttsAudio.onended  = () => { avatarSpeaking = false; stopTalking(); };
+        _xttsAudio.onerror  = () => { avatarSpeaking = false; stopTalking(); };
+        await _xttsAudio.play();
+
     } catch(e) {
-        console.warn('ElevenLabs TTS error, fallback to Web Speech:', e);
-        window._elevenLabsVoiceId = null; // fallback
+        console.warn('XTTS error, fallback to Web Speech:', e.message);
+        window._speakerAudioBase64 = null; // disable XTTS ชั่วคราว
         avatarSpeaking = false; stopTalking();
+        // Web Speech fallback
         if (!avatarSynth) return;
         const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'th-TH';
+        utter.lang  = 'th-TH';
         utter.onstart = () => { avatarSpeaking = true; startTalking(); };
         utter.onend   = () => { avatarSpeaking = false; stopTalking(); };
         avatarSynth.speak(utter);
@@ -2120,7 +2133,7 @@ window.applyVoiceSettings = function() {
 
 function avatarStopSpeaking() {
     if (avatarSynth) avatarSynth.cancel();
-    if (_elevenLabsAudio) { _elevenLabsAudio.pause(); _elevenLabsAudio = null; }
+    if (_xttsAudio) { _xttsAudio.pause(); _xttsAudio = null; }
     avatarSpeaking = false; stopTalking();
 }
 
@@ -2363,11 +2376,12 @@ async function loadAvatarConfig(creatorId) {
         window._avatarPersonalityPrompt = P_PROMPTS[cfg.personality] || '';
         if (cfg.greeting) window._avatarCustomGreeting = cfg.greeting;
 
-        // ElevenLabs voice
-        if (cfg.useElevenLabs && cfg.elevenLabsVoiceId) {
-            window._elevenLabsVoiceId = cfg.elevenLabsVoiceId;
+        // XTTS-v2 voice
+        if (cfg.useXTTS && cfg.speakerAudioBase64) {
+            window._speakerAudioBase64 = cfg.speakerAudioBase64;
+            window._speakerAudioMime   = cfg.speakerAudioMime || 'audio/webm';
             const status = document.getElementById('avatarStatusText');
-            if (status) status.title = '🎙️ ใช้เสียง ElevenLabs';
+            if (status) status.title = '🎙️ ใช้เสียง XTTS-v2';
         }
 
     } catch(e) { console.warn('loadAvatarConfig:', e); }
