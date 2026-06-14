@@ -1163,6 +1163,31 @@
             padding:6px 10px; border-radius:2px 10px 10px 10px;
             font-size:0.78rem; max-width:90%; line-height:1.5;
         }
+        .avatar-msg-image {
+            align-self:flex-start; max-width:92%;
+            border-radius:2px 12px 12px 12px;
+            overflow:hidden; border:1px solid rgba(139,92,246,0.25);
+        }
+        .avatar-msg-image img {
+            width:100%; display:block; border-radius:2px 12px 8px 8px;
+        }
+        .avatar-msg-image .img-caption {
+            padding:6px 10px; font-size:0.75rem; color:#a0a0ba;
+            background:rgba(139,92,246,0.08); line-height:1.4;
+        }
+        .avatar-msg-image .img-loading {
+            padding:16px; text-align:center; color:#a0a0ba;
+            font-size:0.78rem; background:rgba(139,92,246,0.06);
+            display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .img-gen-btn {
+            display:inline-flex; align-items:center; gap:5px;
+            background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3);
+            color:#c4b5fd; font-size:0.72rem; padding:3px 10px;
+            border-radius:99px; cursor:pointer; margin-top:5px;
+            transition:0.2s;
+        }
+        .img-gen-btn:hover { background:rgba(139,92,246,0.3); }
 
         /* quick prompts */
         .avatar-quick-prompts {
@@ -2081,6 +2106,43 @@ window.avatarAskQuick = async function(q) {
     await avatarProcessQuestion(q);
 };
 
+// ── ตรวจว่านักเรียนขอภาพไหม ──
+function isImageRequest(text) {
+    const keywords = ['วาด','ภาพ','รูป','แสดง','ให้ดู','visualize','draw','image','picture','show me','illustrate','diagram'];
+    const t = text.toLowerCase();
+    return keywords.some(k => t.includes(k));
+}
+
+// ── Generate ภาพด้วย Pollinations AI ──
+async function generateImage(prompt, caption) {
+    const h = document.getElementById('avatarChatHistory');
+    if (!h) return;
+
+    // สร้าง loading card
+    const card = document.createElement('div');
+    card.className = 'avatar-msg-image';
+    card.innerHTML = `<div class="img-loading"><div class="spinner-sm"></div>กำลังวาดภาพ...</div>`;
+    h.appendChild(card);
+    h.scrollTop = h.scrollHeight;
+
+    // encode prompt ให้ปลอดภัย
+    const encodedPrompt = encodeURIComponent(prompt + ', educational, clean, colorful, digital art');
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=384&nologo=true&seed=${Date.now()}`;
+
+    // preload image ก่อนแสดง
+    const img = new Image();
+    img.onload = () => {
+        card.innerHTML = `
+            <img src="${imageUrl}" alt="${caption}" loading="lazy">
+            <div class="img-caption">🎨 ${caption}</div>`;
+        h.scrollTop = h.scrollHeight;
+    };
+    img.onerror = () => {
+        card.innerHTML = `<div class="img-loading" style="color:#f87171;">❌ วาดภาพไม่สำเร็จ ลองใหม่อีกครั้ง</div>`;
+    };
+    img.src = imageUrl;
+}
+
 async function avatarProcessQuestion(question) {
     addAvatarMsg('user', question);
     avatarChatHistory.push({ role: 'user', content: question });
@@ -2094,27 +2156,84 @@ async function avatarProcessQuestion(question) {
     if (status)  status.textContent = 'กำลังคิด...';
 
     try {
-        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนปัจจุบัน';
-        const courseTitle = currentCourse?.title || 'คอร์สนี้';
+        const lessonTitle   = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนปัจจุบัน';
+        const courseTitle   = currentCourse?.title || 'คอร์สนี้';
+        const _pPrompt      = window._avatarPersonalityPrompt || 'ตอบแบบเป็นกันเอง';
+        const wantsImage    = isImageRequest(question);
+
         let sys = `คุณคืออาจารย์ AI สอนวิชา "${courseTitle}" บทเรียน "${lessonTitle}"
-ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง ไม่เกิน 3-4 ประโยค ไม่ใช้ markdown พูดเหมือนอาจารย์จริงๆ`;
+ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง ไม่เกิน 3-4 ประโยค ไม่ใช้ markdown
+บุคลิก: ${_pPrompt}`;
         if (lessonPdfContext) sys += `
 
 เนื้อหา:
 ${lessonPdfContext.slice(0, 2000)}`;
 
+        // ถ้าขอภาพ ให้ Groq สร้าง English image prompt ด้วย
+        if (wantsImage) {
+            sys += `
+
+นักเรียนต้องการภาพประกอบ ให้ตอบ JSON เท่านั้น รูปแบบ:
+{"text":"คำอธิบายภาษาไทย 1-2 ประโยค","imagePrompt":"English description for image generation, educational style"}
+ไม่มีข้อความอื่นนอกจาก JSON`;
+        }
+
         const res  = await fetch('/api/groq-analyze', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: question, systemPrompt: sys, messages: avatarChatHistory.slice(-8) })
+            body: JSON.stringify({ prompt: question, systemPrompt: sys, messages: avatarChatHistory.slice(-6) })
         });
         const data = await res.json();
-        const ans  = data.text || 'ขอโทษครับ ตอบไม่ได้ในขณะนี้';
-        avatarChatHistory.push({ role: 'assistant', content: ans });
-        if (avatarChatHistory.length > 20) avatarChatHistory = avatarChatHistory.slice(-20);
+        let   ans  = data.text?.trim() || '';
 
         bubble.classList.remove('typing');
-        avatarSpeak(ans, false);
-        bubble.textContent = ans;
+
+        if (wantsImage) {
+            // parse JSON จาก Groq
+            try {
+                const clean  = ans.replace(/```json|```/g, '').trim();
+                const parsed = JSON.parse(clean);
+                const textAns    = parsed.text || 'นี่คือภาพประกอบครับ';
+                const imgPrompt  = parsed.imagePrompt || question;
+
+                avatarChatHistory.push({ role: 'assistant', content: textAns });
+                avatarSpeak(textAns, false);
+                bubble.textContent = textAns;
+
+                // generate ภาพ
+                if (status) status.textContent = 'กำลังวาดภาพ...';
+                await generateImage(imgPrompt, textAns);
+                if (status) status.textContent = 'พร้อมสอน';
+            } catch(e) {
+                // fallback ถ้า JSON parse ไม่ได้
+                avatarSpeak(ans, false);
+                bubble.textContent = ans;
+                // ลอง generate ภาพด้วย question โดยตรง
+                await generateImage(question + ' educational diagram', question);
+            }
+        } else {
+            // ตอบปกติ + เสนอปุ่มวาดภาพถ้าเกี่ยวกับ concept ที่มองเห็นได้
+            avatarChatHistory.push({ role: 'assistant', content: ans });
+            if (avatarChatHistory.length > 20) avatarChatHistory = avatarChatHistory.slice(-20);
+            avatarSpeak(ans, false);
+            bubble.textContent = ans;
+
+            // เพิ่มปุ่ม "วาดภาพประกอบ" ใน history
+            const h = document.getElementById('avatarChatHistory');
+            const lastMsg = h?.lastElementChild;
+            if (lastMsg && lastMsg.className === 'avatar-msg-ai') {
+                const btn = document.createElement('button');
+                btn.className = 'img-gen-btn';
+                btn.innerHTML = '🎨 วาดภาพประกอบ';
+                btn.onclick = async () => {
+                    btn.remove();
+                    if (status) status.textContent = 'กำลังวาดภาพ...';
+                    await generateImage(`${ans} educational illustration`, ans.slice(0,60));
+                    if (status) status.textContent = 'พร้อมสอน';
+                };
+                lastMsg.appendChild(btn);
+            }
+        }
+
     } catch(e) {
         bubble.classList.remove('typing');
         bubble.textContent = 'ขอโทษครับ เกิดข้อผิดพลาด';
@@ -2123,14 +2242,15 @@ ${lessonPdfContext.slice(0, 2000)}`;
     if (sendBtn) sendBtn.disabled = false;
 }
 
-function addAvatarMsg(role, text) {
+function addAvatarMsg(role, text, isHTML = false) {
     const h = document.getElementById('avatarChatHistory');
     if (!h) return;
     const d = document.createElement('div');
     d.className = role === 'user' ? 'avatar-msg-user' : 'avatar-msg-ai';
-    d.textContent = text;
+    if (isHTML) d.innerHTML = text; else d.textContent = text;
     h.appendChild(d);
     h.scrollTop = h.scrollHeight;
+    return d;
 }
 
 // ── Voice ──
