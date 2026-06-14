@@ -1902,28 +1902,59 @@ function avatarSpeak(text, addToHistory = true) {
     const bubble = document.getElementById('avatarSpeech');
     if (bubble) { bubble.classList.remove('typing'); bubble.textContent = text; }
     if (addToHistory) addAvatarMsg('ai', text);
-    if (!avatarSynth) return;
 
+    // ใช้ ElevenLabs ถ้ามี voice_id
+    if (window._elevenLabsVoiceId) {
+        avatarSpeakElevenLabs(text);
+        return;
+    }
+
+    // fallback: Web Speech API
+    if (!avatarSynth) return;
     const utter  = new SpeechSynthesisUtterance(text);
     const saved  = getAvatarVoiceSettings();
     utter.lang   = 'th-TH';
     utter.rate   = saved.rate;
     utter.pitch  = saved.pitch;
     utter.volume = saved.volume;
-
-    // ใช้ voice ที่ user เลือก หรือ auto-select
     const voices     = avatarSynth.getVoices();
-    const savedVoice = saved.voiceName
-        ? voices.find(v => v.name === saved.voiceName)
-        : null;
-    const autoVoice  = voices.find(v => v.lang.startsWith('th'))
-                    || voices.find(v => v.lang.startsWith('en-US'));
+    const savedVoice = saved.voiceName ? voices.find(v => v.name === saved.voiceName) : null;
+    const autoVoice  = voices.find(v => v.lang.startsWith('th')) || voices.find(v => v.lang.startsWith('en-US'));
     utter.voice = savedVoice || autoVoice || null;
-
     utter.onstart = () => { avatarSpeaking = true; startTalking(); };
     utter.onend   = () => { avatarSpeaking = false; stopTalking(); };
     utter.onerror = () => { avatarSpeaking = false; stopTalking(); };
     avatarSynth.speak(utter);
+}
+
+// ── ElevenLabs TTS ──
+let _elevenLabsAudio = null;
+async function avatarSpeakElevenLabs(text) {
+    try {
+        avatarSpeaking = true; startTalking();
+        const res = await fetch('/api/elevenlabs-tts', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ voiceId: window._elevenLabsVoiceId, text })
+        });
+        if (!res.ok) throw new Error('ElevenLabs TTS failed');
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        if (_elevenLabsAudio) { _elevenLabsAudio.pause(); _elevenLabsAudio = null; }
+        _elevenLabsAudio = new Audio(url);
+        _elevenLabsAudio.onended  = () => { avatarSpeaking = false; stopTalking(); };
+        _elevenLabsAudio.onerror  = () => { avatarSpeaking = false; stopTalking(); };
+        await _elevenLabsAudio.play();
+    } catch(e) {
+        console.warn('ElevenLabs TTS error, fallback to Web Speech:', e);
+        window._elevenLabsVoiceId = null; // fallback
+        avatarSpeaking = false; stopTalking();
+        if (!avatarSynth) return;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'th-TH';
+        utter.onstart = () => { avatarSpeaking = true; startTalking(); };
+        utter.onend   = () => { avatarSpeaking = false; stopTalking(); };
+        avatarSynth.speak(utter);
+    }
 }
 
 // เก็บ/โหลด voice settings
@@ -2089,6 +2120,7 @@ window.applyVoiceSettings = function() {
 
 function avatarStopSpeaking() {
     if (avatarSynth) avatarSynth.cancel();
+    if (_elevenLabsAudio) { _elevenLabsAudio.pause(); _elevenLabsAudio = null; }
     avatarSpeaking = false; stopTalking();
 }
 
@@ -2330,6 +2362,13 @@ async function loadAvatarConfig(creatorId) {
         // Personality & greeting
         window._avatarPersonalityPrompt = P_PROMPTS[cfg.personality] || '';
         if (cfg.greeting) window._avatarCustomGreeting = cfg.greeting;
+
+        // ElevenLabs voice
+        if (cfg.useElevenLabs && cfg.elevenLabsVoiceId) {
+            window._elevenLabsVoiceId = cfg.elevenLabsVoiceId;
+            const status = document.getElementById('avatarStatusText');
+            if (status) status.title = '🎙️ ใช้เสียง ElevenLabs';
+        }
 
     } catch(e) { console.warn('loadAvatarConfig:', e); }
 }

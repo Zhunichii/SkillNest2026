@@ -226,6 +226,57 @@
         .p-option.selected { border-color: var(--primary); background: rgba(139,92,246,0.15); color: var(--text); font-weight: 600; }
         .p-option .p-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
         .teacher-only-tab { display: none; }
+
+        /* ── Voice Recorder ── */
+        .sample-sentence {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;
+            font-size: 0.85rem; line-height: 1.6; color: var(--text);
+            cursor: pointer; transition: 0.2s; position: relative;
+        }
+        .sample-sentence:hover { border-color: var(--primary); background: rgba(139,92,246,0.06); }
+        .sample-sentence.speaking { border-color: #10b981; background: rgba(16,185,129,0.08); }
+        .sample-num { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 3px; font-weight: 600; }
+
+        .voice-recorder-wrap {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px; margin-top: 16px;
+        }
+        .recorder-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+        .btn-record {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 10px; border: none;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+            background: linear-gradient(135deg, #ef4444, #dc2626); color: white;
+        }
+        .btn-record:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-record.recording { background: linear-gradient(135deg, #10b981, #059669); animation: pulse-rec 1.5s infinite; }
+        @keyframes pulse-rec { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); } }
+
+        .voice-status {
+            font-size: 0.82rem; color: var(--text-dim);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .voice-level-bar {
+            height: 4px; background: rgba(255,255,255,0.08);
+            border-radius: 99px; overflow: hidden; margin: 8px 0;
+        }
+        .voice-level-fill {
+            height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 99px; width: 0; transition: width 0.1s;
+        }
+        .audio-preview {
+            width: 100%; margin-top: 10px;
+            border-radius: 8px; background: rgba(255,255,255,0.04);
+        }
+        audio::-webkit-media-controls-panel { background: rgba(30,27,75,0.8); }
+        .voice-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.75rem; padding: 3px 10px; border-radius: 99px;
+            background: rgba(16,185,129,0.15); color: #10b981;
+            border: 1px solid rgba(16,185,129,0.3); font-weight: 600;
+        }
+        .voice-badge.pending { background: rgba(245,158,11,0.15); color: #f59e0b; border-color: rgba(245,158,11,0.3); }
         @media(max-width:768px) {
             .page { grid-template-columns:1fr; }
             .sidebar { display:none; }
@@ -563,6 +614,75 @@
                     </div>
                 </div>
 
+                <!-- Voice Cloning Section -->
+                <div class="section-card" style="margin-top:0;">
+                    <div class="section-title">🎙️ เสียงของ Avatar
+                        <span id="voiceStatusBadge" style="margin-left:auto;font-size:0.72rem;font-weight:400;"></span>
+                    </div>
+                    <div class="section-desc">อัดหรืออัปโหลดเสียงของคุณ ElevenLabs จะ clone เสียงให้ Avatar พูดเหมือนคุณ</div>
+
+                    <!-- Sample sentences -->
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                            📋 ประโยคตัวอย่าง <span style="color:rgba(255,255,255,0.3);">— อ่านให้ครบอย่างน้อย 3 ประโยค (~30 วินาที)</span>
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 1</div>
+                            สวัสดีนักเรียนทุกคนครับ วันนี้เราจะมาเรียนเรื่องที่น่าสนใจมาก ตั้งใจฟังให้ดีนะครับ
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 2</div>
+                            ใครมีคำถามอะไรยกมือได้เลยนะครับ ไม่ต้องเกรงใจ เราอยู่ที่นี่เพื่อช่วยกันครับ
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 3</div>
+                            แนวคิดนี้สำคัญมากครับ ให้จำไว้ให้ดี ตัวอย่างเช่น ถ้าเรามีข้อมูล 10 ชุด จะคำนวณอย่างไร
+                        </div>
+                        <div class="sample-sentence" onclick="speakSample(this)">
+                            <div class="sample-num">ประโยคที่ 4</div>
+                            เยี่ยมมากครับ ตอบถูกต้องเลย นักเรียนเข้าใจดีมาก บทเรียนวันนี้จบแล้วนะครับ อย่าลืมทบทวนด้วย
+                        </div>
+                        <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;">💡 กดที่ประโยคเพื่อดูข้อความ แล้วอ่านออกเสียงขณะอัด</div>
+                    </div>
+
+                    <!-- Recorder -->
+                    <div class="voice-recorder-wrap">
+                        <div class="recorder-controls">
+                            <button class="btn-record" id="btnRecord" onclick="toggleRecording()">
+                                🎙️ เริ่มอัดเสียง
+                            </button>
+                            <label class="btn btn-ghost" style="cursor:pointer;margin:0;">
+                                📁 อัปโหลดไฟล์เสียง
+                                <input type="file" id="voiceFileInput" accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm"
+                                    style="display:none" onchange="handleVoiceFileUpload(this)">
+                            </label>
+                            <span class="voice-status" id="voiceStatus">ยังไม่มีเสียง</span>
+                        </div>
+
+                        <div class="voice-level-bar" id="voiceLevelBar" style="display:none;">
+                            <div class="voice-level-fill" id="voiceLevelFill"></div>
+                        </div>
+
+                        <audio id="audioPreview" class="audio-preview" controls style="display:none;"></audio>
+
+                        <div id="voiceCloneResult" style="display:none;margin-top:12px;">
+                            <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:8px;">ทดสอบเสียง Avatar ที่ clone แล้ว:</div>
+                            <audio id="clonedAudioPreview" class="audio-preview" controls></audio>
+                        </div>
+
+                        <div id="voiceMsg" class="msg" style="margin-top:10px;"></div>
+
+                        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+                            <button class="btn btn-primary" id="btnCloneVoice" onclick="cloneVoice()" style="display:none;">
+                                ✨ Clone เสียงด้วย ElevenLabs
+                            </button>
+                            <button class="btn btn-ghost" id="btnClearVoice" onclick="clearVoice()" style="display:none;">
+                                🗑 ล้างเสียง
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="avatarMsg" class="msg"></div>
                 <button class="btn btn-primary" onclick="saveAvatarConfig()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -638,6 +758,11 @@ async function loadProfile(user) {
         document.querySelectorAll('.teacher-only-tab').forEach(el => el.style.display = 'flex');
         if (data.avatar_config) {
             loadAvatarConfigToUI(data.avatar_config);
+            // แสดง badge ถ้ามี ElevenLabs voice
+            if (data.avatar_config.elevenLabsVoiceId) {
+                const badge = document.getElementById('voiceStatusBadge');
+                if (badge) badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียง ElevenLabs</span>';
+            }
         }
     }
 
@@ -778,6 +903,223 @@ async function init() {
     await loadProfile(user);
 }
 
+// ═══════════════════════════════════════
+//  VOICE RECORDER & ELEVEN LABS CLONE
+// ═══════════════════════════════════════
+let mediaRecorder   = null;
+let audioChunks     = [];
+let recordedBlob    = null;
+let audioContext    = null;
+let analyserNode    = null;
+let levelAnimId     = null;
+let isRecording     = false;
+
+// กด highlight ประโยคที่เลือก
+window.speakSample = function(el) {
+    document.querySelectorAll('.sample-sentence').forEach(e => e.classList.remove('speaking'));
+    el.classList.add('speaking');
+};
+
+// ── Toggle recording ──
+window.toggleRecording = async function() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        await startRecording();
+    }
+};
+
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder  = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        audioChunks    = [];
+
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+            recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const url    = URL.createObjectURL(recordedBlob);
+            const preview = document.getElementById('audioPreview');
+            preview.src   = url;
+            preview.style.display = 'block';
+            document.getElementById('btnCloneVoice').style.display = 'inline-flex';
+            document.getElementById('btnClearVoice').style.display  = 'inline-flex';
+            setVoiceStatus('✅ อัดเสียงเสร็จแล้ว — กด Clone เพื่อสร้างเสียง Avatar', 'success');
+            stopLevelMeter();
+        };
+
+        mediaRecorder.start(200);
+        isRecording = true;
+
+        const btn = document.getElementById('btnRecord');
+        btn.textContent   = '⏹ หยุดอัดเสียง';
+        btn.classList.add('recording');
+        setVoiceStatus('🔴 กำลังอัดเสียง... พูดตามประโยคตัวอย่างด้านบน', '');
+
+        // level meter
+        startLevelMeter(stream);
+
+        document.getElementById('voiceLevelBar').style.display = 'block';
+
+    } catch(e) {
+        setVoiceStatus('❌ ไม่สามารถเข้าถึงไมค์ได้: ' + e.message, 'error');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    }
+    isRecording = false;
+    const btn = document.getElementById('btnRecord');
+    btn.textContent = '🎙️ เริ่มอัดเสียง';
+    btn.classList.remove('recording');
+    document.getElementById('voiceLevelBar').style.display = 'none';
+}
+
+function startLevelMeter(stream) {
+    audioContext = new AudioContext();
+    analyserNode = audioContext.createAnalyser();
+    analyserNode.fftSize = 256;
+    const src = audioContext.createMediaStreamSource(stream);
+    src.connect(analyserNode);
+    const buf = new Uint8Array(analyserNode.frequencyBinCount);
+
+    function animate() {
+        analyserNode.getByteFrequencyData(buf);
+        const avg = buf.reduce((a, b) => a + b, 0) / buf.length;
+        const pct = Math.min(100, avg * 2);
+        const fill = document.getElementById('voiceLevelFill');
+        if (fill) fill.style.width = pct + '%';
+        levelAnimId = requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+function stopLevelMeter() {
+    if (levelAnimId) cancelAnimationFrame(levelAnimId);
+    if (audioContext) audioContext.close();
+    const fill = document.getElementById('voiceLevelFill');
+    if (fill) fill.style.width = '0';
+}
+
+// ── Upload file ──
+window.handleVoiceFileUpload = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) { setVoiceStatus('❌ ไฟล์ต้องไม่เกิน 20MB', 'error'); return; }
+    recordedBlob = file;
+    const url    = URL.createObjectURL(file);
+    const preview = document.getElementById('audioPreview');
+    preview.src   = url;
+    preview.style.display = 'block';
+    document.getElementById('btnCloneVoice').style.display = 'inline-flex';
+    document.getElementById('btnClearVoice').style.display  = 'inline-flex';
+    setVoiceStatus(`✅ โหลดไฟล์ "${file.name}" แล้ว — กด Clone เพื่อสร้างเสียง Avatar`, 'success');
+};
+
+// ── Clone voice ด้วย ElevenLabs ──
+window.cloneVoice = async function() {
+    if (!recordedBlob) { setVoiceMsg('กรุณาอัดหรืออัปโหลดเสียงก่อน', 'error'); return; }
+
+    const btn = document.getElementById('btnCloneVoice');
+    btn.disabled    = true;
+    btn.textContent = '⏳ กำลัง Clone เสียง...';
+    setVoiceStatus('กำลังส่งข้อมูลไป ElevenLabs...', '');
+
+    try {
+        const voiceName = `SkillNest_${currentUser.id.slice(0,8)}_${Date.now()}`;
+        const formData  = new FormData();
+        formData.append('name', voiceName);
+        formData.append('description', `Voice clone for SkillNest teacher ${currentUser.id}`);
+        formData.append('files', recordedBlob, 'voice_sample.webm');
+
+        const res = await fetch('/api/elevenlabs-clone', {
+            method: 'POST', body: formData
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || data.detail || 'Clone ไม่สำเร็จ');
+
+        const voiceId = data.voice_id;
+
+        // บันทึก voice_id ลง avatar_config
+        const currentCfg = (await supabase.from('users').select('avatar_config').eq('id', currentUser.id).single()).data?.avatar_config || {};
+        await supabase.from('users').update({
+            avatar_config: { ...currentCfg, elevenLabsVoiceId: voiceId, useElevenLabs: true }
+        }).eq('id', currentUser.id);
+
+        // ทดสอบเสียง
+        setVoiceStatus('✅ Clone สำเร็จ! กำลังทดสอบเสียง...', '');
+        await previewClonedVoice(voiceId, 'สวัสดีครับ! นี่คือเสียงของ Avatar AI ครับ');
+
+        setVoiceStatus('', '');
+        setVoiceMsg('✅ Clone เสียงสำเร็จแล้ว! Avatar จะใช้เสียงของคุณในห้องเรียน', 'success');
+
+        const badge = document.getElementById('voiceStatusBadge');
+        if (badge) {
+            badge.innerHTML = '<span class="voice-badge">🎙️ ใช้เสียง ElevenLabs</span>';
+        }
+
+    } catch(e) {
+        setVoiceMsg('❌ ' + e.message, 'error');
+    }
+
+    btn.disabled    = false;
+    btn.textContent = '✨ Clone เสียงด้วย ElevenLabs';
+};
+
+async function previewClonedVoice(voiceId, text) {
+    try {
+        const res = await fetch('/api/elevenlabs-tts', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ voiceId, text })
+        });
+        if (!res.ok) return;
+        const blob  = await res.blob();
+        const url   = URL.createObjectURL(blob);
+        const audio = document.getElementById('clonedAudioPreview');
+        audio.src   = url;
+        document.getElementById('voiceCloneResult').style.display = 'block';
+        audio.play().catch(() => {});
+    } catch(e) { console.warn('previewClonedVoice:', e); }
+}
+
+// ── Clear voice ──
+window.clearVoice = async function() {
+    recordedBlob = null;
+    document.getElementById('audioPreview').style.display = 'none';
+    document.getElementById('voiceCloneResult').style.display = 'none';
+    document.getElementById('btnCloneVoice').style.display = 'none';
+    document.getElementById('btnClearVoice').style.display  = 'none';
+    setVoiceStatus('ล้างเสียงแล้ว', '');
+
+    // ลบ voiceId จาก config
+    const currentCfg = (await supabase.from('users').select('avatar_config').eq('id', currentUser.id).single()).data?.avatar_config || {};
+    delete currentCfg.elevenLabsVoiceId;
+    delete currentCfg.useElevenLabs;
+    await supabase.from('users').update({ avatar_config: currentCfg }).eq('id', currentUser.id);
+};
+
+function setVoiceStatus(text, type) {
+    const el = document.getElementById('voiceStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : 'var(--text-dim)';
+}
+
+function setVoiceMsg(text, type) {
+    const el = document.getElementById('voiceMsg');
+    if (!el) return;
+    el.textContent    = text;
+    el.className      = 'msg ' + type;
+    el.style.display  = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// โหลดสถานะ voice เมื่อเปิด tab avatar
+const _origLoadProfile = loadAvatarConfigToUI;
 // ═══════════════════════════════════════
 //  AVATAR CUSTOMIZER
 // ═══════════════════════════════════════
