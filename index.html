@@ -74,7 +74,7 @@
             0%,100% { transform: translateX(0) translateY(0) scale(1); }
             50%     { transform: translateX(40px) translateY(20px) scale(1.12); }
         }
-        body > *:not(.aurora) { position: relative; z-index: 1; }
+        body > *:not(.aurora):not(.scroll-progress):not(.cursor-glow) { position: relative; z-index: 1; }
 
         /* ── Load-in orchestration ── */
         @keyframes rise-in {
