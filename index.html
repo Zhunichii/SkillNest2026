@@ -3,24 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkillNest</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>SkillNest — สร้างและเรียนคอร์สออนไลน์ด้วย AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #020418;
-            --primary-blue: #3b82f6;
-            --text-main: #ffffff;
-            --text-dim: #a0a0ba;
-            --nav-bg: rgba(255, 255, 255, 0.03);
-            --footer-bg: rgba(10, 12, 33, 0.5);
+            --bg-color: #0A0E27;
+            --primary-blue: #6366F1;
+            --primary-2: #4338CA;
+            --accent-cyan: #22D3EE;
+            --success: #34D399;
+            --text-main: #E2E8F0;
+            --text-dim: #8B92AE;
+            --text-faint: #545B78;
+            --nav-bg: rgba(226,232,240,0.04);
+            --footer-bg: rgba(10,12,33,0.5);
+            --line: rgba(226,232,240,0.08);
+            --line-strong: rgba(226,232,240,0.16);
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
+
+        h1, h2, h3, .logo, .logo span {
+            font-family: var(--font-display);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        html { scroll-behavior: smooth; }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
+            background-image:
+                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
+                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
+            background-size: 100% 100%, 26px 26px;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -28,227 +49,339 @@
         /* --- Navigation --- */
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 5%; background: var(--nav-bg);
-            backdrop-filter: blur(15px); border-radius: 100px;
-            margin: 20px auto; width: 90%; max-width: 1100px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 24px; background: var(--nav-bg);
+            backdrop-filter: blur(15px); border-radius: 14px;
+            margin: 20px auto; width: 92%; max-width: 1100px;
+            border: 1px solid var(--line);
             position: sticky; top: 20px; z-index: 1000;
         }
 
-        .logo { font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-        .logo span { background: var(--primary-blue); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+        .logo { font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .logo span {
+            background: var(--primary-blue); padding: 4px 9px; border-radius: 7px;
+            font-size: 0.85rem; color: white; display: inline-flex;
+        }
 
-        .nav-links { display: flex; list-style: none; gap: 25px; }
-        .nav-links a { text-decoration: none; color: var(--text-dim); font-size: 0.9rem; transition: 0.3s; }
-        .nav-links a:hover { color: #fff; }
+        .nav-links { display: flex; list-style: none; gap: 28px; }
+        .nav-links a { text-decoration: none; color: var(--text-dim); font-size: 0.88rem; transition: 0.2s; }
+        .nav-links a:hover { color: var(--text-main); }
 
-        .nav-auth { display: flex; align-items: center; gap: 15px; }
+        .nav-auth { display: flex; align-items: center; gap: 12px; }
 
         .btn-login {
             background: var(--primary-blue); color: white; border: none;
-            padding: 8px 25px; border-radius: 8px; cursor: pointer; font-weight: 600;
-            transition: box-shadow 0.3s ease;
+            padding: 9px 22px; border-radius: 8px; cursor: pointer; font-weight: 500;
+            font-size: 0.88rem; transition: 0.2s; font-family: var(--font-body);
         }
-        .btn-login:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .btn-login:hover { background: var(--primary-2); }
 
         .user-profile { display: none; align-items: center; gap: 10px; position: relative; }
         .user-profile.show { display: flex; }
-        .user-name { color: var(--text-main); font-size: 0.9rem; font-weight: 600; }
+        .user-name { color: var(--text-main); font-size: 0.88rem; font-weight: 500; }
 
         .profile-dropdown-btn {
-            background: var(--primary-blue); color: white; border: none;
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
-            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+            background: var(--bg-color); color: white; border: 1px solid var(--line-strong);
+            padding: 7px 14px; border-radius: 8px; cursor: pointer; font-weight: 500;
+            font-size: 0.85rem;
+            display: flex; align-items: center; gap: 7px; transition: 0.2s;
         }
-        .profile-dropdown-btn:hover { opacity: 0.9; }
+        .profile-dropdown-btn:hover { border-color: var(--primary-blue); }
 
         .dropdown-menu {
             display: none; position: absolute; top: 50px; right: 0;
-            background: rgba(10, 12, 33, 0.95); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
-            min-width: 180px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: #11152E; backdrop-filter: blur(15px);
+            border: 1px solid var(--line); border-radius: 10px;
+            min-width: 190px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
         .dropdown-menu.show { display: block; }
-        .dropdown-item { padding: 12px 20px; color: var(--text-dim); text-decoration: none; display: block; transition: 0.3s; cursor: pointer; }
-        .dropdown-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .dropdown-item { padding: 12px 18px; color: var(--text-dim); text-decoration: none; display: block; transition: 0.15s; cursor: pointer; font-size: 0.86rem; }
+        .dropdown-item:hover { background: rgba(99,102,241,0.1); color: var(--text-main); }
 
         /* --- Global Layout --- */
         .container { padding: 0 5%; max-width: 1200px; margin: 0 auto; }
-        .highlight { color: var(--primary-blue); font-weight: 600; }
+        .highlight { color: var(--primary-blue); }
+
+        .section-eyebrow {
+            font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+            letter-spacing: 0.12em; color: var(--accent-cyan); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px; justify-content: center;
+        }
+        .feature-content .section-eyebrow { justify-content: flex-start; }
 
         /* --- Hero Section --- */
-        .hero { text-align: center; padding: 80px 0 60px; }
-        .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.2; margin-bottom: 25px; }
-        .hero p { color: var(--text-dim); max-width: 700px; margin: 0 auto 35px; font-size: 1rem; line-height: 1.6; }
-        
+        .hero { text-align: center; padding: 90px 0 70px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+            color: #A5B4FC; font-size: 0.8rem; padding: 6px 16px; border-radius: 99px;
+            margin-bottom: 28px; font-weight: 500;
+        }
+        .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .hero h1 { font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.25; margin-bottom: 24px; }
+        .hero p { color: var(--text-dim); max-width: 640px; margin: 0 auto 36px; font-size: 1.05rem; line-height: 1.7; }
+
+        .hero-cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 50px; }
+
         .btn-cta {
             background: var(--primary-blue); color: white; border: none;
-            padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 1rem;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); transition: 0.3s;
+            padding: 13px 28px; border-radius: 9px; cursor: pointer; font-size: 0.95rem;
+            font-weight: 500; transition: 0.2s; font-family: var(--font-body);
         }
-        .btn-cta:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-cta:hover { background: var(--primary-2); transform: translateY(-1px); }
 
-        .glow-divider {
-            width: 70%; height: 2px; margin: 60px auto;
-            background: linear-gradient(90deg, transparent, var(--primary-blue), transparent);
-            box-shadow: 0 0 20px 2px var(--primary-blue); opacity: 0.8; border-radius: 50%;
+        .btn-cta-ghost {
+            background: transparent; color: var(--text-main); border: 1px solid var(--line-strong);
+            padding: 13px 28px; border-radius: 9px; cursor: pointer; font-size: 0.95rem;
+            font-weight: 500; transition: 0.2s; font-family: var(--font-body);
+        }
+        .btn-cta-ghost:hover { border-color: var(--primary-blue); background: rgba(99,102,241,0.06); }
+
+        .trust-row {
+            display: flex; align-items: center; justify-content: center; gap: 36px;
+            flex-wrap: wrap; color: var(--text-faint); font-size: 0.82rem;
+        }
+        .trust-row span { display: flex; align-items: center; gap: 7px; }
+        .trust-row svg { width: 15px; height: 15px; color: var(--success); flex-shrink: 0; }
+
+        .section-divider {
+            width: 100%; height: 1px; margin: 70px 0;
+            background: var(--line);
         }
 
         /* --- Feature Sections --- */
-        .feature-section { display: flex; align-items: center; justify-content: space-between; gap: 50px; padding: 40px 0; }
-        .feature-content { flex: 1; }
-        .feature-content h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1.4; margin-bottom: 20px; }
-        .feature-visual { flex: 1.2; display: flex; justify-content: center; }
+        .feature-section { display: flex; align-items: center; justify-content: space-between; gap: 60px; padding: 30px 0; }
+        .feature-content { flex: 1; text-align: left; }
+        .feature-content h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.4; margin-bottom: 18px; }
+        .feature-content p { color: var(--text-dim); font-size: 0.95rem; line-height: 1.7; margin-bottom: 22px; }
+        .feature-visual { flex: 1.15; display: flex; justify-content: center; }
         .feature-section.reverse { flex-direction: row-reverse; }
 
+        .feature-list { display: flex; flex-direction: column; gap: 12px; }
+        .feature-list-item { display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; color: var(--text-dim); }
+        .feature-list-item svg { width: 16px; height: 16px; color: var(--success); flex-shrink: 0; margin-top: 2px; }
+
+        /* --- Mockup window: realistic dashboard/course preview --- */
         .mockup-window {
-            width: 100%; max-width: 550px; aspect-ratio: 16/10;
-            background: linear-gradient(135deg, #0f1126 0%, #050511 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
-            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+            width: 100%; max-width: 540px; aspect-ratio: 16/10.5;
+            background: #0D1024;
+            border: 1px solid var(--line-strong); border-radius: 12px;
+            box-shadow: 0 24px 60px -10px rgba(0,0,0,0.6);
             display: flex; flex-direction: column; overflow: hidden; position: relative;
         }
-        .window-header { height: 30px; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; padding-left: 10px; gap: 6px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); }
-        .window-body { flex: 1; padding: 20px; display: flex; gap: 15px; }
-        .sidebar { width: 20%; background: rgba(255,255,255,0.03); border-radius: 6px; }
-        .content-area { flex: 1; background: rgba(255,255,255,0.03); border-radius: 6px; position: relative; }
-        .chat-bar { position: absolute; bottom: 15px; left: 15px; right: 15px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 15px; }
+        .window-header {
+            height: 32px; background: rgba(226,232,240,0.04);
+            display: flex; align-items: center; padding: 0 12px; gap: 6px;
+            border-bottom: 1px solid var(--line); flex-shrink: 0;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(226,232,240,0.18); }
+        .window-url {
+            font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-faint);
+            margin-left: 8px;
+        }
+        .window-body { flex: 1; display: flex; min-height: 0; }
+
+        /* Dashboard mockup */
+        .mock-sidebar {
+            width: 26%; background: rgba(226,232,240,0.02);
+            border-right: 1px solid var(--line); padding: 14px 10px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .mock-nav-item {
+            display: flex; align-items: center; gap: 8px; padding: 7px 8px;
+            border-radius: 6px; font-size: 0.62rem; color: var(--text-faint);
+        }
+        .mock-nav-item.active { background: rgba(99,102,241,0.15); color: #A5B4FC; }
+        .mock-nav-item .ico { width: 10px; height: 10px; border-radius: 3px; background: currentColor; opacity: 0.5; flex-shrink: 0; }
+
+        .mock-main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+        .mock-stat-row { display: flex; gap: 8px; }
+        .mock-stat {
+            flex: 1; background: rgba(226,232,240,0.03); border: 1px solid var(--line);
+            border-radius: 6px; padding: 8px 10px;
+        }
+        .mock-stat-label { font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-faint); text-transform: uppercase; margin-bottom: 4px; }
+        .mock-stat-value { font-family: var(--font-display); font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
+
+        .mock-course-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; }
+        .mock-course-card { background: rgba(226,232,240,0.03); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+        .mock-course-thumb { height: 36%; background: linear-gradient(135deg, var(--primary-2), var(--primary-blue)); }
+        .mock-course-thumb.alt { background: linear-gradient(135deg, #0E7490, #164E63); }
+        .mock-course-body { padding: 7px 9px; }
+        .mock-line { height: 4px; background: rgba(226,232,240,0.12); border-radius: 2px; margin-bottom: 4px; }
+        .mock-line.short { width: 55%; }
+        .mock-line.dim { background: rgba(226,232,240,0.06); }
+
+        /* Course-content mockup with avatar */
+        .mock-pdf-toolbar {
+            height: 24px; background: rgba(226,232,240,0.03); border-bottom: 1px solid var(--line);
+            display: flex; align-items: center; gap: 6px; padding: 0 10px; flex-shrink: 0;
+        }
+        .mock-pdf-toolbar .mock-line { height: 3px; width: 14px; margin: 0; }
+        .mock-pdf-body { flex: 1; display: flex; padding: 12px; gap: 10px; min-height: 0; }
+        .mock-pdf-page {
+            flex: 1.4; background: #F4F1EA; border-radius: 5px; padding: 14px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .mock-pdf-page .mock-line { background: rgba(15,18,40,0.18); }
+        .mock-pdf-page .mock-line.heading { height: 7px; width: 70%; background: var(--primary-2); margin-bottom: 6px; }
+
+        .mock-avatar-panel {
+            flex: 1; display: flex; flex-direction: column; gap: 8px;
+            align-items: center; justify-content: center;
+        }
+        .mock-avatar-circle {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: white;
+            flex-shrink: 0;
+        }
+        .mock-chat-bubble {
+            background: rgba(226,232,240,0.04); border: 1px solid var(--line);
+            border-radius: 8px; padding: 8px 10px; width: 92%;
+        }
+        .mock-chat-bubble .mock-line { background: rgba(226,232,240,0.14); }
+
+        /* --- Stats strip --- */
+        .stats-strip {
+            display: grid; grid-template-columns: repeat(4,1fr); gap: 1px;
+            background: var(--line); border: 1px solid var(--line); border-radius: 12px;
+            overflow: hidden; margin: 0 0 70px;
+        }
+        .stat-block {
+            background: rgba(226,232,240,0.02); padding: 28px 20px; text-align: center;
+        }
+        .stat-block-value {
+            font-family: var(--font-display); font-size: 2rem; font-weight: 600;
+            color: var(--text-main); margin-bottom: 6px;
+        }
+        .stat-block-label { font-size: 0.82rem; color: var(--text-dim); }
 
         /* --- Pricing Section --- */
-        .pricing-section { padding: 60px 0; text-align: center; }
-        .pricing-section h2 { font-size: clamp(2rem, 4vw, 2.5rem); margin-bottom: 15px; }
-        .pricing-section p { color: var(--text-dim); margin-bottom: 50px; }
-        
-        /* เปลี่ยนเป็นแบบเรียงลง (Column) และจัดให้อยู่กึ่งกลาง */
-        .pricing-cards { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 40px; 
-        }
-        
+        .pricing-section { padding: 20px 0 60px; text-align: center; }
+        .pricing-section h2 { font-size: clamp(1.9rem, 4vw, 2.4rem); margin-bottom: 14px; }
+        .pricing-section > p { color: var(--text-dim); margin-bottom: 50px; font-size: 1rem; }
+
+        .pricing-cards { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+
         .pricing-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px; padding: 40px 40px;
-            width: 100%; max-width: 500px; /* ปรับให้กว้างขึ้นสำหรับดูแบบแนวตั้ง */
+            background: rgba(226,232,240,0.02);
+            border: 1px solid var(--line);
+            border-radius: 14px; padding: 36px 38px;
+            width: 100%; max-width: 480px;
             text-align: left;
-            backdrop-filter: blur(10px);
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.3s ease;
             position: relative; display: flex; flex-direction: column;
         }
-        
         .pricing-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.5);
-            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-4px);
+            border-color: var(--line-strong);
         }
-        
-        /* Highlight Plan (Pro) */
+
         .pricing-card.popular {
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            background: linear-gradient(180deg, rgba(99,102,241,0.08) 0%, rgba(226,232,240,0.02) 100%);
             border-color: var(--primary-blue);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
-            transform: scale(1.02); /* ขยายขนาดเพียงเล็กน้อยไม่ให้กวนตาในแนวตั้ง */
         }
-        .pricing-card.popular:hover { transform: scale(1.02) translateY(-8px); }
-        
+
         .popular-badge {
-            position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-            background: var(--primary-blue); color: white; padding: 6px 16px;
-            border-radius: 20px; font-size: 0.8rem; font-weight: 600;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); letter-spacing: 0.5px;
+            position: absolute; top: -13px; left: 32px;
+            background: var(--primary-blue); color: white; padding: 5px 14px;
+            border-radius: 99px; font-size: 0.72rem; font-weight: 600;
+            letter-spacing: 0.02em;
         }
-        
-        .pricing-card h3 { font-size: 1.5rem; margin-bottom: 10px; font-weight: 600; }
-        
-        .price { font-size: 2.5rem; font-weight: 600; margin-bottom: 25px; color: white; }
-        .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
-        .pricing-card.popular .price { color: var(--primary-blue); text-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-        
-        .features-list { list-style: none; margin-bottom: 35px; flex-grow: 1; }
-        .features-list li { margin-bottom: 15px; color: var(--text-dim); font-size: 0.95rem; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; }
-        .features-list li::before { content: '✓'; color: #27c93f; font-weight: bold; font-size: 1.1rem; }
-        
+
+        .pricing-card h3 { font-size: 1.3rem; margin-bottom: 8px; }
+        .price { font-family: var(--font-display); font-size: 2.2rem; font-weight: 600; margin-bottom: 24px; color: var(--text-main); }
+        .price span { font-family: var(--font-body); font-size: 0.92rem; color: var(--text-dim); font-weight: 400; }
+        .pricing-card.popular .price { color: var(--primary-blue); }
+
+        .features-list { list-style: none; margin-bottom: 30px; flex-grow: 1; }
+        .features-list li { margin-bottom: 13px; color: var(--text-dim); font-size: 0.9rem; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; }
+        .features-list li svg { width: 15px; height: 15px; color: var(--success); flex-shrink: 0; margin-top: 1px; }
+
         .btn-pricing {
-            width: 100%; padding: 14px; border-radius: 8px; font-size: 1rem;
-            border: 1px solid rgba(255,255,255,0.2); background: transparent;
-            color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+            width: 100%; padding: 12px; border-radius: 8px; font-size: 0.92rem;
+            border: 1px solid var(--line-strong); background: transparent;
+            color: var(--text-main); font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+            font-family: var(--font-body);
         }
-        .btn-pricing:hover { border-color: white; background: rgba(255,255,255,0.05); }
-        
-        .pricing-card.popular .btn-pricing {
-            background: var(--primary-blue); border: none;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
-        .pricing-card.popular .btn-pricing:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-pricing:hover { border-color: var(--text-main); }
+        .pricing-card.popular .btn-pricing { background: var(--primary-blue); border: none; }
+        .pricing-card.popular .btn-pricing:hover { background: var(--primary-2); }
 
-        /* --- Scroll Reveal Class --- */
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        /* --- Scroll Reveal --- */
+        .reveal { opacity: 0; transform: translateY(32px); transition: all 0.7s cubic-bezier(0.4,0,0.2,1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        .delay-1 { transition-delay: 0.1s; }
-        .delay-2 { transition-delay: 0.2s; }
-        .delay-3 { transition-delay: 0.3s; }
-        
-        /* --- Footer Styling --- */
-        .footer { background: var(--footer-bg); border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 60px; padding: 80px 0 30px; position: relative; z-index: 10; }
-        .footer-container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 50px; padding: 0 5%; max-width: 1200px; margin: 0 auto; }
-        .footer-column { flex: 1; min-width: 250px; }
-        .brand-col .logo { margin-bottom: 20px; }
-        .footer-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 30px; max-width: 300px; }
-        .newsletter-title { color: var(--text-main); font-weight: 600; margin-bottom: 15px; font-size: 1.1rem; }
-        .newsletter-form { display: flex; flex-direction: column; gap: 15px; max-width: 300px; }
-        .newsletter-form input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-main); padding: 12px 15px; border-radius: 8px; font-size: 0.9rem; transition: border-color 0.3s; }
-        .newsletter-form input:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-        .newsletter-form button { background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: opacity 0.3s; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-        .newsletter-form button:hover { opacity: 0.9; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
-        .footer-column h4 { color: var(--text-main); margin-bottom: 20px; font-weight: 600; font-size: 1.1rem; }
-        .footer-column ul { list-style: none; }
-        .footer-column ul li { margin-bottom: 15px; }
-        .footer-column ul li a { text-decoration: none; color: var(--text-dim); font-size: 0.95rem; transition: color 0.3s; }
-        .footer-column ul li a:hover { color: var(--primary-blue); }
-        .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 60px; padding-top: 30px; text-align: center; color: #64748b; font-size: 0.8rem; }
+        .delay-1 { transition-delay: 0.08s; }
+        .delay-2 { transition-delay: 0.16s; }
+        .delay-3 { transition-delay: 0.24s; }
 
-        /* --- Responsive --- */
+        /* --- Footer --- */
+        .footer { background: var(--footer-bg); border-top: 1px solid var(--line); margin-top: 40px; padding: 70px 0 30px; position: relative; z-index: 10; }
+        .footer-container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 50px; padding: 0 5%; max-width: 1200px; margin: 0 auto; }
+        .footer-column { flex: 1; min-width: 220px; }
+        .brand-col .logo { margin-bottom: 18px; }
+        .footer-desc { color: var(--text-dim); font-size: 0.88rem; line-height: 1.6; margin-bottom: 26px; max-width: 280px; }
+
+        .newsletter-title { color: var(--text-main); font-weight: 500; margin-bottom: 12px; font-size: 0.95rem; font-family: var(--font-body); }
+        .newsletter-form { display: flex; flex-direction: column; gap: 10px; max-width: 280px; }
+        .newsletter-form input {
+            background: rgba(226,232,240,0.04); border: 1px solid var(--line);
+            color: var(--text-main); padding: 11px 14px; border-radius: 8px; font-size: 0.86rem;
+        }
+        .newsletter-form input:focus { outline: none; border-color: var(--primary-blue); }
+        .newsletter-form button {
+            background: var(--primary-blue); color: white; border: none; padding: 11px;
+            border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 0.86rem;
+        }
+        .newsletter-form button:hover { background: var(--primary-2); }
+
+        .footer-column h4 { color: var(--text-main); margin-bottom: 16px; font-size: 0.98rem; }
+        .footer-column ul { list-style: none; }
+        .footer-column ul li { margin-bottom: 12px; }
+        .footer-column ul li a { text-decoration: none; color: var(--text-dim); font-size: 0.88rem; transition: color 0.2s; }
+        .footer-column ul li a:hover { color: var(--primary-blue); }
+        .footer-bottom { border-top: 1px solid var(--line); margin-top: 50px; padding-top: 26px; text-align: center; color: var(--text-faint); font-size: 0.78rem; }
+
         @media (max-width: 900px) {
             .pricing-card.popular { transform: scale(1); }
-            .pricing-card.popular:hover { transform: translateY(-8px); }
         }
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .feature-section, .feature-section.reverse { flex-direction: column; text-align: center; }
-            .glow-divider { width: 90%; }
+            .feature-content { text-align: center; }
+            .feature-list-item { text-align: left; }
+            .stats-strip { grid-template-columns: repeat(2,1fr); }
             .user-name { display: none; }
-            .footer-container { flex-direction: column; text-align: center; gap: 40px; }
-            .footer-desc, .newsletter-form { margin: 0 auto; margin-bottom: 30px; }
-            .brand-col .logo { justify-content: center; margin-bottom: 20px;}
+            .footer-container { flex-direction: column; text-align: center; gap: 36px; }
+            .footer-desc, .newsletter-form { margin: 0 auto; margin-bottom: 26px; }
+            .brand-col .logo { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="logo"><span>W</span> SkillNest</div>
+        <div class="logo"><span>S</span> SkillNest</div>
         <ul class="nav-links">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Features</a></li>
-            <li><a href="#">About us</a></li>
-            <li><a href="#">Pricing</a></li>
+            <li><a href="#hero">หน้าแรก</a></li>
+            <li><a href="#features">ฟีเจอร์</a></li>
+            <li><a href="#pricing">แพ็กเกจ</a></li>
         </ul>
-        
+
         <div class="nav-auth">
-            <button class="btn-login" id="loginBtn" style="display: block;">Log in</button>
+            <button class="btn-login" id="loginBtn" style="display: block;">เข้าสู่ระบบ</button>
             <div class="user-profile" id="userProfile" style="display: none;">
                 <span class="user-name" id="displayName"></span>
                 <button class="profile-dropdown-btn" id="profileDropdownBtn">
-                    👤 <span id="userInitial"></span>
+                    <span id="userInitial"></span>
                 </button>
                 <div class="dropdown-menu" id="dropdownMenu">
-                    <a class="dropdown-item" id="dashboardItem">Dashboard</a>
-                    <a class="dropdown-item" id="profileItem">โปรไฟล์</a>
-                    <a class="dropdown-item" id="settingsItem">การตั้งค่า</a>
+                    <a class="dropdown-item" id="dashboardItem">แดชบอร์ด</a>
+                    <a class="dropdown-item" id="settingsItem">ตั้งค่า &amp; โปรไฟล์</a>
                     <a class="dropdown-item" id="logoutItem">ออกจากระบบ</a>
                 </div>
             </div>
@@ -256,146 +389,235 @@
     </nav>
 
     <div class="container">
-        <header class="hero">
-            <h1 class="reveal delay-1">Development of Course Management <br> <span class="highlight">Platform</span> with Intelligent Teaching <br> Assistant System</h1>
-            <p class="reveal delay-2">The only platform that automatically analyzes learning content, creates an optimal learning sequence, and includes an AI assistant to teach and answer questions throughout.</p>
-            <div class="reveal delay-3">
-                <button class="btn-cta" id="freetrialBtn">Start free trial</button>
+        <header class="hero" id="hero">
+            <div class="hero-badge reveal"><span class="dot"></span> เปิดให้ใช้งานแล้ววันนี้</div>
+            <h1 class="reveal delay-1">สร้างและสอนคอร์สออนไลน์<br>พร้อม <span class="highlight">ผู้ช่วยสอน AI</span> ของคุณเอง</h1>
+            <p class="reveal delay-2">แพลตฟอร์มที่ช่วยครูสร้างคอร์สเรียนได้ในไม่กี่นาที พร้อม Avatar AI ที่อธิบายเนื้อหา ตอบคำถาม และติดตามผลการเรียนของนักเรียนแทนคุณ ตลอด 24 ชั่วโมง</p>
+            <div class="hero-cta-row reveal delay-3">
+                <button class="btn-cta" id="freetrialBtn">เริ่มต้นใช้งานฟรี</button>
+                <button class="btn-cta-ghost" id="scrollFeaturesBtn">ดูฟีเจอร์ทั้งหมด</button>
+            </div>
+            <div class="trust-row reveal delay-3">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ไม่ต้องใช้บัตรเครดิต</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>เริ่มสร้างคอร์สได้ภายใน 5 นาที</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>รองรับภาษาไทยเต็มรูปแบบ</span>
             </div>
         </header>
 
-        <div class="glow-divider reveal"></div>
+        <div class="stats-strip reveal">
+            <div class="stat-block">
+                <div class="stat-block-value">100%</div>
+                <div class="stat-block-label">ฟรีสำหรับเริ่มต้น</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-block-value">24/7</div>
+                <div class="stat-block-label">Avatar AI พร้อมตอบคำถาม</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-block-value">&lt;5 นาที</div>
+                <div class="stat-block-label">สร้างคอร์สแรกของคุณ</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-block-value">ไม่จำกัด</div>
+                <div class="stat-block-label">จำนวนผู้เรียน</div>
+            </div>
+        </div>
 
-        <section class="feature-section reveal">
+        <section class="feature-section reveal" id="features">
             <div class="feature-content reveal delay-1">
-                <h2><span class="highlight">Platform</span> that assist in creating courses, where AI enables convenient and efficient management of various courses</h2>
+                <div class="section-eyebrow">// สำหรับผู้สอน</div>
+                <h2>จัดการคอร์สเรียนทั้งหมด<br>ใน<span class="highlight">แดชบอร์ดเดียว</span></h2>
+                <p>อัปโหลด PDF วิดีโอ หรือสไลด์ แล้วระบบจะจัดเรียงบทเรียนให้อัตโนมัติ พร้อมแบบทดสอบและการบ้านที่ AI ช่วยออกให้ ติดตามความก้าวหน้าของนักเรียนได้แบบเรียลไทม์</p>
+                <div class="feature-list">
+                    <div class="feature-list-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        สร้างบทเรียนจาก PDF, วิดีโอ, สไลด์ได้ทันที
+                    </div>
+                    <div class="feature-list-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        AI ช่วยออกแบบทดสอบและการบ้านอัตโนมัติ
+                    </div>
+                    <div class="feature-list-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        วิเคราะห์ผลการเรียนของนักเรียนรายคน
+                    </div>
+                </div>
             </div>
             <div class="feature-visual reveal delay-2">
                 <div class="mockup-window">
-                    <div class="window-header"><div class="dot"></div><div class="dot"></div></div>
+                    <div class="window-header">
+                        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        <span class="window-url">skillnest.app/dashboard</span>
+                    </div>
                     <div class="window-body">
-                        <div class="sidebar"></div>
-                        <div class="content-area">
-                             <div style="width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(59,130,246,0.1), transparent);"></div>
-                             <div class="chat-bar"></div>
+                        <div class="mock-sidebar">
+                            <div class="mock-nav-item active"><span class="ico"></span> หน้าหลัก</div>
+                            <div class="mock-nav-item"><span class="ico"></span> คอร์สของฉัน</div>
+                            <div class="mock-nav-item"><span class="ico"></span> ค้นหาคอร์ส</div>
+                            <div class="mock-nav-item"><span class="ico"></span> ตั้งค่า</div>
+                        </div>
+                        <div class="mock-main">
+                            <div class="mock-stat-row">
+                                <div class="mock-stat"><div class="mock-stat-label">นักเรียน</div><div class="mock-stat-value">248</div></div>
+                                <div class="mock-stat"><div class="mock-stat-label">คอร์ส</div><div class="mock-stat-value">6</div></div>
+                                <div class="mock-stat"><div class="mock-stat-label">อัตราจบ</div><div class="mock-stat-value">73%</div></div>
+                            </div>
+                            <div class="mock-course-grid">
+                                <div class="mock-course-card">
+                                    <div class="mock-course-thumb"></div>
+                                    <div class="mock-course-body"><div class="mock-line short"></div><div class="mock-line dim"></div></div>
+                                </div>
+                                <div class="mock-course-card">
+                                    <div class="mock-course-thumb alt"></div>
+                                    <div class="mock-course-body"><div class="mock-line short"></div><div class="mock-line dim"></div></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <div class="glow-divider reveal"></div>
+        <div class="section-divider reveal"></div>
 
         <section class="feature-section reverse reveal">
             <div class="feature-visual reveal delay-2">
                 <div class="mockup-window">
-                    <div class="window-header"><div class="dot"></div><div class="dot"></div></div>
-                    <div class="window-body">
-                        <div class="sidebar"></div>
-                        <div class="content-area">
-                            <div style="position: absolute; top: 10px; left: 10px; color: #555; font-size: 0.8rem;">Front-End</div>
+                    <div class="window-header">
+                        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        <span class="window-url">skillnest.app/course-content</span>
+                    </div>
+                    <div class="mock-pdf-toolbar">
+                        <div class="mock-line"></div><div class="mock-line"></div><div class="mock-line"></div>
+                        <div class="mock-line" style="margin-left:auto;"></div>
+                    </div>
+                    <div class="mock-pdf-body">
+                        <div class="mock-pdf-page">
+                            <div class="mock-line heading"></div>
+                            <div class="mock-line"></div>
+                            <div class="mock-line"></div>
+                            <div class="mock-line short"></div>
+                        </div>
+                        <div class="mock-avatar-panel">
+                            <div class="mock-avatar-circle">S</div>
+                            <div class="mock-chat-bubble">
+                                <div class="mock-line"></div>
+                                <div class="mock-line short"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="feature-content reveal delay-1">
-                <h2>Users can learn from existing courses on the <span class="highlight">platform</span> as well as from self-uploaded courses</h2>
+                <div class="section-eyebrow">// สำหรับผู้เรียน</div>
+                <h2>เรียนกับ <span class="highlight">Avatar AI</span><br>ที่อธิบายได้ทุกหน้า</h2>
+                <p>ระหว่างอ่าน PDF หรือดูวิดีโอ นักเรียนสามารถเรียก Avatar ขึ้นมาถามคำถามได้ทันที ไม่ว่าจะอธิบายเนื้อหาหน้านั้น สรุปบทเรียน หรือออกโจทย์ฝึกเพิ่มเติม</p>
+                <div class="feature-list">
+                    <div class="feature-list-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Avatar อธิบายเนื้อหาหน้า PDF ที่กำลังดูอยู่
+                    </div>
+                    <div class="feature-list-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        ถามตอบด้วยเสียงหรือข้อความได้ทันที
+                    </div>
+                    <div class="feature-list-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        จำบริบทบทเรียน ไม่ต้องอธิบายซ้ำ
+                    </div>
+                </div>
             </div>
         </section>
 
-        <div class="glow-divider reveal"></div>
+        <div class="section-divider reveal"></div>
 
-        <section class="pricing-section reveal">
-            <h2 class="reveal delay-1">Choose Your <span class="highlight">Plan</span></h2>
-            <p class="reveal delay-2">แพ็กเกจที่เหมาะสมสำหรับการสร้างและจัดการคอร์สเรียนของคุณ</p>
-            
+        <section class="pricing-section reveal" id="pricing">
+            <h2 class="reveal delay-1">เลือกแพ็กเกจที่<span class="highlight">เหมาะกับคุณ</span></h2>
+            <p class="reveal delay-2">เริ่มต้นใช้งานฟรี แล้วอัปเกรดเมื่อพร้อมขยายคอร์สเรียนของคุณ</p>
+
             <div class="pricing-cards">
-                
+
                 <div class="pricing-card reveal delay-1">
                     <h3>Starter</h3>
                     <div class="price">0 ฿<span> / เดือน</span></div>
                     <ul class="features-list">
-                        <li>สร้างได้สูงสุด 2 คอร์สเรียน</li>
-                        <li>ผู้เรียนไม่เกิน 50 คน</li>
-                        <li>AI ผู้ช่วยวิเคราะห์เนื้อหา (จำกัดการใช้งาน)</li>
-                        <li>Community Support</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>สร้างได้สูงสุด 2 คอร์สเรียน</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ผู้เรียนไม่เกิน 50 คน</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Avatar AI ผู้ช่วยสอน (จำกัดการใช้งาน)</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ซัพพอร์ตทางอีเมล</li>
                     </ul>
-                    <button class="btn-pricing">เริ่มต้นใช้งานฟรี</button>
+                    <button class="btn-pricing" onclick="goToSignup()">เริ่มต้นใช้งานฟรี</button>
                 </div>
 
                 <div class="pricing-card popular reveal delay-2">
-                    <div class="popular-badge">Most Popular</div>
+                    <div class="popular-badge">ใช้งานมากที่สุด</div>
                     <h3>Pro</h3>
                     <div class="price">590 ฿<span> / เดือน</span></div>
                     <ul class="features-list">
-                        <li>สร้างคอร์สเรียนไม่จำกัด</li>
-                        <li>ผู้เรียนไม่จำกัดจำนวน</li>
-                        <li>AI สร้างเนื้อหาอัตโนมัติเต็มรูปแบบ</li>
-                        <li>ออกใบประกาศนียบัตรให้ผู้เรียนได้</li>
-                        <li>Priority Email Support</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>สร้างคอร์สเรียนไม่จำกัด</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ผู้เรียนไม่จำกัดจำนวน</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ปรับแต่ง Avatar AI ได้เต็มรูปแบบ</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ออกใบประกาศนียบัตรให้ผู้เรียนได้</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ซัพพอร์ตแบบมีลำดับความสำคัญ</li>
                     </ul>
-                    <button class="btn-pricing">เลือกแพ็กเกจ Pro</button>
+                    <button class="btn-pricing" onclick="goToSignup()">เลือกแพ็กเกจ Pro</button>
                 </div>
 
                 <div class="pricing-card reveal delay-3">
                     <h3>Enterprise</h3>
                     <div class="price">1,990 ฿<span> / เดือน</span></div>
                     <ul class="features-list">
-                        <li>ฟีเจอร์ทุกอย่างในแพ็กเกจ Pro</li>
-                        <li>Custom Domain (ใช้ชื่อโดเมนของคุณเอง)</li>
-                        <li>เชื่อมต่อระบบ API (Integration)</li>
-                        <li>ผู้ดูแลระบบหลายคน (Multi-admin)</li>
-                        <li>24/7 Phone & Email Support</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ฟีเจอร์ทุกอย่างในแพ็กเกจ Pro</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ใช้ชื่อโดเมนของคุณเอง</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>เชื่อมต่อระบบภายนอกผ่าน API</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ผู้ดูแลระบบได้หลายบัญชี</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ซัพพอร์ตด่วนตลอด 24 ชั่วโมง</li>
                     </ul>
-                    <button class="btn-pricing">ติดต่อฝ่ายขาย</button>
+                    <button class="btn-pricing" onclick="goToContactSales()">ติดต่อฝ่ายขาย</button>
                 </div>
 
             </div>
         </section>
-
-        <div class="glow-divider reveal"></div>
 
     </div>
 
     <footer class="footer reveal">
         <div class="footer-container">
             <div class="footer-column brand-col reveal delay-1">
-                <div class="logo"><span>W</span> SkillNest</div>
-                <p class="footer-desc">The intelligent platform to create and manage courses with AI assistance.</p>
-                
+                <div class="logo"><span>S</span> SkillNest</div>
+                <p class="footer-desc">แพลตฟอร์มสร้างและจัดการคอร์สเรียนออนไลน์ พร้อมผู้ช่วยสอน AI ที่ช่วยอธิบายเนื้อหาและตอบคำถามนักเรียนแทนคุณ</p>
+
                 <div class="newsletter-box">
-                    <h4 class="newsletter-title">Subscribe to newsletter</h4>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Enter Your Mail" required>
-                        <button type="submit">Subscribe</button>
+                    <h4 class="newsletter-title">รับข่าวสารและอัปเดตใหม่ๆ</h4>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="อีเมลของคุณ" required>
+                        <button type="submit">สมัครรับข่าวสาร</button>
                     </form>
                 </div>
             </div>
-            
+
             <div class="footer-column menu-col reveal delay-2">
-                <h4>Menu</h4>
+                <h4>เมนู</h4>
                 <ul>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Features</a></li>
-                    <li><a href="#">About us</a></li>
-                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#hero">หน้าแรก</a></li>
+                    <li><a href="#features">ฟีเจอร์</a></li>
+                    <li><a href="#pricing">แพ็กเกจ</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-column support-col reveal delay-3">
-                <h4>Support</h4>
+                <h4>เริ่มต้นใช้งาน</h4>
                 <ul>
-                    <li><a href="#">Create Account</a></li>
-                    <li><a href="login-page/login.html">Log In</a></li>
-                    <li><a href="#">Dashboard</a></li>
-                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="login-page/signup.html">สมัครสมาชิก</a></li>
+                    <li><a href="login-page/login.html">เข้าสู่ระบบ</a></li>
+                    <li><a href="dashboard.html">แดชบอร์ด</a></li>
                 </ul>
             </div>
         </div>
-        
+
         <div class="footer-bottom reveal delay-1">
             <div class="container">
-                <p>&copy; 2026 SkillNest Limited | Privacy Policy - Terms of Service</p>
+                <p>&copy; 2026 SkillNest — โปรเจคจบการศึกษา</p>
             </div>
         </div>
     </footer>
@@ -408,6 +630,7 @@
         const displayName = document.getElementById('displayName');
         const userInitial = document.getElementById('userInitial');
         const freetrialBtn = document.getElementById('freetrialBtn');
+        const scrollFeaturesBtn = document.getElementById('scrollFeaturesBtn');
         const profileDropdownBtn = document.getElementById('profileDropdownBtn');
         const dropdownMenu = document.getElementById('dropdownMenu');
 
@@ -420,10 +643,10 @@
                         .select('first_name')
                         .eq('id', user.id)
                         .single();
-                    const firstName = profile?.first_name || 'User';
+                    const firstName = profile?.first_name || 'ผู้ใช้';
                     loginBtn.style.display = 'none';
                     userProfile.style.display = 'flex';
-                    displayName.textContent = `Hello, ${firstName}`;
+                    displayName.textContent = `สวัสดี, ${firstName}`;
                     userInitial.textContent = firstName.charAt(0).toUpperCase();
                 } catch (error) {
                     console.error('Error fetching user data:', error);
@@ -437,30 +660,46 @@
         });
 
         loginBtn.addEventListener('click', () => window.location.href = 'login-page/login.html');
+
         freetrialBtn.addEventListener('click', async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            window.location.href = user ? 'dashboard.html' : 'login-page/login.html';
+            window.location.href = user ? 'dashboard.html' : 'login-page/signup.html';
         });
+
+        scrollFeaturesBtn.addEventListener('click', () => {
+            document.getElementById('features').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        window.goToSignup = function() {
+            window.location.href = 'login-page/signup.html';
+        };
+        window.goToContactSales = function() {
+            window.location.href = 'mailto:contact@skillnest.app?subject=สอบถามแพ็กเกจ Enterprise';
+        };
+
         profileDropdownBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
         document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
         dropdownMenu.addEventListener('click', (e) => e.stopPropagation());
         document.getElementById('dashboardItem').addEventListener('click', () => window.location.href = 'dashboard.html');
+        document.getElementById('settingsItem').addEventListener('click', () => window.location.href = 'setting.html');
         document.getElementById('logoutItem').addEventListener('click', async () => {
             try { await supabase.auth.signOut(); window.location.reload(); }
             catch (error) { console.error('Logout error:', error); alert('เกิดข้อผิดพลาดในการออกจากระบบ'); }
         });
 
-        // Scroll Reveal Animation Script
+        document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('ขอบคุณที่สมัครรับข่าวสารครับ!');
+            e.target.reset();
+        });
+
         function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 100;
-                if (elementTop < windowHeight - elementVisible) {
-                    reveals[i].classList.add("active");
-                }
-            }
+            const reveals = document.querySelectorAll(".reveal");
+            const windowHeight = window.innerHeight;
+            reveals.forEach(el => {
+                const elementTop = el.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) el.classList.add("active");
+            });
         }
         window.addEventListener("scroll", reveal);
         reveal();
