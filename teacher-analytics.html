@@ -4,26 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics ครู - SkillNest</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --bg-color: #020418;
-            --primary-blue: #3b82f6;
-            --primary-purple: #8b5cf6;
-            --text-main: #ffffff;
-            --text-dim: #a0a0ba;
-            --nav-bg: rgba(255,255,255,0.03);
-            --card-bg: rgba(255,255,255,0.05);
-            --border-color: rgba(255,255,255,0.1);
+                :root {
+            --bg-color: #0A0E27;
+            --bg: #0A0E27;
+            --primary-blue: #6366F1;
+            --primary-purple: #6366F1;
+            --primary: #6366F1;
+            --primary-2: #4338CA;
+            --accent-cyan: #22D3EE;
+            --success-green: #34D399;
+            --success: #34D399;
+            --danger-red: #F87171;
+            --danger: #F87171;
+            --text-main: #E2E8F0;
+            --text: #E2E8F0;
+            --text-dim: #8B92AE;
+            --nav-bg: rgba(226,232,240,0.04);
+            --card-bg: rgba(226,232,240,0.04);
+            --card: rgba(226,232,240,0.04);
+            --card-hover: rgba(226,232,240,0.07);
+            --border-color: rgba(226,232,240,0.09);
+            --border: rgba(226,232,240,0.09);
+            --border-focus: rgba(99,102,241,0.6);
+            --input-bg: rgba(226,232,240,0.05);
+            --active-lesson: rgba(99,102,241,0.16);
+            --chat-bg: #060818;
+            --bg-grad: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
+            --nav-h: 70px;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        h1, h2, h3, .logo, .logo-mock, .course-title, .card-stat-value,
+        .page-title, .nav-logo, .section-title, .avatar-header-title,
+        .modal-title, .stat-value, .quiz-title {
+            font-family: var(--font-display, 'Space Grotesk', sans-serif);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
+            background-image:
+                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
+                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
+            background-size: 100% 100%, 26px 26px;
             min-height: 100vh;
             overflow-x: hidden;
         }
