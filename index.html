@@ -46,6 +46,54 @@
             overflow-x: hidden;
         }
 
+        /* ── Aurora: signature ambient light behind hero ── */
+        .aurora {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            overflow: hidden; opacity: 0.7;
+        }
+        .aurora::before, .aurora::after {
+            content: ''; position: absolute; border-radius: 50%;
+            filter: blur(90px); opacity: 0.5;
+        }
+        .aurora::before {
+            width: 620px; height: 620px; top: -260px; left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(99,102,241,0.5) 0%, transparent 68%);
+            animation: aurora-drift-1 16s ease-in-out infinite;
+        }
+        .aurora::after {
+            width: 460px; height: 460px; top: -120px; left: 32%;
+            background: radial-gradient(circle, rgba(34,211,238,0.28) 0%, transparent 70%);
+            animation: aurora-drift-2 20s ease-in-out infinite;
+        }
+        @keyframes aurora-drift-1 {
+            0%,100% { transform: translateX(-50%) translateY(0) scale(1); }
+            50%     { transform: translateX(-46%) translateY(30px) scale(1.08); }
+        }
+        @keyframes aurora-drift-2 {
+            0%,100% { transform: translateX(0) translateY(0) scale(1); }
+            50%     { transform: translateX(40px) translateY(20px) scale(1.12); }
+        }
+        body > *:not(.aurora) { position: relative; z-index: 1; }
+
+        /* ── Load-in orchestration ── */
+        @keyframes rise-in {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .load-seq { opacity: 0; animation: rise-in 0.85s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .load-1 { animation-delay: 0.05s; }
+        .load-2 { animation-delay: 0.18s; }
+        .load-3 { animation-delay: 0.32s; }
+        .load-4 { animation-delay: 0.46s; }
+        .load-5 { animation-delay: 0.60s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .aurora::before, .aurora::after { animation: none; }
+            .load-seq { animation: none; opacity: 1; }
+            .reveal { transition: none; opacity: 1; transform: none; }
+        }
+
         /* --- Navigation --- */
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -54,6 +102,12 @@
             margin: 20px auto; width: 92%; max-width: 1100px;
             border: 1px solid var(--line);
             position: sticky; top: 20px; z-index: 1000;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .navbar.scrolled {
+            background: rgba(13,16,36,0.85);
+            border-color: var(--line-strong);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
         }
 
         .logo { font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
@@ -128,9 +182,19 @@
         .btn-cta {
             background: var(--primary-blue); color: white; border: none;
             padding: 13px 28px; border-radius: 9px; cursor: pointer; font-size: 0.95rem;
-            font-weight: 500; transition: 0.2s; font-family: var(--font-body);
+            font-weight: 500; transition: transform 0.2s, box-shadow 0.3s; font-family: var(--font-body);
+            position: relative; overflow: hidden;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.25);
         }
-        .btn-cta:hover { background: var(--primary-2); transform: translateY(-1px); }
+        .btn-cta::after {
+            content: ''; position: absolute; top: 0; left: -120%;
+            width: 60%; height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.28), transparent);
+            transition: left 0.6s ease;
+        }
+        .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(99,102,241,0.4); }
+        .btn-cta:hover::after { left: 130%; }
+        .btn-cta:active { transform: translateY(0); }
 
         .btn-cta-ghost {
             background: transparent; color: var(--text-main); border: 1px solid var(--line-strong);
@@ -170,7 +234,18 @@
             border: 1px solid var(--line-strong); border-radius: 12px;
             box-shadow: 0 24px 60px -10px rgba(0,0,0,0.6);
             display: flex; flex-direction: column; overflow: hidden; position: relative;
+            transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s;
+            transform-style: preserve-3d; will-change: transform;
         }
+        .mockup-window:hover {
+            box-shadow: 0 32px 70px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.25);
+        }
+        .mockup-glow {
+            position: absolute; inset: 0; border-radius: 12px; pointer-events: none;
+            background: radial-gradient(circle at var(--mx,50%) var(--my,0%), rgba(99,102,241,0.14), transparent 55%);
+            opacity: 0; transition: opacity 0.3s; z-index: 5;
+        }
+        .mockup-window:hover .mockup-glow { opacity: 1; }
         .window-header {
             height: 32px; background: rgba(226,232,240,0.04);
             display: flex; align-items: center; padding: 0 12px; gap: 6px;
@@ -253,7 +328,9 @@
         }
         .stat-block {
             background: rgba(226,232,240,0.02); padding: 28px 20px; text-align: center;
+            transition: background 0.25s;
         }
+        .stat-block:hover { background: rgba(99,102,241,0.06); }
         .stat-block-value {
             font-family: var(--font-display); font-size: 2rem; font-weight: 600;
             color: var(--text-main); margin-bottom: 6px;
@@ -364,6 +441,8 @@
 </head>
 <body>
 
+    <div class="aurora" aria-hidden="true"></div>
+
     <nav class="navbar">
         <div class="logo"><span>S</span> SkillNest</div>
         <ul class="nav-links">
@@ -390,14 +469,14 @@
 
     <div class="container">
         <header class="hero" id="hero">
-            <div class="hero-badge reveal"><span class="dot"></span> เปิดให้ใช้งานแล้ววันนี้</div>
-            <h1 class="reveal delay-1">สร้างและสอนคอร์สออนไลน์<br>พร้อม <span class="highlight">ผู้ช่วยสอน AI</span> ของคุณเอง</h1>
-            <p class="reveal delay-2">แพลตฟอร์มที่ช่วยครูสร้างคอร์สเรียนได้ในไม่กี่นาที พร้อม Avatar AI ที่อธิบายเนื้อหา ตอบคำถาม และติดตามผลการเรียนของนักเรียนแทนคุณ ตลอด 24 ชั่วโมง</p>
-            <div class="hero-cta-row reveal delay-3">
+            <div class="hero-badge load-seq load-1"><span class="dot"></span> เปิดให้ใช้งานแล้ววันนี้</div>
+            <h1 class="load-seq load-2">สร้างและสอนคอร์สออนไลน์<br>พร้อม <span class="highlight">ผู้ช่วยสอน AI</span> ของคุณเอง</h1>
+            <p class="load-seq load-3">แพลตฟอร์มที่ช่วยครูสร้างคอร์สเรียนได้ในไม่กี่นาที พร้อม Avatar AI ที่อธิบายเนื้อหา ตอบคำถาม และติดตามผลการเรียนของนักเรียนแทนคุณ ตลอด 24 ชั่วโมง</p>
+            <div class="hero-cta-row load-seq load-4">
                 <button class="btn-cta" id="freetrialBtn">เริ่มต้นใช้งานฟรี</button>
                 <button class="btn-cta-ghost" id="scrollFeaturesBtn">ดูฟีเจอร์ทั้งหมด</button>
             </div>
-            <div class="trust-row reveal delay-3">
+            <div class="trust-row load-seq load-5">
                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>ไม่ต้องใช้บัตรเครดิต</span>
                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>เริ่มสร้างคอร์สได้ภายใน 5 นาที</span>
                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>รองรับภาษาไทยเต็มรูปแบบ</span>
@@ -406,7 +485,7 @@
 
         <div class="stats-strip reveal">
             <div class="stat-block">
-                <div class="stat-block-value">100%</div>
+                <div class="stat-block-value" data-count="100" data-suffix="%">0%</div>
                 <div class="stat-block-label">ฟรีสำหรับเริ่มต้น</div>
             </div>
             <div class="stat-block">
@@ -444,7 +523,8 @@
                 </div>
             </div>
             <div class="feature-visual reveal delay-2">
-                <div class="mockup-window">
+                <div class="mockup-window" data-tilt>
+                    <div class="mockup-glow"></div>
                     <div class="window-header">
                         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
                         <span class="window-url">skillnest.app/dashboard</span>
@@ -482,7 +562,8 @@
 
         <section class="feature-section reverse reveal">
             <div class="feature-visual reveal delay-2">
-                <div class="mockup-window">
+                <div class="mockup-window" data-tilt>
+                    <div class="mockup-glow"></div>
                     <div class="window-header">
                         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
                         <span class="window-url">skillnest.app/course-content</span>
@@ -703,6 +784,66 @@
         }
         window.addEventListener("scroll", reveal);
         reveal();
+
+        // ── Premium interaction layer ──
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Nav solidify on scroll
+        const navbar = document.querySelector('.navbar');
+        function onScrollNav() {
+            if (window.scrollY > 24) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        }
+        window.addEventListener('scroll', onScrollNav);
+        onScrollNav();
+
+        // Count-up animation for stats
+        function animateCount(el) {
+            const target = parseInt(el.dataset.count, 10);
+            const suffix = el.dataset.suffix || '';
+            if (prefersReduced) { el.textContent = target + suffix; return; }
+            const dur = 1100; const start = performance.now();
+            function tick(now) {
+                const p = Math.min((now - start) / dur, 1);
+                const eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(target * eased) + suffix;
+                if (p < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        }
+
+        const statObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    if (el.dataset.count && !el.dataset.done) {
+                        el.dataset.done = '1';
+                        animateCount(el);
+                    }
+                    statObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('[data-count]').forEach(el => statObserver.observe(el));
+
+        // Mouse-tilt + glow on mockup windows
+        if (!prefersReduced) {
+            document.querySelectorAll('[data-tilt]').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const r = card.getBoundingClientRect();
+                    const px = (e.clientX - r.left) / r.width;
+                    const py = (e.clientY - r.top) / r.height;
+                    const rx = (py - 0.5) * -6;
+                    const ry = (px - 0.5) * 8;
+                    card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+                    const glow = card.querySelector('.mockup-glow');
+                    if (glow) { glow.style.setProperty('--mx', (px*100)+'%'); glow.style.setProperty('--my', (py*100)+'%'); }
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = '';
+                });
+            });
+        }
     </script>
 </body>
 </html>
