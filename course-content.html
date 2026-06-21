@@ -1803,8 +1803,10 @@ async function avatarExplainCurrentPage(pageNum) {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 prompt: `อธิบายเนื้อหาหน้า ${pageNum} ให้นักเรียนเข้าใจ 2-3 ประโยค ไม่ต้องบอกว่า "หน้า X" ในประโยคแรก`,
-                systemPrompt: `คุณคืออาจารย์ AI สอนวิชา "${lessonTitle}"
+                systemPrompt: `คุณคืออาจารย์ AI ผู้ช่วยสอนบน SkillNest
 ตอบเป็นภาษาไทย กระชับ เหมือนอาจารย์อธิบายในห้องเรียน ไม่ใช้ markdown
+ให้อธิบายตามเนื้อหาหน้านี้จริงๆ ที่เห็นด้านล่าง ไม่ต้องอ้างอิงชื่อบทเรียนถ้าไม่ตรงกับเนื้อหา
+
 เนื้อหาหน้า ${pageNum}: ${pageText}`,
                 messages: []
             })
@@ -2244,13 +2246,27 @@ async function avatarProcessQuestion(question) {
         const _pPrompt      = window._avatarPersonalityPrompt || 'ตอบแบบเป็นกันเอง';
         const wantsImage    = isImageRequest(question);
 
-        let sys = `คุณคืออาจารย์ AI สอนวิชา "${courseTitle}" บทเรียน "${lessonTitle}"
+        let sys;
+        if (lessonPdfContext) {
+            // มีเนื้อหา PDF จริง → ยึดเนื้อหาเป็นหลัก ไม่ยึดชื่อคอร์ส
+            sys = `คุณคืออาจารย์ AI ผู้ช่วยสอนบน SkillNest
+ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง ไม่เกิน 3-4 ประโยค ไม่ใช้ markdown
+บุคลิก: ${_pPrompt}
+
+สำคัญมาก: ให้ยึด "เนื้อหาบทเรียนจริง" ด้านล่างนี้เป็นหลักในการตอบเสมอ
+ชื่อคอร์ส ("${courseTitle}") เป็นเพียงป้ายกำกับ อาจไม่ตรงกับเนื้อหาจริงก็ได้
+ถ้าชื่อคอร์สกับเนื้อหาขัดกัน ให้เชื่อเนื้อหาบทเรียนจริงเท่านั้น และอธิบายตามเนื้อหาที่เห็น
+ห้ามดึงความรู้นอกเนื้อหามาตอบโดยอ้างชื่อคอร์ส
+
+── เนื้อหาบทเรียนจริง ──
+${lessonPdfContext.slice(0, 2000)}
+── จบเนื้อหา ──`;
+        } else {
+            // ไม่มีเนื้อหา PDF → ใช้ชื่อคอร์ส/บทเรียนเป็น context ได้
+            sys = `คุณคืออาจารย์ AI สอนวิชา "${courseTitle}" บทเรียน "${lessonTitle}"
 ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง ไม่เกิน 3-4 ประโยค ไม่ใช้ markdown
 บุคลิก: ${_pPrompt}`;
-        if (lessonPdfContext) sys += `
-
-เนื้อหา:
-${lessonPdfContext.slice(0, 2000)}`;
+        }
 
         // ถ้าขอภาพ ให้ Groq สร้าง English image prompt ด้วย
         if (wantsImage) {
@@ -3306,17 +3322,25 @@ async function sendMessageWithContext(userMessage) {
         const courseTitle = currentCourse?.title || 'คอร์สเรียน';
 
         // สร้าง system prompt พร้อม context
-        let systemPrompt = `คุณเป็น AI Tutor สำหรับคอร์ส "${courseTitle}" บทเรียน "${lessonTitle}" บน SkillNest
-ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย`;
-
+        let systemPrompt;
         if (lessonPdfContext) {
-            systemPrompt += `
+            // ยึดเนื้อหา PDF จริงเป็นหลัก ไม่ยึดชื่อคอร์ส (กันชื่อคอร์สขัดกับเนื้อหา)
+            systemPrompt = `คุณเป็น AI Tutor บน SkillNest
+ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย
+
+สำคัญมาก: ให้ยึด "เนื้อหาจากเอกสาร" ด้านล่างเป็นหลักในการตอบเสมอ
+ชื่อคอร์ส ("${courseTitle}") เป็นเพียงป้ายกำกับ อาจไม่ตรงกับเนื้อหาจริง
+ถ้าชื่อคอร์สกับเนื้อหาขัดกัน ให้เชื่อเนื้อหาเอกสารจริงเท่านั้น
 
 เนื้อหาจากเอกสาร PDF ของบทเรียนนี้:
 ---
 ${lessonPdfContext}
 ---
 ตอบคำถามโดยอ้างอิงเนื้อหาข้างต้นเป็นหลัก ถ้าถามนอกเนื้อหาให้บอกว่าอยู่นอกขอบเขตบทเรียนนี้`;
+        } else {
+            // ไม่มี PDF → ใช้ชื่อคอร์สเป็น context ได้
+            systemPrompt = `คุณเป็น AI Tutor สำหรับคอร์ส "${courseTitle}" บทเรียน "${lessonTitle}" บน SkillNest
+ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย`;
         }
 
         const response = await fetch('/api/groq-analyze', {
