@@ -428,98 +428,131 @@
 
 <script type="module">
 import { supabase } from './supabase.js';
-let currentUser = null;
 
-const { data: { user } } = await supabase.auth.getUser();
-if (!user) { window.location.href = '../login-page/login.html'; } else
-(async (user) => {
+let currentUser = null;
+let allCourses = [];   // คอร์สที่ลงทะเบียน + มี quiz/homework
+
+// ── Init ──
+(async function init() {
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.location.href = '../login-page/login.html'; return; }
-    const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
-    if (userDoc.exists() && userDoc.data().userType !== 'student') {
-        alert('หน้านี้สำหรับนักเรียนเท่านั้น');
-        window.location.href = 'dashboard.html';
-        return;
-    }
     currentUser = user;
+
+    // แสดง sidebar ตาม role
+    try {
+        const { data: userDoc } = await supabase.from('users').select('user_type').eq('id', user.id).single();
+        if (userDoc?.user_type === 'teacher') {
+            document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'flex');
+        }
+    } catch(e) {}
+
     loadQuizzes();
-});
+})();
 
 async function loadQuizzes() {
     const grid = document.getElementById('quizGrid');
     try {
-        const enrollSnap = await getDocs(query(collection(db,'enrollments'), where('userId','==',currentUser.id)));
-        const enrolledIds = new Set();
-        enrollSnap.forEach(d => enrolledIds.add(d.data().courseId));
+        // 1. คอร์สที่ลงทะเบียน
+        const { data: enrollments } = await supabase
+            .from('enrollments').select('course_id').eq('user_id', currentUser.id);
+        const enrolledIds = (enrollments || []).map(e => e.course_id);
 
-        if (enrolledIds.size === 0) {
-            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่ได้สมัครเรียนคอร์สใด</h3><p>กลับไปที่ <a href="dashboard.html" style="color:#3b82f6;">Dashboard</a> เพื่อสมัครเรียนคอร์สที่สนใจ</p></div>`;
+        if (enrolledIds.length === 0) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่ได้สมัครเรียนคอร์สใด</h3><p>กลับไปที่ <a href="dashboard.html" style="color:var(--primary-blue);">หน้าหลัก</a> เพื่อสมัครเรียนคอร์สที่สนใจ</p></div>`;
             return;
         }
 
-        const coursesWithQuiz = [];
-        for (const cid of enrolledIds) {
-            try {
-                const cdoc = await getDoc(doc(db,'courses',cid));
-                if (cdoc.exists()) {
-                    const data = cdoc.data();
-                    if (data.quiz && data.quiz.length > 0) coursesWithQuiz.push({ id: cid, ...data });
-                }
-            } catch(e) {}
-        }
+        // 2. ดึงเฉพาะคอร์สที่ลงทะเบียน
+        const { data: courses } = await supabase
+            .from('courses').select('*').in('id', enrolledIds);
 
-        if (coursesWithQuiz.length === 0) {
-            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่มีแบบฝึกหัด</h3><p>คอร์สที่คุณสมัครยังไม่มีแบบทดสอบ</p></div>`;
-            return;
-        }
+        // 3. คะแนน quiz + การส่งการบ้านของนักเรียนคนนี้
+        const { data: quizScores } = await supabase
+            .from('quiz_scores').select('*').eq('user_id', currentUser.id);
+        const { data: submissions } = await supabase
+            .from('submissions').select('*').eq('user_id', currentUser.id);
 
         const scoresMap = {};
-        try {
-            const scoresSnap = await getDocs(query(collection(db,'quizScores'), where('userId','==',currentUser.id)));
-            scoresSnap.forEach(d => { const s = d.data(); scoresMap[s.courseId] = s; });
-        } catch(e) {}
+        (quizScores || []).forEach(s => { scoresMap[s.course_id] = s; });
+        const subMap = {};
+        (submissions || []).forEach(s => { subMap[`${s.course_id}_${s.homework_index}`] = s; });
 
+        // 4. เก็บเฉพาะคอร์สที่มี quiz หรือ homework
+        allCourses = (courses || []).filter(c => {
+            const hasQuiz = Array.isArray(c.quiz) && c.quiz.length > 0;
+            const hasHw   = Array.isArray(c.homework) && c.homework.length > 0;
+            return hasQuiz || hasHw;
+        });
+
+        if (allCourses.length === 0) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่มีแบบฝึกหัด</h3><p>คอร์สที่คุณสมัครยังไม่มีแบบทดสอบหรือการบ้านในตอนนี้</p></div>`;
+            return;
+        }
+
+        // 5. render การ์ด
         grid.innerHTML = '';
-        coursesWithQuiz.forEach(course => {
-            const quizCount = course.quiz.length;
+        allCourses.forEach(course => {
+            const quizArr = Array.isArray(course.quiz) ? course.quiz : [];
+            const hwArr   = Array.isArray(course.homework) ? course.homework : [];
+            const quizCount = quizArr.length;
             const scoreData = scoresMap[course.id];
             const hasScore  = !!scoreData;
-            const pct = hasScore ? Math.round((scoreData.score / quizCount) * 100) : 0;
+            const pct = hasScore ? scoreData.pct : 0;
+
+            // นับการบ้านที่ส่งแล้ว
+            let hwDone = 0;
+            hwArr.forEach((hw, hi) => { if (subMap[`${course.id}_${hi}`]) hwDone++; });
+
+            // ส่วน quiz ในการ์ด
+            let quizSection = '';
+            if (quizCount > 0) {
+                quizSection = `
+                    <div class="quiz-meta">📋 แบบทดสอบ ${quizCount} ข้อ</div>
+                    ${hasScore ? `
+                        <div class="quiz-score-bar"><div class="quiz-score-fill" style="width:${pct}%"></div></div>
+                        <div class="quiz-score-label"><span>คะแนนล่าสุด</span><span>${scoreData.score}/${scoreData.total} (${pct}%)</span></div>
+                    ` : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำแบบทดสอบ</p>`}
+                    <div class="quiz-card-actions">
+                        <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">${hasScore ? '🔁 ทำแบบทดสอบใหม่' : '▶️ เริ่มทำแบบทดสอบ'}</button>
+                    </div>`;
+            }
+
+            // ส่วน homework ในการ์ด
+            let hwSection = '';
+            if (hwArr.length > 0) {
+                hwSection = `
+                    <div class="quiz-meta" style="margin-top:${quizCount>0?'0.85rem':'0'};">📄 การบ้าน ${hwArr.length} ชิ้น — ส่งแล้ว ${hwDone}/${hwArr.length}</div>
+                    <div class="quiz-card-actions">
+                        <a href="course-content.html?id=${course.id}&tab=homework" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:block;">📄 ไปทำการบ้าน</a>
+                    </div>`;
+            }
 
             const card = document.createElement('div');
             card.className = 'quiz-card';
             card.innerHTML = `
                 <div class="quiz-card-header">
-                    <div class="quiz-course-name">${course.title}</div>
-                    <span class="quiz-count-badge">${quizCount} ข้อ</span>
+                    <div class="quiz-course-name">${escapeHtml(course.title || 'คอร์สเรียน')}</div>
+                    <span class="quiz-count-badge">${quizCount > 0 ? quizCount + ' ข้อ' : hwArr.length + ' การบ้าน'}</span>
                 </div>
-                <div class="quiz-meta">${course.category || ''} • ${course.level || ''}</div>
-                ${hasScore ? `
-                    <div class="quiz-score-bar">
-                        <div class="quiz-score-fill" style="width:${pct}%"></div>
-                    </div>
-                    <div class="quiz-score-label">
-                        <span>คะแนนล่าสุด</span>
-                        <span>${scoreData.score}/${quizCount} (${pct}%)</span>
-                    </div>
-                ` : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำ</p>`}
-
-                <div class="quiz-card-actions">
-                    <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">
-                        ${hasScore ? '🔁 ทำใหม่' : '▶️ เริ่มทำ'}
-                    </button>
-                    <a href="course-content.html?id=${course.id}" class="btn-go-lesson" title="ดูบทเรียน">
-                        📚 บทเรียน
-                    </a>
-                </div>
-            `;
+                <div class="quiz-meta" style="margin-bottom:0.75rem;">${course.category || ''}${course.level ? ' • ' + course.level : ''}</div>
+                ${quizSection}
+                ${hwSection}
+                <div class="quiz-card-actions" style="margin-top:0.75rem;">
+                    <a href="course-content.html?id=${course.id}" class="btn-go-lesson" title="ดูบทเรียน" style="text-decoration:none;">📚 ไปที่บทเรียน</a>
+                </div>`;
             grid.appendChild(card);
         });
 
-        window.__coursesWithQuiz = coursesWithQuiz;
+        window.__coursesWithQuiz = allCourses;
+
     } catch(err) {
-        console.error(err);
+        console.error('loadQuizzes error:', err);
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3><p>${err.message}</p></div>`;
     }
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 let currentQuiz = null;
@@ -603,10 +636,10 @@ async function showResult() {
 
     try {
         await supabase.from('quiz_scores').upsert({
-            id: `${currentUser.id}_${courseId}`,
             user_id: currentUser.id,
             course_id: courseId,
-            userId: currentUser.id, courseId, score, total, pct, updatedAt: new Date()
+            score, total, pct,
+            updated_at: new Date().toISOString()
         });
     } catch(e) { console.error('Save score error:', e); }
 
