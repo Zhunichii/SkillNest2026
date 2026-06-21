@@ -404,21 +404,7 @@ let quizCounter = 0;
 let homeworks = [];
 let hwCounter = 0;
 
-// ─── Auth & Load ───────────────────────────────────────────────
-const { data: { user: _eu } } = await supabase.auth.getUser();
-if (!_eu) { window.location.href = '../login-page/login.html'; }
-else {
-    const { data: _ep } = await supabase.from('users').select('user_type').eq('id', _eu.id).single();
-    if (_ep?.user_type !== 'teacher') {
-        alert('เฉพาะครูเท่านั้น');
-        window.location.href = 'dashboard.html';
-    } else {
-        currentUser = _eu;
-        courseId = new URLSearchParams(window.location.search).get('id');
-        if (!courseId) { alert('ไม่พบ course ID'); window.location.href = 'manage-courses.html'; }
-        else { await loadCourseForEdit(); }
-    }
-}
+// (init moved to bottom of file — see initEditCoursePage)
 
 async function loadCourseForEdit() {
     showLoading('กำลังโหลดข้อมูลคอร์ส...');
@@ -961,6 +947,30 @@ function updateSubText(text) {
 function hideLoading() {
     document.getElementById('loadingOverlay').classList.remove('show');
 }
+// ─── Auth & Load (รันหลัง function ทั้งหมดถูก define ครบแล้ว) ──
+async function initEditCoursePage() {
+    const { data: { user: _eu } } = await supabase.auth.getUser();
+    if (!_eu) { window.location.href = '../login-page/login.html'; return; }
+
+    const { data: _ep } = await supabase.from('users').select('user_type').eq('id', _eu.id).single();
+    if (_ep?.user_type !== 'teacher') {
+        alert('เฉพาะครูเท่านั้น');
+        window.location.href = 'dashboard.html';
+        return;
+    }
+
+    currentUser = _eu;
+    courseId = new URLSearchParams(window.location.search).get('id');
+    if (!courseId) {
+        alert('ไม่พบ course ID');
+        window.location.href = 'manage-courses.html';
+        return;
+    }
+
+    await loadCourseForEdit();
+}
+
+initEditCoursePage();
 </script>
 </body>
 </html>
