@@ -841,6 +841,62 @@
             font-size: 0.85rem;
             color: var(--text-dim);
         }
+        /* ── Code IDE ── */
+        .ide-wrap {
+            border: 1px solid var(--line-strong, rgba(226,232,240,0.16));
+            border-radius: 10px; overflow: hidden; margin-bottom: 12px;
+            background: #0D1117;
+        }
+        .ide-toolbar {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; background: #161B22; border-bottom: 1px solid rgba(226,232,240,0.08);
+        }
+        .ide-lang-badge {
+            font-family: var(--font-mono, monospace); font-size: 0.72rem;
+            background: rgba(99,102,241,0.15); color: #A5B4FC;
+            padding: 3px 9px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .ide-run-btn {
+            margin-left: auto; background: #238636; color: white; border: none;
+            padding: 6px 16px; border-radius: 6px; font-size: 0.82rem; font-weight: 500;
+            cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+            font-family: var(--font-body, sans-serif);
+        }
+        .ide-run-btn:hover { background: #2ea043; }
+        .ide-run-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .ide-reset-btn {
+            background: transparent; color: var(--text-dim, #8B92AE);
+            border: 1px solid rgba(226,232,240,0.16); padding: 6px 12px;
+            border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-family: var(--font-body, sans-serif);
+        }
+        .ide-reset-btn:hover { color: var(--text-main, #E2E8F0); border-color: rgba(226,232,240,0.3); }
+
+        .ide-editor {
+            width: 100%; min-height: 200px; max-height: 400px;
+            background: #0D1117; color: #E6EDF3; border: none; outline: none;
+            font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.85rem;
+            line-height: 1.6; padding: 14px; resize: vertical; tab-size: 4;
+            white-space: pre; overflow-wrap: normal; overflow-x: auto;
+        }
+        .ide-console {
+            background: #010409; border-top: 1px solid rgba(226,232,240,0.08);
+            padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+            line-height: 1.5; max-height: 220px; overflow-y: auto; color: #C9D1D9;
+            white-space: pre-wrap; word-break: break-word;
+        }
+        .ide-console:empty::before {
+            content: '// ผลลัพธ์จะแสดงที่นี่หลังกดรัน'; color: #484F58;
+        }
+        .ide-console .out-line { color: #C9D1D9; }
+        .ide-console .err-line { color: #FF7B72; }
+        .ide-console .ok-line  { color: #3FB950; }
+        .ide-console .info-line { color: #58A6FF; }
+
+        .ide-preview-frame {
+            width: 100%; height: 240px; border: none; background: white;
+            border-top: 1px solid rgba(226,232,240,0.08);
+        }
+
         .hw-submit-area textarea {
             width: 100%;
             padding: 0.75rem;
@@ -3483,6 +3539,8 @@ async function loadHomeworkPanel() {
 
         const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
         const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
+        const isCode = hw.submissionType === 'code';
+        const codeLang = hw.codeLanguage || 'python';
 
         let scoreHtml = '';
         if (isGraded) {
@@ -3495,7 +3553,11 @@ async function loadHomeworkPanel() {
 
         let submittedHtml = '';
         if (isSubmitted && sub.content) {
-            submittedHtml = `<div class="hw-comment-display">📝 งานที่ส่ง: ${sub.content}</div>`;
+            if (sub.submission_kind === 'code') {
+                submittedHtml = `<div class="hw-comment-display">💻 โค้ดที่ส่ง (${sub.code_language || 'code'}):<pre style="background:#0D1117;color:#E6EDF3;padding:12px;border-radius:8px;overflow-x:auto;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.5;white-space:pre;">${escapeForTextarea(sub.content)}</pre></div>`;
+            } else {
+                submittedHtml = `<div class="hw-comment-display">📝 งานที่ส่ง: ${sub.content}</div>`;
+            }
         }
         if (isSubmitted && sub.fileUrl) {
             submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.fileUrl}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
@@ -3503,7 +3565,26 @@ async function loadHomeworkPanel() {
 
         let submitFormHtml = '';
         if (!isSubmitted) {
-            submitFormHtml = `
+            if (isCode) {
+                const starter = hw.starterCode || (codeLang === 'python' ? '# เขียนโค้ดของคุณที่นี่\nprint("Hello, SkillNest!")' : '// เขียนโค้ดของคุณที่นี่\nconsole.log("Hello, SkillNest!");');
+                submitFormHtml = `
+                <div class="hw-submit-area" id="hw-form-${idx}">
+                    <div class="ide-wrap">
+                        <div class="ide-toolbar">
+                            <span class="ide-lang-badge">${codeLang}</span>
+                            <button class="ide-reset-btn" onclick="resetCode(${idx}, ${JSON.stringify(starter).replace(/"/g, '&quot;')})">↺ รีเซ็ต</button>
+                            <button class="ide-run-btn" id="ide-run-${idx}" onclick="runCode(${idx}, '${codeLang}')">▶ รันโค้ด</button>
+                        </div>
+                        <textarea class="ide-editor" id="hw-code-${idx}" spellcheck="false">${escapeForTextarea(starter)}</textarea>
+                        <div class="ide-console" id="ide-console-${idx}"></div>
+                        <iframe class="ide-preview-frame" id="ide-preview-${idx}" style="display:none;" sandbox="allow-scripts"></iframe>
+                    </div>
+                    <button class="btn-submit-hw" onclick="submitHomework(${idx}, '${courseId}')">
+                        📤 ส่งคำตอบ (โค้ด)
+                    </button>
+                </div>`;
+            } else {
+                submitFormHtml = `
                 <div class="hw-submit-area" id="hw-form-${idx}">
                     ${canSubmit ? `<textarea placeholder="พิมพ์คำตอบ / งานของคุณที่นี่..." id="hw-text-${idx}"></textarea>` : ''}
                     ${canFile ? `
@@ -3517,6 +3598,7 @@ async function loadHomeworkPanel() {
                         📤 ส่งการบ้าน
                     </button>
                 </div>`;
+            }
         } else if (!isGraded) {
             submitFormHtml = `<p style="font-size:0.85rem;color:var(--text-dim);margin-top:0.5rem;">รอครูตรวจงาน...</p>`;
         }
@@ -3544,8 +3626,158 @@ window.previewHwFile = function(idx, input) {
     document.getElementById(`hw-file-preview-${idx}`).textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
 };
 
+// ── Code IDE Runtime ──
+function escapeForTextarea(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+window.resetCode = function(idx, starter) {
+    const ed = document.getElementById(`hw-code-${idx}`);
+    if (ed) ed.value = starter;
+    const con = document.getElementById(`ide-console-${idx}`);
+    if (con) con.innerHTML = '';
+    const frame = document.getElementById(`ide-preview-${idx}`);
+    if (frame) frame.style.display = 'none';
+};
+
+// Pyodide (โหลดครั้งเดียว แชร์ทุก IDE)
+let _pyodideInstance = null;
+let _pyodideLoading = null;
+async function getPyodide(consoleEl) {
+    if (_pyodideInstance) return _pyodideInstance;
+    if (_pyodideLoading) return _pyodideLoading;
+    _pyodideLoading = (async () => {
+        appendConsole(consoleEl, 'info', '⏳ กำลังโหลด Python runtime (ครั้งแรกอาจช้าสักครู่)...');
+        if (!window.loadPyodide) {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js';
+                s.onload = resolve; s.onerror = () => reject(new Error('โหลด Pyodide ไม่สำเร็จ'));
+                document.head.appendChild(s);
+            });
+        }
+        _pyodideInstance = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/' });
+        return _pyodideInstance;
+    })();
+    return _pyodideLoading;
+}
+
+function appendConsole(el, type, text) {
+    if (!el) return;
+    const cls = type === 'err' ? 'err-line' : type === 'ok' ? 'ok-line' : type === 'info' ? 'info-line' : 'out-line';
+    const span = document.createElement('div');
+    span.className = cls;
+    span.textContent = text;
+    el.appendChild(span);
+    el.scrollTop = el.scrollHeight;
+}
+
+window.runCode = async function(idx, lang) {
+    const editor = document.getElementById(`hw-code-${idx}`);
+    const consoleEl = document.getElementById(`ide-console-${idx}`);
+    const frame = document.getElementById(`ide-preview-${idx}`);
+    const runBtn = document.getElementById(`ide-run-${idx}`);
+    if (!editor) return;
+
+    const code = editor.value;
+    consoleEl.innerHTML = '';
+    frame.style.display = 'none';
+    runBtn.disabled = true;
+    const origLabel = runBtn.textContent;
+    runBtn.textContent = '⏳ กำลังรัน...';
+
+    try {
+        if (lang === 'python') {
+            const pyodide = await getPyodide(consoleEl);
+            consoleEl.innerHTML = '';
+            // ดัก stdout / stderr
+            pyodide.setStdout({ batched: (s) => appendConsole(consoleEl, 'out', s) });
+            pyodide.setStderr({ batched: (s) => appendConsole(consoleEl, 'err', s) });
+            try {
+                await pyodide.runPythonAsync(code);
+                appendConsole(consoleEl, 'ok', '\n✓ รันเสร็จสมบูรณ์');
+            } catch(pyErr) {
+                appendConsole(consoleEl, 'err', String(pyErr.message || pyErr));
+            }
+        } else if (lang === 'javascript') {
+            // รัน JS ใน sandbox ผ่าน Function + ดัก console.log
+            const logs = [];
+            const sandboxConsole = {
+                log:  (...a) => logs.push(a.map(fmtVal).join(' ')),
+                error:(...a) => logs.push('❌ ' + a.map(fmtVal).join(' ')),
+                warn: (...a) => logs.push('⚠️ ' + a.map(fmtVal).join(' ')),
+                info: (...a) => logs.push(a.map(fmtVal).join(' ')),
+            };
+            try {
+                const fn = new Function('console', code);
+                fn(sandboxConsole);
+                logs.forEach(l => appendConsole(consoleEl, l.startsWith('❌') ? 'err' : 'out', l));
+                appendConsole(consoleEl, 'ok', '\n✓ รันเสร็จสมบูรณ์');
+            } catch(jsErr) {
+                logs.forEach(l => appendConsole(consoleEl, 'out', l));
+                appendConsole(consoleEl, 'err', String(jsErr.message || jsErr));
+            }
+        } else if (lang === 'html') {
+            // แสดงผล HTML ใน iframe sandbox
+            frame.style.display = 'block';
+            frame.srcdoc = code;
+            appendConsole(consoleEl, 'ok', '✓ แสดงผลด้านล่าง');
+        } else {
+            appendConsole(consoleEl, 'info', `ภาษา ${lang} ยังไม่รองรับการรันในเบราว์เซอร์ — นักเรียนเขียนและส่งได้ตามปกติ`);
+        }
+    } catch(e) {
+        appendConsole(consoleEl, 'err', 'เกิดข้อผิดพลาด: ' + e.message);
+    }
+
+    runBtn.disabled = false;
+    runBtn.textContent = origLabel;
+};
+
+function fmtVal(v) {
+    if (typeof v === 'object') { try { return JSON.stringify(v); } catch(e) { return String(v); } }
+    return String(v);
+}
+
 window.submitHomework = async function(hwIdx, courseId) {
     const hw = currentCourse.homework[hwIdx];
+    const isCode = hw.submissionType === 'code';
+
+    // ── กรณีส่งโค้ดจาก IDE ──
+    if (isCode) {
+        const codeEl = document.getElementById(`hw-code-${hwIdx}`);
+        const codeContent = codeEl ? codeEl.value.trim() : '';
+        if (!codeContent) { alert('❌ กรุณาเขียนโค้ดก่อนส่ง'); return; }
+
+        const btnC = document.querySelector(`#hw-form-${hwIdx} .btn-submit-hw`);
+        if (btnC) { btnC.disabled = true; btnC.textContent = '⏳ กำลังส่ง...'; }
+        try {
+            const subId = `${currentUser.id}_${courseId}_${hwIdx}`;
+            const { error } = await supabase.from('submissions').upsert({
+                id: subId,
+                user_id: currentUser.id,
+                course_id: courseId,
+                homework_index: hwIdx,
+                homework_title: hw.title,
+                content: codeContent,
+                file_url: '',
+                submission_kind: 'code',
+                code_language: hw.codeLanguage || 'python',
+                submitted_at: new Date().toISOString(),
+                status: 'submitted',
+                grade: null,
+                comment: ''
+            });
+            if (error) throw error;
+            alert('✅ ส่งคำตอบ (โค้ด) สำเร็จ!');
+            await loadHomeworkPanel();
+        } catch(e) {
+            console.error('Submit code error:', e);
+            alert('❌ เกิดข้อผิดพลาด: ' + e.message);
+            if (btnC) { btnC.disabled = false; btnC.textContent = '📤 ส่งคำตอบ (โค้ด)'; }
+        }
+        return;
+    }
+
     const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
     const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
 

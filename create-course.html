@@ -1165,6 +1165,17 @@ window.addHomework = function() {
                     <div class="hw-type-btn active" onclick="setHwType('${hwId}','text',this)">✍️ พิมพ์ข้อความ</div>
                     <div class="hw-type-btn" onclick="setHwType('${hwId}','file',this)">📎 อัปโหลดไฟล์</div>
                     <div class="hw-type-btn" onclick="setHwType('${hwId}','both',this)">✍️📎 ทั้งสองแบบ</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','code',this)">💻 เขียนโค้ด (IDE)</div>
+                </div>
+                <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:none;margin-top:0.75rem;">
+                    <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
+                    <select class="hw-code-lang" id="hw-code-lang-${hwId}" onchange="setHwCodeLang('${hwId}', this.value)"
+                        style="width:100%;padding:0.6rem;border-radius:8px;background:var(--input-bg);color:var(--text-main);border:1px solid var(--border-color);margin-top:0.4rem;">
+                        <option value="python">Python (รันในเบราว์เซอร์ได้)</option>
+                        <option value="javascript">JavaScript (รันในเบราว์เซอร์ได้)</option>
+                        <option value="html">HTML/CSS (แสดงผลในเบราว์เซอร์ได้)</option>
+                        <option value="other">ภาษาอื่นๆ (เขียน+ส่งได้ ไม่รันอัตโนมัติ)</option>
+                    </select>
                 </div>
             </div>
         </div>`);
@@ -1180,6 +1191,15 @@ window.setHwType = function(hwId, type, btn) {
     if (hw) hw.type = type;
     btn.closest('.hw-type-selector').querySelectorAll('.hw-type-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    // แสดงตัวเลือกภาษาเมื่อเลือก code
+    const opts = document.getElementById('hw-code-opts-' + hwId);
+    if (opts) opts.style.display = (type === 'code') ? 'block' : 'none';
+    if (type === 'code' && hw && !hw.codeLanguage) hw.codeLanguage = 'python';
+};
+
+window.setHwCodeLang = function(hwId, lang) {
+    const hw = homeworks.find(h => h.id === hwId);
+    if (hw) hw.codeLanguage = lang;
 };
 
 function collectHomeworkData() {
@@ -1195,6 +1215,7 @@ function collectHomeworkData() {
             deadline: item.querySelector('.hw-deadline').value || null,
             maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,
             submissionType: hw.type || 'text',
+            codeLanguage: hw.type === 'code' ? (hw.codeLanguage || 'python') : null,
             order: i
         });
     });

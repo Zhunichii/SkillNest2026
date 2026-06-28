@@ -752,7 +752,7 @@ window.addHomework = function(data = null) {
     hwCounter++;
     const hwId = 'hw-' + hwCounter;
     const initType = data?.submissionType || 'text';
-    homeworks.push({ id: hwId, type: initType });
+    homeworks.push({ id: hwId, type: initType, codeLanguage: data?.codeLanguage || 'python' });
 
     const typeActive = t => initType === t ? 'active' : '';
     document.getElementById('homeworkList').insertAdjacentHTML('beforeend', `
@@ -785,6 +785,17 @@ window.addHomework = function(data = null) {
                     <div class="hw-type-btn ${typeActive('text')}" onclick="setHwType('${hwId}','text',this)">✍️ พิมพ์ข้อความ</div>
                     <div class="hw-type-btn ${typeActive('file')}" onclick="setHwType('${hwId}','file',this)">📎 อัปโหลดไฟล์</div>
                     <div class="hw-type-btn ${typeActive('both')}" onclick="setHwType('${hwId}','both',this)">✍️📎 ทั้งสองแบบ</div>
+                    <div class="hw-type-btn ${typeActive('code')}" onclick="setHwType('${hwId}','code',this)">💻 เขียนโค้ด (IDE)</div>
+                </div>
+                <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:${initType==='code'?'block':'none'};margin-top:0.75rem;">
+                    <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
+                    <select class="hw-code-lang" id="hw-code-lang-${hwId}" onchange="setHwCodeLang('${hwId}', this.value)"
+                        style="width:100%;padding:0.6rem;border-radius:8px;background:var(--input-bg);color:var(--text-main);border:1px solid var(--border-color);margin-top:0.4rem;">
+                        <option value="python" ${(data?.codeLanguage||'python')==='python'?'selected':''}>Python (รันในเบราว์เซอร์ได้)</option>
+                        <option value="javascript" ${data?.codeLanguage==='javascript'?'selected':''}>JavaScript (รันในเบราว์เซอร์ได้)</option>
+                        <option value="html" ${data?.codeLanguage==='html'?'selected':''}>HTML/CSS (แสดงผลในเบราว์เซอร์ได้)</option>
+                        <option value="other" ${data?.codeLanguage==='other'?'selected':''}>ภาษาอื่นๆ (เขียน+ส่งได้ ไม่รันอัตโนมัติ)</option>
+                    </select>
                 </div>
             </div>
         </div>`);
@@ -799,6 +810,13 @@ window.setHwType = function(hwId, type, btn) {
     if (hw) hw.type = type;
     btn.closest('.hw-type-selector').querySelectorAll('.hw-type-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    const opts = document.getElementById('hw-code-opts-' + hwId);
+    if (opts) opts.style.display = (type === 'code') ? 'block' : 'none';
+    if (type === 'code' && hw && !hw.codeLanguage) hw.codeLanguage = 'python';
+};
+window.setHwCodeLang = function(hwId, lang) {
+    const hw = homeworks.find(h => h.id === hwId);
+    if (hw) hw.codeLanguage = lang;
 };
 function collectHomeworkData() {
     return Array.from(document.querySelectorAll('.hw-item')).map((item, i) => {
@@ -811,6 +829,7 @@ function collectHomeworkData() {
             deadline: item.querySelector('.hw-deadline').value || null,
             maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,
             submissionType: hw.type || 'text',
+            codeLanguage: hw.type === 'code' ? (hw.codeLanguage || document.getElementById('hw-code-lang-'+hw.id)?.value || 'python') : null,
             order: i
         };
     }).filter(Boolean);
