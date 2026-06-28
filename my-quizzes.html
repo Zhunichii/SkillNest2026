@@ -474,6 +474,7 @@ async function loadQuizzes() {
 
         const scoresMap = {};
         (quizScores || []).forEach(s => { scoresMap[s.course_id] = s; });
+        window.__completedQuiz = scoresMap;
         const subMap = {};
         (submissions || []).forEach(s => { subMap[`${s.course_id}_${s.homework_index}`] = s; });
 
@@ -510,11 +511,16 @@ async function loadQuizzes() {
                     <div class="quiz-meta">📋 แบบทดสอบ ${quizCount} ข้อ</div>
                     ${hasScore ? `
                         <div class="quiz-score-bar"><div class="quiz-score-fill" style="width:${pct}%"></div></div>
-                        <div class="quiz-score-label"><span>คะแนนล่าสุด</span><span>${scoreData.score}/${scoreData.total} (${pct}%)</span></div>
-                    ` : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำแบบทดสอบ</p>`}
-                    <div class="quiz-card-actions">
-                        <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">${hasScore ? '🔁 ทำแบบทดสอบใหม่' : '▶️ เริ่มทำแบบทดสอบ'}</button>
-                    </div>`;
+                        <div class="quiz-score-label"><span>คะแนนของคุณ</span><span>${scoreData.score}/${scoreData.total} (${pct}%)</span></div>
+                        <div class="quiz-card-actions">
+                            <button class="btn-start-quiz" disabled style="opacity:0.55;cursor:not-allowed;">✅ ทำแบบทดสอบแล้ว</button>
+                        </div>
+                    ` : `
+                        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำแบบทดสอบ • ทำได้ครั้งเดียว</p>
+                        <div class="quiz-card-actions">
+                            <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">▶️ เริ่มทำแบบทดสอบ</button>
+                        </div>
+                    `}`;
             }
 
             // ส่วน homework ในการ์ด
@@ -558,6 +564,12 @@ function escapeHtml(str) {
 let currentQuiz = null;
 
 window.startQuiz = function(courseId) {
+    // ทำได้ครั้งเดียว — ถ้าทำแล้วแจ้งเตือนและไม่ให้ทำซ้ำ
+    if (window.__completedQuiz && window.__completedQuiz[courseId]) {
+        const s = window.__completedQuiz[courseId];
+        alert(`คุณทำแบบทดสอบนี้ไปแล้ว\nคะแนนของคุณ: ${s.score}/${s.total} (${s.pct}%)\n\nแบบทดสอบทำได้เพียงครั้งเดียวเท่านั้น`);
+        return;
+    }
     const course = window.__coursesWithQuiz.find(c => c.id === courseId);
     if (!course) return;
     currentQuiz = { courseId, courseName: course.title, questions: course.quiz, currentIndex: 0, score: 0, selected: null, answered: false };
@@ -632,7 +644,7 @@ async function showResult() {
     const total = questions.length;
     const pct   = Math.round((score/total)*100);
     const emoji = pct>=80 ? '🎉' : pct>=60 ? '👍' : '📚';
-    const msg   = pct>=80 ? 'ยอดเยี่ยม!' : pct>=60 ? 'ทำได้ดี!' : 'ลองทำใหม่อีกครั้งนะ';
+    const msg   = pct>=80 ? 'ยอดเยี่ยม!' : pct>=60 ? 'ทำได้ดี!' : 'ทำได้ดีแล้ว สู้ๆ นะ';
 
     try {
         await supabase.from('quiz_scores').upsert({
@@ -641,6 +653,9 @@ async function showResult() {
             score, total, pct,
             updated_at: new Date().toISOString()
         });
+        // mark ว่าทำแล้วทันที กันทำซ้ำในเซสชันเดียวกัน
+        if (!window.__completedQuiz) window.__completedQuiz = {};
+        window.__completedQuiz[courseId] = { score, total, pct };
     } catch(e) { console.error('Save score error:', e); }
 
     document.getElementById('quizModal').innerHTML = `
@@ -653,7 +668,7 @@ async function showResult() {
                 <div class="result-stat"><div class="result-stat-num" style="color:var(--danger-red);">${total-score}</div><div class="result-stat-label">ผิด</div></div>
                 <div class="result-stat"><div class="result-stat-num" style="color:var(--primary-blue);">${pct}%</div><div class="result-stat-label">คะแนน</div></div>
             </div>
-            <button class="btn-retry" onclick="startQuiz('${courseId}')">🔁 ทำใหม่</button>
+            <p style="color:var(--text-dim);font-size:0.82rem;margin:4px 0 16px;">📌 แบบทดสอบนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว</p>
             <button class="btn-close-result" onclick="closeQuizModal()">กลับหน้าหลัก</button>
         </div>`;
 

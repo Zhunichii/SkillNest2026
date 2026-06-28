@@ -2500,8 +2500,13 @@ async function loadCourseData() {
                         const sumEl = document.getElementById('quizScoreSummary');
                         sumEl.classList.add('show');
                         document.getElementById('quizScoreVal').textContent = `${scoreData.score}/${scoreData.total}`;
-                        document.getElementById('quizScoreDetail').textContent = `${scoreData.pct}% • ทำล่าสุดแล้ว`;
-                        document.getElementById('btnStartQuiz').textContent = '🔁 ทำแบบทดสอบอีกครั้ง';
+                        document.getElementById('quizScoreDetail').textContent = `${scoreData.pct}% • ทำเสร็จแล้ว`;
+                        const startBtn = document.getElementById('btnStartQuiz');
+                        startBtn.textContent = '✅ ทำแบบทดสอบแล้ว';
+                        startBtn.disabled = true;
+                        startBtn.style.opacity = '0.55';
+                        startBtn.style.cursor = 'not-allowed';
+                        window._quizDone = true;
                     }
                 } catch(e) {}
             }
@@ -2511,6 +2516,17 @@ async function loadCourseData() {
         if (currentCourse.homework && currentCourse.homework.length > 0) {
             document.getElementById('hwTabBtn').style.display = 'inline-block';
             await loadHomeworkPanel();
+        }
+
+        // เปิดแท็บอัตโนมัติถ้ามี ?tab= ใน URL (มาจากหน้า "แบบฝึกหัดของฉัน")
+        const _tabParam = new URLSearchParams(window.location.search).get('tab');
+        if (_tabParam === 'quiz' || _tabParam === 'homework') {
+            const tabBtnId = _tabParam === 'quiz' ? 'quizTabBtn' : 'hwTabBtn';
+            const tabBtn = document.getElementById(tabBtnId);
+            if (tabBtn && tabBtn.style.display !== 'none') {
+                switchTab(_tabParam, tabBtn);
+                tabBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
     } catch (error) {
@@ -3545,6 +3561,11 @@ let cqState = null; // current quiz state
 
 window.startCourseQuiz = function() {
     if (!currentCourse || !currentCourse.quiz || currentCourse.quiz.length === 0) return;
+    // ทำได้ครั้งเดียว
+    if (window._quizDone) {
+        alert('คุณทำแบบทดสอบนี้ไปแล้ว\nแบบทดสอบทำได้เพียงครั้งเดียวเท่านั้น');
+        return;
+    }
     cqState = {
         questions: currentCourse.quiz,
         index: 0,
@@ -3620,7 +3641,7 @@ async function showCourseQuizResult() {
     const total = questions.length;
     const pct = Math.round((score/total)*100);
     const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
-    const msg = pct >= 80 ? 'ยอดเยี่ยมมาก!' : pct >= 60 ? 'ทำได้ดี!' : 'ลองทำใหม่อีกครั้งนะ';
+    const msg = pct >= 80 ? 'ยอดเยี่ยมมาก!' : pct >= 60 ? 'ทำได้ดี!' : 'ทบทวนบทเรียนเพิ่มเติมได้นะ';
 
     // Save score
     const urlParams = new URLSearchParams(window.location.search);
@@ -3641,7 +3662,12 @@ async function showCourseQuizResult() {
                 sumEl.classList.add('show');
                 document.getElementById('quizScoreVal').textContent = `${score}/${total}`;
                 document.getElementById('quizScoreDetail').textContent = `${pct}% • เพิ่งทำเสร็จ`;
-                document.getElementById('btnStartQuiz').textContent = '🔁 ทำแบบทดสอบอีกครั้ง';
+                const startBtn = document.getElementById('btnStartQuiz');
+                startBtn.textContent = '✅ ทำแบบทดสอบแล้ว';
+                startBtn.disabled = true;
+                startBtn.style.opacity = '0.55';
+                startBtn.style.cursor = 'not-allowed';
+                window._quizDone = true;
             }
         } catch(e) {}
     }
@@ -3656,8 +3682,8 @@ async function showCourseQuizResult() {
                 <div class="qm-result-stat"><div class="qm-result-num" style="color:#ef4444;">${total-score}</div><div class="qm-result-label">ผิด</div></div>
                 <div class="qm-result-stat"><div class="qm-result-num" style="color:#3b82f6;">${pct}%</div><div class="qm-result-label">คะแนน</div></div>
             </div>
-            <button class="btn-retry-qm" onclick="startCourseQuiz()">🔁 ทำใหม่</button>
             <button class="btn-close-qm" onclick="closeCourseQuiz()">ปิด</button>
+            <p style="margin-top:14px;font-size:0.82rem;color:#8B92AE;">📌 แบบทดสอบนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว</p>
         </div>
     `;
 }
