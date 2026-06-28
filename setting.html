@@ -294,6 +294,19 @@
             border-radius: 8px; background: rgba(255,255,255,0.04);
         }
         audio::-webkit-media-controls-panel { background: rgba(30,27,75,0.8); }
+        .gemini-voice-opt { cursor: pointer; display: block; }
+        .gemini-voice-opt input { display: none; }
+        .gemini-voice-card {
+            background: rgba(226,232,240,0.03); border: 1.5px solid var(--border, rgba(226,232,240,0.12));
+            border-radius: 10px; padding: 12px; text-align: center; transition: 0.2s;
+        }
+        .gemini-voice-card:hover { border-color: rgba(99,102,241,0.5); }
+        .gemini-voice-opt input:checked + .gemini-voice-card {
+            background: rgba(99,102,241,0.1); border-color: var(--primary, #6366F1);
+        }
+        .gv-name { font-weight: 600; font-size: 0.92rem; margin-bottom: 3px; }
+        .gv-desc { font-size: 0.74rem; color: var(--text-dim); }
+
         .voice-badge {
             display: inline-flex; align-items: center; gap: 5px;
             font-size: 0.75rem; padding: 3px 10px; border-radius: 99px;
@@ -640,6 +653,45 @@
                             <label>คำทักทายเมื่อนักเรียนเปิด Avatar</label>
                             <textarea id="avatarGreeting" rows="2" placeholder="เช่น สวัสดีครับ! ผมพร้อมช่วยสอนแล้ว มีคำถามอะไรไหมครับ?"></textarea>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Gemini Voice Picker -->
+                <div class="section-card" style="margin-top:0;">
+                    <div class="section-title">🔊 เสียงพูดของ Avatar (Gemini)</div>
+                    <div class="section-desc">เลือกเสียงที่ Avatar AI จะใช้พูดกับนักเรียน — ใช้ Gemini Speech รองรับภาษาไทย</div>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px;">
+                        <label class="gemini-voice-opt">
+                            <input type="radio" name="geminiVoice" value="Charon" checked>
+                            <div class="gemini-voice-card"><div class="gv-name">Charon</div><div class="gv-desc">ชาย • นุ่ม สุภาพ</div></div>
+                        </label>
+                        <label class="gemini-voice-opt">
+                            <input type="radio" name="geminiVoice" value="Kore">
+                            <div class="gemini-voice-card"><div class="gv-name">Kore</div><div class="gv-desc">หญิง • ชัดเจน</div></div>
+                        </label>
+                        <label class="gemini-voice-opt">
+                            <input type="radio" name="geminiVoice" value="Puck">
+                            <div class="gemini-voice-card"><div class="gv-name">Puck</div><div class="gv-desc">ชาย • สดใส</div></div>
+                        </label>
+                        <label class="gemini-voice-opt">
+                            <input type="radio" name="geminiVoice" value="Aoede">
+                            <div class="gemini-voice-card"><div class="gv-name">Aoede</div><div class="gv-desc">หญิง • อบอุ่น</div></div>
+                        </label>
+                        <label class="gemini-voice-opt">
+                            <input type="radio" name="geminiVoice" value="Leda">
+                            <div class="gemini-voice-card"><div class="gv-name">Leda</div><div class="gv-desc">หญิง • นุ่มนวล</div></div>
+                        </label>
+                        <label class="gemini-voice-opt">
+                            <input type="radio" name="geminiVoice" value="Orus">
+                            <div class="gemini-voice-card"><div class="gv-name">Orus</div><div class="gv-desc">ชาย • หนักแน่น</div></div>
+                        </label>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <button class="btn btn-ghost" type="button" onclick="previewGeminiVoice()" id="btnPreviewGemini" style="font-size:0.85rem;">
+                            ▶️ ทดลองฟังเสียง
+                        </button>
+                        <span id="geminiPreviewStatus" style="font-size:0.8rem;color:var(--text-dim);margin-left:8px;"></span>
                     </div>
                 </div>
 
@@ -1155,6 +1207,11 @@ function loadAvatarConfigToUI(cfg) {
     document.getElementById('avatarName').value     = avatarConfig.name || '';
     document.getElementById('avatarGreeting').value = avatarConfig.greeting || '';
 
+    // gemini voice
+    const gv = cfg.geminiVoiceName || 'Charon';
+    const gvRadio = document.querySelector(`input[name="geminiVoice"][value="${gv}"]`);
+    if (gvRadio) gvRadio.checked = true;
+
     updatePreview();
 }
 
@@ -1201,6 +1258,32 @@ window.selectPersonality = function(p, el) {
 document.getElementById('avatarName')?.addEventListener('input', updatePreview);
 document.getElementById('avatarGreeting')?.addEventListener('input', updatePreview);
 
+window.previewGeminiVoice = async function() {
+    const voice = document.querySelector('input[name="geminiVoice"]:checked')?.value || 'Charon';
+    const btn = document.getElementById('btnPreviewGemini');
+    const status = document.getElementById('geminiPreviewStatus');
+    btn.disabled = true;
+    status.textContent = 'กำลังโหลดเสียง...';
+    try {
+        const res = await fetch('/api/gemini-tts', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: 'สวัสดีครับ ผมเป็นผู้ช่วยสอน AI ยินดีช่วยอธิบายบทเรียนให้นะครับ',
+                voiceName: voice
+            })
+        });
+        if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || 'ไม่สำเร็จ'); }
+        const blob = await res.blob();
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.onended = () => { status.textContent = ''; };
+        await audio.play();
+        status.textContent = '🔊 กำลังเล่น...';
+    } catch(e) {
+        status.textContent = '❌ ' + e.message;
+    }
+    btn.disabled = false;
+};
+
 window.saveAvatarConfig = async function() {
     const cfg = {
         char:        avatarConfig.char,
@@ -1209,6 +1292,8 @@ window.saveAvatarConfig = async function() {
         name:        document.getElementById('avatarName').value.trim(),
         greeting:    document.getElementById('avatarGreeting').value.trim(),
         prompt:      PERSONALITIES[avatarConfig.personality]?.prompt || '',
+        geminiVoiceName: document.querySelector('input[name="geminiVoice"]:checked')?.value || 'Charon',
+        useGeminiTTS: true,
     };
     const { error } = await supabase.from('users')
         .update({ avatar_config: cfg }).eq('id', currentUser.id);

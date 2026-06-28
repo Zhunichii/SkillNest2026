@@ -1943,6 +1943,12 @@ function avatarSpeak(text, addToHistory = true) {
     if (bubble) { bubble.classList.remove('typing'); bubble.textContent = text; }
     if (addToHistory) addAvatarMsg('ai', text);
 
+    // ลำดับความสำคัญ: Gemini Speech (เสียงอาจารย์) → XTTS → Web Speech
+    if (window._useGeminiTTS !== false) {
+        avatarSpeakGemini(text);
+        return;
+    }
+
     // ใช้ XTTS ถ้ามี speaker audio
     if (window._speakerAudioBase64) {
         avatarSpeakXTTS(text);
@@ -1951,6 +1957,43 @@ function avatarSpeak(text, addToHistory = true) {
 
     // fallback: Web Speech API
     avatarSpeakWebSpeech(text);
+}
+
+// ── Gemini Speech (TTS) — เสียงอาจารย์ ──
+let _geminiAudio = null;
+async function avatarSpeakGemini(text) {
+    try {
+        avatarSpeaking = true; startTalking();
+        const res = await fetch('/api/gemini-tts', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text,
+                voiceName: window._geminiVoiceName || 'Charon'
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        if (_geminiAudio) { _geminiAudio.pause(); _geminiAudio = null; }
+        _geminiAudio = new Audio(url);
+        const saved = getAvatarVoiceSettings();
+        _geminiAudio.playbackRate = saved.rate || 1.0;
+        _geminiAudio.volume       = saved.volume ?? 1.0;
+        _geminiAudio.onended  = () => { avatarSpeaking = false; stopTalking(); URL.revokeObjectURL(url); };
+        _geminiAudio.onerror  = () => { avatarSpeaking = false; stopTalking(); };
+        await _geminiAudio.play();
+    } catch(e) {
+        console.warn('Gemini TTS error, fallback:', e.message);
+        avatarSpeaking = false; stopTalking();
+        // fallback ตามลำดับ
+        if (window._speakerAudioBase64) avatarSpeakXTTS(text);
+        else avatarSpeakWebSpeech(text);
+    }
 }
 
 // ── XTTS-v2 TTS ──
@@ -2165,6 +2208,7 @@ window.applyVoiceSettings = function() {
 function avatarStopSpeaking() {
     if (avatarSynth) avatarSynth.cancel();
     if (_xttsAudio) { _xttsAudio.pause(); _xttsAudio = null; }
+    if (_geminiAudio) { _geminiAudio.pause(); _geminiAudio = null; }
     avatarSpeaking = false; stopTalking();
 }
 
@@ -2432,12 +2476,16 @@ async function loadAvatarConfig(creatorId) {
         window._avatarPersonalityPrompt = P_PROMPTS[cfg.personality] || '';
         if (cfg.greeting) window._avatarCustomGreeting = cfg.greeting;
 
-        // XTTS voice — โหลดจาก speaker_audio_base64 column
+        // Gemini Speech — เสียงอาจารย์ (ครูเลือกเสียงได้ใน avatar_config)
+        window._geminiVoiceName = cfg.geminiVoiceName || 'Charon';
+        window._useGeminiTTS = cfg.useGeminiTTS !== false; // default เปิดใช้
+
+        // XTTS voice — โหลดจาก speaker_audio_base64 column (เป็น fallback)
         if (cfg.useXTTS && data.speaker_audio_base64) {
             window._speakerAudioBase64 = data.speaker_audio_base64;
             window._speakerAudioMime   = data.speaker_audio_mime || 'audio/webm';
             const status = document.getElementById('avatarStatusText');
-            if (status) status.title = '🎙️ ใช้เสียงครู (XTTS)';
+            if (status) status.title = '🎙️ ใช้เสียงครู';
         }
 
     } catch(e) { console.warn('loadAvatarConfig:', e); }
