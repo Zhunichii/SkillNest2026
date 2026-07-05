@@ -294,6 +294,14 @@
             <input type="file" id="thumbnailInput" accept="image/*" style="display:none;">
             <div id="thumbnailPreview"></div>
         </div>
+        <div class="section">
+            <h2 class="section-title">🔗 ฝังฟอร์มออนไลน์ (Google Form / Microsoft Form)</h2>
+            <div class="alert-info">💡 นักเรียนจะทำแบบฟอร์มนี้ได้ทันทีในหน้าคอร์ส ไม่ต้องเปิดแท็บใหม่</div>
+            <div class="form-group">
+                <label>URL ของฟอร์ม (Google Form หรือ Microsoft Form)</label>
+                <input type="url" id="embeddedFormUrl" class="form-control" placeholder="เช่น https://docs.google.com/forms/d/e/xxxx/viewform">
+            </div>
+        </div>
     </div>
 
     <!-- TAB 2: บทเรียน -->
@@ -352,6 +360,30 @@
     <div id="editTabHomework" class="edit-tab-panel">
         <div class="section">
             <h2 class="section-title">📋 การบ้าน (Homework)</h2>
+
+            <div class="ai-gen-area">
+                <div class="ai-gen-title">✨ ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ</div>
+                <div class="form-group">
+                    <label>อัปโหลดไฟล์ (PDF หรือรูปภาพโจทย์)</label>
+                    <div class="file-upload-area" onclick="document.getElementById('hwSourceFileInput').click()">
+                        <div class="file-upload-icon">📤</div>
+                        <p>คลิกเพื่ออัปโหลดไฟล์การบ้าน</p>
+                        <small style="color:var(--text-dim);">รองรับ PDF และรูปภาพ (JPG, PNG)</small>
+                    </div>
+                    <input type="file" id="hwSourceFileInput" accept=".pdf,image/*" style="display:none;">
+                    <div id="hwSourceFilePreview"></div>
+                </div>
+                <div class="form-group">
+                    <label>หรือวางข้อความโจทย์ตรงนี้แทน</label>
+                    <textarea id="hwSourceText" class="form-control" rows="4" placeholder="วางข้อความการบ้าน/โจทย์ที่นี่ (ถ้าไม่มีไฟล์)"></textarea>
+                </div>
+                <div style="display:flex; gap:0.75rem; align-items:center;">
+                    <button class="btn btn-ai" id="btnExtractHomework" onclick="extractHomeworkWithAI()">🤖 ให้ AI แตกเป็นข้อๆ</button>
+                    <small style="color:var(--text-dim);">AI จะเติมลงฟอร์มการบ้านด้านล่างให้ แก้ไขต่อได้ตามต้องการ</small>
+                </div>
+                <div id="hwExtractStatus" class="ai-loading-text"></div>
+            </div>
+
             <div id="homeworkList"></div>
             <button class="btn btn-outline" onclick="addHomework()">+ เพิ่มการบ้าน</button>
         </div>
@@ -421,6 +453,7 @@ function populateForm(course) {
     document.getElementById('courseCategory').value = course.category || '';
     document.getElementById('courseLevel').value = course.level || '';
     document.getElementById('courseInstructor').value = course.instructor || '';
+    document.getElementById('embeddedFormUrl').value = course.embeddedFormUrl || '';
 
     // ── รูปปก ──
     if (course.thumbnail) {
@@ -736,6 +769,158 @@ function collectQuizData() {
     }).filter(Boolean);
 }
 
+// ─── Homework AI Extraction (PDF / รูปภาพ / ข้อความ) ──────────────
+let hwSourceFile = null;
+
+document.getElementById('hwSourceFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    hwSourceFile = file;
+    const icon = file.type.startsWith('image/') ? '🖼️' : '📄';
+    document.getElementById('hwSourceFilePreview').innerHTML = `
+        <div class="file-preview">
+            <div style="font-size:2rem;">${icon}</div>
+            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button class="btn btn-danger" onclick="removeHwSourceFile()">✕</button>
+        </div>`;
+});
+
+window.removeHwSourceFile = function() {
+    hwSourceFile = null;
+    document.getElementById('hwSourceFileInput').value = '';
+    document.getElementById('hwSourceFilePreview').innerHTML = '';
+};
+
+async function ensurePdfJsLoaded() {
+    if (window.pdfjsLib) return;
+    await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+}
+
+async function extractTextFromPdfFile(file) {
+    await ensurePdfJsLoaded();
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    const maxPages = Math.min(pdf.numPages, 15);
+    for (let i = 1; i <= maxPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+    }
+    return fullText.slice(0, 6000);
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+function toDatetimeLocalValue(deadlineStr) {
+    if (!deadlineStr) return '';
+    const d = new Date(deadlineStr);
+    if (isNaN(d.getTime())) return '';
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours()||23)}:${pad(d.getMinutes()||59)}`;
+}
+
+const HOMEWORK_EXTRACT_INSTRUCTION = `คุณเป็นผู้ช่วยอาจารย์ ช่วยแตกเนื้อหาการบ้าน/โจทย์ต่อไปนี้ ออกเป็นรายการการบ้านแต่ละข้อ
+ตอบเป็น JSON array เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+[{"title":"ชื่อการบ้านสั้นๆ","description":"รายละเอียด/โจทย์ของข้อนี้","deadline":"YYYY-MM-DD หรือเว้นว่างถ้าไม่ระบุ","maxScore":100}]
+ถ้าเนื้อหาไม่ได้แบ่งเป็นหลายข้อ ให้สรุปเป็นการบ้าน 1 ข้อ
+
+เนื้อหา:
+`;
+
+window.extractHomeworkWithAI = async function() {
+    const btn = document.getElementById('btnExtractHomework');
+    const status = document.getElementById('hwExtractStatus');
+    const pastedText = document.getElementById('hwSourceText').value.trim();
+
+    if (!hwSourceFile && !pastedText) {
+        alert('กรุณาอัปโหลดไฟล์ หรือวางข้อความโจทย์ก่อนครับ');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ AI กำลังประมวลผล...';
+    status.classList.add('show');
+    status.textContent = 'กำลังอ่านเนื้อหา...';
+
+    try {
+        let requestBody;
+
+        if (hwSourceFile && hwSourceFile.type.startsWith('image/')) {
+            status.textContent = 'AI กำลังอ่านรูปภาพ...';
+            const base64 = await fileToBase64(hwSourceFile);
+            requestBody = {
+                type: 'outline',
+                prompt: HOMEWORK_EXTRACT_INSTRUCTION + '(เนื้อหาอยู่ในรูปภาพที่แนบมา)',
+                image: base64,
+                mimeType: hwSourceFile.type
+            };
+        } else {
+            let contentText = pastedText;
+            if (hwSourceFile && hwSourceFile.type === 'application/pdf') {
+                status.textContent = 'กำลังดึงข้อความจาก PDF...';
+                contentText = await extractTextFromPdfFile(hwSourceFile);
+            }
+            if (!contentText || !contentText.trim()) {
+                throw new Error('ไม่พบข้อความในไฟล์ที่อัปโหลด ลองวางข้อความแทนได้ครับ');
+            }
+            requestBody = {
+                type: 'outline',
+                prompt: HOMEWORK_EXTRACT_INSTRUCTION + contentText
+            };
+        }
+
+        status.textContent = 'AI กำลังแตกเป็นข้อๆ...';
+        const res = await fetch('/api/generate-quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        const jsonStr = (data.text || '').replace(/```json|```/g, '').trim();
+        const items = JSON.parse(jsonStr);
+        if (!Array.isArray(items) || items.length === 0) {
+            throw new Error('AI ไม่พบข้อการบ้านจากเนื้อหานี้');
+        }
+
+        items.forEach(item => {
+            addHomework({
+                title: item.title || '',
+                description: item.description || '',
+                deadline: toDatetimeLocalValue(item.deadline),
+                maxScore: item.maxScore || 100
+            });
+        });
+
+        status.textContent = `✅ เพิ่มการบ้านให้แล้ว ${items.length} ข้อ — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
+        document.getElementById('homeworkList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (err) {
+        console.error('extractHomeworkWithAI error:', err);
+        status.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🤖 ให้ AI แตกเป็นข้อๆ';
+    }
+};
+
 // ─── Homework ────────────────────────────────────────────────────
 window.addHomework = function(data = null) {
     hwCounter++;
@@ -928,6 +1113,7 @@ window.saveCourse = async function() {
             lessons: lessonsData,
             quiz: quizData,
             homework: homeworkData,
+            embeddedFormUrl: document.getElementById('embeddedFormUrl').value.trim() || null,
             updated_at: new Date().toISOString()
         }).eq('id', courseId);
         if (upErr) throw upErr;

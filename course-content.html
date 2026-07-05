@@ -1370,6 +1370,7 @@
                 <div class="lesson-tab active" onclick="switchTab('lessons', this)">📚 บทเรียน</div>
                 <div class="lesson-tab" id="quizTabBtn" onclick="switchTab('quiz', this)" style="display:none;">📝 แบบทดสอบ</div>
                 <div class="lesson-tab" id="hwTabBtn" onclick="switchTab('homework', this)" style="display:none;">📋 การบ้าน</div>
+                <div class="lesson-tab" id="formTabBtn" onclick="switchTab('form', this)" style="display:none;">🔗 แบบฟอร์ม</div>
             </div>
 
             <!-- Lesson list panel -->
@@ -1408,6 +1409,19 @@
                 <div style="padding:0.5rem 0;">
                     <div id="hwPanelList">
                         <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Embedded Form panel -->
+            <div id="tabForm" class="tab-panel">
+                <div style="padding:0.5rem 0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+                        <h3 style="margin:0;">🔗 แบบฟอร์ม</h3>
+                        <a id="formOpenNewTabLink" href="#" target="_blank" rel="noopener" style="font-size:0.85rem;color:var(--primary-blue);">เปิดในแท็บใหม่ ↗</a>
+                    </div>
+                    <div id="formEmbedWrap" style="position:relative;width:100%;min-height:70vh;border:1px solid var(--border-color);border-radius:12px;overflow:hidden;background:#fff;">
+                        <iframe id="courseFormIframe" src="" style="width:100%;height:75vh;border:0;display:block;" loading="lazy"></iframe>
                     </div>
                 </div>
             </div>
@@ -2591,10 +2605,18 @@ async function loadCourseData() {
             await loadHomeworkPanel();
         }
 
+        // แสดง form tab ถ้ามี embeddedFormUrl
+        if (currentCourse.embeddedFormUrl) {
+            document.getElementById('formTabBtn').style.display = 'inline-block';
+            const embedUrl = buildFormEmbedUrl(currentCourse.embeddedFormUrl);
+            document.getElementById('courseFormIframe').src = embedUrl;
+            document.getElementById('formOpenNewTabLink').href = currentCourse.embeddedFormUrl;
+        }
+
         // เปิดแท็บอัตโนมัติถ้ามี ?tab= ใน URL (มาจากหน้า "แบบฝึกหัดของฉัน")
         const _tabParam = new URLSearchParams(window.location.search).get('tab');
-        if (_tabParam === 'quiz' || _tabParam === 'homework') {
-            const tabBtnId = _tabParam === 'quiz' ? 'quizTabBtn' : 'hwTabBtn';
+        if (_tabParam === 'quiz' || _tabParam === 'homework' || _tabParam === 'form') {
+            const tabBtnId = _tabParam === 'quiz' ? 'quizTabBtn' : (_tabParam === 'homework' ? 'hwTabBtn' : 'formTabBtn');
             const tabBtn = document.getElementById(tabBtnId);
             if (tabBtn && tabBtn.style.display !== 'none') {
                 switchTab(_tabParam, tabBtn);
@@ -3286,6 +3308,28 @@ function renderUnsupportedFile(container, fileUrl, title, fileType) {
 
 window.openPDFInNewTab = function(url) {
     window.open(url, '_blank');
+}
+
+// แปลง URL ฟอร์ม (Google Form / Microsoft Form) ให้เหมาะกับการฝังใน iframe
+function buildFormEmbedUrl(rawUrl) {
+    try {
+        const url = new URL(rawUrl);
+        const host = url.hostname.toLowerCase();
+
+        // Google Forms: เติม embedded=true เพื่อซ่อน header/footer ของ Google
+        if (host.includes('docs.google.com') && url.pathname.includes('/forms/')) {
+            url.searchParams.set('embedded', 'true');
+            return url.toString();
+        }
+        // Microsoft Forms: ฝัง iframe ได้โดยตรงอยู่แล้ว
+        if (host.includes('forms.office.com') || host.includes('forms.microsoft.com')) {
+            return url.toString();
+        }
+        // อื่นๆ: ใช้ URL ตรงๆ
+        return url.toString();
+    } catch (e) {
+        return rawUrl;
+    }
 }
 
 const chatMessages = document.getElementById("chatMessages");

@@ -4,7 +4,7 @@
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { topic, count, type: reqType, prompt: customPrompt } = req.body;
+    const { topic, count, type: reqType, prompt: customPrompt, image, mimeType } = req.body;
 
     // ใช้ key แยกกันตาม use case
     // GEMINI_API_KEY_COURSE → สำหรับสร้างคอร์ส/outline
@@ -30,6 +30,17 @@ export default async function handler(req, res) {
 [{"question":"คำถาม","options":["ก.","ข.","ค.","ง."],"correct":0,"explanation":"คำอธิบาย"}]`;
     }
 
+    // รองรับ Gemini Vision: ถ้ามี image (base64 ไม่ต้องมี data: prefix) แนบเข้าไปเป็น inlineData part
+    const parts = [{ text: prompt }];
+    if (image) {
+        parts.push({
+            inlineData: {
+                mimeType: mimeType || 'image/jpeg',
+                data: image
+            }
+        });
+    }
+
     try {
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -37,7 +48,7 @@ export default async function handler(req, res) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
+                    contents: [{ parts }],
                     generationConfig: {
                         temperature: 0.7,
                         maxOutputTokens: reqType === 'outline' ? 4096 : 1500
