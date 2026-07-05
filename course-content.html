@@ -19,11 +19,10 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
             background-image:
-                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
-                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
-            background-size: 100% 100%, 26px 26px;
+                var(--bg-grad),
+                radial-gradient(circle at 1px 1px, var(--dot-grid) 1px, transparent 0);
+            background-size: var(--bg-grad-size, 100% 100%), 26px 26px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -35,7 +34,7 @@
             align-items: center;
             padding: 1rem 2rem;
             background: var(--nav-bg);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--line);
             backdrop-filter: blur(10px);
         }
 
@@ -52,13 +51,13 @@
             border-radius: 8px;
             font-size: 0.9rem;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
         }
         .btn-back:hover {
-            color: #ffffff;
+            color: var(--text-main);
             background: rgba(59, 130, 246, 0.1);
-            border-color: #3b82f6;
+            border-color: var(--primary-blue);
             transform: translateX(-3px);
         }
         .btn-back:active {
@@ -148,7 +147,7 @@
 
         .playlist-section {
             background: var(--nav-bg);
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--line);
             border-radius: 12px;
             padding: 1rem;
             margin-top: 1.5rem;
@@ -172,7 +171,7 @@
             align-items: center;
         }
 
-        .lesson-item:hover { background: rgba(255,255,255,0.03); }
+        .lesson-item:hover { background: var(--card-hover); }
 
         .lesson-item.active {
             background: var(--active-lesson);
@@ -199,7 +198,7 @@
             font-size: 0.7rem;
             margin-left: 0.5rem;
             background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
+            color: var(--primary-blue);
         }
 
         /* ── Floating AI Button (Gemini-style) ── */
@@ -410,7 +409,7 @@
         }
 
         .spinner {
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 3px solid var(--border-color);
             border-top: 3px solid var(--primary-blue);
             border-radius: 50%;
             width: 40px;
@@ -428,7 +427,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #1e293b;
+            background: var(--bg-elevated); border: 1px solid var(--border-color);
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
@@ -441,7 +440,7 @@
         .error-modal.show { display: block; }
 
         .error-modal h3 {
-            color: #ef4444;
+            color: var(--danger);
             margin-bottom: 1rem;
             font-size: 1.2rem;
         }
@@ -453,7 +452,7 @@
         }
 
         .error-modal button {
-            background: #3b82f6;
+            background: var(--primary-blue);
             color: white;
             padding: 0.75rem 1.5rem;
             border: none;
@@ -462,7 +461,7 @@
             font-size: 1rem;
         }
 
-        .error-modal button:hover { background: #2563eb; }
+        .error-modal button:hover { opacity: 0.9; }
 
         .pdf-viewer-container {
             width: 100%;
@@ -575,7 +574,7 @@
             display: flex;
             gap: 0;
             margin-bottom: 1.5rem;
-            border-bottom: 2px solid rgba(255,255,255,0.08);
+            border-bottom: 2px solid var(--line);
         }
 
         .lesson-tab {
@@ -588,7 +587,7 @@
             transition: 0.2s;
         }
 
-        .lesson-tab:hover { color: white; }
+        .lesson-tab:hover { color: var(--text-main); }
 
         .lesson-tab.active {
             color: var(--primary-blue);
@@ -662,8 +661,8 @@
         .quiz-modal-overlay.show { display: flex; }
 
         .quiz-modal-box {
-            background: #0f1035;
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
             width: 100%;
             max-width: 640px;
@@ -681,7 +680,7 @@
 
         .qm-progress-bar {
             height: 6px;
-            background: rgba(255,255,255,0.08);
+            background: var(--card-hover);
             border-radius: 3px;
             margin-bottom: 1.75rem;
             overflow: hidden;
@@ -701,20 +700,20 @@
             align-items: center;
             gap: 1rem;
             padding: 0.9rem 1.1rem;
-            background: rgba(255,255,255,0.04);
-            border: 2px solid rgba(255,255,255,0.08);
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
             border-radius: 12px;
             margin-bottom: 0.65rem;
             cursor: pointer;
             transition: 0.2s;
         }
         .qm-choice:hover { border-color: #8b5cf6; background: rgba(139,92,246,0.08); }
-        .qm-choice.selected { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
-        .qm-choice.correct { border-color: #10b981 !important; background: rgba(16,185,129,0.1) !important; }
-        .qm-choice.wrong { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
+        .qm-choice.selected { border-color: var(--primary-blue); background: rgba(59,130,246,0.1); }
+        .qm-choice.correct { border-color: var(--success) !important; background: rgba(16,185,129,0.1) !important; }
+        .qm-choice.wrong { border-color: var(--danger) !important; background: rgba(239,68,68,0.1) !important; }
 
         .qm-letter {
-            background: rgba(255,255,255,0.1);
+            background: var(--card-hover);
             border-radius: 8px;
             padding: 0.3rem 0.65rem;
             font-weight: 700;
@@ -727,7 +726,7 @@
             width: 100%;
             margin-top: 1.25rem;
             padding: 0.85rem;
-            background: #3b82f6;
+            background: var(--primary-blue);
             color: white;
             border: none;
             border-radius: 12px;
@@ -743,14 +742,14 @@
         .qm-result-score { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.4rem; }
         .qm-result-sub { color: var(--text-dim); margin-bottom: 1.75rem; }
         .qm-result-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.75rem; margin-bottom: 1.75rem; }
-        .qm-result-stat { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 0.85rem; }
+        .qm-result-stat { background: var(--card-bg); border-radius: 10px; padding: 0.85rem; }
         .qm-result-num { font-size: 1.5rem; font-weight: 700; }
         .qm-result-label { font-size: 0.78rem; color: var(--text-dim); }
 
         .btn-close-qm {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
             padding: 0.85rem 2rem;
             border-radius: 12px;
             cursor: pointer;
@@ -768,8 +767,8 @@
 
         /* === Homework Tab === */
         .hw-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 1rem;
@@ -789,9 +788,9 @@
             font-weight: 600;
             white-space: nowrap;
         }
-        .hw-status-badge.pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
-        .hw-status-badge.submitted { background: rgba(59,130,246,0.2); color: #60a5fa; }
-        .hw-status-badge.graded { background: rgba(16,185,129,0.2); color: #34d399; }
+        .hw-status-badge.pending { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .hw-status-badge.submitted { background: rgba(59,130,246,0.2); color: var(--primary-blue); }
+        .hw-status-badge.graded { background: rgba(16,185,129,0.2); color: var(--success); }
         .hw-deadline { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem; }
         .hw-desc-text { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 1rem; line-height: 1.6; }
         .hw-score-display {
@@ -803,7 +802,7 @@
             font-size: 0.9rem;
         }
         .hw-comment-display {
-            background: rgba(255,255,255,0.03);
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 0.6rem 1rem;
             margin-bottom: 1rem;
@@ -870,7 +869,7 @@
             width: 100%;
             padding: 0.75rem;
             background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             color: white;
             font-size: 0.9rem;
@@ -878,9 +877,9 @@
             min-height: 90px;
             font-family: inherit;
         }
-        .hw-submit-area textarea:focus { outline: none; border-color: #f59e0b; }
+        .hw-submit-area textarea:focus { outline: none; border-color: var(--warning); }
         .hw-file-upload {
-            border: 2px dashed rgba(255,255,255,0.1);
+            border: 2px dashed var(--border-color);
             border-radius: 8px;
             padding: 1rem;
             text-align: center;
@@ -890,7 +889,7 @@
             transition: 0.2s;
             margin-top: 0.5rem;
         }
-        .hw-file-upload:hover { border-color: #f59e0b; color: white; }
+        .hw-file-upload:hover { border-color: var(--warning); color: var(--text-main); }
         .btn-submit-hw {
             margin-top: 0.75rem;
             padding: 0.7rem 1.5rem;
@@ -910,7 +909,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(2,4,24,0.97);
+            background: var(--bg-color); opacity: 0.97;
             z-index: 4000;
             align-items: center;
             justify-content: center;
@@ -1345,10 +1344,10 @@
             <!-- Progress bar -->
             <div id="progressSection" style="margin-top:1rem;display:none;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-                    <span style="font-size:0.85rem;color:#a0a0ba;">ความคืบหน้า</span>
+                    <span style="font-size:0.85rem;color:var(--text-dim);">ความคืบหน้า</span>
                     <span id="progressPct" style="font-size:0.85rem;color:#8b5cf6;font-weight:600;">0%</span>
                 </div>
-                <div style="background:rgba(255,255,255,0.08);border-radius:99px;height:6px;overflow:hidden;">
+                <div style="background:var(--border-color);border-radius:99px;height:6px;overflow:hidden;">
                     <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border-radius:99px;width:0%;transition:width 0.5s ease;"></div>
                 </div>
                 <button id="btnMarkDone" onclick="markCurrentLessonDone()" style="margin-top:0.8rem;padding:0.5rem 1.2rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
@@ -1453,7 +1452,7 @@
             <div class="chat-header-title">AI Assistant</div>
             <button class="chat-header-close" onclick="toggleChat()" title="ปิด">✕</button>
         </div>
-        <div id="pdfContextIndicator" style="display:none;padding:6px 14px;background:rgba(16,185,129,0.1);border-bottom:1px solid rgba(16,185,129,0.2);font-size:11px;color:#10b981;"></div>
+        <div id="pdfContextIndicator" style="display:none;padding:6px 14px;background:rgba(16,185,129,0.1);border-bottom:1px solid rgba(16,185,129,0.2);font-size:11px;color:var(--success);"></div>
         <div class="chat-messages" id="chatMessages">
             <div class="msg-bot">สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ? 😊</div>
         </div>
@@ -1581,7 +1580,7 @@ function markCompletedLessonsInList() {
                 const badge = document.createElement('span');
                 badge.className = 'lesson-done-badge';
                 badge.textContent = '✓';
-                badge.style.cssText = 'color:#10b981;font-weight:700;margin-left:auto;flex-shrink:0;';
+                badge.style.cssText = 'color:var(--success);font-weight:700;margin-left:auto;flex-shrink:0;';
                 el.appendChild(badge);
             }
         }
@@ -3129,7 +3128,7 @@ async function renderPDFViewer(container, fileUrl, title) {
     if (!ok) {
         document.getElementById('pdfLoadingMsg').innerHTML =
             '<div style="text-align:center;color:#ef4444;">โหลด PDF.js ไม่สำเร็จ<br>' +
-            '<a href="' + fileUrl + '" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>';
+            '<a href="' + fileUrl + '" target="_blank" style="color:var(--primary-blue);">เปิดในแท็บใหม่แทน</a></div>';
         return;
     }
 
@@ -3161,7 +3160,7 @@ async function renderPDFViewer(container, fileUrl, title) {
         document.getElementById('pdfLoadingMsg').innerHTML =
             '<div style="text-align:center;color:#ef4444;">โหลด PDF ไม่สำเร็จ<br>' +
             '<small>' + e.message + '</small><br><br>' +
-            '<a href="' + fileUrl + '" target="_blank" style="color:#60a5fa;">เปิดในแท็บใหม่แทน</a></div>';
+            '<a href="' + fileUrl + '" target="_blank" style="color:var(--primary-blue);">เปิดในแท็บใหม่แทน</a></div>';
     }
 }
 
@@ -3379,7 +3378,7 @@ async function loadPdfContext(fileUrl) {
         const indicator = document.getElementById('pdfContextIndicator');
         if (indicator) {
             indicator.style.display = 'flex';
-            indicator.innerHTML = `<span style="font-size:11px;color:#10b981;">📄 AI อ่าน PDF แล้ว (${pdf.numPages} หน้า)</span>`;
+            indicator.innerHTML = `<span style="font-size:11px;color:var(--success);">📄 AI อ่าน PDF แล้ว (${pdf.numPages} หน้า)</span>`;
         }
         console.log('✅ PDF context loaded:', fullText.length, 'chars');
     } catch(e) {
@@ -3573,7 +3572,7 @@ async function loadHomeworkPanel() {
             }
         }
         if (isSubmitted && sub.fileUrl) {
-            submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.fileUrl}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
+            submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.fileUrl}" target="_blank" style="color:var(--primary-blue);">ดูไฟล์</a></div>`;
         }
 
         let submitFormHtml = '';
@@ -3605,7 +3604,7 @@ async function loadHomeworkPanel() {
                             📎 คลิกเพื่อแนบไฟล์ (PDF, Word, รูปภาพ)
                         </div>
                         <input type="file" id="hw-file-input-${idx}" style="display:none;" onchange="previewHwFile(${idx}, this)">
-                        <div id="hw-file-preview-${idx}" style="font-size:0.85rem; color:#60a5fa; margin-top:0.4rem;"></div>
+                        <div id="hw-file-preview-${idx}" style="font-size:0.85rem; color:var(--primary-blue); margin-top:0.4rem;"></div>
                     ` : ''}
                     <button class="btn-submit-hw" onclick="submitHomework(${idx}, '${courseId}')">
                         📤 ส่งการบ้าน
@@ -3883,7 +3882,7 @@ function renderCourseQuestion() {
                 <div style="font-weight:600; margin-bottom:0.2rem;">${currentCourse.title}</div>
                 <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total}</div>
             </div>
-            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()">✕ ออก</button>
+            <button style="background:var(--card-bg);border:1px solid var(--border-color);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()">✕ ออก</button>
         </div>
         <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
         <div class="qm-question">${index+1}. ${q.question}</div>
@@ -3971,8 +3970,8 @@ async function showCourseQuizResult() {
             <div class="qm-result-score">${score} / ${total}</div>
             <div class="qm-result-sub">${msg} — คะแนน ${pct}%</div>
             <div class="qm-result-grid">
-                <div class="qm-result-stat"><div class="qm-result-num" style="color:#10b981;">${score}</div><div class="qm-result-label">ถูก</div></div>
-                <div class="qm-result-stat"><div class="qm-result-num" style="color:#ef4444;">${total-score}</div><div class="qm-result-label">ผิด</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:var(--success);">${score}</div><div class="qm-result-label">ถูก</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:var(--danger);">${total-score}</div><div class="qm-result-label">ผิด</div></div>
                 <div class="qm-result-stat"><div class="qm-result-num" style="color:#3b82f6;">${pct}%</div><div class="qm-result-label">คะแนน</div></div>
             </div>
             <button class="btn-close-qm" onclick="closeCourseQuiz()">ปิด</button>

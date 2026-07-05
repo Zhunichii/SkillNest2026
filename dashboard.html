@@ -19,11 +19,10 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
             background-image:
-                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
-                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
-            background-size: 100% 100%, 26px 26px;
+                var(--bg-grad),
+                radial-gradient(circle at 1px 1px, var(--dot-grid) 1px, transparent 0);
+            background-size: var(--bg-grad-size, 100% 100%), 26px 26px;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -41,7 +40,7 @@
             height: 70px;
             background: var(--nav-bg);
             backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-color);
             display: grid;
             grid-template-columns: 1fr 2fr 1fr;
             align-items: center;
@@ -79,8 +78,8 @@
         }
 
         .search-bar input {
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 9px 40px 9px 38px;
             color: var(--text-main);
@@ -113,7 +112,7 @@
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255,255,255,0.1);
+            background: var(--card-hover);
             border: none;
             color: var(--text-dim);
             cursor: pointer;
@@ -126,7 +125,7 @@
             justify-content: center;
             transition: 0.2s;
         }
-        .search-clear-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+        .search-clear-btn:hover { background: var(--border-color); color: var(--text-main); }
         .search-clear-btn.show { display: flex; }
 
         /* =============================================
@@ -137,8 +136,8 @@
             top: calc(100% + 8px);
             left: 0;
             right: 0;
-            background: #0d1030;
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
             border-radius: 14px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.7);
             z-index: 1500;
@@ -157,7 +156,7 @@
             display: flex;
             gap: 8px;
             padding: 12px 14px 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid var(--line);
             overflow-x: auto;
             scrollbar-width: none;
         }
@@ -172,14 +171,14 @@
             font-size: 0.75rem;
             white-space: nowrap;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
             color: var(--text-dim);
             transition: all 0.15s;
             user-select: none;
         }
-        .filter-chip:hover { border-color: var(--primary-blue); color: white; background: rgba(59,130,246,0.1); }
-        .filter-chip.active { border-color: var(--primary-blue); background: rgba(59,130,246,0.18); color: white; }
+        .filter-chip:hover { border-color: var(--primary-blue); color: var(--text-main); background: rgba(59,130,246,0.1); }
+        .filter-chip.active { border-color: var(--primary-blue); background: rgba(59,130,246,0.18); color: var(--text-main); }
 
         /* Trending section */
         .search-section-label {
@@ -200,22 +199,22 @@
 
         .trending-tag {
             padding: 5px 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
             font-size: 0.78rem;
             color: var(--text-dim);
             cursor: pointer;
             transition: all 0.15s;
         }
-        .trending-tag:hover { background: rgba(59,130,246,0.12); border-color: var(--primary-blue); color: white; }
+        .trending-tag:hover { background: rgba(59,130,246,0.12); border-color: var(--primary-blue); color: var(--text-main); }
 
         /* Suggestion results */
         .search-results-list {
             max-height: 240px;
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.1) transparent;
+            scrollbar-color: var(--border-color) transparent;
         }
 
         .search-result-item {
@@ -225,9 +224,9 @@
             padding: 10px 14px;
             cursor: pointer;
             transition: background 0.15s;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--line);
         }
-        .search-result-item:hover { background: rgba(255,255,255,0.04); }
+        .search-result-item:hover { background: var(--card-hover); }
         .search-result-item:last-child { border-bottom: none; }
 
         .search-result-thumb {
@@ -255,7 +254,7 @@
             padding: 2px 8px;
             border-radius: 10px;
             background: rgba(59,130,246,0.15);
-            color: #60a5fa;
+            color: var(--primary-blue);
             white-space: nowrap;
         }
 
@@ -268,7 +267,7 @@
 
         .search-footer {
             padding: 8px 14px;
-            border-top: 1px solid rgba(255,255,255,0.06);
+            border-top: 1px solid var(--line);
             font-size: 0.73rem;
             color: var(--text-dim);
             text-align: center;
@@ -278,16 +277,16 @@
         .recent-searches-list { padding: 0 14px 6px; display: flex; flex-wrap: wrap; gap: 6px; }
         .recent-item {
             display: flex; align-items: center; gap: 6px;
-            padding: 5px 10px; background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+            padding: 5px 10px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 20px;
             font-size: 0.78rem; color: var(--text-dim); cursor: pointer; transition: 0.15s;
         }
-        .recent-item:hover { border-color: var(--primary-blue); color: white; background: rgba(59,130,246,0.1); }
+        .recent-item:hover { border-color: var(--primary-blue); color: var(--text-main); background: rgba(59,130,246,0.1); }
         .recent-item-remove {
             font-size: 0.65rem; opacity: 0.5; margin-left: 2px;
             cursor: pointer; padding: 0 2px;
         }
-        .recent-item-remove:hover { opacity: 1; color: #ef4444; }
+        .recent-item-remove:hover { opacity: 1; color: var(--danger-red); }
 
         /* Favorites grid */
         .favorites-grid {
@@ -296,8 +295,8 @@
         }
         .fav-card {
             display: flex; align-items: center; gap: 8px;
-            padding: 8px 10px; background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;
+            padding: 8px 10px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 10px;
             cursor: pointer; transition: 0.15s;
         }
         .fav-card:hover { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.3); }
@@ -335,14 +334,14 @@
         }
 
         .notification-bell-btn:hover {
-            background: rgba(255,255,255,0.07);
+            background: var(--card-hover);
         }
 
         .notification-badge {
             position: absolute;
             top: 2px;
             right: 2px;
-            background: #ef4444;
+            background: var(--danger-red);
             color: white;
             font-size: 0.6rem;
             font-weight: 700;
@@ -354,7 +353,7 @@
             justify-content: center;
             padding: 0 3px;
             line-height: 1;
-            border: 2px solid #020418;
+            border: 2px solid var(--bg-color);
             animation: badgePop 0.3s ease;
         }
 
@@ -370,8 +369,8 @@
             top: calc(100% + 12px);
             right: -10px;
             width: 360px;
-            background: #0d1030;
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(59,130,246,0.1);
             z-index: 2000;
@@ -392,7 +391,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 16px 18px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-bottom: 1px solid var(--line);
         }
 
         .notif-panel-header h4 {
@@ -402,7 +401,7 @@
 
         .notif-mark-all {
             font-size: 0.75rem;
-            color: #60a5fa;
+            color: var(--primary-blue);
             cursor: pointer;
             background: none;
             border: none;
@@ -413,7 +412,7 @@
 
         .notif-tabs {
             display: flex;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-bottom: 1px solid var(--line);
         }
 
         .notif-tab {
@@ -438,7 +437,7 @@
             max-height: 340px;
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.1) transparent;
+            scrollbar-color: var(--border-color) transparent;
         }
 
         .notif-item {
@@ -448,10 +447,10 @@
             cursor: pointer;
             transition: background 0.2s;
             position: relative;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--line);
         }
 
-        .notif-item:hover { background: rgba(255,255,255,0.04); }
+        .notif-item:hover { background: var(--card-hover); }
 
         .notif-item.unread { background: rgba(59,130,246,0.06); }
         .notif-item.unread:hover { background: rgba(59,130,246,0.1); }
@@ -506,13 +505,13 @@
 
         .notif-panel-footer {
             padding: 10px 18px;
-            border-top: 1px solid rgba(255,255,255,0.07);
+            border-top: 1px solid var(--line);
             text-align: center;
         }
 
         .notif-panel-footer a {
             font-size: 0.78rem;
-            color: #60a5fa;
+            color: var(--primary-blue);
             text-decoration: none;
         }
 
@@ -531,8 +530,8 @@
         }
 
         .toast {
-            background: #0f1035;
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
             border-left: 3px solid var(--primary-blue);
             border-radius: 12px;
             padding: 14px 16px;
@@ -545,7 +544,7 @@
             animation: toastIn 0.35s cubic-bezier(.175,.885,.32,1.275);
         }
 
-        .toast.homework { border-left-color: #f59e0b; }
+        .toast.homework { border-left-color: var(--warning); }
         .toast.system   { border-left-color: #8b5cf6; }
 
         @keyframes toastIn {
@@ -614,9 +613,9 @@
             position: absolute;
             top: 45px;
             right: 0;
-            background: rgba(10, 12, 33, 0.95);
+            background: var(--bg-elevated);
             backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             min-width: 180px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -633,7 +632,7 @@
             cursor: pointer;
         }
 
-        .dropdown-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .dropdown-item:hover { background: var(--card-hover); color: var(--text-main); }
 
         /* =============================================
            SIDEBAR & MAIN
@@ -646,7 +645,7 @@
             height: calc(100vh - 70px);
             background: var(--nav-bg);
             backdrop-filter: blur(15px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--border-color);
             padding: 30px 20px;
         }
 
@@ -722,7 +721,7 @@
 
         .course-card {
             background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
             transition: transform 0.3s, box-shadow 0.3s;
@@ -768,7 +767,7 @@
 
         .progress-section { margin-top: 15px; }
         .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
+        .progress-bar { width: 100%; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--primary-blue); border-radius: 3px; transition: width 0.3s; }
 
         .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); grid-column: 1 / -1; width: 100%; }
@@ -776,7 +775,7 @@
         .empty-state h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-main); }
 
         .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 60px; }
-        .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 768px) {
@@ -795,12 +794,12 @@
         }
         .enroll-modal-overlay.show { display: flex; }
 
-        .enroll-modal { background: #0f1035; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; width: 100%; max-width: 520px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+        .enroll-modal { background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: 20px; width: 100%; max-width: 520px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
         .enroll-modal-thumb { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700; color: rgba(255,255,255,0.5); }
         .enroll-modal-body { padding: 1.75rem; }
         .enroll-modal-body h2 { font-size: 1.35rem; margin-bottom: 0.5rem; }
         .enroll-modal-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
-        .enroll-badge { background: rgba(59,130,246,0.15); color: #60a5fa; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.8rem; }
+        .enroll-badge { background: rgba(59,130,246,0.15); color: var(--primary-blue); padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.8rem; }
         .enroll-modal-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; max-height: 80px; overflow: hidden; text-overflow: ellipsis; }
         .enroll-modal-lessons { display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.5rem; }
         .enroll-modal-actions { display: flex; gap: 0.75rem; }
@@ -808,8 +807,8 @@
         .btn-enroll:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-go-course { flex: 1; padding: 0.9rem; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; }
         .btn-go-course:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-cancel-enroll { padding: 0.9rem 1.25rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-cancel-enroll:hover { color: white; }
+        .btn-cancel-enroll { padding: 0.9rem 1.25rem; background: var(--card-hover); border: 1px solid var(--border-color); color: var(--text-dim); border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .btn-cancel-enroll:hover { color: var(--text-main); }
         .enrolled-tag { position: absolute; top: 10px; left: 10px; background: rgba(16,185,129,0.85); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
     </style>
 </head>
@@ -846,10 +845,10 @@
                         <div id="recentSearchesBlock" style="display:none;">
                             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px;">
                                 <span class="search-section-label" style="padding:0;">🕐 ค้นหาล่าสุด</span>
-                                <button id="clearRecentBtn" style="font-size:0.72rem;color:#60a5fa;background:none;border:none;cursor:pointer;padding:0;">ล้างทั้งหมด</button>
+                                <button id="clearRecentBtn" style="font-size:0.72rem;color:var(--primary-blue);background:none;border:none;cursor:pointer;padding:0;">ล้างทั้งหมด</button>
                             </div>
                             <div class="recent-searches-list" id="recentSearchesList"></div>
-                            <div style="height:1px;background:rgba(255,255,255,0.06);margin:6px 0;"></div>
+                            <div style="height:1px;background:var(--line);margin:6px 0;"></div>
                         </div>
 
                         <div class="search-section-label">🔥 หมวดหมู่ยอดนิยม</div>
@@ -868,7 +867,7 @@
 
                         <!-- Learner favorites (top 4 from cache) -->
                         <div id="favoritesBlock">
-                            <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 0 0;"></div>
+                            <div style="height:1px;background:var(--line);margin:4px 0 0;"></div>
                             <div class="search-section-label" style="margin-top:4px;">⭐ คอร์สแนะนำ</div>
                             <div class="favorites-grid" id="favoritesGrid"></div>
                         </div>
@@ -1960,7 +1959,7 @@
                 markCardAsEnrolled(courseId);
                 const actionsEl = document.getElementById('enrollModalActions');
                 actionsEl.innerHTML = `<button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
-                document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend', '<p style="color:#10b981;font-size:0.9rem;margin-top:0.3rem;">✅ สมัครเรียนสำเร็จแล้ว!</p>');
+                document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend', '<p style="color:var(--success);font-size:0.9rem;margin-top:0.3rem;">✅ สมัครเรียนสำเร็จแล้ว!</p>');
             } catch(e) { alert('❌ เกิดข้อผิดพลาดในการสมัคร: ' + e.message); }
         };
 

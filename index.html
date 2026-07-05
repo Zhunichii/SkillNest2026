@@ -20,11 +20,10 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
             background-image:
-                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
-                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
-            background-size: 100% 100%, 26px 26px;
+                var(--bg-grad),
+                radial-gradient(circle at 1px 1px, var(--dot-grid) 1px, transparent 0);
+            background-size: var(--bg-grad-size, 100% 100%), 26px 26px;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -88,7 +87,7 @@
             transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
         .navbar.scrolled {
-            background: rgba(13,16,36,0.85);
+            background: var(--bg-elevated);
             border-color: var(--line-strong);
             box-shadow: 0 8px 32px rgba(0,0,0,0.35);
         }
@@ -117,7 +116,7 @@
         .user-name { color: var(--text-main); font-size: 0.88rem; font-weight: 500; }
 
         .profile-dropdown-btn {
-            background: var(--bg-color); color: white; border: 1px solid var(--line-strong);
+            background: var(--bg-color); color: var(--text-main); border: 1px solid var(--line-strong);
             padding: 7px 14px; border-radius: 8px; cursor: pointer; font-weight: 500;
             font-size: 0.85rem;
             display: flex; align-items: center; gap: 7px; transition: 0.2s;
@@ -126,7 +125,7 @@
 
         .dropdown-menu {
             display: none; position: absolute; top: 50px; right: 0;
-            background: #11152E; backdrop-filter: blur(15px);
+            background: var(--bg-elevated); backdrop-filter: blur(15px);
             border: 1px solid var(--line); border-radius: 10px;
             min-width: 190px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);
             overflow: hidden;
@@ -310,7 +309,7 @@
             overflow: hidden; margin: 0 0 70px;
         }
         .stat-block {
-            background: rgba(226,232,240,0.02); padding: 28px 20px; text-align: center;
+            background: var(--card); padding: 28px 20px; text-align: center;
             transition: background 0.25s;
         }
         .stat-block:hover { background: rgba(99,102,241,0.06); }
@@ -328,7 +327,7 @@
         .pricing-cards { display: flex; flex-direction: column; align-items: center; gap: 28px; }
 
         .pricing-card {
-            background: rgba(226,232,240,0.02);
+            background: var(--card);
             border: 1px solid var(--line);
             border-radius: 14px; padding: 36px 38px;
             width: 100%; max-width: 480px;
@@ -389,7 +388,7 @@
         .newsletter-title { color: var(--text-main); font-weight: 500; margin-bottom: 12px; font-size: 0.95rem; font-family: var(--font-body); }
         .newsletter-form { display: flex; flex-direction: column; gap: 10px; max-width: 280px; }
         .newsletter-form input {
-            background: rgba(226,232,240,0.04); border: 1px solid var(--line);
+            background: var(--input-bg); border: 1px solid var(--line);
             color: var(--text-main); padding: 11px 14px; border-radius: 8px; font-size: 0.86rem;
         }
         .newsletter-form input:focus { outline: none; border-color: var(--primary-blue); }

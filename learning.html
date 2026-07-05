@@ -21,11 +21,10 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
             background-image:
-                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
-                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
-            background-size: 100% 100%, 26px 26px;
+                var(--bg-grad),
+                radial-gradient(circle at 1px 1px, var(--dot-grid) 1px, transparent 0);
+            background-size: var(--bg-grad-size, 100% 100%), 26px 26px;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -199,7 +198,7 @@
 
         .stat-card:hover {
             border-color: rgba(59, 130, 246, 0.3);
-            background: rgba(255, 255, 255, 0.07);
+            background: var(--card-hover);
         }
 
         .stat-label {
@@ -218,8 +217,8 @@
             font-size: 0.8rem;
         }
 
-        .stat-sub.up { color: #10b981; }
-        .stat-sub.warn { color: #f59e0b; }
+        .stat-sub.up { color: var(--success); }
+        .stat-sub.warn { color: var(--warning); }
 
         /* === Middle Grid === */
         .mid-grid {
@@ -269,7 +268,7 @@
 
         .progress-track {
             width: 100%;
-            background: rgba(255,255,255,0.08);
+            background: var(--card-hover);
             height: 6px;
             border-radius: 10px;
             overflow: hidden;
@@ -300,9 +299,9 @@
             font-weight: 600;
         }
 
-        .badge-green { background: rgba(16,185,129,0.15); color: #10b981; }
-        .badge-yellow { background: rgba(245,158,11,0.15); color: #f59e0b; }
-        .badge-red { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .badge-green { background: rgba(16,185,129,0.15); color: var(--success); }
+        .badge-yellow { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); }
 
         .ai-suggestion {
             margin-top: 14px;
@@ -312,7 +311,7 @@
 
         .suggestion-item {
             font-size: 0.8rem;
-            color: #f59e0b;
+            color: var(--warning);
             padding: 4px 0;
         }
 
@@ -329,7 +328,7 @@
             border-radius: 4px;
         }
 
-        .heat-off { background: rgba(255,255,255,0.06); }
+        .heat-off { background: var(--card-hover); }
         .heat-on { background: #3b82f6; }
         .heat-on.hot { background: #8b5cf6; }
 
@@ -364,7 +363,7 @@
             padding: 16px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            background: rgba(255,255,255,0.02);
+            background: var(--card-bg);
             transition: 0.3s;
         }
 
@@ -467,7 +466,7 @@
     <div class="mid-grid">
         <div class="card">
             <div class="card-title">ความคืบหน้าคอร์ส</div>
-            <div id="courseProgressList"><div style="color:#a0a0ba;font-size:0.9rem;">กำลังโหลด...</div></div>
+            <div id="courseProgressList"><div style="color:var(--text-dim);font-size:0.9rem;">กำลังโหลด...</div></div>
         </div>
 
         <div class="card">
@@ -492,7 +491,7 @@
             <div class="card-title">Streak การเรียน (4 สัปดาห์)</div>
             <div class="heatmap-grid" id="heatmap"></div>
             <div class="heatmap-legend">
-                <div><span class="legend-dot" style="background:rgba(255,255,255,0.06)"></span>ไม่ได้เรียน</div>
+                <div><span class="legend-dot" style="background:var(--card-hover)"></span>ไม่ได้เรียน</div>
                 <div><span class="legend-dot" style="background:#3b82f6"></span>เรียนแล้ว</div>
                 <div><span class="legend-dot" style="background:#8b5cf6"></span>เรียนหนัก</div>
             </div>
@@ -502,7 +501,7 @@
         <div class="card">
             <div class="card-title">Badge ที่ได้รับ</div>
             <div class="badges-grid" id="badgesGrid">
-                <div style="color:#a0a0ba;font-size:0.9rem;grid-column:1/-1;">กำลังโหลด...</div>
+                <div style="color:var(--text-dim);font-size:0.9rem;grid-column:1/-1;">กำลังโหลด...</div>
             </div>
         </div>
 
@@ -512,6 +511,12 @@
 
 <script type="module">
 import { supabase } from './supabase.js';
+
+// อ่านค่าสีจาก CSS variable ของธีมปัจจุบัน เพื่อให้กราฟ Chart.js เปลี่ยนตามธีมด้วย
+function themeVar(name, fallback) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+}
 
 // ============ FILTER TABS ============
 function setFilter(btn) {
@@ -537,8 +542,8 @@ function renderBarChart(data) {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: { color: '#a0a0ba' } },
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a0a0ba' } }
+                x: { grid: { display: false }, ticks: { color: themeVar('--text-dim','#a0a0ba') } },
+                y: { grid: { color: themeVar('--line','rgba(255,255,255,0.05)') }, ticks: { color: themeVar('--text-dim','#a0a0ba') } }
             }
         }
     });
@@ -660,7 +665,7 @@ async function loadLearningData() {
     // ===== COURSE PROGRESS LIST =====
     const progressEl = document.getElementById('courseProgressList');
     if (enrList.length === 0) {
-        progressEl.innerHTML = '<div style="color:#a0a0ba;">ยังไม่ได้ลงทะเบียนคอร์สใดเลย</div>';
+        progressEl.innerHTML = '<div style="color:var(--text-dim);">ยังไม่ได้ลงทะเบียนคอร์สใดเลย</div>';
     } else {
         const colors = ['#8b5cf6','#10b981','#f59e0b','#3b82f6','#ef4444','#06b6d4'];
         progressEl.innerHTML = enrList.map((e, i) => {
@@ -682,7 +687,7 @@ async function loadLearningData() {
                 <div class="progress-row">
                     <span>${title}</span>
                     <span style="display:flex;gap:8px;align-items:center;">
-                        <span style="font-size:0.75rem;color:#a0a0ba;">${statusText}</span>
+                        <span style="font-size:0.75rem;color:var(--text-dim);">${statusText}</span>
                         <span>${pct}%</span>
                     </span>
                 </div>
@@ -715,7 +720,7 @@ async function loadLearningData() {
     const badgesGrid = document.getElementById('badgesGrid');
     const earned = computeBadges(enrList, quizList);
     if (earned.length === 0) {
-        badgesGrid.innerHTML = '<div style="color:#a0a0ba;grid-column:1/-1;">ยังไม่ได้รับ Badge ใดเลย เริ่มเรียนเลย!</div>';
+        badgesGrid.innerHTML = '<div style="color:var(--text-dim);grid-column:1/-1;">ยังไม่ได้รับ Badge ใดเลย เริ่มเรียนเลย!</div>';
     } else {
         badgesGrid.innerHTML = earned.map(b => `
             <div class="badge-item">
@@ -728,13 +733,13 @@ async function loadLearningData() {
 // ============ AI ANALYSIS FUNCTION ============
 async function runAIAnalysis(enrollments, quizScores, aiBox) {
     aiBox.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;color:#a0a0ba;padding:0.5rem 0;">
+        <div style="display:flex;align-items:center;gap:10px;color:var(--text-dim);padding:0.5rem 0;">
             <div style="width:18px;height:18px;border:2px solid #8b5cf6;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
             <span>AI กำลังวิเคราะห์ข้อมูลการเรียนของคุณ...</span>
         </div>`;
 
     if (enrollments.length === 0 && quizScores.length === 0) {
-        aiBox.innerHTML = '<div style="color:#a0a0ba;">ยังไม่มีข้อมูลการเรียน เริ่มเรียนคอร์สแรกเลย!</div>';
+        aiBox.innerHTML = '<div style="color:var(--text-dim);">ยังไม่มีข้อมูลการเรียน เริ่มเรียนคอร์สแรกเลย!</div>';
         return;
     }
 
@@ -788,9 +793,9 @@ async function runAIAnalysis(enrollments, quizScores, aiBox) {
             if (trimmed.match(/^[1-9]\.|จุดแข็ง|จุดที่ควร|คำแนะนำ/)) {
                 html += `<div style="color:#8b5cf6;font-weight:600;margin-top:0.8rem;margin-bottom:0.3rem;">${trimmed}</div>`;
             } else if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-                html += `<div style="color:#e2e8f0;padding-left:1rem;">👉 ${trimmed.replace(/^[-•]\s*/, '')}</div>`;
+                html += `<div style="color:var(--text-main);padding-left:1rem;">👉 ${trimmed.replace(/^[-•]\s*/, '')}</div>`;
             } else if (trimmed) {
-                html += `<div style="color:#e2e8f0;">${trimmed}</div>`;
+                html += `<div style="color:var(--text-main);">${trimmed}</div>`;
             }
         });
         html += `<div style="margin-top:1rem;text-align:right;">
@@ -801,7 +806,7 @@ async function runAIAnalysis(enrollments, quizScores, aiBox) {
 
     } catch(e) {
         console.error('AI Analysis error:', e);
-        aiBox.innerHTML = `<div style="color:#a0a0ba;">ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ <button onclick="rerunAIAnalysis()" style="background:transparent;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></div>`;
+        aiBox.innerHTML = `<div style="color:var(--text-dim);">ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ <button onclick="rerunAIAnalysis()" style="background:transparent;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></div>`;
     }
 }
 

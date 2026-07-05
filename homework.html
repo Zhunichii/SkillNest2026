@@ -62,7 +62,7 @@
         }
         .course-tab-btn:hover, .course-tab-btn.active {
             background: rgba(245,158,11,0.15);
-            border-color: #f59e0b; color:white;
+            border-color: var(--warning); color:var(--text-main);
         }
 
         /* Homework assignment cards */
@@ -100,19 +100,19 @@
         .status-badge {
             padding:0.2rem 0.65rem; border-radius:20px; font-size:0.75rem; font-weight:600;
         }
-        .status-badge.submitted { background:rgba(59,130,246,0.2); color:#60a5fa; }
-        .status-badge.graded { background:rgba(16,185,129,0.2); color:#34d399; }
+        .status-badge.submitted { background:rgba(59,130,246,0.2); color:var(--primary-blue); }
+        .status-badge.graded { background:rgba(16,185,129,0.2); color:var(--success); }
 
         .btn-grade {
             padding:0.4rem 1rem;
-            background: linear-gradient(135deg,#f59e0b,#d97706);
+            background: linear-gradient(135deg,var(--warning),#d97706);
             color:white; border:none; border-radius:8px;
             font-size:0.82rem; font-weight:600; cursor:pointer; transition:0.2s;
         }
         .btn-grade:hover { opacity:0.9; }
 
         .view-link {
-            color:#60a5fa; text-decoration:none; font-size:0.85rem;
+            color:var(--primary-blue); text-decoration:none; font-size:0.85rem;
         }
         .view-link:hover { text-decoration:underline; }
 
@@ -137,7 +137,7 @@
             background: var(--input-bg); border:1px solid var(--border-color);
             border-radius:8px; color:var(--text-main); font-size:0.95rem;
         }
-        .form-control:focus { outline:none; border-color:#f59e0b; }
+        .form-control:focus { outline:none; border-color:var(--warning); }
         textarea.form-control { resize:vertical; min-height:80px; font-family:inherit; }
         .submission-preview {
             background: var(--card-bg);
@@ -147,7 +147,7 @@
         .modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; }
         .btn-confirm-grade {
             flex:1; padding:0.85rem;
-            background: linear-gradient(135deg,#10b981,#059669);
+            background: linear-gradient(135deg,var(--success),#059669);
             color:white; border:none; border-radius:10px;
             font-weight:700; font-size:1rem; cursor:pointer; transition:0.2s;
         }
@@ -166,8 +166,8 @@
         .spinner-wrap { display:flex; justify-content:center; padding:60px; }
         .spinner {
             width:46px; height:46px;
-            border:4px solid rgba(255,255,255,0.1);
-            border-top:4px solid #f59e0b;
+            border:4px solid var(--border-color);
+            border-top:4px solid var(--warning);
             border-radius:50%; animation:spin 1s linear infinite;
         }
         @keyframes spin { 100% { transform:rotate(360deg); } }
@@ -396,7 +396,7 @@ window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore,
 
     let previewHtml = '';
     if (content) previewHtml += `<div>📝 งานที่ส่ง:<br><br>${content}</div>`;
-    if (fileUrl) previewHtml += `${content?'<br>':''}📎 ไฟล์แนบ: <a href="${fileUrl}" target="_blank" style="color:#60a5fa;">เปิดไฟล์</a>`;
+    if (fileUrl) previewHtml += `${content?'<br>':''}📎 ไฟล์แนบ: <a href="${fileUrl}" target="_blank" style="color:var(--primary-blue);">เปิดไฟล์</a>`;
     if (!content && !fileUrl) previewHtml = '<em>ไม่มีเนื้อหางาน</em>';
     document.getElementById('gradeSubmissionPreview').innerHTML = previewHtml;
     document.getElementById('gradeModalOverlay').classList.add('show');

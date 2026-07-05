@@ -22,9 +22,9 @@
         .brand-panel {
             background:
                 radial-gradient(circle at 30% 20%, rgba(99,102,241,0.18) 0%, transparent 55%),
-                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.035) 1px, transparent 0);
+                radial-gradient(circle at 1px 1px, var(--dot-grid) 1px, transparent 0);
             background-size: 100% 100%, 28px 28px;
-            background-color: #0D1024;
+            background-color: var(--bg-elevated);
             border-right: 1px solid var(--line);
             display: flex;
             flex-direction: column;
@@ -71,7 +71,7 @@
         .input-field {
             width: 100%;
             padding: 12px 16px;
-            background-color: rgba(226,232,240,0.04);
+            background-color: var(--input-bg);
             border: 1px solid var(--line-strong);
             border-radius: 9px;
             font-size: 0.95rem;

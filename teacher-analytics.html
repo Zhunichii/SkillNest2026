@@ -20,11 +20,10 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
             background-image:
-                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
-                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
-            background-size: 100% 100%, 26px 26px;
+                var(--bg-grad),
+                radial-gradient(circle at 1px 1px, var(--dot-grid) 1px, transparent 0);
+            background-size: var(--bg-grad-size, 100% 100%), 26px 26px;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -98,13 +97,13 @@
             background:var(--card-bg); border:1px solid var(--border-color);
             border-radius:16px; padding:24px; transition:0.3s;
         }
-        .stat-card:hover { border-color:rgba(59,130,246,0.3); background:rgba(255,255,255,0.07); }
+        .stat-card:hover { border-color:rgba(59,130,246,0.3); background:var(--card-hover); }
         .stat-label { color:var(--text-dim); font-size:0.85rem; margin-bottom:10px; }
         .stat-value { font-size:2rem; font-weight:600; margin-bottom:6px; }
         .stat-sub { font-size:0.8rem; }
-        .stat-sub.up   { color:#10b981; }
-        .stat-sub.warn { color:#f59e0b; }
-        .stat-sub a    { color:#f59e0b; text-decoration:none; }
+        .stat-sub.up   { color:var(--success); }
+        .stat-sub.warn { color:var(--warning); }
+        .stat-sub a    { color:var(--warning); text-decoration:none; }
         .stat-sub a:hover { text-decoration:underline; }
 
         /* ── Grid layouts ── */
@@ -120,7 +119,7 @@
         .progress-item { margin-bottom:18px; }
         .progress-row { display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:6px; }
         .progress-row span:last-child { color:var(--text-dim); }
-        .progress-track { width:100%; background:rgba(255,255,255,0.08); height:6px; border-radius:10px; overflow:hidden; }
+        .progress-track { width:100%; background:var(--card-hover); height:6px; border-radius:10px; overflow:hidden; }
         .progress-fill  { height:100%; border-radius:10px; transition:width 0.6s ease; }
 
         /* ── AI Card ── */
@@ -136,7 +135,7 @@
             color:#c4b5fd; padding:6px 14px; border-radius:8px; font-size:0.82rem; cursor:pointer; transition:0.2s;
         }
         .btn-reanalyze:hover { background:rgba(139,92,246,0.3); }
-        .ai-content { font-size:0.88rem; line-height:1.8; color:#e2e8f0; }
+        .ai-content { font-size:0.88rem; line-height:1.8; color:var(--text-main); }
         .ai-section-head { color:#c4b5fd; font-weight:600; margin-top:10px; margin-bottom:4px; }
         .ai-spinner { display:flex; align-items:center; gap:10px; color:var(--text-dim); }
         .spinner-sm { width:16px; height:16px; border:2px solid var(--primary-purple); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; }
@@ -145,15 +144,15 @@
         /* ── Student Table ── */
         .student-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
         .student-table th { color:var(--text-dim); font-weight:500; text-align:left; padding:8px 12px; border-bottom:1px solid var(--border-color); }
-        .student-table td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.04); }
+        .student-table td { padding:10px 12px; border-bottom:1px solid var(--line); }
         .student-table tr:last-child td { border-bottom:none; }
-        .student-table tr:hover td { background:rgba(255,255,255,0.02); }
-        .progress-pill { height:6px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden; width:80px; }
+        .student-table tr:hover td { background:var(--card-hover); }
+        .progress-pill { height:6px; background:var(--card-hover); border-radius:99px; overflow:hidden; width:80px; }
         .progress-pill-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--primary-purple),var(--primary-blue)); }
         .status-badge { font-size:0.72rem; padding:3px 8px; border-radius:99px; font-weight:500; }
-        .status-done     { background:rgba(16,185,129,0.15); color:#10b981; }
-        .status-progress { background:rgba(59,130,246,0.15); color:#3b82f6; }
-        .status-new      { background:rgba(255,255,255,0.06); color:var(--text-dim); }
+        .status-done     { background:rgba(16,185,129,0.15); color:var(--success); }
+        .status-progress { background:rgba(59,130,246,0.15); color:var(--primary-blue); }
+        .status-new      { background:var(--card-hover); color:var(--text-dim); }
 
         /* ── HW Summary ── */
         .hw-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color); }
@@ -169,9 +168,9 @@
         .skill-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-color); font-size:0.88rem; }
         .skill-row:last-child { border-bottom:none; }
         .skill-badge { padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; }
-        .badge-green  { background:rgba(16,185,129,0.15); color:#10b981; }
-        .badge-yellow { background:rgba(245,158,11,0.15); color:#f59e0b; }
-        .badge-red    { background:rgba(239,68,68,0.15); color:#ef4444; }
+        .badge-green  { background:rgba(16,185,129,0.15); color:var(--success); }
+        .badge-yellow { background:rgba(245,158,11,0.15); color:var(--warning); }
+        .badge-red    { background:rgba(239,68,68,0.15); color:var(--danger); }
 
         /* ── Loading ── */
         .page-loading { display:flex; align-items:center; justify-content:center; min-height:60vh; flex-direction:column; gap:16px; color:var(--text-dim); }
@@ -234,6 +233,12 @@ let selectedId   = 'all';
 let barChart     = null;
 let pieChart     = null;
 let quizChart    = null;
+
+// อ่านค่าสีจาก CSS variable ของธีมปัจจุบัน เพื่อให้กราฟ Chart.js เปลี่ยนตามธีมด้วย
+function themeVar(name, fallback) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+}
 
 // ── Init ──
 async function init() {
@@ -454,11 +459,11 @@ function renderPie(enrolls) {
         type:'doughnut',
         data:{
             labels:['เรียนจบ','กำลังเรียน','ยังไม่เริ่ม'],
-            datasets:[{ data:[done,inProg,fresh], backgroundColor:['#10b981','#3b82f6','rgba(255,255,255,0.08)'], borderWidth:0, hoverOffset:6 }]
+            datasets:[{ data:[done,inProg,fresh], backgroundColor:['#10b981','#3b82f6', themeVar('--card-hover','rgba(255,255,255,0.08)')], borderWidth:0, hoverOffset:6 }]
         },
         options:{
             responsive:true, maintainAspectRatio:false, cutout:'65%',
-            plugins:{ legend:{ position:'bottom', labels:{ color:'#a0a0ba', font:{ size:11 }, padding:16 } } }
+            plugins:{ legend:{ position:'bottom', labels:{ color:themeVar('--text-dim','#a0a0ba'), font:{ size:11 }, padding:16 } } }
         }
     });
 }
@@ -507,8 +512,8 @@ function renderHwSummary(subs, courses) {
         return `<div class="hw-row">
             <div><div class="hw-name">${title}</div><div class="hw-meta">${c.homework.length} งาน</div></div>
             <div class="hw-stats">
-                <div class="hw-stat"><div class="hw-stat-val" style="color:#f59e0b">${pending}</div><div class="hw-stat-lbl">รอตรวจ</div></div>
-                <div class="hw-stat"><div class="hw-stat-val" style="color:#10b981">${graded}</div><div class="hw-stat-lbl">ตรวจแล้ว</div></div>
+                <div class="hw-stat"><div class="hw-stat-val" style="color:var(--warning)">${pending}</div><div class="hw-stat-lbl">รอตรวจ</div></div>
+                <div class="hw-stat"><div class="hw-stat-val" style="color:var(--success)">${graded}</div><div class="hw-stat-lbl">ตรวจแล้ว</div></div>
                 <div class="hw-stat"><div class="hw-stat-val" style="color:#8b5cf6">${avgScore!==null?avgScore+'%':'—'}</div><div class="hw-stat-lbl">คะแนนเฉลี่ย</div></div>
             </div>
         </div>`;
@@ -560,11 +565,11 @@ function renderBarChart(enrolls, courses) {
         },
         options:{
             responsive:true, maintainAspectRatio:false,
-            plugins:{ legend:{ labels:{ color:'#a0a0ba', font:{ size:11 } } } },
+            plugins:{ legend:{ labels:{ color:themeVar('--text-dim','#a0a0ba'), font:{ size:11 } } } },
             scales:{
-                x:{ grid:{ display:false }, ticks:{ color:'#a0a0ba', font:{ size:11 } } },
-                y:{ position:'left', max:100, grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#a0a0ba', callback:v=>v+'%' } },
-                y1:{ position:'right', grid:{ display:false }, ticks:{ color:'#a0a0ba', callback:v=>v+' นาที' } }
+                x:{ grid:{ display:false }, ticks:{ color:themeVar('--text-dim','#a0a0ba'), font:{ size:11 } } },
+                y:{ position:'left', max:100, grid:{ color:themeVar('--line','rgba(255,255,255,0.05)') }, ticks:{ color:themeVar('--text-dim','#a0a0ba'), callback:v=>v+'%' } },
+                y1:{ position:'right', grid:{ display:false }, ticks:{ color:themeVar('--text-dim','#a0a0ba'), callback:v=>v+' นาที' } }
             }
         }
     });

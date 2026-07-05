@@ -20,7 +20,7 @@
         /* ── Nav ── */
         .top-nav {
             position:fixed; top:0; left:0; right:0; height:var(--nav-h);
-            background:rgba(255,255,255,0.03); backdrop-filter:blur(15px);
+            background:var(--nav-bg); backdrop-filter:blur(15px);
             border-bottom:1px solid var(--border);
             display:flex; align-items:center; justify-content:space-between;
             padding:0 32px; z-index:100;
@@ -36,7 +36,7 @@
         /* ── Sidebar ── */
         .sidebar {
             width:220px; flex-shrink:0;
-            background:rgba(255,255,255,0.02); border-right:1px solid var(--border);
+            background:var(--nav-bg); border-right:1px solid var(--border);
             padding:32px 16px; position:sticky; top:var(--nav-h); height:calc(100vh - var(--nav-h));
             overflow-y:auto;
         }
@@ -112,14 +112,14 @@
             position:absolute; bottom:0; right:0;
             width:28px; height:28px; border-radius:50%;
             background:linear-gradient(135deg,var(--primary),var(--primary-2));
-            border:2px solid #020418; display:flex; align-items:center; justify-content:center;
+            border:2px solid var(--bg-color); display:flex; align-items:center; justify-content:center;
             cursor:pointer; font-size:0.75rem;
         }
         .avatar-info h3 { font-size:1.1rem; font-weight:600; margin-bottom:4px; }
         .avatar-info p { font-size:0.82rem; color:var(--text-dim); }
         .user-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.72rem; padding:3px 10px; border-radius:99px; margin-top:6px; font-weight:600; }
         .badge-teacher { background:rgba(139,92,246,0.2); color:#c4b5fd; border:1px solid rgba(139,92,246,0.3); }
-        .badge-student { background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
+        .badge-student { background:rgba(16,185,129,0.15); color:var(--success); border:1px solid rgba(16,185,129,0.3); }
 
         /* ── Form ── */
         .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -127,14 +127,14 @@
         .form-group { display:flex; flex-direction:column; gap:6px; }
         label { font-size:0.82rem; font-weight:500; color:var(--text-dim); }
         input, textarea, select {
-            background:rgba(255,255,255,0.06); border:1px solid var(--border);
+            background:var(--input-bg); border:1px solid var(--border);
             border-radius:10px; padding:10px 14px; color:var(--text);
             font-size:0.88rem; outline:none; transition:0.2s; font-family:inherit;
             width:100%;
         }
         input:focus, textarea:focus, select:focus { border-color:var(--border-focus); background:rgba(139,92,246,0.06); }
         input:disabled { opacity:0.5; cursor:not-allowed; }
-        input::placeholder, textarea::placeholder { color:rgba(255,255,255,0.2); }
+        input::placeholder, textarea::placeholder { color:var(--text-faint); }
         textarea { resize:vertical; min-height:90px; }
 
         /* ── Buttons ── */
@@ -147,7 +147,7 @@
         .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
         .btn-ghost { background:var(--card); border:1px solid var(--border); color:var(--text-dim); }
         .btn-ghost:hover { border-color:var(--primary); color:var(--text); }
-        .btn-danger { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; }
+        .btn-danger { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:var(--danger); }
         .btn-danger:hover { background:rgba(239,68,68,0.25); }
 
         /* ── Toggle ── */
@@ -159,18 +159,18 @@
         .switch input { opacity:0; width:0; height:0; }
         .slider {
             position:absolute; inset:0; border-radius:99px;
-            background:rgba(255,255,255,0.1); cursor:pointer; transition:0.3s;
+            background:var(--border); cursor:pointer; transition:0.3s;
         }
         .slider::before {
             content:''; position:absolute; width:18px; height:18px;
-            left:3px; top:3px; border-radius:50%; background:rgba(255,255,255,0.5);
+            left:3px; top:3px; border-radius:50%; background:var(--text-main);
             transition:0.3s;
         }
         .switch input:checked + .slider { background:linear-gradient(135deg,var(--primary),var(--primary-2)); }
         .switch input:checked + .slider::before { transform:translateX(20px); background:white; }
 
         /* ── Password strength ── */
-        .pw-strength { height:4px; border-radius:99px; margin-top:6px; background:rgba(255,255,255,0.08); overflow:hidden; }
+        .pw-strength { height:4px; border-radius:99px; margin-top:6px; background:var(--border); overflow:hidden; }
         .pw-bar { height:100%; border-radius:99px; width:0; transition:0.3s; }
 
         /* ── Message ── */
@@ -183,7 +183,7 @@
 
         /* ── Danger zone ── */
         .danger-zone { border-color:rgba(239,68,68,0.2); }
-        .danger-zone .section-title { color:#f87171; }
+        .danger-zone .section-title { color:var(--danger-red); }
 
 
         /* ── Avatar Customizer ── */
@@ -202,7 +202,7 @@
         .color-swatch.selected { border-color: white; transform: scale(1.15); }
         .char-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 8px; }
         .char-option {
-            background: rgba(255,255,255,0.04); border: 2px solid var(--border);
+            background: var(--card); border: 2px solid var(--border);
             border-radius: 12px; padding: 14px 8px; cursor: pointer;
             text-align: center; transition: 0.2s; font-size: 0.78rem; color: var(--text-dim);
         }
@@ -212,7 +212,7 @@
         .personality-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
         .p-option {
             padding: 10px 8px; border-radius: 10px; border: 1px solid var(--border);
-            background: rgba(255,255,255,0.04); cursor: pointer; text-align: center;
+            background: var(--card); cursor: pointer; text-align: center;
             font-size: 0.78rem; color: var(--text-dim); transition: 0.2s;
         }
         .p-option:hover { border-color: rgba(139,92,246,0.5); color: var(--text); }
@@ -222,17 +222,17 @@
 
         /* ── Voice Recorder ── */
         .sample-sentence {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            background: var(--card); border: 1px solid var(--border);
             border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;
             font-size: 0.85rem; line-height: 1.6; color: var(--text);
             cursor: pointer; transition: 0.2s; position: relative;
         }
         .sample-sentence:hover { border-color: var(--primary); background: rgba(139,92,246,0.06); }
-        .sample-sentence.speaking { border-color: #10b981; background: rgba(16,185,129,0.08); }
+        .sample-sentence.speaking { border-color: var(--success); background: rgba(16,185,129,0.08); }
         .sample-num { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 3px; font-weight: 600; }
 
         .voice-recorder-wrap {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            background: var(--card); border: 1px solid var(--border);
             border-radius: 14px; padding: 20px; margin-top: 16px;
         }
         .recorder-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
@@ -251,7 +251,7 @@
             display: flex; align-items: center; gap: 6px;
         }
         .voice-level-bar {
-            height: 4px; background: rgba(255,255,255,0.08);
+            height: 4px; background: var(--border);
             border-radius: 99px; overflow: hidden; margin: 8px 0;
         }
         .voice-level-fill {
@@ -260,13 +260,13 @@
         }
         .audio-preview {
             width: 100%; margin-top: 10px;
-            border-radius: 8px; background: rgba(255,255,255,0.04);
+            border-radius: 8px; background: var(--card);
         }
         audio::-webkit-media-controls-panel { background: rgba(30,27,75,0.8); }
         .gemini-voice-opt { cursor: pointer; display: block; }
         .gemini-voice-opt input { display: none; }
         .gemini-voice-card {
-            background: rgba(226,232,240,0.03); border: 1.5px solid var(--border, rgba(226,232,240,0.12));
+            background: var(--card); border: 1.5px solid var(--border, rgba(226,232,240,0.12));
             border-radius: 10px; padding: 12px; text-align: center; transition: 0.2s;
         }
         .gemini-voice-card:hover { border-color: rgba(99,102,241,0.5); }
@@ -279,11 +279,11 @@
         .voice-badge {
             display: inline-flex; align-items: center; gap: 5px;
             font-size: 0.75rem; padding: 3px 10px; border-radius: 99px;
-            background: rgba(16,185,129,0.15); color: #10b981;
+            background: rgba(16,185,129,0.15); color: var(--success);
             border: 1px solid rgba(16,185,129,0.3); font-weight: 600;
         }
         .voice-card {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            background: var(--card); border: 1px solid var(--border);
             border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: 0.2s;
         }
         .voice-card:hover { border-color: rgba(139,92,246,0.5); background: rgba(139,92,246,0.06); }
@@ -435,7 +435,7 @@
                             <div class="quick-link-icon" style="background:rgba(139,92,246,0.15);">🔒</div>
                             <span>เปลี่ยนรหัสผ่าน</span>
                         </div>
-                        <div class="quick-link" onclick="signOut()" style="color:#f87171;">
+                        <div class="quick-link" onclick="signOut()" style="color:var(--danger-red);">
                             <div class="quick-link-icon" style="background:rgba(239,68,68,0.15);">🚪</div>
                             <span>ออกจากระบบ</span>
                         </div>
@@ -674,7 +674,7 @@
                     <!-- Sample sentences -->
                     <div style="margin-bottom:16px;">
                         <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                            📋 ประโยคตัวอย่าง <span style="color:rgba(255,255,255,0.3);">— อ่านให้ครบอย่างน้อย 3 ประโยค (~30 วินาที)</span>
+                            📋 ประโยคตัวอย่าง <span style="color:var(--text-faint);">— อ่านให้ครบอย่างน้อย 3 ประโยค (~30 วินาที)</span>
                         </div>
                         <div class="sample-sentence" onclick="speakSample(this)">
                             <div class="sample-num">ประโยคที่ 1</div>
@@ -749,7 +749,7 @@
                     </div>
                     <div id="avatarPreviewGreeting"
                         style="font-size:0.82rem;color:var(--text-dim);line-height:1.6;
-                        background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:left;">
+                        background:var(--card);border-radius:10px;padding:10px;text-align:left;">
                         สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?
                     </div>
                 </div>
@@ -1120,7 +1120,7 @@ function setVoiceStatus(text, type) {
     const el = document.getElementById('voiceStatus');
     if (!el) return;
     el.textContent = text;
-    el.style.color = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : 'var(--text-dim)';
+    el.style.color = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--text-dim)';
 }
 
 function showVoiceMsg(text, type) {
