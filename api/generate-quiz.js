@@ -62,7 +62,7 @@ export default async function handler(req, res) {
                     contents: [{ parts }],
                     generationConfig: {
                         temperature: 0.7,
-                        maxOutputTokens: reqType === 'outline' ? 8192 : 1500
+                        maxOutputTokens: reqType === 'outline' ? 16384 : 1500
                     }
                 })
             }
@@ -74,28 +74,40 @@ export default async function handler(req, res) {
         }
 
         const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const candidate = data.candidates?.[0];
+        const text = candidate?.content?.parts?.[0]?.text || '';
+        const finishReason = candidate?.finishReason || '';
 
         // ถ้าเป็น outline mode ส่ง text กลับตรงๆ ให้ client parse
         if (reqType === 'outline' || customPrompt) {
-            // พยายาม repair JSON ที่ถูกตัดกลางคัน
-            let repairedText = text;
+            const cleaned = text.replace(/```json|```/g, '').trim();
+            let repairedText = cleaned;
+            let parsedOk = true;
             try {
-                JSON.parse(text.replace(/```json|```/g, '').trim());
-            } catch(e) {
-                // ถ้า parse ไม่ได้ ให้ลอง close JSON อัตโนมัติ
-                let t = text.replace(/```json|```/g, '').trim();
-                // นับ bracket ที่เปิดแต่ยังไม่ปิด
-                let opens = (t.match(/\[/g)||[]).length - (t.match(/\]/g)||[]).length;
-                let opensBrace = (t.match(/\{/g)||[]).length - (t.match(/\}/g)||[]).length;
-                // ตัด trailing comma ออก
-                t = t.replace(/,\s*$/, '');
-                t = t.replace(/,\s*([\]}])/g, '$1');
-                for (let i = 0; i < opensBrace; i++) t += '}';
-                for (let i = 0; i < opens; i++) t += ']';
-                repairedText = t;
+                JSON.parse(cleaned);
+            } catch (e) {
+                parsedOk = false;
+                repairedText = repairTruncatedJsonArray(cleaned);
             }
-            return res.json({ text: repairedText });
+
+            // ตรวจซ้ำอีกครั้งว่า repair แล้ว parse ผ่านจริงไหม ถ้าไม่ผ่านให้แจ้ง error แทนที่จะส่ง JSON เสียกลับไป
+            try {
+                const repairedArr = JSON.parse(repairedText);
+                if (!parsedOk && finishReason === 'MAX_TOKENS') {
+                    // เนื้อหายาวเกินจนถูกตัด — เก็บเท่าที่ parse ได้ แต่แจ้งเตือนไว้ใน response ด้วย
+                    return res.json({
+                        text: repairedText,
+                        warning: `เนื้อหายาวเกินไป AI สร้างได้ไม่ครบ (เก็บได้ ${Array.isArray(repairedArr) ? repairedArr.length : 0} ข้อ) ลองแบ่งไฟล์ให้เล็กลงหรือทำทีละส่วน`
+                    });
+                }
+                return res.json({ text: repairedText });
+            } catch (e2) {
+                return res.status(500).json({
+                    error: finishReason === 'MAX_TOKENS'
+                        ? 'เนื้อหายาวเกินไป AI สร้างคำตอบไม่เสร็จและกู้คืนไม่ได้ ลองแบ่งไฟล์ให้เล็กลงหรือลดจำนวนหน้าแล้วลองใหม่'
+                        : 'AI ตอบกลับมาเป็น JSON ที่ไม่ถูกต้อง ลองใหม่อีกครั้ง'
+                });
+            }
         }
 
         // Quiz mode — parse JSON array
@@ -107,4 +119,32 @@ export default async function handler(req, res) {
         console.error('generate-quiz error:', err);
         res.status(500).json({ error: err.message });
     }
+}
+
+// กู้ JSON array ที่ถูกตัดกลางคัน (เช่น token limit หมดกลาง string) โดยตัดทิ้งเฉพาะ
+// object สุดท้ายที่ยังไม่สมบูรณ์ แทนที่จะพยายามปะต่อ string ที่ขาดหาย (ซึ่งมักทำให้ได้ JSON ที่ยัง invalid อยู่ดี)
+function repairTruncatedJsonArray(rawText) {
+    const startIdx = rawText.indexOf('[');
+    if (startIdx === -1) return rawText; // ไม่ใช่ array ซ่อมด้วยวิธีนี้ไม่ได้
+
+    let depth = 0;
+    let inString = false;
+    let escape = false;
+    let lastCompleteEnd = -1;
+
+    for (let i = startIdx; i < rawText.length; i++) {
+        const ch = rawText[i];
+        if (escape) { escape = false; continue; }
+        if (ch === '\\') { escape = true; continue; }
+        if (ch === '"') { inString = !inString; continue; }
+        if (inString) continue;
+        if (ch === '{') depth++;
+        else if (ch === '}') {
+            depth--;
+            if (depth === 0) lastCompleteEnd = i; // ปิด object ระดับบนสุดสมบูรณ์ 1 ตัว
+        }
+    }
+
+    if (lastCompleteEnd === -1) return rawText; // ไม่มี object ไหนสมบูรณ์เลย กู้ไม่ได้
+    return rawText.slice(startIdx, lastCompleteEnd + 1) + ']';
 }
