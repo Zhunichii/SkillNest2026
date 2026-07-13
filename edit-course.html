@@ -795,18 +795,45 @@ async function ensurePdfJsLoaded() {
         'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 }
 
-async function extractTextFromPdfFile(file) {
+async function analyzePdfFile(file) {
     await ensurePdfJsLoaded();
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let fullText = '';
     const maxPages = Math.min(pdf.numPages, 15);
+    const MAX_IMAGE_PAGES = 6;
+
+    let fullText = '';
+    const pageImages = [];
+
     for (let i = 1; i <= maxPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+
+        if (pageImages.length < MAX_IMAGE_PAGES) {
+            try {
+                const opList = await page.getOperatorList();
+                const hasImage = opList.fnArray.some(fn =>
+                    fn === window.pdfjsLib.OPS.paintImageXObject ||
+                    fn === window.pdfjsLib.OPS.paintInlineImageXObject
+                );
+                if (hasImage) {
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    pageImages.push({ pageNum: i, data: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+                }
+            } catch (e) {
+                console.warn('ไม่สามารถตรวจสอบ/render รูปภาพในหน้า', i, e);
+            }
+        }
     }
-    return fullText.slice(0, 6000);
+
+    return { text: fullText.slice(0, 6000), pageImages };
 }
 
 async function ensureMammothLoaded() {
@@ -845,8 +872,11 @@ function toDatetimeLocalValue(deadlineStr) {
 }
 
 const HOMEWORK_EXTRACT_INSTRUCTION = `คุณเป็นผู้ช่วยอาจารย์ ช่วยแตกเนื้อหาการบ้าน/โจทย์ต่อไปนี้ ออกเป็นรายการการบ้านแต่ละข้อ
+ข้อสำคัญมาก: ถ้าโจทย์มีโค้ดโปรแกรม (source code) อยู่ในกรอบสี่เหลี่ยมหรือในภาพหน้ากระดาษที่แนบมา
+ให้คัดลอกโค้ดนั้นมาใส่ใน description ให้ครบถ้วนตามต้นฉบับด้วย ห้ามตัดโค้ดออกหรือสรุปแทนโค้ดจริง
+ใส่โค้ดในเครื่องหมาย \`\`\` ... \`\`\` และ escape ขึ้นบรรทัดใหม่ในโค้ดด้วย \\n ให้ JSON ยังคง valid
 ตอบเป็น JSON array เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
-[{"title":"ชื่อการบ้านสั้นๆ","description":"รายละเอียด/โจทย์ของข้อนี้","deadline":"YYYY-MM-DD หรือเว้นว่างถ้าไม่ระบุ","maxScore":100}]
+[{"title":"ชื่อการบ้านสั้นๆ","description":"รายละเอียด/โจทย์ของข้อนี้ (รวมโค้ดถ้ามี)","deadline":"YYYY-MM-DD หรือเว้นว่างถ้าไม่ระบุ","maxScore":100}]
 ถ้าเนื้อหาไม่ได้แบ่งเป็นหลายข้อ ให้สรุปเป็นการบ้าน 1 ข้อ
 
 เนื้อหา:
@@ -881,19 +911,26 @@ window.extractHomeworkWithAI = async function() {
             };
         } else {
             let contentText = pastedText;
+            let pageImages = [];
             if (hwSourceFile && hwSourceFile.type === 'application/pdf') {
-                status.textContent = 'กำลังดึงข้อความจาก PDF...';
-                contentText = await extractTextFromPdfFile(hwSourceFile);
+                status.textContent = 'กำลังอ่าน PDF (รวมภาพโค้ด/เนื้อหาที่ฝังอยู่ในไฟล์)...';
+                const analyzed = await analyzePdfFile(hwSourceFile);
+                contentText = analyzed.text;
+                pageImages = analyzed.pageImages;
             } else if (hwSourceFile && hwSourceFile.name.toLowerCase().endsWith('.docx')) {
                 status.textContent = 'กำลังดึงข้อความจากไฟล์ Word...';
                 contentText = await extractTextFromDocxFile(hwSourceFile);
             }
-            if (!contentText || !contentText.trim()) {
+            if ((!contentText || !contentText.trim()) && pageImages.length === 0) {
                 throw new Error('ไม่พบข้อความในไฟล์ที่อัปโหลด ลองวางข้อความแทนได้ครับ');
             }
+            const imageNote = pageImages.length > 0
+                ? `(หมายเหตุ: แนบภาพหน้า ${pageImages.map(p => p.pageNum).join(', ')} มาด้วย เพราะมีเนื้อหา/โค้ดที่อยู่ในรูปภาพ ไม่ใช่ข้อความ กรุณาอ่านและรวมเข้ากับเนื้อหาด้านล่างด้วย)\n\n`
+                : '';
             requestBody = {
                 type: 'outline',
-                prompt: HOMEWORK_EXTRACT_INSTRUCTION + contentText
+                prompt: HOMEWORK_EXTRACT_INSTRUCTION + imageNote + contentText,
+                images: pageImages.length > 0 ? pageImages.map(p => ({ data: p.data, mimeType: p.mimeType })) : undefined
             };
         }
 
