@@ -847,6 +847,25 @@
             line-height: 1.6; padding: 14px; resize: vertical; tab-size: 4;
             white-space: pre; overflow-wrap: normal; overflow-x: auto;
         }
+        .ide-stdin-wrap {
+            border-top: 1px solid rgba(226,232,240,0.08);
+            background: #0D1117;
+            padding: 8px 14px 10px;
+        }
+        .ide-stdin-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.74rem; color: #8B92AE; margin-bottom: 5px;
+            font-family: var(--font-body, sans-serif);
+        }
+        .ide-stdin {
+            width: 100%; min-height: 52px; max-height: 140px;
+            background: #010409; color: #E6EDF3;
+            border: 1px solid rgba(226,232,240,0.12); border-radius: 6px;
+            font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.8rem;
+            line-height: 1.5; padding: 8px 10px; resize: vertical; outline: none;
+        }
+        .ide-stdin:focus { border-color: rgba(99,102,241,0.5); }
+        .ide-stdin::placeholder { color: #484F58; }
         .ide-console {
             background: #010409; border-top: 1px solid rgba(226,232,240,0.08);
             padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
@@ -3545,6 +3564,10 @@ async function loadHomeworkPanel() {
                             <button class="ide-run-btn" id="ide-run-${idx}" onclick="runCode(${idx}, '${codeLang}')">▶ รันโค้ด</button>
                         </div>
                         <textarea class="ide-editor" id="hw-code-${idx}" spellcheck="false">${escapeForTextarea(starter)}</textarea>
+                        <div class="ide-stdin-wrap">
+                            <div class="ide-stdin-label">📥 ข้อมูล Input (ถ้าโปรแกรมมีคำสั่งรับค่า เช่น input() — ใส่ค่าแต่ละตัวคนละบรรทัด ตามลำดับที่โปรแกรมจะถาม)</div>
+                            <textarea class="ide-stdin" id="ide-stdin-${idx}" spellcheck="false" placeholder="เช่น&#10;Somchai&#10;25"></textarea>
+                        </div>
                         <div class="ide-console" id="ide-console-${idx}"></div>
                         <iframe class="ide-preview-frame" id="ide-preview-${idx}" style="display:none;" sandbox="allow-scripts"></iframe>
                     </div>
@@ -3643,12 +3666,17 @@ function appendConsole(el, type, text) {
 
 window.runCode = async function(idx, lang) {
     const editor = document.getElementById(`hw-code-${idx}`);
+    const stdinEl = document.getElementById(`ide-stdin-${idx}`);
     const consoleEl = document.getElementById(`ide-console-${idx}`);
     const frame = document.getElementById(`ide-preview-${idx}`);
     const runBtn = document.getElementById(`ide-run-${idx}`);
     if (!editor) return;
 
     const code = editor.value;
+    // แตกข้อมูล stdin ที่นักเรียนใส่ไว้ เป็นคิวทีละบรรทัด (รองรับ input()/prompt() ที่โปรแกรมเรียก)
+    const stdinQueue = (stdinEl?.value || '').split('\n');
+    let stdinIndex = 0;
+
     consoleEl.innerHTML = '';
     frame.style.display = 'none';
     runBtn.disabled = true;
@@ -3662,6 +3690,29 @@ window.runCode = async function(idx, lang) {
             // ดัก stdout / stderr
             pyodide.setStdout({ batched: (s) => appendConsole(consoleEl, 'out', s) });
             pyodide.setStderr({ batched: (s) => appendConsole(consoleEl, 'err', s) });
+
+            // ผูก input() ให้ดึงค่าจากคิว stdin ที่นักเรียนกรอกไว้ด้านบน แทนที่จะ error
+            pyodide.globals.set('_ide_get_input_line', () => {
+                if (stdinIndex >= stdinQueue.length) return undefined; // หมดคิว
+                return stdinQueue[stdinIndex++];
+            });
+            try {
+                await pyodide.runPythonAsync(`
+import builtins as _ide_builtins
+def _ide_custom_input(prompt=''):
+    if prompt:
+        print(prompt, end='')
+    _line = _ide_get_input_line()
+    if _line is None:
+        raise EOFError('EOF when reading a line — ไม่มีข้อมูล Input เหลือ กรุณาเพิ่มค่าในช่อง "ข้อมูล Input" ด้านบนแล้วลองรันใหม่')
+    print(_line)
+    return _line
+_ide_builtins.input = _ide_custom_input
+`);
+            } catch (setupErr) {
+                console.warn('ide input() setup error:', setupErr);
+            }
+
             try {
                 await pyodide.runPythonAsync(code);
                 appendConsole(consoleEl, 'ok', '\n✓ รันเสร็จสมบูรณ์');
@@ -3677,9 +3728,19 @@ window.runCode = async function(idx, lang) {
                 warn: (...a) => logs.push('⚠️ ' + a.map(fmtVal).join(' ')),
                 info: (...a) => logs.push(a.map(fmtVal).join(' ')),
             };
+            // ผูก prompt() ให้ดึงค่าจากคิว stdin แทนที่จะเด้ง dialog ของเบราว์เซอร์
+            const sandboxPrompt = (msg) => {
+                if (stdinIndex >= stdinQueue.length) {
+                    logs.push('⚠️ prompt() ถูกเรียกแต่ไม่มีข้อมูล Input เหลือ — เพิ่มค่าในช่อง "ข้อมูล Input" ด้านบนแล้วลองใหม่');
+                    return null;
+                }
+                const val = stdinQueue[stdinIndex++];
+                logs.push(`${msg ? msg + ' ' : ''}${val}`);
+                return val;
+            };
             try {
-                const fn = new Function('console', code);
-                fn(sandboxConsole);
+                const fn = new Function('console', 'prompt', code);
+                fn(sandboxConsole, sandboxPrompt);
                 logs.forEach(l => appendConsole(consoleEl, l.startsWith('❌') ? 'err' : 'out', l));
                 appendConsole(consoleEl, 'ok', '\n✓ รันเสร็จสมบูรณ์');
             } catch(jsErr) {
