@@ -9,6 +9,7 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
         body {
+            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
             color: var(--text-main); min-height:100vh; padding:2rem;
         }
         .container { max-width:1000px; margin:0 auto; }
@@ -25,9 +26,9 @@
             display:flex; align-items:center; gap:6px;
             padding:0.5rem 1rem; border-radius:8px;
             border:1px solid var(--border-color);
-            background:var(--card-bg); transition:0.2s;
+            background:rgba(255,255,255,0.03); transition:0.2s;
         }
-        .btn-back:hover { color:var(--text-main); border-color:var(--primary-blue); }
+        .btn-back:hover { color:white; border-color:var(--primary-blue); }
 
         .section {
             background: var(--card-bg); border-radius:16px;
@@ -89,7 +90,7 @@
         .existing-file-badge {
             display:inline-flex; align-items:center; gap:0.5rem;
             background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.25);
-            color:var(--primary-blue); padding:0.4rem 0.8rem; border-radius:8px; font-size:0.82rem;
+            color:#60a5fa; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.82rem;
             margin-bottom:0.75rem;
         }
         .upload-method {
@@ -101,8 +102,8 @@
             padding:0.75rem; text-align:center; cursor:pointer; transition:0.2s;
             background:var(--input-bg); color:var(--text-dim); font-size:0.9rem;
         }
-        .method-option:hover { border-color:var(--primary-blue); color:var(--text-main); }
-        .method-option.active { border-color:var(--primary-blue); background:rgba(59,130,246,0.1); color:var(--text-main); }
+        .method-option:hover { border-color:var(--primary-blue); color:white; }
+        .method-option.active { border-color:var(--primary-blue); background:rgba(59,130,246,0.1); color:white; }
         .method-icon { font-size:1.5rem; margin-bottom:0.25rem; }
 
         /* Buttons */
@@ -116,16 +117,16 @@
         .btn-success { background:var(--success-green); color:white; }
         .btn-success:hover { background:#059669; }
         .btn-danger {
-            background:rgba(239,68,68,0.15); color:var(--danger);
+            background:rgba(239,68,68,0.15); color:#ef4444;
             border:1px solid rgba(239,68,68,0.3); padding:0.4rem 0.8rem;
             font-size:0.85rem; border-radius:6px; font-weight:500;
         }
-        .btn-danger:hover { background:var(--danger); color:white; }
+        .btn-danger:hover { background:#ef4444; color:white; }
         .btn-outline {
             background:transparent; color:var(--text-dim);
             border:1px dashed var(--border-color);
         }
-        .btn-outline:hover { border-color:var(--primary-blue); color:var(--text-main); }
+        .btn-outline:hover { border-color:var(--primary-blue); color:white; }
         .btn-warning { background:var(--warning); color:white; }
         .btn-warning:hover { background:#d97706; }
         .btn-save {
@@ -154,7 +155,7 @@
             display:flex; align-items:center; gap:0.5rem;
         }
         .choice-label {
-            background:var(--card-hover); border-radius:6px;
+            background:rgba(255,255,255,0.1); border-radius:6px;
             padding:0.3rem 0.6rem; font-weight:700; min-width:32px; text-align:center;
         }
 
@@ -185,7 +186,7 @@
             border-radius:8px; background:var(--input-bg); color:var(--text-dim);
             cursor:pointer; font-size:0.85rem; text-align:center; transition:0.2s;
         }
-        .hw-type-btn.active { border-color:var(--warning); background:rgba(245,158,11,0.15); color:var(--text-main); }
+        .hw-type-btn.active { border-color:#f59e0b; background:rgba(245,158,11,0.15); color:white; }
 
         /* Tabs */
         .edit-tabs { display:flex; gap:0; border-bottom:2px solid var(--border-color); margin-bottom:1.5rem; }
@@ -193,14 +194,14 @@
             padding:0.6rem 1.25rem; cursor:pointer; color:var(--text-dim);
             border-bottom:2px solid transparent; margin-bottom:-2px; transition:0.2s; font-size:0.95rem;
         }
-        .edit-tab:hover { color:var(--text-main); }
+        .edit-tab:hover { color:white; }
         .edit-tab.active { color:var(--primary-blue); border-bottom-color:var(--primary-blue); font-weight:600; }
         .edit-tab-panel { display:none; }
         .edit-tab-panel.active { display:block; }
 
         /* Loading overlay */
         .loading-overlay {
-            position:fixed; inset:0; background:var(--bg-color); opacity:0.92;
+            position:fixed; inset:0; background:rgba(2,4,24,0.92);
             backdrop-filter:blur(10px); z-index:9999;
             display:none; align-items:center; justify-content:center;
         }
@@ -208,7 +209,7 @@
         .loading-content { text-align:center; }
         .spinner {
             width:50px; height:50px;
-            border:4px solid var(--border-color);
+            border:4px solid rgba(255,255,255,0.1);
             border-top:4px solid var(--primary-blue);
             border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 1rem;
         }
@@ -216,11 +217,11 @@
 
         .alert-info {
             background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25);
-            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:var(--primary-blue);
+            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#93c5fd;
         }
         .alert-warning {
             background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
-            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:var(--warning);
+            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#fcd34d;
         }
 
         @media (max-width:640px) { .grid { grid-template-columns:1fr; } .ai-gen-row { grid-template-columns:1fr; } }
@@ -293,14 +294,6 @@
             <input type="file" id="thumbnailInput" accept="image/*" style="display:none;">
             <div id="thumbnailPreview"></div>
         </div>
-        <div class="section">
-            <h2 class="section-title">🔗 ฝังฟอร์มออนไลน์ (Google Form / Microsoft Form)</h2>
-            <div class="alert-info">💡 นักเรียนจะทำแบบฟอร์มนี้ได้ทันทีในหน้าคอร์ส ไม่ต้องเปิดแท็บใหม่</div>
-            <div class="form-group">
-                <label>URL ของฟอร์ม (Google Form หรือ Microsoft Form)</label>
-                <input type="url" id="embeddedFormUrl" class="form-control" placeholder="เช่น https://docs.google.com/forms/d/e/xxxx/viewform">
-            </div>
-        </div>
     </div>
 
     <!-- TAB 2: บทเรียน -->
@@ -367,9 +360,9 @@
                     <div class="file-upload-area" onclick="document.getElementById('hwSourceFileInput').click()">
                         <div class="file-upload-icon">📤</div>
                         <p>คลิกเพื่ออัปโหลดไฟล์การบ้าน</p>
-                        <small style="color:var(--text-dim);">รองรับ PDF และรูปภาพ (JPG, PNG)</small>
+                        <small style="color:var(--text-dim);">รองรับ PDF, Word (.docx) และรูปภาพ (JPG, PNG)</small>
                     </div>
-                    <input type="file" id="hwSourceFileInput" accept=".pdf,image/*" style="display:none;">
+                    <input type="file" id="hwSourceFileInput" accept=".pdf,.docx,image/*" style="display:none;">
                     <div id="hwSourceFilePreview"></div>
                 </div>
                 <div class="form-group">
@@ -452,7 +445,6 @@ function populateForm(course) {
     document.getElementById('courseCategory').value = course.category || '';
     document.getElementById('courseLevel').value = course.level || '';
     document.getElementById('courseInstructor').value = course.instructor || '';
-    document.getElementById('embeddedFormUrl').value = course.embeddedFormUrl || '';
 
     // ── รูปปก ──
     if (course.thumbnail) {
@@ -817,6 +809,24 @@ async function extractTextFromPdfFile(file) {
     return fullText.slice(0, 6000);
 }
 
+async function ensureMammothLoaded() {
+    if (window.mammoth) return;
+    await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.7.0/mammoth.browser.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+}
+
+async function extractTextFromDocxFile(file) {
+    await ensureMammothLoaded();
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await window.mammoth.extractRawText({ arrayBuffer });
+    return (result.value || '').slice(0, 6000);
+}
+
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -874,6 +884,9 @@ window.extractHomeworkWithAI = async function() {
             if (hwSourceFile && hwSourceFile.type === 'application/pdf') {
                 status.textContent = 'กำลังดึงข้อความจาก PDF...';
                 contentText = await extractTextFromPdfFile(hwSourceFile);
+            } else if (hwSourceFile && hwSourceFile.name.toLowerCase().endsWith('.docx')) {
+                status.textContent = 'กำลังดึงข้อความจากไฟล์ Word...';
+                contentText = await extractTextFromDocxFile(hwSourceFile);
             }
             if (!contentText || !contentText.trim()) {
                 throw new Error('ไม่พบข้อความในไฟล์ที่อัปโหลด ลองวางข้อความแทนได้ครับ');
@@ -1112,7 +1125,6 @@ window.saveCourse = async function() {
             lessons: lessonsData,
             quiz: quizData,
             homework: homeworkData,
-            embeddedFormUrl: document.getElementById('embeddedFormUrl').value.trim() || null,
             updated_at: new Date().toISOString()
         }).eq('id', courseId);
         if (upErr) throw upErr;
