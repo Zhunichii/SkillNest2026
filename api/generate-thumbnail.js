@@ -1,5 +1,6 @@
 // /api/generate-thumbnail.js
-// สร้างรูปปกคอร์สด้วย Gemini image generation (Nano Banana)
+// สร้างรูปปกคอร์สด้วย Pollinations.ai (ฟรี ไม่ต้องใช้ API key, ใช้โมเดล Flux)
+// เอกสาร: https://pollinations.ai — เรียกผ่าน GET URL ธรรมดา ไม่มีค่าใช้จ่าย ไม่ต้องสมัครสมาชิก
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -7,57 +8,44 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
     if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt required' });
 
-    // ใช้ key เดียวกับฝั่งสร้างคอร์ส (GEMINI_API_KEY_COURSE)
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY_COURSE || process.env.GEMINI_API_KEY;
-    if (!GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'GEMINI_API_KEY_COURSE not set in environment variables' });
-    }
+    // เสริม prompt ให้เหมาะกับภาพปกคอร์ส (เขียนเป็นอังกฤษเพราะโมเดล Flux เข้าใจอังกฤษได้แม่นกว่า
+    // แต่ยังคงคำอธิบายภาษาไทยของผู้ใช้ไว้ในนั้นด้วย โมเดลอ่านผสมได้ในระดับหนึ่ง)
+    const fullPrompt =
+        `course cover thumbnail illustration, ${prompt}, ` +
+        `wide 16:9 banner composition, clean modern design, no text, no letters, no words, no watermark, no logo`;
 
-    const fullPrompt = `สร้างภาพปกคอร์สเรียนออนไลน์ (thumbnail) สำหรับเนื้อหา: ${prompt}
-โจทย์ภาพ: อัตราส่วนภาพแนวนอนประมาณ 16:9 ดูทันสมัย สวยงาม เหมาะเป็นภาพปกหน้าคอร์สเรียน
-ข้อห้าม: ห้ามมีตัวอักษร ตัวเลข หรือข้อความใดๆ ปรากฏอยู่ในภาพเด็ดขาด`;
+    // สุ่ม seed ทุกครั้งเพื่อให้ "สร้างใหม่อีกครั้ง" ได้ภาพที่ต่างจากเดิม
+    const seed = Math.floor(Math.random() * 1_000_000_000);
+
+    const imageUrl =
+        `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}` +
+        `?width=1280&height=720&model=flux&nologo=true&seed=${seed}`;
 
     try {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: fullPrompt }] }],
-                    generationConfig: {
-                        responseModalities: ['TEXT', 'IMAGE']
-                    }
-                })
-            }
-        );
+        const response = await fetch(imageUrl);
 
         if (!response.ok) {
-            const err = await response.json().catch(() => ({}));
-            return res.status(response.status).json({ error: err.error?.message || 'Gemini image API error' });
-        }
-
-        const data = await response.json();
-        const parts = data.candidates?.[0]?.content?.parts || [];
-        const imagePart = parts.find(p => p.inlineData && p.inlineData.data);
-
-        if (!imagePart) {
-            // โมเดลอาจปฏิเสธ (เช่น เนื้อหาไม่เหมาะสม) หรือตอบกลับเป็นข้อความแทน
-            const textPart = parts.find(p => p.text)?.text || '';
-            return res.status(500).json({
-                error: textPart
-                    ? `AI ไม่สามารถสร้างภาพได้: ${textPart}`
-                    : 'AI ไม่สามารถสร้างภาพได้ ลองเปลี่ยนคำอธิบายแล้วลองใหม่'
+            return res.status(response.status).json({
+                error: `Pollinations image API error (HTTP ${response.status}) — ลองใหม่อีกครั้ง`
             });
         }
 
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.startsWith('image/')) {
+            // บางครั้งถ้า prompt ถูกกรอง อาจได้ error page กลับมาแทนรูปภาพ
+            return res.status(500).json({ error: 'AI ไม่สามารถสร้างภาพได้ ลองเปลี่ยนคำอธิบายแล้วลองใหม่' });
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString('base64');
+
         res.json({
-            image: imagePart.inlineData.data,
-            mimeType: imagePart.inlineData.mimeType || 'image/png'
+            image: base64,
+            mimeType: contentType
         });
 
     } catch (err) {
-        console.error('generate-thumbnail error:', err);
+        console.error('generate-thumbnail (pollinations) error:', err);
         res.status(500).json({ error: err.message });
     }
 }
