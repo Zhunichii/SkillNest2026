@@ -833,6 +833,18 @@
         }
         .ide-run-btn:hover { background: #2ea043; }
         .ide-run-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .ide-stop-btn {
+            background: #DA3633; color: white; border: none;
+            padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 500;
+            cursor: pointer; font-family: var(--font-body, sans-serif);
+        }
+        .ide-stop-btn:hover { background: #F85149; }
+        .ide-mode-badge {
+            font-size: 0.7rem; padding: 3px 9px; border-radius: 5px;
+            font-family: var(--font-body, sans-serif); white-space: nowrap;
+        }
+        .ide-mode-badge.live { background: rgba(63,185,80,0.15); color: #3FB950; }
+        .ide-mode-badge.fallback { background: rgba(210,153,34,0.15); color: #D29922; }
         .ide-reset-btn {
             background: transparent; color: var(--text-dim, #8B92AE);
             border: 1px solid rgba(226,232,240,0.16); padding: 6px 12px;
@@ -879,6 +891,16 @@
         .ide-console .err-line { color: #FF7B72; }
         .ide-console .ok-line  { color: #3FB950; }
         .ide-console .info-line { color: #58A6FF; }
+        .ide-input-row {
+            display: flex; align-items: center; gap: 4px;
+            color: #E6EDF3; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+        }
+        .ide-input-field {
+            flex: 1; background: transparent; border: none; outline: none;
+            border-bottom: 1px solid rgba(88,166,255,0.4);
+            color: #58A6FF; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+            padding: 2px 4px; min-width: 60px;
+        }
 
         .ide-preview-frame {
             width: 100%; height: 240px; border: none; background: white;
@@ -3555,19 +3577,29 @@ async function loadHomeworkPanel() {
         if (!isSubmitted) {
             if (isCode) {
                 const starter = hw.starterCode || (codeLang === 'python' ? '# เขียนโค้ดของคุณที่นี่\nprint("Hello, SkillNest!")' : '// เขียนโค้ดของคุณที่นี่\nconsole.log("Hello, SkillNest!");');
+                const pyLive = codeLang === 'python' && typeof window !== 'undefined' && !!window.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
+                const modeBadge = codeLang === 'python'
+                    ? (pyLive
+                        ? `<span class="ide-mode-badge live">🟢 Terminal โต้ตอบสด</span>`
+                        : `<span class="ide-mode-badge fallback">🟡 โหมด Input ล่วงหน้า</span>`)
+                    : (codeLang === 'javascript' ? `<span class="ide-mode-badge live">🟢 prompt() โต้ตอบสด</span>` : '');
+                const stdinBoxHtml = (codeLang === 'python' && !pyLive) ? `
+                        <div class="ide-stdin-wrap">
+                            <div class="ide-stdin-label">📥 ข้อมูล Input ล่วงหน้า (เบราว์เซอร์/หน้านี้ยังไม่รองรับ terminal โต้ตอบสด — ใส่ค่าที่โปรแกรมจะถาม คนละบรรทัดตามลำดับ)</div>
+                            <textarea class="ide-stdin" id="ide-stdin-${idx}" spellcheck="false" placeholder="เช่น&#10;Somchai&#10;25"></textarea>
+                        </div>` : '';
                 submitFormHtml = `
                 <div class="hw-submit-area" id="hw-form-${idx}">
                     <div class="ide-wrap">
                         <div class="ide-toolbar">
                             <span class="ide-lang-badge">${codeLang}</span>
+                            ${modeBadge}
                             <button class="ide-reset-btn" onclick="resetCode(${idx}, ${JSON.stringify(starter).replace(/"/g, '&quot;')})">↺ รีเซ็ต</button>
+                            <button class="ide-stop-btn" id="ide-stop-${idx}" style="display:none;" onclick="stopCode(${idx})">⏹ หยุด</button>
                             <button class="ide-run-btn" id="ide-run-${idx}" onclick="runCode(${idx}, '${codeLang}')">▶ รันโค้ด</button>
                         </div>
                         <textarea class="ide-editor" id="hw-code-${idx}" spellcheck="false">${escapeForTextarea(starter)}</textarea>
-                        <div class="ide-stdin-wrap">
-                            <div class="ide-stdin-label">📥 ข้อมูล Input (ถ้าโปรแกรมมีคำสั่งรับค่า เช่น input() — ใส่ค่าแต่ละตัวคนละบรรทัด ตามลำดับที่โปรแกรมจะถาม)</div>
-                            <textarea class="ide-stdin" id="ide-stdin-${idx}" spellcheck="false" placeholder="เช่น&#10;Somchai&#10;25"></textarea>
-                        </div>
+                        ${stdinBoxHtml}
                         <div class="ide-console" id="ide-console-${idx}"></div>
                         <iframe class="ide-preview-frame" id="ide-preview-${idx}" style="display:none;" sandbox="allow-scripts"></iframe>
                     </div>
@@ -3630,9 +3662,177 @@ window.resetCode = function(idx, starter) {
     if (con) con.innerHTML = '';
     const frame = document.getElementById(`ide-preview-${idx}`);
     if (frame) frame.style.display = 'none';
+    // ถ้ามีโปรแกรมกำลังรัน/ค้างรอ input อยู่ ให้หยุดก่อน (กันกด Reset แล้ว worker ค้างรอตลอดไป)
+    if (_ideWorkers[idx]) window.stopCode(idx);
+    const stopBtn = document.getElementById(`ide-stop-${idx}`);
+    if (stopBtn) stopBtn.style.display = 'none';
+    const runBtn = document.getElementById(`ide-run-${idx}`);
+    if (runBtn) { runBtn.disabled = false; runBtn.textContent = '▶ รันโค้ด'; }
 };
 
-// Pyodide (โหลดครั้งเดียว แชร์ทุก IDE)
+// ── Python live terminal: รันผ่าน Web Worker + SharedArrayBuffer เพื่อให้ input() หยุดรอค่าจริงได้
+// ต้องมี window.crossOriginIsolated === true (ตั้ง header COOP/COEP ที่ vercel.json) ไม่งั้น fallback เป็นโหมด "กรอก Input ล่วงหน้า"
+const PY_LIVE_TERMINAL = typeof window !== 'undefined' && !!window.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
+
+const PYODIDE_WORKER_SRC = [
+    "importScripts('https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js');",
+    "let pyodideReadyPromise = null;",
+    "let control = null;",
+    "let dataBuf = null;",
+    "function getPyodideReady() {",
+    "    if (!pyodideReadyPromise) pyodideReadyPromise = loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/' });",
+    "    return pyodideReadyPromise;",
+    "}",
+    "function blockingReadLine(promptText) {",
+    "    Atomics.store(control, 0, 0);",
+    "    self.postMessage({ type: 'input_request', prompt: promptText || '' });",
+    "    Atomics.wait(control, 0, 0);",
+    "    const flag = Atomics.load(control, 0);",
+    "    if (flag === 2) return undefined;",
+    "    const len = Atomics.load(control, 1);",
+    "    return new TextDecoder().decode(dataBuf.slice(0, len));",
+    "}",
+    "self.onmessage = async (e) => {",
+    "    const msg = e.data;",
+    "    if (msg.type === 'init') {",
+    "        control = new Int32Array(msg.controlBuffer);",
+    "        dataBuf = new Uint8Array(msg.dataBuffer);",
+    "        const pyodide = await getPyodideReady();",
+    "        pyodide.setStdout({ batched: (s) => self.postMessage({ type: 'stdout', text: s }) });",
+    "        pyodide.setStderr({ batched: (s) => self.postMessage({ type: 'stderr', text: s }) });",
+    "        if (msg.interruptBuffer) pyodide.setInterruptBuffer(new Uint8Array(msg.interruptBuffer));",
+    "        pyodide.globals.set('_ide_blocking_input', blockingReadLine);",
+    "        const setupCode = 'import builtins as _ide_builtins\\n' +",
+    "            'def _ide_custom_input(prompt=\"\"):\\n' +",
+    "            '    _line = _ide_blocking_input(prompt)\\n' +",
+    "            '    if _line is None:\\n' +",
+    "            '        raise EOFError(\"EOF when reading a line\")\\n' +",
+    "            '    return _line\\n' +",
+    "            '_ide_builtins.input = _ide_custom_input\\n';",
+    "        await pyodide.runPythonAsync(setupCode);",
+    "        self.postMessage({ type: 'ready' });",
+    "    } else if (msg.type === 'run') {",
+    "        try {",
+    "            const pyodide = await getPyodideReady();",
+    "            await pyodide.runPythonAsync(msg.code);",
+    "            self.postMessage({ type: 'done' });",
+    "        } catch (err) {",
+    "            self.postMessage({ type: 'error', message: String((err && err.message) || err) });",
+    "        }",
+    "    }",
+    "};"
+].join('\n');
+
+const _ideWorkers = {}; // idx -> { worker, control, dataBuf, interruptArr, ready }
+
+async function ensurePyWorkerReady(idx, consoleEl) {
+    if (_ideWorkers[idx]) { await _ideWorkers[idx].ready; return _ideWorkers[idx]; }
+
+    const controlBuffer = new SharedArrayBuffer(8);
+    const dataBuffer = new SharedArrayBuffer(65536);
+    const interruptBuffer = new SharedArrayBuffer(1);
+    const control = new Int32Array(controlBuffer);
+    const dataBuf = new Uint8Array(dataBuffer);
+    const interruptArr = new Uint8Array(interruptBuffer);
+
+    const blobUrl = URL.createObjectURL(new Blob([PYODIDE_WORKER_SRC], { type: 'application/javascript' }));
+    const worker = new Worker(blobUrl);
+
+    const state = { worker, control, dataBuf, interruptArr, ready: null, idx };
+    _ideWorkers[idx] = state;
+
+    state.ready = new Promise((resolve, reject) => {
+        state._resolveReady = resolve;
+        state._rejectReady = reject;
+    });
+
+    worker.onmessage = (e) => handlePyWorkerMessage(idx, consoleEl, e.data);
+    worker.onerror = (e) => {
+        appendConsole(consoleEl, 'err', '⚠️ Worker error: ' + e.message + ' (โหลด Python runtime ไม่สำเร็จ)');
+        if (state._rejectReady) state._rejectReady(e);
+        finishRun(idx);
+    };
+
+    appendConsole(consoleEl, 'info', '⏳ กำลังโหลด Python runtime (ครั้งแรกอาจช้าสักครู่)...');
+    worker.postMessage({ type: 'init', controlBuffer, dataBuffer, interruptBuffer });
+
+    await state.ready;
+    return state;
+}
+
+function handlePyWorkerMessage(idx, consoleEl, msg) {
+    const state = _ideWorkers[idx];
+    if (!state) return;
+    if (msg.type === 'ready') {
+        if (state._resolveReady) { state._resolveReady(); state._resolveReady = null; }
+    } else if (msg.type === 'stdout') {
+        appendConsole(consoleEl, 'out', msg.text);
+    } else if (msg.type === 'stderr') {
+        appendConsole(consoleEl, 'err', msg.text);
+    } else if (msg.type === 'input_request') {
+        const stopBtn = document.getElementById(`ide-stop-${idx}`);
+        if (stopBtn) stopBtn.style.display = 'inline-block';
+        showInlineInputPrompt(consoleEl, msg.prompt, (val) => {
+            const bytes = new TextEncoder().encode(val).slice(0, state.dataBuf.length);
+            state.dataBuf.set(bytes);
+            Atomics.store(state.control, 1, bytes.length);
+            Atomics.store(state.control, 0, 1);
+            Atomics.notify(state.control, 0);
+        });
+    } else if (msg.type === 'done') {
+        appendConsole(consoleEl, 'ok', '\n✓ รันเสร็จสมบูรณ์');
+        finishRun(idx);
+    } else if (msg.type === 'error') {
+        appendConsole(consoleEl, 'err', msg.message);
+        finishRun(idx);
+    }
+}
+
+function finishRun(idx) {
+    const runBtn  = document.getElementById(`ide-run-${idx}`);
+    const stopBtn = document.getElementById(`ide-stop-${idx}`);
+    if (runBtn)  { runBtn.disabled = false; runBtn.textContent = '▶ รันโค้ด'; }
+    if (stopBtn) stopBtn.style.display = 'none';
+}
+
+// แสดงช่อง input แบบ inline ใน console ให้ดูเหมือน terminal จริง (พิมพ์แล้ว Enter เพื่อส่งค่า)
+function showInlineInputPrompt(consoleEl, promptText, onSubmit) {
+    const row = document.createElement('div');
+    row.className = 'ide-input-row';
+    const label = document.createElement('span');
+    label.textContent = promptText || '';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'ide-input-field';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    row.appendChild(label);
+    row.appendChild(input);
+    consoleEl.appendChild(row);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+    input.focus();
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const val = input.value;
+            row.remove();
+            appendConsole(consoleEl, 'out', `${promptText || ''}${val}`);
+            onSubmit(val);
+        }
+    });
+}
+
+// หยุดโปรแกรม Python ที่กำลังรัน/ค้างรอ input อยู่ (KeyboardInterrupt)
+window.stopCode = function(idx) {
+    const state = _ideWorkers[idx];
+    if (!state) return;
+    Atomics.store(state.interruptArr, 0, 2);   // ส่ง SIGINT ให้ Pyodide เช็คระหว่างรันโค้ด
+    Atomics.store(state.control, 0, 2);         // ปลุกกรณีกำลังรอ input (Atomics.wait ค้างอยู่)
+    Atomics.notify(state.control, 0);
+    const consoleEl = document.getElementById(`ide-console-${idx}`);
+    appendConsole(consoleEl, 'info', '⏹ ส่งคำสั่งหยุดโปรแกรมแล้ว...');
+};
+
+// Pyodide แบบรันใน main thread (fallback สำหรับหน้า/เบราว์เซอร์ที่ไม่รองรับ SharedArrayBuffer)
 let _pyodideInstance = null;
 let _pyodideLoading = null;
 async function getPyodide(consoleEl) {
@@ -3666,34 +3866,46 @@ function appendConsole(el, type, text) {
 
 window.runCode = async function(idx, lang) {
     const editor = document.getElementById(`hw-code-${idx}`);
-    const stdinEl = document.getElementById(`ide-stdin-${idx}`);
+    const stdinEl = document.getElementById(`ide-stdin-${idx}`); // มีเฉพาะโหมด fallback ของ python
     const consoleEl = document.getElementById(`ide-console-${idx}`);
     const frame = document.getElementById(`ide-preview-${idx}`);
     const runBtn = document.getElementById(`ide-run-${idx}`);
     if (!editor) return;
 
     const code = editor.value;
-    // แตกข้อมูล stdin ที่นักเรียนใส่ไว้ เป็นคิวทีละบรรทัด (รองรับ input()/prompt() ที่โปรแกรมเรียก)
-    const stdinQueue = (stdinEl?.value || '').split('\n');
-    let stdinIndex = 0;
-
     consoleEl.innerHTML = '';
     frame.style.display = 'none';
     runBtn.disabled = true;
-    const origLabel = runBtn.textContent;
     runBtn.textContent = '⏳ กำลังรัน...';
 
+    if (lang === 'python' && PY_LIVE_TERMINAL) {
+        // ── โหมด Terminal โต้ตอบสด: รันผ่าน Worker, ผลลัพธ์ถูก stream กลับมาแบบ real-time ──
+        try {
+            const state = await ensurePyWorkerReady(idx, consoleEl);
+            consoleEl.innerHTML = '';
+            state.worker.postMessage({ type: 'run', code });
+            // ไม่ enable ปุ่ม Run ที่นี่ — จะถูก enable ใน finishRun() เมื่อได้ 'done'/'error' กลับมาจาก worker
+        } catch (e) {
+            appendConsole(consoleEl, 'err', 'เกิดข้อผิดพลาด: ' + e.message);
+            finishRun(idx);
+        }
+        return;
+    }
+
+    // ── โหมดอื่นๆ (python fallback / javascript / html) — ทำงานแบบเดิม จบแล้ว enable ปุ่มทันที ──
     try {
         if (lang === 'python') {
+            // fallback: ไม่มี live terminal — ใช้คิว stdin ที่กรอกไว้ล่วงหน้า
+            const stdinQueue = (stdinEl?.value || '').split('\n');
+            let stdinIndex = 0;
+
             const pyodide = await getPyodide(consoleEl);
             consoleEl.innerHTML = '';
-            // ดัก stdout / stderr
             pyodide.setStdout({ batched: (s) => appendConsole(consoleEl, 'out', s) });
             pyodide.setStderr({ batched: (s) => appendConsole(consoleEl, 'err', s) });
 
-            // ผูก input() ให้ดึงค่าจากคิว stdin ที่นักเรียนกรอกไว้ด้านบน แทนที่จะ error
             pyodide.globals.set('_ide_get_input_line', () => {
-                if (stdinIndex >= stdinQueue.length) return undefined; // หมดคิว
+                if (stdinIndex >= stdinQueue.length) return undefined;
                 return stdinQueue[stdinIndex++];
             });
             try {
@@ -3721,6 +3933,7 @@ _ide_builtins.input = _ide_custom_input
             }
         } else if (lang === 'javascript') {
             // รัน JS ใน sandbox ผ่าน Function + ดัก console.log
+            // prompt() ใช้ของจริงจากเบราว์เซอร์ — เป็น dialog ที่ block จริง ได้ค่าแบบโต้ตอบสดอยู่แล้วโดยไม่ต้องพึ่ง SharedArrayBuffer
             const logs = [];
             const sandboxConsole = {
                 log:  (...a) => logs.push(a.map(fmtVal).join(' ')),
@@ -3728,16 +3941,7 @@ _ide_builtins.input = _ide_custom_input
                 warn: (...a) => logs.push('⚠️ ' + a.map(fmtVal).join(' ')),
                 info: (...a) => logs.push(a.map(fmtVal).join(' ')),
             };
-            // ผูก prompt() ให้ดึงค่าจากคิว stdin แทนที่จะเด้ง dialog ของเบราว์เซอร์
-            const sandboxPrompt = (msg) => {
-                if (stdinIndex >= stdinQueue.length) {
-                    logs.push('⚠️ prompt() ถูกเรียกแต่ไม่มีข้อมูล Input เหลือ — เพิ่มค่าในช่อง "ข้อมูล Input" ด้านบนแล้วลองใหม่');
-                    return null;
-                }
-                const val = stdinQueue[stdinIndex++];
-                logs.push(`${msg ? msg + ' ' : ''}${val}`);
-                return val;
-            };
+            const sandboxPrompt = (msg) => window.prompt(msg || '');
             try {
                 const fn = new Function('console', 'prompt', code);
                 fn(sandboxConsole, sandboxPrompt);
@@ -3760,7 +3964,7 @@ _ide_builtins.input = _ide_custom_input
     }
 
     runBtn.disabled = false;
-    runBtn.textContent = origLabel;
+    runBtn.textContent = '▶ รันโค้ด';
 };
 
 function fmtVal(v) {
