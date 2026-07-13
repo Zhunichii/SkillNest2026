@@ -342,6 +342,40 @@
     <div class="wizard-panel" id="wizardStep2" data-step="2">
     <div class="section">
         <h2 class="section-title">🖼️ รูปปกคอร์ส</h2>
+
+        <div class="ai-gen-area">
+            <div class="ai-gen-title">✨ ให้ AI สร้างรูปปกให้</div>
+            <div class="form-group">
+                <label>อธิบายรูปปกที่ต้องการ</label>
+                <textarea id="thumbPromptInput" class="form-control" rows="2" placeholder="เช่น ภาพประกอบเกี่ยวกับการเขียนโปรแกรม Python สไตล์การ์ตูนแบนสีสันสดใส"></textarea>
+                <small>เว้นว่างไว้ได้ — AI จะใช้ชื่อคอร์สและหมวดหมู่จาก Step 1 แทน</small>
+            </div>
+            <div class="form-group" style="max-width:260px;">
+                <label>สไตล์ภาพ</label>
+                <select id="thumbStyleSelect" class="form-control">
+                    <option value="flat illustration สีสันสดใส ทันสมัย">Flat Illustration</option>
+                    <option value="ภาพวาดสไตล์ 3D render น่ารัก">3D Render น่ารัก</option>
+                    <option value="minimal geometric shapes สีพาสเทล เรียบง่าย">Minimal Geometric</option>
+                    <option value="ภาพถ่ายสมจริง photorealistic">สมจริง (Photorealistic)</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                <button class="btn btn-ai" id="btnGenThumbnail" onclick="generateThumbnailWithAI()">🎨 สร้างรูปปกด้วย AI</button>
+                <small style="color:var(--text-dim);">ใช้เวลาประมาณ 10-20 วินาที</small>
+            </div>
+            <div id="thumbGenStatus" class="ai-loading-text"></div>
+            <div id="thumbGenPreviewWrap" style="display:none;margin-top:1rem;">
+                <img id="thumbGenPreviewImg" style="width:100%;max-width:420px;border-radius:12px;border:1px solid var(--border-color);display:block;" alt="ตัวอย่างรูปปกที่ AI สร้าง">
+                <div style="display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;">
+                    <button class="btn btn-success" onclick="useAIThumbnail()">✅ ใช้รูปนี้</button>
+                    <button class="btn btn-outline" id="btnRegenThumbnail" onclick="generateThumbnailWithAI()">🔄 สร้างใหม่อีกครั้ง</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin:1.5rem 0 0.5rem;">
+            <label style="font-weight:600;">หรืออัปโหลดรูปเอง</label>
+        </div>
         <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
             <div class="file-upload-icon">📷</div>
             <p>คลิกเพื่ออัพโหลดรูปปก</p>
@@ -742,27 +776,98 @@ else {
 }
 
 // === Thumbnail Upload ===
+function setThumbnailFromFile(file) {
+    thumbnailFile = file;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        document.getElementById('thumbnailPreview').innerHTML = `
+            <div class="file-preview">
+                <img src="${event.target.result}" alt="Thumbnail">
+                <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+                <button class="btn btn-danger" onclick="removeThumbnail()">✕</button>
+            </div>`;
+    };
+    reader.readAsDataURL(file);
+}
+
 document.getElementById('thumbnailInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-        thumbnailFile = file;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('thumbnailPreview').innerHTML = `
-                <div class="file-preview">
-                    <img src="${event.target.result}" alt="Thumbnail">
-                    <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                    <button class="btn btn-danger" onclick="removeThumbnail()">✕</button>
-                </div>`;
-        };
-        reader.readAsDataURL(file);
-    }
+    if (file && file.type.startsWith('image/')) setThumbnailFromFile(file);
 });
 
 window.removeThumbnail = function() {
     thumbnailFile = null;
     document.getElementById('thumbnailInput').value = '';
     document.getElementById('thumbnailPreview').innerHTML = '';
+};
+
+// === Thumbnail AI Generation ===
+function base64ToFile(base64Data, mimeType, filename) {
+    const byteChars = atob(base64Data);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+    const byteArray = new Uint8Array(byteNumbers);
+    return new File([byteArray], filename, { type: mimeType });
+}
+
+window.generateThumbnailWithAI = async function() {
+    const btn      = document.getElementById('btnGenThumbnail');
+    const regenBtn = document.getElementById('btnRegenThumbnail');
+    const status   = document.getElementById('thumbGenStatus');
+    const style    = document.getElementById('thumbStyleSelect').value;
+    let promptText = document.getElementById('thumbPromptInput').value.trim();
+
+    if (!promptText) {
+        const title    = document.getElementById('courseTitle').value.trim();
+        const category = document.getElementById('courseCategory').selectedOptions[0]?.text || '';
+        if (!title) {
+            alert('กรุณากรอกชื่อคอร์สใน Step 1 ก่อน หรือพิมพ์คำอธิบายรูปปกที่ต้องการตรงนี้');
+            return;
+        }
+        promptText = `คอร์สเรียนเรื่อง "${title}"${category ? ' หมวดหมู่ ' + category : ''}`;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ AI กำลังวาดภาพ...';
+    if (regenBtn) regenBtn.disabled = true;
+    status.classList.add('show');
+    status.textContent = 'กำลังสร้างภาพปกคอร์ส อาจใช้เวลาสักครู่...';
+    document.getElementById('thumbGenPreviewWrap').style.display = 'none';
+
+    try {
+        const res = await fetch('/api/generate-thumbnail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: `${promptText} สไตล์ภาพ: ${style}` })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        if (!data.image) throw new Error('ไม่ได้รับภาพจาก AI');
+
+        window._aiThumbnailBase64 = data.image;
+        window._aiThumbnailMime   = data.mimeType || 'image/png';
+        document.getElementById('thumbGenPreviewImg').src = `data:${window._aiThumbnailMime};base64,${data.image}`;
+        document.getElementById('thumbGenPreviewWrap').style.display = 'block';
+        status.textContent = '✅ สร้างเสร็จแล้ว ถูกใจกด "ใช้รูปนี้" หรือกด "สร้างใหม่อีกครั้ง" เพื่อลองแบบอื่น';
+
+    } catch (err) {
+        console.error('generateThumbnailWithAI error:', err);
+        status.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🎨 สร้างรูปปกด้วย AI';
+        if (regenBtn) regenBtn.disabled = false;
+    }
+};
+
+window.useAIThumbnail = function() {
+    if (!window._aiThumbnailBase64) return;
+    const ext  = (window._aiThumbnailMime || 'image/png').split('/')[1] || 'png';
+    const file = base64ToFile(window._aiThumbnailBase64, window._aiThumbnailMime, `ai-thumbnail.${ext}`);
+    setThumbnailFromFile(file);
+    document.getElementById('thumbGenPreviewWrap').style.display = 'none';
+    document.getElementById('thumbGenStatus').textContent = '✅ ใช้รูปนี้เป็นปกคอร์สแล้ว เลื่อนลงไปดูตัวอย่างด้านล่างได้';
+    document.getElementById('thumbnailPreview').scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
 // === Add Lesson ===
