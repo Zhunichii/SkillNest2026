@@ -3550,6 +3550,7 @@ async function loadHomeworkPanel() {
         const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
         const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
         const isCode = hw.submissionType === 'code';
+        const isForm = hw.submissionType === 'form';
         const codeLang = hw.codeLanguage || 'python';
 
         let scoreHtml = '';
@@ -3562,7 +3563,12 @@ async function loadHomeworkPanel() {
         }
 
         let submittedHtml = '';
-        if (isSubmitted && sub.content) {
+        if (isSubmitted && sub.submission_kind === 'form' && Array.isArray(sub.form_answers)) {
+            const autoAnswers = sub.form_answers.filter(a => a.type !== 'short_answer');
+            const correctCount = autoAnswers.filter(a => a.isCorrect).length;
+            const reviewCount = sub.form_answers.filter(a => a.needsReview).length;
+            submittedHtml = `<div class="hw-comment-display">📋 ส่งแบบฟอร์มแล้ว — ตอบถูก ${correctCount}/${autoAnswers.length} ข้อที่ตรวจอัตโนมัติ${reviewCount ? ` • ${reviewCount} ข้อเรียงความรอครูตรวจ` : ''}</div>`;
+        } else if (isSubmitted && sub.content) {
             if (sub.submission_kind === 'code') {
                 submittedHtml = `<div class="hw-comment-display">💻 โค้ดที่ส่ง (${sub.code_language || 'code'}):<pre style="background:#0D1117;color:#E6EDF3;padding:12px;border-radius:8px;overflow-x:auto;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.5;white-space:pre;">${escapeForTextarea(sub.content)}</pre></div>`;
             } else {
@@ -3575,7 +3581,16 @@ async function loadHomeworkPanel() {
 
         let submitFormHtml = '';
         if (!isSubmitted) {
-            if (isCode) {
+            if (isForm) {
+                const qCount = (hw.formQuestions || []).length;
+                submitFormHtml = `
+                <div class="hw-submit-area" id="hw-form-${idx}">
+                    <div class="alert alert-info" style="margin-bottom:0.75rem;">📋 แบบฟอร์มนี้มี ${qCount} คำถาม ทำทีละข้อแล้วกดส่งได้เลย</div>
+                    <button class="btn-submit-hw" onclick="startHomeworkForm(${idx}, '${courseId}')">
+                        ▶ เริ่มทำแบบฟอร์ม
+                    </button>
+                </div>`;
+            } else if (isCode) {
                 const starter = hw.starterCode || (codeLang === 'python' ? '# เขียนโค้ดของคุณที่นี่\nprint("Hello, SkillNest!")' : '// เขียนโค้ดของคุณที่นี่\nconsole.log("Hello, SkillNest!");');
                 const pyLive = codeLang === 'python' && typeof window !== 'undefined' && !!window.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
                 const modeBadge = codeLang === 'python'
@@ -4070,6 +4085,234 @@ window.submitHomework = async function(hwIdx, courseId) {
     }
 };
 
+// === Homework "แบบฟอร์มหลายคำถาม" — ทำทีละข้อคล้าย Quiz แต่บันทึกลง submissions ===
+let hwfState = null;
+
+window.startHomeworkForm = function(hwIdx, courseId) {
+    const hw = currentCourse.homework[hwIdx];
+    if (!hw || !Array.isArray(hw.formQuestions) || hw.formQuestions.length === 0) {
+        alert('แบบฟอร์มนี้ยังไม่มีคำถาม');
+        return;
+    }
+    hwfState = {
+        hwIdx, courseId, hw,
+        questions: hw.formQuestions,
+        index: 0,
+        score: 0,
+        maxTotal: hw.formQuestions.reduce((s, q) => s + (q.points || 1), 0),
+        answered: false,
+        needsReview: false,
+        answers: [],
+        checkedSet: new Set()
+    };
+    renderHwFormQuestion();
+    document.getElementById('quizModalOverlay').classList.add('show');
+};
+
+function renderHwFormQuestion() {
+    const { questions, index, hw } = hwfState;
+    const q = questions[index];
+    const total = questions.length;
+    const pct = Math.round((index / total) * 100);
+    const labels = ['A','B','C','D'];
+    const qType = q.type || 'multiple_choice';
+    const choices = qType === 'true_false' ? ['ถูก','ผิด'] : (q.choices || []);
+
+    let bodyHtml = '';
+    let nextBtnHtml = '';
+
+    if (qType === 'checkbox') {
+        bodyHtml = `
+        <div id="cqChoices">
+            ${choices.map((c,i) => `
+                <div class="qm-choice" id="cqc-${i}" onclick="hwfToggleCheckbox(${i})">
+                    <span class="qm-letter">${labels[i]}</span>
+                    <span>${c}</span>
+                </div>`).join('')}
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">เลือกได้มากกว่า 1 ข้อ แล้วกดยืนยันคำตอบ</div>`;
+        nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="hwfConfirmCheckbox()">ยืนยันคำตอบ</button>`;
+    } else if (qType === 'short_answer') {
+        bodyHtml = `
+        <textarea id="cqShortAnswer" class="form-control" rows="4"
+            style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
+            placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">📝 คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
+        nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="hwfConfirmShortAnswer()">ยืนยันคำตอบ</button>`;
+    } else {
+        bodyHtml = `
+        <div id="cqChoices">
+            ${choices.map((c,i) => `
+                <div class="qm-choice" id="cqc-${i}" onclick="hwfSelectChoice(${i})">
+                    <span class="qm-letter">${labels[i]}</span>
+                    <span>${c}</span>
+                </div>`).join('')}
+        </div>`;
+        nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" disabled onclick="hwfNextQuestion()">
+            ${index+1 < total ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม 🎯'}
+        </button>`;
+    }
+
+    document.getElementById('quizModalBox').innerHTML = `
+        <div class="qm-header">
+            <div>
+                <div style="font-weight:600; margin-bottom:0.2rem;">${hw.title}</div>
+                <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total} • ${q.points || 1} คะแนน</div>
+            </div>
+            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeHwForm()">✕ ออก</button>
+        </div>
+        <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
+        <div class="qm-question">${index+1}. ${q.question}</div>
+        ${bodyHtml}
+        ${nextBtnHtml}
+    `;
+    hwfState.answered = false;
+    hwfState.checkedSet = new Set();
+}
+
+window.hwfSelectChoice = function(idx) {
+    if (hwfState.answered) return;
+    const { questions, index } = hwfState;
+    const q = questions[index];
+    const labels = ['A','B','C','D'];
+    const correctIdx = labels.indexOf(q.correct);
+    const points = q.points || 1;
+
+    hwfState.answered = true;
+    document.getElementById(`cqc-${idx}`).classList.add('selected');
+
+    setTimeout(() => {
+        document.getElementById(`cqc-${correctIdx}`)?.classList.add('correct');
+        const isCorrect = idx === correctIdx;
+        if (idx !== correctIdx) document.getElementById(`cqc-${idx}`)?.classList.add('wrong');
+        if (isCorrect) hwfState.score += points;
+        hwfState.answers.push({
+            question: q.question, type: q.type || 'multiple_choice',
+            selected: labels[idx], isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points
+        });
+        document.getElementById('cqBtnNext').disabled = false;
+    }, 300);
+};
+
+window.hwfToggleCheckbox = function(idx) {
+    if (hwfState.answered) return;
+    const el = document.getElementById(`cqc-${idx}`);
+    if (hwfState.checkedSet.has(idx)) { hwfState.checkedSet.delete(idx); el.classList.remove('selected'); }
+    else { hwfState.checkedSet.add(idx); el.classList.add('selected'); }
+};
+
+window.hwfConfirmCheckbox = function() {
+    if (hwfState.answered) return;
+    const { questions, index } = hwfState;
+    const q = questions[index];
+    const labels = ['A','B','C','D'];
+    const points = q.points || 1;
+    const correctSet = new Set(q.correctMultiple || []);
+    const selectedLetters = Array.from(hwfState.checkedSet).map(i => labels[i]).sort();
+    const isCorrect = selectedLetters.length === correctSet.size && selectedLetters.every(l => correctSet.has(l));
+
+    hwfState.answered = true;
+    (q.choices || []).forEach((c,i) => {
+        const el = document.getElementById(`cqc-${i}`);
+        if (!el) return;
+        if (correctSet.has(labels[i])) el.classList.add('correct');
+        else if (hwfState.checkedSet.has(i)) el.classList.add('wrong');
+    });
+    if (isCorrect) hwfState.score += points;
+    hwfState.answers.push({
+        question: q.question, type: 'checkbox',
+        selectedMultiple: selectedLetters, isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points
+    });
+
+    const btn = document.getElementById('cqBtnNext');
+    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม 🎯';
+    btn.setAttribute('onclick', 'hwfNextQuestion()');
+};
+
+window.hwfConfirmShortAnswer = function() {
+    if (hwfState.answered) return;
+    const { questions, index } = hwfState;
+    const q = questions[index];
+    const points = q.points || 1;
+    const answerText = document.getElementById('cqShortAnswer').value.trim();
+
+    hwfState.answered = true;
+    hwfState.needsReview = true;
+    hwfState.answers.push({
+        question: q.question, type: 'short_answer',
+        answerText, isCorrect: null, pointsEarned: 0, maxPoints: points, needsReview: true
+    });
+
+    const btn = document.getElementById('cqBtnNext');
+    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม 🎯';
+    btn.setAttribute('onclick', 'hwfNextQuestion()');
+    btn.disabled = false;
+};
+
+window.hwfNextQuestion = function() {
+    const { questions, index } = hwfState;
+    if (index + 1 < questions.length) {
+        hwfState.index++;
+        renderHwFormQuestion();
+    } else {
+        showHwFormResult();
+    }
+};
+
+async function showHwFormResult() {
+    const { hwIdx, courseId, hw, score, maxTotal, needsReview, answers } = hwfState;
+    const pct = maxTotal > 0 ? Math.round((score/maxTotal)*100) : 0;
+    const scaledGrade = maxTotal > 0 ? Math.round((score / maxTotal) * (hw.maxScore || 100)) : 0;
+    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+    const wrongCount = answers.filter(a => a.isCorrect === false).length;
+    const reviewCount = answers.filter(a => a.needsReview).length;
+
+    if (currentUser) {
+        try {
+            const subId = `${currentUser.id}_${courseId}_${hwIdx}`;
+            const { error } = await supabase.from('submissions').upsert({
+                id: subId,
+                user_id: currentUser.id,
+                course_id: courseId,
+                homework_index: hwIdx,
+                homework_title: hw.title,
+                content: '',
+                file_url: '',
+                submission_kind: 'form',
+                form_answers: answers,
+                submitted_at: new Date().toISOString(),
+                status: needsReview ? 'submitted' : 'graded',
+                grade: needsReview ? null : scaledGrade,
+                needs_review: needsReview,
+                comment: needsReview ? '' : 'ตรวจให้คะแนนอัตโนมัติ'
+            });
+            if (error) throw error;
+        } catch(e) {
+            console.error('Submit hw form error:', e);
+        }
+    }
+
+    document.getElementById('quizModalBox').innerHTML = `
+        <div class="qm-result">
+            <div class="qm-result-emoji">${emoji}</div>
+            <div class="qm-result-score">${score} / ${maxTotal}</div>
+            <div class="qm-result-sub">${needsReview ? 'ส่งแบบฟอร์มแล้ว รอครูตรวจข้อเรียงความ' : `คะแนนที่ได้ ${scaledGrade}/${hw.maxScore || 100}`}</div>
+            <div class="qm-result-grid">
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#ef4444;">${wrongCount}</div><div class="qm-result-label">ตอบผิด</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#3b82f6;">${pct}%</div><div class="qm-result-label">คะแนน (ที่ตรวจแล้ว)</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#f59e0b;">${reviewCount}</div><div class="qm-result-label">รอครูตรวจ</div></div>
+            </div>
+            <button class="btn-close-qm" onclick="closeHwForm()">ปิด</button>
+        </div>
+    `;
+    await loadHomeworkPanel();
+}
+
+window.closeHwForm = function() {
+    document.getElementById('quizModalOverlay').classList.remove('show');
+    hwfState = null;
+};
+
 // === Quiz Logic (inline in course-content) ===
 let cqState = null; // current quiz state
 
@@ -4084,7 +4327,10 @@ window.startCourseQuiz = function() {
         questions: currentCourse.quiz,
         index: 0,
         score: 0,
-        answered: false
+        maxTotal: currentCourse.quiz.reduce((s, q) => s + (q.points || 1), 0),
+        answered: false,
+        needsReview: false,
+        answers: [] // {question, type, selected, selectedMultiple, answerText, isCorrect, pointsEarned, maxPoints}
     };
     renderCourseQuestion();
     document.getElementById('quizModalOverlay').classList.add('show');
@@ -4096,30 +4342,60 @@ function renderCourseQuestion() {
     const total = questions.length;
     const pct = Math.round((index / total) * 100);
     const labels = ['A','B','C','D'];
-    const choices = q.type === 'true_false' ? ['ถูก','ผิด'] : (q.choices || []);
+    const qType = q.type || 'multiple_choice';
+    const choices = qType === 'true_false' ? ['ถูก','ผิด'] : (q.choices || []);
 
-    document.getElementById('quizModalBox').innerHTML = `
-        <div class="qm-header">
-            <div>
-                <div style="font-weight:600; margin-bottom:0.2rem;">${currentCourse.title}</div>
-                <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total}</div>
-            </div>
-            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()">✕ ออก</button>
+    let bodyHtml = '';
+    let nextBtnHtml = '';
+
+    if (qType === 'checkbox') {
+        bodyHtml = `
+        <div id="cqChoices">
+            ${choices.map((c,i) => `
+                <div class="qm-choice" id="cqc-${i}" onclick="toggleCourseCheckbox(${i})">
+                    <span class="qm-letter">${labels[i]}</span>
+                    <span>${c}</span>
+                </div>`).join('')}
         </div>
-        <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
-        <div class="qm-question">${index+1}. ${q.question}</div>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">เลือกได้มากกว่า 1 ข้อ แล้วกดยืนยันคำตอบ</div>`;
+        nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="confirmCourseCheckbox()">ยืนยันคำตอบ</button>`;
+    } else if (qType === 'short_answer') {
+        bodyHtml = `
+        <textarea id="cqShortAnswer" class="form-control" rows="4"
+            style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
+            placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">📝 คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
+        nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="confirmCourseShortAnswer()">ยืนยันคำตอบ</button>`;
+    } else {
+        // multiple_choice / true_false
+        bodyHtml = `
         <div id="cqChoices">
             ${choices.map((c,i) => `
                 <div class="qm-choice" id="cqc-${i}" onclick="selectCourseChoice(${i})">
                     <span class="qm-letter">${labels[i]}</span>
                     <span>${c}</span>
                 </div>`).join('')}
-        </div>
-        <button class="qm-btn-next" id="cqBtnNext" disabled onclick="nextCourseQuestion()">
+        </div>`;
+        nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" disabled onclick="nextCourseQuestion()">
             ${index+1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯'}
-        </button>
+        </button>`;
+    }
+
+    document.getElementById('quizModalBox').innerHTML = `
+        <div class="qm-header">
+            <div>
+                <div style="font-weight:600; margin-bottom:0.2rem;">${currentCourse.title}</div>
+                <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total} • ${q.points || 1} คะแนน</div>
+            </div>
+            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()">✕ ออก</button>
+        </div>
+        <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
+        <div class="qm-question">${index+1}. ${q.question}</div>
+        ${bodyHtml}
+        ${nextBtnHtml}
     `;
     cqState.answered = false;
+    cqState.checkedSet = new Set();
 }
 
 window.selectCourseChoice = function(idx) {
@@ -4128,16 +4404,82 @@ window.selectCourseChoice = function(idx) {
     const q = questions[index];
     const labels = ['A','B','C','D'];
     const correctIdx = labels.indexOf(q.correct);
+    const points = q.points || 1;
 
     cqState.answered = true;
     document.getElementById(`cqc-${idx}`).classList.add('selected');
 
     setTimeout(() => {
         document.getElementById(`cqc-${correctIdx}`)?.classList.add('correct');
+        const isCorrect = idx === correctIdx;
         if (idx !== correctIdx) document.getElementById(`cqc-${idx}`)?.classList.add('wrong');
-        if (idx === correctIdx) cqState.score++;
+        if (isCorrect) cqState.score += points;
+        cqState.answers.push({
+            question: q.question, type: q.type || 'multiple_choice',
+            selected: labels[idx], isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points
+        });
         document.getElementById('cqBtnNext').disabled = false;
     }, 300);
+};
+
+window.toggleCourseCheckbox = function(idx) {
+    if (cqState.answered) return;
+    const el = document.getElementById(`cqc-${idx}`);
+    if (cqState.checkedSet.has(idx)) {
+        cqState.checkedSet.delete(idx);
+        el.classList.remove('selected');
+    } else {
+        cqState.checkedSet.add(idx);
+        el.classList.add('selected');
+    }
+};
+
+window.confirmCourseCheckbox = function() {
+    if (cqState.answered) return;
+    const { questions, index } = cqState;
+    const q = questions[index];
+    const labels = ['A','B','C','D'];
+    const points = q.points || 1;
+    const correctSet = new Set(q.correctMultiple || []);
+    const selectedLetters = Array.from(cqState.checkedSet).map(i => labels[i]).sort();
+    const isCorrect = selectedLetters.length === correctSet.size && selectedLetters.every(l => correctSet.has(l));
+
+    cqState.answered = true;
+    (q.choices || []).forEach((c,i) => {
+        const el = document.getElementById(`cqc-${i}`);
+        if (!el) return;
+        if (correctSet.has(labels[i])) el.classList.add('correct');
+        else if (cqState.checkedSet.has(i)) el.classList.add('wrong');
+    });
+    if (isCorrect) cqState.score += points;
+    cqState.answers.push({
+        question: q.question, type: 'checkbox',
+        selectedMultiple: selectedLetters, isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points
+    });
+
+    const btn = document.getElementById('cqBtnNext');
+    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯';
+    btn.setAttribute('onclick', 'nextCourseQuestion()');
+};
+
+window.confirmCourseShortAnswer = function() {
+    if (cqState.answered) return;
+    const { questions, index } = cqState;
+    const q = questions[index];
+    const points = q.points || 1;
+    const answerText = document.getElementById('cqShortAnswer').value.trim();
+
+    cqState.answered = true;
+    cqState.needsReview = true;
+    cqState.answers.push({
+        question: q.question, type: 'short_answer',
+        answerText, isCorrect: null, pointsEarned: 0, maxPoints: points, needsReview: true
+    });
+
+    const btn = document.getElementById('cqBtnNext');
+    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯';
+    btn.setAttribute('onclick', 'nextCourseQuestion()');
+    btn.disabled = false;
 };
 
 window.nextCourseQuestion = function() {
@@ -4151,11 +4493,12 @@ window.nextCourseQuestion = function() {
 };
 
 async function showCourseQuizResult() {
-    const { questions, score } = cqState;
-    const total = questions.length;
+    const { score, maxTotal, needsReview, answers } = cqState;
+    const total = maxTotal;
     const pct = Math.round((score/total)*100);
     const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
     const msg = pct >= 80 ? 'ยอดเยี่ยมมาก!' : pct >= 60 ? 'ทำได้ดี!' : 'ทบทวนบทเรียนเพิ่มเติมได้นะ';
+    const wrongCount = answers.filter(a => a.isCorrect === false).length;
 
     // Save score
     const urlParams = new URLSearchParams(window.location.search);
@@ -4168,6 +4511,8 @@ async function showCourseQuizResult() {
                     user_id: currentUser.id,
                     course_id: courseId,
                     score, total, pct,
+                    answers,
+                    needs_review: needsReview,
                     updated_at: new Date().toISOString()
                 });
             // update summary in quiz tab
@@ -4175,7 +4520,9 @@ async function showCourseQuizResult() {
             if (sumEl) {
                 sumEl.classList.add('show');
                 document.getElementById('quizScoreVal').textContent = `${score}/${total}`;
-                document.getElementById('quizScoreDetail').textContent = `${pct}% • เพิ่งทำเสร็จ`;
+                document.getElementById('quizScoreDetail').textContent = needsReview
+                    ? `${pct}% • รอครูตรวจข้อเรียงความเพิ่มเติม`
+                    : `${pct}% • เพิ่งทำเสร็จ`;
                 const startBtn = document.getElementById('btnStartQuiz');
                 startBtn.textContent = '✅ ทำแบบทดสอบแล้ว';
                 startBtn.disabled = true;
@@ -4190,14 +4537,14 @@ async function showCourseQuizResult() {
         <div class="qm-result">
             <div class="qm-result-emoji">${emoji}</div>
             <div class="qm-result-score">${score} / ${total}</div>
-            <div class="qm-result-sub">${msg} — คะแนน ${pct}%</div>
+            <div class="qm-result-sub">${msg} — คะแนน ${pct}%${needsReview ? ' (ยังไม่รวมข้อเรียงความ)' : ''}</div>
             <div class="qm-result-grid">
-                <div class="qm-result-stat"><div class="qm-result-num" style="color:#10b981;">${score}</div><div class="qm-result-label">ถูก</div></div>
-                <div class="qm-result-stat"><div class="qm-result-num" style="color:#ef4444;">${total-score}</div><div class="qm-result-label">ผิด</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#ef4444;">${wrongCount}</div><div class="qm-result-label">ตอบผิด</div></div>
                 <div class="qm-result-stat"><div class="qm-result-num" style="color:#3b82f6;">${pct}%</div><div class="qm-result-label">คะแนน</div></div>
+                <div class="qm-result-stat"><div class="qm-result-num" style="color:#f59e0b;">${answers.filter(a=>a.needsReview).length}</div><div class="qm-result-label">รอครูตรวจ</div></div>
             </div>
             <button class="btn-close-qm" onclick="closeCourseQuiz()">ปิด</button>
-            <p style="margin-top:14px;font-size:0.82rem;color:#8B92AE;">📌 แบบทดสอบนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว</p>
+            <p style="margin-top:14px;font-size:0.82rem;color:#8B92AE;">📌 แบบทดสอบนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว${needsReview ? ' — คะแนนรวมจะอัปเดตอีกครั้งหลังครูตรวจข้อเรียงความ' : ''}</p>
         </div>
     `;
 }
@@ -4208,7 +4555,9 @@ window.closeCourseQuiz = function() {
 };
 
 document.getElementById('quizModalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeCourseQuiz();
+    if (e.target !== this) return;
+    if (hwfState) closeHwForm();
+    else closeCourseQuiz();
 });
 
 </script>

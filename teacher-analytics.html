@@ -180,6 +180,50 @@
         .empty-box { text-align:center; padding:48px 24px; color:var(--text-dim); grid-column:1/-1; }
         .empty-box h3 { color:var(--text-main); margin-bottom:8px; }
 
+        /* ── Review Queue (ตรวจข้อเรียงความ) ── */
+        .review-item {
+            background:var(--card-hover); border:1px solid var(--border-color);
+            border-radius:12px; padding:16px; margin-bottom:12px;
+        }
+        .review-item:last-child { margin-bottom:0; }
+        .review-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:8px; flex-wrap:wrap; }
+        .review-meta { font-size:0.78rem; color:var(--text-dim); }
+        .review-question { font-weight:600; font-size:0.92rem; margin-bottom:6px; }
+        .review-answer {
+            background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px;
+            padding:10px 12px; font-size:0.88rem; margin-bottom:10px; white-space:pre-wrap; line-height:1.6;
+        }
+        .review-grade-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .review-grade-row input[type=number] {
+            width:80px; padding:6px 10px; border-radius:8px;
+            border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-main);
+        }
+        .btn-save-review {
+            background:var(--primary-blue); color:white; border:none; padding:7px 16px;
+            border-radius:8px; font-size:0.85rem; cursor:pointer;
+        }
+        .btn-save-review:hover { opacity:0.9; }
+        .btn-save-review:disabled { opacity:0.5; cursor:not-allowed; }
+
+        /* ── Student Score Table ── */
+        .score-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        .score-table th { color:var(--text-dim); font-weight:500; text-align:left; padding:8px 12px; border-bottom:1px solid var(--border-color); }
+        .score-table td { padding:10px 12px; border-bottom:1px solid var(--line); }
+        .score-table tr:last-child td { border-bottom:none; }
+        .score-table tr:hover td { background:var(--card-hover); }
+        .score-pill { padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
+
+        /* ── Quiz Question Breakdown ── */
+        .qbreak-item { padding:14px 0; border-bottom:1px solid var(--border-color); }
+        .qbreak-item:last-child { border-bottom:none; }
+        .qbreak-q { font-weight:600; font-size:0.9rem; margin-bottom:8px; }
+        .qbreak-choice-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; font-size:0.82rem; }
+        .qbreak-choice-label { width:22px; color:var(--text-dim); }
+        .qbreak-bar-track { flex:1; height:8px; background:var(--card-hover); border-radius:4px; overflow:hidden; }
+        .qbreak-bar-fill { height:100%; border-radius:4px; background:var(--primary-blue); }
+        .qbreak-bar-fill.correct-fill { background:var(--success); }
+        .qbreak-pct { width:38px; text-align:right; color:var(--text-dim); font-size:0.78rem; }
+
         @media(max-width:900px) {
             .stats-grid  { grid-template-columns:repeat(2,1fr); }
             .mid-grid, .bottom-grid { grid-template-columns:1fr; }
@@ -325,6 +369,12 @@ function renderPage() {
         </div>
     </div>
 
+    <!-- Review Queue: ตรวจข้อเรียงความ/ตอบสั้นที่รอตรวจ -->
+    <div class="card full-card" id="reviewQueueCard" style="display:none;">
+        <div class="card-title">🖊️ รอตรวจข้อเรียงความ <span id="reviewQueueCount" style="font-size:0.8rem;color:var(--text-dim);font-weight:400;"></span></div>
+        <div id="reviewQueueList"></div>
+    </div>
+
     <!-- Mid: Progress + Pie -->
     <div class="mid-grid">
         <div class="card">
@@ -335,6 +385,18 @@ function renderPage() {
             <div class="card-title">สัดส่วนสถานะนักเรียน</div>
             <div style="position:relative;height:200px;"><canvas id="pieChart"></canvas></div>
         </div>
+    </div>
+
+    <!-- Student Score Table (full width) -->
+    <div class="card full-card">
+        <div class="card-title">📊 คะแนนนักเรียนรายบุคคล <span id="scoreTableCount" style="font-size:0.8rem;color:var(--text-dim);font-weight:400;"></span></div>
+        <div id="studentScoreTable"></div>
+    </div>
+
+    <!-- Quiz Question Breakdown (full width, เฉพาะตอนเลือกคอร์สเดียว) -->
+    <div class="card full-card" id="qBreakdownCard" style="display:none;">
+        <div class="card-title">🔍 รายละเอียดคำถาม Quiz รายข้อ</div>
+        <div id="quizQuestionBreakdown"></div>
     </div>
 
     <!-- Bottom: Students + HW + Quiz -->
@@ -389,6 +451,9 @@ function updateAll() {
     renderProgressList(enrolls, courses);
     renderPie(enrolls);
     renderStudentTable(enrolls);
+    renderReviewQueue(subs, quiz, courses);
+    renderStudentScoreTable(enrolls, subs, quiz, courses);
+    renderQuizQuestionBreakdown(quiz, courses);
     renderHwSummary(subs, courses);
     renderQuizSummary(quiz, courses);
     renderBarChart(enrolls, courses);
@@ -500,7 +565,229 @@ function renderStudentTable(enrolls) {
     ${enrolls.length>8?`<div style="text-align:center;color:var(--text-dim);font-size:0.78rem;padding:10px 0;">และอีก ${enrolls.length-8} คน</div>`:''}</div>`;
 }
 
-// ── HW Summary ──
+// ── ชื่อผู้ใช้จาก user_id (lookup จาก allEnrolls ที่ join ตาราง users มาแล้ว) ──
+function getUserName(userId) {
+    const en = allEnrolls.find(e => e.user_id === userId);
+    if (en && en.users) {
+        const u = en.users;
+        return `${u.first_name||''} ${u.last_name||''}`.trim() || u.email || userId.slice(0,8)+'…';
+    }
+    return userId.slice(0,8)+'…';
+}
+
+// ── Review Queue: ข้อตอบสั้น/เรียงความที่รอตรวจ (ทั้งจาก Quiz และการบ้านแบบฟอร์ม) ──
+function renderReviewQueue(subs, quiz, courses) {
+    const card = document.getElementById('reviewQueueCard');
+    const listEl = document.getElementById('reviewQueueList');
+    const countEl = document.getElementById('reviewQueueCount');
+
+    const items = [];
+
+    quiz.filter(q => q.needs_review).forEach(qs => {
+        const course = allCourses.find(c => c.id === qs.course_id);
+        (qs.answers || []).forEach((a, ai) => {
+            if (a.type === 'short_answer' && a.needsReview) {
+                items.push({
+                    kind: 'quiz', userId: qs.user_id, courseId: qs.course_id, courseTitle: course?.title || '',
+                    question: a.question, answerText: a.answerText, maxPoints: a.maxPoints || 1, answerIndex: ai
+                });
+            }
+        });
+    });
+
+    subs.filter(s => s.submission_kind === 'form' && Array.isArray(s.form_answers)).forEach(sub => {
+        const course = allCourses.find(c => c.id === sub.course_id);
+        (sub.form_answers || []).forEach((a, ai) => {
+            if (a.type === 'short_answer' && a.needsReview) {
+                items.push({
+                    kind: 'submission', rowId: sub.id, userId: sub.user_id, courseId: sub.course_id, courseTitle: course?.title || '',
+                    homeworkTitle: sub.homework_title, question: a.question, answerText: a.answerText,
+                    maxPoints: a.maxPoints || 1, answerIndex: ai
+                });
+            }
+        });
+    });
+
+    if (!items.length) { card.style.display = 'none'; window._reviewQueueItems = []; return; }
+    card.style.display = 'block';
+    countEl.textContent = `${items.length} ข้อ`;
+    window._reviewQueueItems = items;
+
+    listEl.innerHTML = items.map((it, i) => `
+        <div class="review-item">
+            <div class="review-header">
+                <div>
+                    <div style="font-weight:600;">${getUserName(it.userId)}</div>
+                    <div class="review-meta">${it.courseTitle}${it.homeworkTitle ? ' • การบ้าน: ' + it.homeworkTitle : ' • Quiz'}</div>
+                </div>
+                <div class="review-meta">เต็ม ${it.maxPoints} คะแนน</div>
+            </div>
+            <div class="review-question">${it.question}</div>
+            <div class="review-answer">${(it.answerText || '(ไม่ได้ตอบ)').replace(/</g,'&lt;')}</div>
+            <div class="review-grade-row">
+                <label style="font-size:0.85rem;color:var(--text-dim);">ให้คะแนน:</label>
+                <input type="number" min="0" max="${it.maxPoints}" step="0.5" id="review-score-${i}" placeholder="0-${it.maxPoints}">
+                <button class="btn-save-review" onclick="saveReviewItem(${i})">บันทึกคะแนน</button>
+                <span id="review-status-${i}" style="font-size:0.8rem;color:var(--success);"></span>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.saveReviewItem = async function(i) {
+    const it = window._reviewQueueItems[i];
+    const input = document.getElementById(`review-score-${i}`);
+    const statusEl = document.getElementById(`review-status-${i}`);
+    const btn = input.closest('.review-grade-row').querySelector('.btn-save-review');
+    const points = parseFloat(input.value);
+    if (isNaN(points) || points < 0 || points > it.maxPoints) {
+        alert(`กรุณาใส่คะแนน 0-${it.maxPoints}`);
+        return;
+    }
+    btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+    try {
+        if (it.kind === 'quiz') await saveQuizReview(it, points);
+        else await saveSubmissionReview(it, points);
+        statusEl.textContent = '✅ บันทึกแล้ว';
+        btn.textContent = 'บันทึกแล้ว';
+        input.disabled = true;
+        await fetchAll();
+        updateAll();
+    } catch(e) {
+        alert('เกิดข้อผิดพลาด: ' + e.message);
+        btn.disabled = false; btn.textContent = 'บันทึกคะแนน';
+    }
+};
+
+async function saveQuizReview(it, points) {
+    const row = allQuiz.find(q => q.user_id === it.userId && q.course_id === it.courseId);
+    if (!row) throw new Error('ไม่พบข้อมูล quiz');
+    const answers = (row.answers || []).map((a, idx) => idx === it.answerIndex
+        ? { ...a, pointsEarned: points, needsReview: false, isCorrect: points >= (a.maxPoints || 1) }
+        : a);
+    const newScore = answers.reduce((s,a) => s + (a.pointsEarned || 0), 0);
+    const newPct = row.total > 0 ? Math.round((newScore/row.total)*100) : 0;
+    const stillPending = answers.some(a => a.needsReview);
+    const { error } = await supabase.from('quiz_scores')
+        .update({ answers, score: newScore, pct: newPct, needs_review: stillPending })
+        .eq('user_id', row.user_id).eq('course_id', row.course_id);
+    if (error) throw error;
+}
+
+async function saveSubmissionReview(it, points) {
+    const row = allSubs.find(s => s.id === it.rowId);
+    if (!row) throw new Error('ไม่พบข้อมูลการส่งงาน');
+    const answers = (row.form_answers || []).map((a, idx) => idx === it.answerIndex
+        ? { ...a, pointsEarned: points, needsReview: false, isCorrect: points >= (a.maxPoints || 1) }
+        : a);
+    const maxTotal = answers.reduce((s,a) => s + (a.maxPoints || 1), 0);
+    const earned = answers.reduce((s,a) => s + (a.pointsEarned || 0), 0);
+    const course = allCourses.find(c => c.id === row.course_id);
+    const hw = course?.homework?.[row.homework_index];
+    const scaledGrade = maxTotal > 0 ? Math.round((earned/maxTotal) * (hw?.maxScore || 100)) : 0;
+    const stillPending = answers.some(a => a.needsReview);
+    const { error } = await supabase.from('submissions')
+        .update({
+            form_answers: answers, needs_review: stillPending,
+            status: stillPending ? 'submitted' : 'graded',
+            grade: stillPending ? null : scaledGrade
+        })
+        .eq('id', row.id);
+    if (error) throw error;
+}
+
+// ── Student Score Table: คะแนน Quiz/การบ้านรายบุคคล ──
+function renderStudentScoreTable(enrolls, subs, quiz, courses) {
+    const el = document.getElementById('studentScoreTable');
+    const countEl = document.getElementById('scoreTableCount');
+    if (!enrolls.length) { el.innerHTML = '<div style="color:var(--text-dim);padding:12px 0;">ยังไม่มีนักเรียน</div>'; countEl.textContent = ''; return; }
+    countEl.textContent = `${enrolls.length} คน`;
+
+    const rows = enrolls.slice(0, 15).map(e => {
+        const u = e.users;
+        const name = u ? `${u.first_name||''} ${u.last_name||''}`.trim() || u.email : e.user_id.slice(0,8)+'…';
+        const course = allCourses.find(c => c.id === e.course_id);
+        const qz = quiz.find(q => q.user_id === e.user_id && q.course_id === e.course_id);
+        const mySubs = subs.filter(s => s.user_id === e.user_id && s.course_id === e.course_id);
+        const gradedSubs = mySubs.filter(s => s.status === 'graded' && s.grade != null);
+        const hwAvg = gradedSubs.length ? Math.round(gradedSubs.reduce((s,x) => s+(x.grade||0), 0)/gradedSubs.length) : null;
+        const pendingCount = mySubs.filter(s => s.status === 'submitted').length + (qz && qz.needs_review ? 1 : 0);
+
+        const quizBadge = qz ? `<span class="score-pill" style="background:rgba(59,130,246,0.15);color:#60a5fa;">${qz.score}/${qz.total} (${qz.pct}%)</span>` : '<span style="color:var(--text-dim);">—</span>';
+        const hwBadge = hwAvg !== null ? `<span class="score-pill" style="background:rgba(16,185,129,0.15);color:var(--success);">${hwAvg}%</span>` : '<span style="color:var(--text-dim);">—</span>';
+        const pendingBadge = pendingCount > 0 ? `<span class="score-pill" style="background:rgba(245,158,11,0.15);color:var(--warning);">${pendingCount} รอตรวจ</span>` : '<span style="color:var(--text-dim);">—</span>';
+
+        return `<tr>
+            <td>${name}</td>
+            ${selectedId==='all' ? `<td style="font-size:0.78rem;color:var(--text-dim);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${course?.title||''}</td>` : ''}
+            <td>${quizBadge}</td>
+            <td>${hwBadge}</td>
+            <td>${pendingBadge}</td>
+        </tr>`;
+    }).join('');
+
+    el.innerHTML = `<div style="overflow-x:auto;"><table class="score-table">
+        <thead><tr>
+            <th>ชื่อ</th>
+            ${selectedId==='all'?'<th>คอร์ส</th>':''}
+            <th>Quiz</th><th>การบ้านเฉลี่ย</th><th>รอตรวจ</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+    </table>
+    ${enrolls.length>15?`<div style="text-align:center;color:var(--text-dim);font-size:0.78rem;padding:10px 0;">และอีก ${enrolls.length-15} คน</div>`:''}</div>`;
+}
+
+// ── Quiz Question Breakdown: รายละเอียดต่อข้อ (เฉพาะตอนเลือกคอร์สเดียว) ──
+function renderQuizQuestionBreakdown(quiz, courses) {
+    const card = document.getElementById('qBreakdownCard');
+    const el = document.getElementById('quizQuestionBreakdown');
+    if (selectedId === 'all' || courses.length !== 1 || !courses[0].quiz || !courses[0].quiz.length || !quiz.length) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = 'block';
+    const course = courses[0];
+    const labels = ['A','B','C','D'];
+
+    el.innerHTML = course.quiz.map((q, qi) => {
+        const qType = q.type || 'multiple_choice';
+        const relevantAnswers = quiz.map(qs => (qs.answers || [])[qi]).filter(Boolean);
+
+        if (qType === 'short_answer') {
+            const reviewedCount = relevantAnswers.filter(a => !a.needsReview).length;
+            return `<div class="qbreak-item">
+                <div class="qbreak-q">${qi+1}. ${q.question} <span style="color:var(--text-dim);font-weight:400;font-size:0.8rem;">(ตอบสั้น/เรียงความ)</span></div>
+                <div style="font-size:0.82rem;color:var(--text-dim);">ตรวจแล้ว ${reviewedCount}/${relevantAnswers.length} คน</div>
+            </div>`;
+        }
+
+        const choiceCount = (q.choices || (qType==='true_false' ? ['ถูก','ผิด'] : [])).map((c, ci) => {
+            const letter = labels[ci];
+            let count = 0;
+            relevantAnswers.forEach(a => {
+                if (qType === 'checkbox') { if ((a.selectedMultiple||[]).includes(letter)) count++; }
+                else { if (a.selected === letter) count++; }
+            });
+            return { letter, text: c, count };
+        });
+        const totalAnswered = relevantAnswers.length || 1;
+        const correctCount = relevantAnswers.filter(a => a.isCorrect).length;
+        const correctPct = Math.round((correctCount/totalAnswered)*100);
+
+        return `<div class="qbreak-item">
+            <div class="qbreak-q">${qi+1}. ${q.question} <span style="color:${correctPct>=60?'var(--success)':'var(--warning)'};font-weight:600;font-size:0.82rem;">(ถูก ${correctPct}%)</span></div>
+            ${choiceCount.map(c => {
+                const pct = Math.round((c.count/totalAnswered)*100);
+                const isCorrectChoice = qType==='checkbox' ? (q.correctMultiple||[]).includes(c.letter) : q.correct === c.letter;
+                return `<div class="qbreak-choice-row">
+                    <span class="qbreak-choice-label">${c.letter}</span>
+                    <div class="qbreak-bar-track"><div class="qbreak-bar-fill${isCorrectChoice?' correct-fill':''}" style="width:${pct}%"></div></div>
+                    <span class="qbreak-pct">${pct}%</span>
+                </div>`;
+            }).join('')}
+        </div>`;
+    }).join('');
+}
 function renderHwSummary(subs, courses) {
     const el = document.getElementById('hwSummary');
     const rows = courses.filter(c=>c.homework&&c.homework.length).map(c => {

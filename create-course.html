@@ -1380,22 +1380,78 @@ window.addQuizQuestion = function(data = null) {
     quizCounter++;
     const qId = 'quiz-' + quizCounter;
     const qType = data?.type || 'multiple_choice';
-    const qText = data?.question || '';
+    quizQuestions.push({ id: qId });
+    document.getElementById('quizList').insertAdjacentHTML('beforeend', `
+        <div class="quiz-item" id="${qId}">
+            <div class="quiz-question-header">
+                <span class="quiz-question-number">ข้อที่ ${quizCounter}</span>
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                    <select class="form-control quiz-type-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" onchange="onQuizTypeChange('${qId}')">
+                        <option value="multiple_choice">ปรนัยเลือกตอบ</option>
+                        <option value="checkbox">เลือกได้หลายข้อ</option>
+                        <option value="true_false">ถูก/ผิด</option>
+                        <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
+                    </select>
+                    <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
+                    <button class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>คำถาม <span class="required">*</span></label>
+                <textarea class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question || ''}</textarea>
+            </div>
+            <div class="quiz-answer-area" id="${qId}-answer-area"></div>
+        </div>`);
+    document.querySelector(`#${qId} .quiz-type-select`).value = qType;
+    renderQuizAnswerArea(qId, qType, data);
+};
+
+function renderQuizAnswerArea(qId, qType, data) {
+    const area = document.getElementById(`${qId}-answer-area`);
     const choices = data?.choices || ['', '', '', ''];
     const correct = data?.correct || 'A';
-    quizQuestions.push({ id: qId });
-    const choicesHTML = qType === 'true_false' ? `
+    const correctMultiple = data?.correctMultiple || [];
+
+    if (qType === 'true_false') {
+        area.innerHTML = `
         <div class="quiz-choices" style="grid-template-columns:1fr 1fr;">
             <div class="quiz-choice-item"><span class="choice-label">A</span><input type="text" class="form-control choice-input" value="ถูก" readonly></div>
             <div class="quiz-choice-item"><span class="choice-label">B</span><input type="text" class="form-control choice-input" value="ผิด" readonly></div>
         </div>
         <div class="form-group" style="margin-top:0.75rem;">
             <label>เฉลย</label>
-            <select class="form-control correct-answer-select quiz-correct">
+            <select class="form-control quiz-correct">
                 <option value="A" ${correct==='A'?'selected':''}>A - ถูก</option>
                 <option value="B" ${correct==='B'?'selected':''}>B - ผิด</option>
             </select>
-        </div>` : `
+        </div>`;
+    } else if (qType === 'checkbox') {
+        area.innerHTML = `
+        <div class="quiz-choices">
+            ${['A','B','C','D'].map((letter,i) => `
+            <div class="quiz-choice-item">
+                <span class="choice-label">${letter}</span>
+                <input type="text" class="form-control choice-input" placeholder="ตัวเลือก ${letter}" value="${choices[i]||''}">
+            </div>`).join('')}
+        </div>
+        <div class="form-group" style="margin-top:0.75rem;">
+            <label>เฉลย (เลือกได้มากกว่า 1 ข้อ)</label>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                ${['A','B','C','D'].map(l => `
+                <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                    <input type="checkbox" class="quiz-correct-multi" value="${l}" ${correctMultiple.includes(l)?'checked':''}> ${l}
+                </label>`).join('')}
+            </div>
+        </div>`;
+    } else if (qType === 'short_answer') {
+        area.innerHTML = `
+        <div class="form-group" style="margin-top:0.75rem;">
+            <label>คำตอบตัวอย่าง/เกณฑ์การให้คะแนน (สำหรับอาจารย์อ้างอิงตอนตรวจ ไม่บังคับ)</label>
+            <textarea class="form-control quiz-sample-answer" rows="2" placeholder="เช่น ต้องกล่าวถึง...">${data?.sampleAnswer || ''}</textarea>
+        </div>
+        <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.82rem;">📝 คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
+    } else {
+        area.innerHTML = `
         <div class="quiz-choices">
             ${['A','B','C','D'].map((letter,i) => `
             <div class="quiz-choice-item">
@@ -1405,27 +1461,58 @@ window.addQuizQuestion = function(data = null) {
         </div>
         <div class="form-group" style="margin-top:0.75rem;">
             <label>เฉลย (ตัวเลือกที่ถูกต้อง)</label>
-            <select class="form-control correct-answer-select quiz-correct">
+            <select class="form-control quiz-correct">
                 ${['A','B','C','D'].map(l => `<option value="${l}" ${correct===l?'selected':''}>${l}</option>`).join('')}
             </select>
         </div>`;
-    document.getElementById('quizList').insertAdjacentHTML('beforeend', `
-        <div class="quiz-item" id="${qId}">
-            <div class="quiz-question-header">
-                <span class="quiz-question-number">ข้อที่ ${quizCounter}</span>
-                <button class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
-            </div>
-            <div class="form-group">
-                <label>คำถาม <span class="required">*</span></label>
-                <textarea class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${qText}</textarea>
-            </div>
-            ${choicesHTML}
-        </div>`);
+    }
+}
+
+window.onQuizTypeChange = function(qId) {
+    const type = document.querySelector(`#${qId} .quiz-type-select`).value;
+    renderQuizAnswerArea(qId, type, null);
 };
 
 window.removeQuizQuestion = function(qId) {
     document.getElementById(qId).remove();
     quizQuestions = quizQuestions.filter(q => q.id !== qId);
+};
+
+// === Homework "แบบฟอร์มหลายคำถาม" — ใช้ตัวสร้างคำถามร่วมกับ Quiz (renderQuizAnswerArea) ===
+window.addFormQuestion = function(hwId, data = null) {
+    const container = document.getElementById('hw-form-questions-' + hwId);
+    if (!container) return;
+    const qId = `hwq-${hwId}-${container.children.length + 1}-${Date.now()}`;
+    const qType = data?.type || 'multiple_choice';
+    const qNum = container.children.length + 1;
+    container.insertAdjacentHTML('beforeend', `
+        <div class="quiz-item" id="${qId}">
+            <div class="quiz-question-header">
+                <span class="quiz-question-number">ข้อที่ ${qNum}</span>
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                    <select class="form-control quiz-type-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" onchange="onQuizTypeChange('${qId}')">
+                        <option value="multiple_choice">ปรนัยเลือกตอบ</option>
+                        <option value="checkbox">เลือกได้หลายข้อ</option>
+                        <option value="true_false">ถูก/ผิด</option>
+                        <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
+                    </select>
+                    <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
+                    <button type="button" class="btn btn-danger" onclick="removeFormQuestion('${qId}')">ลบ</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>คำถาม <span class="required">*</span></label>
+                <textarea class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question || ''}</textarea>
+            </div>
+            <div class="quiz-answer-area" id="${qId}-answer-area"></div>
+        </div>`);
+    document.querySelector(`#${qId} .quiz-type-select`).value = qType;
+    renderQuizAnswerArea(qId, qType, data);
+};
+
+window.removeFormQuestion = function(qId) {
+    const el = document.getElementById(qId);
+    if (el) el.remove();
 };
 
 window.generateQuizWithAI = async function() {
@@ -1487,18 +1574,38 @@ ${type === 'true_false' ? `[{"question":"คำถาม","type":"true_false","c
     }
 };
 
-function collectQuizData() {
-    const items = document.querySelectorAll('.quiz-item');
+function collectQuestionsFromItems(items) {
     const result = [];
     items.forEach(item => {
         const questionText = item.querySelector('.quiz-question-text').value.trim();
         if (!questionText) return;
-        const choiceInputs = item.querySelectorAll('.choice-input');
-        const choices = Array.from(choiceInputs).map(inp => inp.value.trim());
-        const correct = item.querySelector('.quiz-correct').value;
-        result.push({ question: questionText, type: choices.length === 2 ? 'true_false' : 'multiple_choice', choices, correct });
+        const type = item.querySelector('.quiz-type-select')?.value || 'multiple_choice';
+        const points = parseInt(item.querySelector('.quiz-points')?.value) || 1;
+        const q = { question: questionText, type, points };
+
+        if (type === 'short_answer') {
+            q.sampleAnswer = item.querySelector('.quiz-sample-answer')?.value.trim() || '';
+        } else if (type === 'checkbox') {
+            q.choices = Array.from(item.querySelectorAll('.choice-input')).map(inp => inp.value.trim());
+            q.correctMultiple = Array.from(item.querySelectorAll('.quiz-correct-multi:checked')).map(cb => cb.value);
+        } else {
+            q.choices = Array.from(item.querySelectorAll('.choice-input')).map(inp => inp.value.trim());
+            q.correct = item.querySelector('.quiz-correct')?.value || 'A';
+        }
+        result.push(q);
     });
     return result;
+}
+
+function collectQuizData() {
+    // scope เฉพาะ .quiz-item ที่อยู่ใต้ #quizList โดยตรง — กันไม่ให้ปนกับคำถามในแบบฟอร์มการบ้าน
+    return collectQuestionsFromItems(document.querySelectorAll('#quizList > .quiz-item'));
+}
+
+function collectHomeworkFormQuestions(hwId) {
+    const container = document.getElementById('hw-form-questions-' + hwId);
+    if (!container) return [];
+    return collectQuestionsFromItems(container.querySelectorAll('.quiz-item'));
 }
 
 // === Homework AI Extraction (PDF / รูปภาพ / ข้อความ) ===
@@ -1764,6 +1871,7 @@ window.addHomework = function() {
                     <div class="hw-type-btn" onclick="setHwType('${hwId}','file',this)">📎 อัปโหลดไฟล์</div>
                     <div class="hw-type-btn" onclick="setHwType('${hwId}','both',this)">✍️📎 ทั้งสองแบบ</div>
                     <div class="hw-type-btn" onclick="setHwType('${hwId}','code',this)">💻 เขียนโค้ด (IDE)</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','form',this)">📋 แบบฟอร์มหลายคำถาม</div>
                 </div>
                 <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:none;margin-top:0.75rem;">
                     <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
@@ -1774,6 +1882,11 @@ window.addHomework = function() {
                         <option value="html">HTML/CSS (แสดงผลในเบราว์เซอร์ได้)</option>
                         <option value="other">ภาษาอื่นๆ (เขียน+ส่งได้ ไม่รันอัตโนมัติ)</option>
                     </select>
+                </div>
+                <div class="hw-form-opts" id="hw-form-opts-${hwId}" style="display:none;margin-top:0.75rem;">
+                    <div class="alert alert-info" style="margin-bottom:1rem;">💡 แบบฟอร์มหลายคำถาม — นักเรียนทำทีละข้อแบบ Google Forms ข้อปรนัย/เลือกหลายข้อ/ถูกผิด ระบบตรวจให้อัตโนมัติ ส่วนข้อตอบสั้น/เรียงความ อาจารย์ต้องตรวจเองทีหลัง</div>
+                    <div id="hw-form-questions-${hwId}"></div>
+                    <button type="button" class="btn btn-outline" onclick="addFormQuestion('${hwId}')">+ เพิ่มคำถามในฟอร์ม</button>
                 </div>
             </div>
         </div>`);
@@ -1793,6 +1906,13 @@ window.setHwType = function(hwId, type, btn) {
     const opts = document.getElementById('hw-code-opts-' + hwId);
     if (opts) opts.style.display = (type === 'code') ? 'block' : 'none';
     if (type === 'code' && hw && !hw.codeLanguage) hw.codeLanguage = 'python';
+    // แสดงตัวสร้างแบบฟอร์มเมื่อเลือก form
+    const formOpts = document.getElementById('hw-form-opts-' + hwId);
+    if (formOpts) formOpts.style.display = (type === 'form') ? 'block' : 'none';
+    if (type === 'form') {
+        const container = document.getElementById('hw-form-questions-' + hwId);
+        if (container && container.children.length === 0) addFormQuestion(hwId);
+    }
 };
 
 window.setHwCodeLang = function(hwId, lang) {
@@ -1807,6 +1927,7 @@ function collectHomeworkData() {
         const title = item.querySelector('.hw-title').value.trim();
         if (!title) return;
         const hw = homeworks[i] || {};
+        const isForm = hw.type === 'form';
         result.push({
             title,
             description: item.querySelector('.hw-desc').value.trim(),
@@ -1814,6 +1935,7 @@ function collectHomeworkData() {
             maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,
             submissionType: hw.type || 'text',
             codeLanguage: hw.type === 'code' ? (hw.codeLanguage || 'python') : null,
+            formQuestions: isForm ? collectHomeworkFormQuestions(item.id) : null,
             order: i
         });
     });
