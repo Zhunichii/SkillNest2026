@@ -1376,6 +1376,17 @@ function detectFileType(filename) {
 let quizQuestions = [];
 let quizCounter = 0;
 
+// สร้าง <option> รายชื่อบทเรียนปัจจุบัน ให้เลือกผูก Quiz/การบ้านกับบทใดบทหนึ่งได้ (หรือ "ทั้งคอร์ส")
+function buildLessonOptionsHtml(selectedValue) {
+    let html = `<option value="">📌 ทั้งคอร์ส (ไม่ระบุบท)</option>`;
+    lessons.forEach((l, i) => {
+        const title = (l.title || `บทที่ ${i+1}`).slice(0, 40);
+        const sel = String(selectedValue) === String(i) ? 'selected' : '';
+        html += `<option value="${i}" ${sel}>บทที่ ${i+1}: ${title}</option>`;
+    });
+    return html;
+}
+
 window.addQuizQuestion = function(data = null) {
     quizCounter++;
     const qId = 'quiz-' + quizCounter;
@@ -1386,6 +1397,9 @@ window.addQuizQuestion = function(data = null) {
             <div class="quiz-question-header">
                 <span class="quiz-question-number">ข้อที่ ${quizCounter}</span>
                 <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                    <select class="form-control quiz-lesson-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" title="ผูกกับบทเรียน">
+                        ${buildLessonOptionsHtml(data?.lessonIndex)}
+                    </select>
                     <select class="form-control quiz-type-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" onchange="onQuizTypeChange('${qId}')">
                         <option value="multiple_choice">ปรนัยเลือกตอบ</option>
                         <option value="checkbox">เลือกได้หลายข้อ</option>
@@ -1582,6 +1596,10 @@ function collectQuestionsFromItems(items) {
         const type = item.querySelector('.quiz-type-select')?.value || 'multiple_choice';
         const points = parseInt(item.querySelector('.quiz-points')?.value) || 1;
         const q = { question: questionText, type, points };
+        const lessonSelect = item.querySelector('.quiz-lesson-select');
+        if (lessonSelect) {
+            q.lessonIndex = lessonSelect.value === '' ? null : parseInt(lessonSelect.value);
+        }
 
         if (type === 'short_answer') {
             q.sampleAnswer = item.querySelector('.quiz-sample-answer')?.value.trim() || '';
@@ -1844,7 +1862,12 @@ window.addHomework = function() {
         <div class="hw-item" id="${hwId}">
             <div class="hw-item-header">
                 <span class="hw-number-badge">การบ้านที่ ${hwCounter}</span>
-                <button class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <select class="form-control hw-lesson-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" title="ผูกกับบทเรียน">
+                        ${buildLessonOptionsHtml('')}
+                    </select>
+                    <button class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
+                </div>
             </div>
             <div class="form-group">
                 <label>ชื่อการบ้าน <span class="required">*</span></label>
@@ -1928,6 +1951,7 @@ function collectHomeworkData() {
         if (!title) return;
         const hw = homeworks[i] || {};
         const isForm = hw.type === 'form';
+        const lessonSelect = item.querySelector('.hw-lesson-select');
         result.push({
             title,
             description: item.querySelector('.hw-desc').value.trim(),
@@ -1936,6 +1960,7 @@ function collectHomeworkData() {
             submissionType: hw.type || 'text',
             codeLanguage: hw.type === 'code' ? (hw.codeLanguage || 'python') : null,
             formQuestions: isForm ? collectHomeworkFormQuestions(item.id) : null,
+            lessonIndex: lessonSelect && lessonSelect.value !== '' ? parseInt(lessonSelect.value) : null,
             order: i
         });
     });

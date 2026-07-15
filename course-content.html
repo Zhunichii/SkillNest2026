@@ -767,6 +767,23 @@
         }
 
         /* === Homework Tab === */
+        .hw-scope-header {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin: 1.25rem 0 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .hw-scope-header:first-child { margin-top: 0; }
+        .quiz-scope-block {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .quiz-scope-title { font-weight: 600; margin-bottom: 0.75rem; }
         .hw-card {
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
@@ -1428,18 +1445,8 @@
                     <div class="quiz-panel-header">
                         <h3>📝 แบบทดสอบ</h3>
                     </div>
-                    <div class="quiz-score-summary" id="quizScoreSummary">
-                        <div class="score-val" id="quizScoreVal">0/0</div>
-                        <div>
-                            <div style="font-weight:600;">คะแนนล่าสุด</div>
-                            <div class="score-detail" id="quizScoreDetail">ยังไม่เคยทำ</div>
-                        </div>
-                    </div>
                     <div id="quizPanelContent">
-                        <p style="color:var(--text-dim); margin-bottom:1.25rem;" id="quizPanelDesc">กำลังโหลด...</p>
-                        <button class="btn-start-quiz-inline" id="btnStartQuiz" onclick="startCourseQuiz()">
-                            ▶️ เริ่มทำแบบทดสอบ
-                        </button>
+                        <p style="color:var(--text-dim); margin-bottom:1.25rem;">กำลังโหลด...</p>
                     </div>
                 </div>
             </div>
@@ -2590,46 +2597,15 @@ async function loadCourseData() {
 
         if (currentCourse.lessons && Array.isArray(currentCourse.lessons) && currentCourse.lessons.length > 0) {
             renderLessonList(currentCourse.lessons);
-            playLesson(0);
+            await loadQuizScoreCache();
+            playLesson(0); // playLesson() จะเรียก renderQuizTab() + loadHomeworkPanel() ให้เองตามบทที่เลือก
         } else {
             showError("ไม่มีบทเรียนในคอร์สนี้");
         }
 
-        // แสดง quiz tab ถ้ามี quiz
-        if (currentCourse.quiz && currentCourse.quiz.length > 0) {
-            document.getElementById('quizTabBtn').style.display = 'inline-block';
-            const qCount = currentCourse.quiz.length;
-            document.getElementById('quizPanelDesc').textContent = `คอร์สนี้มีแบบทดสอบทั้งหมด ${qCount} ข้อ ทดสอบความเข้าใจของคุณหลังเรียนจบ`;
-
-            // โหลดคะแนนเดิม (ถ้ามี)
-            if (currentUser) {
-                try {
-                    const { data: scoreData } = await supabase
-                        .from('quiz_scores')
-                        .select('*')
-                        .eq('user_id', currentUser.id)
-                        .eq('course_id', courseId)
-                        .single();
-                    if (scoreData) {
-                        const sumEl = document.getElementById('quizScoreSummary');
-                        sumEl.classList.add('show');
-                        document.getElementById('quizScoreVal').textContent = `${scoreData.score}/${scoreData.total}`;
-                        document.getElementById('quizScoreDetail').textContent = `${scoreData.pct}% • ทำเสร็จแล้ว`;
-                        const startBtn = document.getElementById('btnStartQuiz');
-                        startBtn.textContent = '✅ ทำแบบทดสอบแล้ว';
-                        startBtn.disabled = true;
-                        startBtn.style.opacity = '0.55';
-                        startBtn.style.cursor = 'not-allowed';
-                        window._quizDone = true;
-                    }
-                } catch(e) {}
-            }
-        }
-
-        // แสดง homework tab ถ้ามีการบ้าน
+        // แสดง homework tab ถ้ามีการบ้านอยู่ในคอร์ส (เนื้อหาข้างในจะกรองตามบทที่กำลังดูอยู่ผ่าน playLesson)
         if (currentCourse.homework && currentCourse.homework.length > 0) {
             document.getElementById('hwTabBtn').style.display = 'inline-block';
-            await loadHomeworkPanel();
         }
 
         // เปิดแท็บอัตโนมัติถ้ามี ?tab= ใน URL (มาจากหน้า "แบบฝึกหัดของฉัน")
@@ -2697,7 +2673,11 @@ function getFileTypeLabel(type) {
 
 window.playLesson = function(index) {
     currentLessonIndex = index;
-    
+
+    // รีเฟรชแท็บแบบทดสอบ/การบ้านให้ตรงกับบทที่เพิ่งเลือก (ทำก่อนส่วนอื่นเผื่อไฟล์บทเรียนโหลดไม่สำเร็จ)
+    renderQuizTab();
+    loadHomeworkPanel();
+
     document.querySelectorAll('.lesson-item').forEach((item, i) => {
         if (i === index) {
             item.classList.add('active');
@@ -3533,7 +3513,38 @@ async function loadHomeworkPanel() {
     const now = new Date();
     container.innerHTML = '';
 
-    currentCourse.homework.forEach((hw, idx) => {
+    // แบ่งการบ้านเป็น 2 กลุ่ม: ของบทเรียนที่กำลังดูอยู่ กับ "ทั้งคอร์ส" (ไม่ระบุบท)
+    const allIdx = currentCourse.homework.map((hw, idx) => idx);
+    const lessonIdx = allIdx.filter(i => currentCourse.homework[i].lessonIndex === currentLessonIndex);
+    const globalIdx = allIdx.filter(i => currentCourse.homework[i].lessonIndex == null);
+
+    if (lessonIdx.length === 0 && globalIdx.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:2rem;">บทนี้ยังไม่มีการบ้าน</p>`;
+        return;
+    }
+
+    if (lessonIdx.length > 0) {
+        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || `บทที่ ${currentLessonIndex+1}`;
+        const header = document.createElement('div');
+        header.className = 'hw-scope-header';
+        header.innerHTML = `📖 การบ้านบทนี้ — ${lessonTitle}`;
+        container.appendChild(header);
+        lessonIdx.forEach(idx => container.appendChild(buildHwCard(currentCourse.homework[idx], idx, submissionsMap, courseId, now)));
+    }
+    if (globalIdx.length > 0) {
+        const header = document.createElement('div');
+        header.className = 'hw-scope-header';
+        header.innerHTML = `📌 การบ้านรวมทั้งคอร์ส`;
+        container.appendChild(header);
+        globalIdx.forEach(idx => container.appendChild(buildHwCard(currentCourse.homework[idx], idx, submissionsMap, courseId, now)));
+    }
+    if (lessonIdx.length === 0 && globalIdx.length > 0) {
+        // มีแค่การบ้านรวม ไม่มีของบทนี้โดยเฉพาะ — ใส่ข้อความแจ้งไว้ด้านบนสุดกันงง
+        container.insertAdjacentHTML('afterbegin', `<p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.75rem;">บทนี้ไม่มีการบ้านเฉพาะบท มีแต่การบ้านรวมทั้งคอร์สด้านล่าง</p>`);
+    }
+}
+
+function buildHwCard(hw, idx, submissionsMap, courseId, now) {
         const sub = submissionsMap[idx];
         const isGraded = sub && sub.status === 'graded';
         const isSubmitted = sub && (sub.status === 'submitted' || isGraded);
@@ -3655,8 +3666,7 @@ async function loadHomeworkPanel() {
             ${submittedHtml}
             ${submitFormHtml}
         `;
-        container.appendChild(card);
-    });
+        return card;
 }
 
 window.previewHwFile = function(idx, input) {
@@ -4315,22 +4325,104 @@ window.closeHwForm = function() {
 
 // === Quiz Logic (inline in course-content) ===
 let cqState = null; // current quiz state
+let cachedQuizScoreRow = null; // แคชคะแนน quiz ของ user คนนี้ในคอร์สนี้ (โหลดตอนเปิดหน้า อัปเดตทุกครั้งที่ทำเสร็จ)
 
-window.startCourseQuiz = function() {
-    if (!currentCourse || !currentCourse.quiz || currentCourse.quiz.length === 0) return;
-    // ทำได้ครั้งเดียว
-    if (window._quizDone) {
-        alert('คุณทำแบบทดสอบนี้ไปแล้ว\nแบบทดสอบทำได้เพียงครั้งเดียวเท่านั้น');
+async function loadQuizScoreCache() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    if (!currentUser || !courseId) return;
+    try {
+        const { data } = await supabase.from('quiz_scores').select('*')
+            .eq('user_id', currentUser.id).eq('course_id', courseId).maybeSingle();
+        cachedQuizScoreRow = data || null;
+    } catch(e) { cachedQuizScoreRow = null; }
+}
+
+function hasTakenQuizScope(scopeLessonIndex) {
+    if (!cachedQuizScoreRow || !Array.isArray(cachedQuizScoreRow.answers)) return false;
+    return cachedQuizScoreRow.answers.some(a => (a.lessonIndex ?? null) === scopeLessonIndex);
+}
+
+// วาดแท็บ "แบบทดสอบ" ใหม่ตามบทเรียนที่กำลังดูอยู่ (currentLessonIndex) + ส่วน "ทั้งคอร์ส" ที่โชว์เสมอ
+function renderQuizTab() {
+    const panel = document.getElementById('quizPanelContent');
+    const tabBtn = document.getElementById('quizTabBtn');
+    if (!panel || !currentCourse) return;
+
+    const allQuiz = currentCourse.quiz || [];
+    tabBtn.style.display = allQuiz.length > 0 ? 'inline-block' : 'none';
+    if (allQuiz.length === 0) return;
+
+    const lessonQ = allQuiz.filter(q => (q.lessonIndex ?? null) === currentLessonIndex);
+    const globalQ = allQuiz.filter(q => q.lessonIndex == null);
+
+    if (lessonQ.length === 0 && globalQ.length === 0) {
+        panel.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:2rem;">บทนี้ยังไม่มีแบบทดสอบ</p>`;
+        return;
+    }
+
+    let html = '';
+    if (lessonQ.length > 0) {
+        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || `บทที่ ${currentLessonIndex+1}`;
+        html += renderQuizScopeBlock(currentLessonIndex, lessonQ, `📖 แบบทดสอบบทนี้ — ${lessonTitle}`);
+    }
+    if (globalQ.length > 0) {
+        html += renderQuizScopeBlock(null, globalQ, `📌 แบบทดสอบรวมทั้งคอร์ส`);
+    }
+    panel.innerHTML = html;
+}
+
+function renderQuizScopeBlock(scopeLessonIndex, questions, title) {
+    const totalPoints = questions.reduce((s,q) => s + (q.points||1), 0);
+    const done = hasTakenQuizScope(scopeLessonIndex);
+    let scoreSummaryHtml = '';
+
+    if (done && cachedQuizScoreRow) {
+        const scopeAnswers = (cachedQuizScoreRow.answers||[]).filter(a => (a.lessonIndex??null) === scopeLessonIndex);
+        const scopeScore = scopeAnswers.reduce((s,a) => s + (a.pointsEarned||0), 0);
+        const scopeMax = scopeAnswers.reduce((s,a) => s + (a.maxPoints||1), 0);
+        const scopePct = scopeMax > 0 ? Math.round((scopeScore/scopeMax)*100) : 0;
+        const anyPending = scopeAnswers.some(a => a.needsReview);
+        scoreSummaryHtml = `
+            <div class="quiz-score-summary show">
+                <div class="score-val">${scopeScore}/${scopeMax}</div>
+                <div>
+                    <div style="font-weight:600;">คะแนนล่าสุด</div>
+                    <div class="score-detail">${scopePct}%${anyPending ? ' • รอครูตรวจข้อเรียงความ' : ' • ทำเสร็จแล้ว'}</div>
+                </div>
+            </div>`;
+    }
+
+    const scopeArg = scopeLessonIndex === null ? 'null' : scopeLessonIndex;
+    const btnHtml = done
+        ? `<button class="btn-start-quiz-inline" disabled style="opacity:0.55;cursor:not-allowed;">✅ ทำแบบทดสอบแล้ว</button>`
+        : `<button class="btn-start-quiz-inline" onclick="startCourseQuiz(${scopeArg})">▶️ เริ่มทำแบบทดสอบ (${questions.length} ข้อ • ${totalPoints} คะแนน)</button>`;
+
+    return `
+    <div class="quiz-scope-block">
+        <div class="quiz-scope-title">${title}</div>
+        ${scoreSummaryHtml}
+        ${btnHtml}
+    </div>`;
+}
+
+window.startCourseQuiz = function(scopeLessonIndex) {
+    if (!currentCourse || !currentCourse.quiz) return;
+    const questions = currentCourse.quiz.filter(q => (q.lessonIndex ?? null) === scopeLessonIndex);
+    if (questions.length === 0) return;
+    if (hasTakenQuizScope(scopeLessonIndex)) {
+        alert('คุณทำแบบทดสอบส่วนนี้ไปแล้ว\nทำได้เพียงครั้งเดียวเท่านั้น');
         return;
     }
     cqState = {
-        questions: currentCourse.quiz,
+        scopeLessonIndex,
+        questions,
         index: 0,
         score: 0,
-        maxTotal: currentCourse.quiz.reduce((s, q) => s + (q.points || 1), 0),
+        maxTotal: questions.reduce((s, q) => s + (q.points || 1), 0),
         answered: false,
         needsReview: false,
-        answers: [] // {question, type, selected, selectedMultiple, answerText, isCorrect, pointsEarned, maxPoints}
+        answers: [] // {question, type, selected, selectedMultiple, answerText, isCorrect, pointsEarned, maxPoints, lessonIndex}
     };
     renderCourseQuestion();
     document.getElementById('quizModalOverlay').classList.add('show');
@@ -4416,7 +4508,8 @@ window.selectCourseChoice = function(idx) {
         if (isCorrect) cqState.score += points;
         cqState.answers.push({
             question: q.question, type: q.type || 'multiple_choice',
-            selected: labels[idx], isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points
+            selected: labels[idx], isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points,
+            lessonIndex: cqState.scopeLessonIndex
         });
         document.getElementById('cqBtnNext').disabled = false;
     }, 300);
@@ -4454,7 +4547,8 @@ window.confirmCourseCheckbox = function() {
     if (isCorrect) cqState.score += points;
     cqState.answers.push({
         question: q.question, type: 'checkbox',
-        selectedMultiple: selectedLetters, isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points
+        selectedMultiple: selectedLetters, isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points,
+        lessonIndex: cqState.scopeLessonIndex
     });
 
     const btn = document.getElementById('cqBtnNext');
@@ -4473,7 +4567,8 @@ window.confirmCourseShortAnswer = function() {
     cqState.needsReview = true;
     cqState.answers.push({
         question: q.question, type: 'short_answer',
-        answerText, isCorrect: null, pointsEarned: 0, maxPoints: points, needsReview: true
+        answerText, isCorrect: null, pointsEarned: 0, maxPoints: points, needsReview: true,
+        lessonIndex: cqState.scopeLessonIndex
     });
 
     const btn = document.getElementById('cqBtnNext');
@@ -4492,51 +4587,53 @@ window.nextCourseQuestion = function() {
     }
 };
 
+async function persistLessonQuizResult(scopeLessonIndex, newAnswers) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    if (!currentUser || !courseId) return;
+
+    // ตัดคำตอบเดิมของสโคปเดียวกันทิ้ง (เผื่อกรณีทำซ้ำ) แล้วรวมกับผลรอบนี้
+    const prevAnswers = (cachedQuizScoreRow?.answers || []).filter(a => (a.lessonIndex ?? null) !== scopeLessonIndex);
+    const mergedAnswers = [...prevAnswers, ...newAnswers];
+
+    const allTotal = (currentCourse.quiz || []).reduce((s,q) => s + (q.points||1), 0);
+    const score = mergedAnswers.reduce((s,a) => s + (a.pointsEarned||0), 0);
+    const pct = allTotal > 0 ? Math.round((score/allTotal)*100) : 0;
+    const needsReview = mergedAnswers.some(a => a.needsReview);
+
+    const { error } = await supabase.from('quiz_scores').upsert({
+        user_id: currentUser.id,
+        course_id: courseId,
+        score, total: allTotal, pct,
+        answers: mergedAnswers,
+        needs_review: needsReview,
+        updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+
+    cachedQuizScoreRow = { user_id: currentUser.id, course_id: courseId, score, total: allTotal, pct, answers: mergedAnswers, needs_review: needsReview };
+}
+
 async function showCourseQuizResult() {
-    const { score, maxTotal, needsReview, answers } = cqState;
-    const total = maxTotal;
-    const pct = Math.round((score/total)*100);
+    const { scopeLessonIndex, score, maxTotal, needsReview, answers } = cqState;
+    const pct = maxTotal > 0 ? Math.round((score/maxTotal)*100) : 0;
     const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
     const msg = pct >= 80 ? 'ยอดเยี่ยมมาก!' : pct >= 60 ? 'ทำได้ดี!' : 'ทบทวนบทเรียนเพิ่มเติมได้นะ';
     const wrongCount = answers.filter(a => a.isCorrect === false).length;
 
-    // Save score
-    const urlParams = new URLSearchParams(window.location.search);
-    const courseId = urlParams.get('id');
-    if (currentUser && courseId) {
+    if (currentUser) {
         try {
-            await supabase
-                .from('quiz_scores')
-                .upsert({
-                    user_id: currentUser.id,
-                    course_id: courseId,
-                    score, total, pct,
-                    answers,
-                    needs_review: needsReview,
-                    updated_at: new Date().toISOString()
-                });
-            // update summary in quiz tab
-            const sumEl = document.getElementById('quizScoreSummary');
-            if (sumEl) {
-                sumEl.classList.add('show');
-                document.getElementById('quizScoreVal').textContent = `${score}/${total}`;
-                document.getElementById('quizScoreDetail').textContent = needsReview
-                    ? `${pct}% • รอครูตรวจข้อเรียงความเพิ่มเติม`
-                    : `${pct}% • เพิ่งทำเสร็จ`;
-                const startBtn = document.getElementById('btnStartQuiz');
-                startBtn.textContent = '✅ ทำแบบทดสอบแล้ว';
-                startBtn.disabled = true;
-                startBtn.style.opacity = '0.55';
-                startBtn.style.cursor = 'not-allowed';
-                window._quizDone = true;
-            }
-        } catch(e) {}
+            await persistLessonQuizResult(scopeLessonIndex, answers);
+        } catch(e) {
+            console.error('persist quiz error:', e);
+        }
     }
+    renderQuizTab(); // อัปเดตสถานะปุ่ม/คะแนนในแท็บให้ตรงกับที่เพิ่งบันทึก
 
     document.getElementById('quizModalBox').innerHTML = `
         <div class="qm-result">
             <div class="qm-result-emoji">${emoji}</div>
-            <div class="qm-result-score">${score} / ${total}</div>
+            <div class="qm-result-score">${score} / ${maxTotal}</div>
             <div class="qm-result-sub">${msg} — คะแนน ${pct}%${needsReview ? ' (ยังไม่รวมข้อเรียงความ)' : ''}</div>
             <div class="qm-result-grid">
                 <div class="qm-result-stat"><div class="qm-result-num" style="color:#ef4444;">${wrongCount}</div><div class="qm-result-label">ตอบผิด</div></div>
@@ -4544,7 +4641,7 @@ async function showCourseQuizResult() {
                 <div class="qm-result-stat"><div class="qm-result-num" style="color:#f59e0b;">${answers.filter(a=>a.needsReview).length}</div><div class="qm-result-label">รอครูตรวจ</div></div>
             </div>
             <button class="btn-close-qm" onclick="closeCourseQuiz()">ปิด</button>
-            <p style="margin-top:14px;font-size:0.82rem;color:#8B92AE;">📌 แบบทดสอบนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว${needsReview ? ' — คะแนนรวมจะอัปเดตอีกครั้งหลังครูตรวจข้อเรียงความ' : ''}</p>
+            <p style="margin-top:14px;font-size:0.82rem;color:#8B92AE;">📌 ส่วนนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว${needsReview ? ' — คะแนนจะอัปเดตอีกครั้งหลังครูตรวจข้อเรียงความ' : ''}</p>
         </div>
     `;
 }

@@ -751,12 +751,19 @@ function renderQuizQuestionBreakdown(quiz, courses) {
 
     el.innerHTML = course.quiz.map((q, qi) => {
         const qType = q.type || 'multiple_choice';
-        const relevantAnswers = quiz.map(qs => (qs.answers || [])[qi]).filter(Boolean);
+        // จับคู่คำตอบด้วยข้อความคำถาม แทนตำแหน่ง index — เพราะตอนนี้คำตอบถูกรวมเข้ามาทีละบท ไม่เรียงตามลำดับ course.quiz เสมอไป
+        const relevantAnswers = quiz
+            .map(qs => (qs.answers || []).find(a => a.question === q.question))
+            .filter(Boolean);
+        const lessonLabel = q.lessonIndex != null
+            ? (course.lessons?.[q.lessonIndex]?.title ? `บทที่ ${q.lessonIndex+1}: ${course.lessons[q.lessonIndex].title}` : `บทที่ ${q.lessonIndex+1}`)
+            : '📌 ทั้งคอร์ส';
 
         if (qType === 'short_answer') {
             const reviewedCount = relevantAnswers.filter(a => !a.needsReview).length;
             return `<div class="qbreak-item">
                 <div class="qbreak-q">${qi+1}. ${q.question} <span style="color:var(--text-dim);font-weight:400;font-size:0.8rem;">(ตอบสั้น/เรียงความ)</span></div>
+                <div style="font-size:0.76rem;color:var(--primary-blue);margin-bottom:4px;">${lessonLabel}</div>
                 <div style="font-size:0.82rem;color:var(--text-dim);">ตรวจแล้ว ${reviewedCount}/${relevantAnswers.length} คน</div>
             </div>`;
         }
@@ -776,6 +783,7 @@ function renderQuizQuestionBreakdown(quiz, courses) {
 
         return `<div class="qbreak-item">
             <div class="qbreak-q">${qi+1}. ${q.question} <span style="color:${correctPct>=60?'var(--success)':'var(--warning)'};font-weight:600;font-size:0.82rem;">(ถูก ${correctPct}%)</span></div>
+            <div style="font-size:0.76rem;color:var(--primary-blue);margin-bottom:4px;">${lessonLabel}</div>
             ${choiceCount.map(c => {
                 const pct = Math.round((c.count/totalAnswered)*100);
                 const isCorrectChoice = qType==='checkbox' ? (q.correctMultiple||[]).includes(c.letter) : q.correct === c.letter;
