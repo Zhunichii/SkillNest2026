@@ -398,6 +398,7 @@
         @media (max-width: 640px) {
             body { padding: 1.5rem 1rem 4rem; }
             .section { padding: 1.5rem 1.25rem 1.75rem; }
+            .grid { grid-template-columns: 1fr !important; }
             .wizard-label { display: none; }
             .wizard-progress-item.active .wizard-label { display: block; position: absolute; top: 42px; white-space: nowrap; max-width: none; }
         }
@@ -1799,6 +1800,11 @@ window.addQuizQuestion = function(data = null) {
                     <button class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.9rem;font-size:0.82rem;color:var(--text-dim);flex-wrap:wrap;">
+                <label style="margin:0;white-space:nowrap;font-size:0.82rem;">เปิดให้ทำวันที่:</label>
+                <input type="datetime-local" class="form-control quiz-release" style="width:auto;padding:0.35rem 0.6rem;font-size:0.82rem;" value="${data?.releaseAt || ''}">
+                <span style="font-size:0.76rem;">เว้นว่าง = เปิดให้ทำได้ทันที</span>
+            </div>
             <div class="form-group">
                 <label>คำถาม <span class="required">*</span></label>
                 <textarea class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question || ''}</textarea>
@@ -1988,6 +1994,10 @@ function collectQuestionsFromItems(items) {
         const lessonSelect = item.querySelector('.quiz-lesson-select');
         if (lessonSelect) {
             q.lessonIndex = lessonSelect.value === '' ? null : parseInt(lessonSelect.value);
+        }
+        const releaseInput = item.querySelector('.quiz-release');
+        if (releaseInput) {
+            q.releaseAt = releaseInput.value || null;
         }
 
         if (type === 'short_answer') {
@@ -2266,7 +2276,12 @@ window.addHomework = function() {
                 <label>คำอธิบาย / โจทย์</label>
                 <textarea class="form-control hw-desc" rows="3" placeholder="อธิบายสิ่งที่นักเรียนต้องทำ..."></textarea>
             </div>
-            <div class="grid">
+            <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <div class="form-group">
+                    <label>เปิดให้ทำวันที่ (ไม่บังคับ)</label>
+                    <input type="datetime-local" class="form-control hw-release">
+                    <small>เว้นว่างไว้ = เปิดให้ทำได้ทันที</small>
+                </div>
                 <div class="form-group">
                     <label>วันกำหนดส่ง (Deadline)</label>
                     <input type="datetime-local" class="form-control hw-deadline">
@@ -2344,6 +2359,7 @@ function collectHomeworkData() {
         result.push({
             title,
             description: item.querySelector('.hw-desc').value.trim(),
+            releaseAt: item.querySelector('.hw-release')?.value || null,
             deadline: item.querySelector('.hw-deadline').value || null,
             maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,
             submissionType: hw.type || 'text',

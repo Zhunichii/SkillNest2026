@@ -3906,6 +3906,21 @@ async function loadHomeworkPanel() {
 }
 
 function buildHwCard(hw, idx, submissionsMap, courseId, now) {
+        // ยังไม่ถึงเวลาเปิดให้ทำ — โชว์การ์ดแบบล็อกไว้ ไม่แสดงฟอร์มส่งงาน
+        if (hw.releaseAt && new Date(hw.releaseAt) > now) {
+            const card = document.createElement('div');
+            card.className = 'hw-card';
+            card.style.opacity = '0.7';
+            card.innerHTML = `
+                <div class="hw-card-header">
+                    <div class="hw-card-title">${idx + 1}. ${hw.title}</div>
+                    <span class="hw-status-badge pending">🔒 ยังไม่เปิด</span>
+                </div>
+                <div class="hw-deadline">จะเปิดให้ทำวันที่ ${new Date(hw.releaseAt).toLocaleString('th-TH')}</div>
+            `;
+            return card;
+        }
+
         const sub = submissionsMap[idx];
         const isGraded = sub && sub.status === 'graded';
         const isSubmitted = sub && (sub.status === 'submitted' || isGraded);
@@ -4705,6 +4720,11 @@ function hasTakenQuizScope(scopeLessonIndex) {
 }
 
 // วาดแท็บ "แบบทดสอบ" ใหม่ตามบทเรียนที่กำลังดูอยู่ (currentLessonIndex) + ส่วน "ทั้งคอร์ส" ที่โชว์เสมอ
+function isReleased(item) {
+    if (!item.releaseAt) return true;
+    return new Date(item.releaseAt) <= new Date();
+}
+
 function renderQuizTab() {
     const panel = document.getElementById('quizPanelContent');
     const tabBtn = document.getElementById('quizTabBtn');
@@ -4733,7 +4753,24 @@ function renderQuizTab() {
     panel.innerHTML = html;
 }
 
-function renderQuizScopeBlock(scopeLessonIndex, questions, title) {
+function renderQuizScopeBlock(scopeLessonIndex, allQuestions, title) {
+    const released = allQuestions.filter(isReleased);
+    const pending = allQuestions.filter(q => !isReleased(q));
+
+    if (released.length === 0) {
+        const earliest = pending.reduce((min, q) => {
+            const t = new Date(q.releaseAt);
+            return (!min || t < min) ? t : min;
+        }, null);
+        return `
+        <div class="quiz-scope-block" style="opacity:0.75;">
+            <div class="quiz-scope-title">${title}</div>
+            <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:0.35rem;">🔒 ยังไม่เปิดให้ทำ</p>
+            ${earliest ? `<p style="color:var(--text-dim);font-size:0.82rem;">จะเปิดให้ทำวันที่ ${earliest.toLocaleString('th-TH')}</p>` : ''}
+        </div>`;
+    }
+
+    const questions = released;
     const totalPoints = questions.reduce((s,q) => s + (q.points||1), 0);
     const done = hasTakenQuizScope(scopeLessonIndex);
     let scoreSummaryHtml = '';
@@ -4764,12 +4801,13 @@ function renderQuizScopeBlock(scopeLessonIndex, questions, title) {
         <div class="quiz-scope-title">${title}</div>
         ${scoreSummaryHtml}
         ${btnHtml}
+        ${pending.length > 0 ? `<p style="color:var(--text-dim);font-size:0.78rem;margin-top:0.6rem;">🔒 มีอีก ${pending.length} ข้อที่ยังไม่เปิดให้ทำ</p>` : ''}
     </div>`;
 }
 
 window.startCourseQuiz = function(scopeLessonIndex) {
     if (!currentCourse || !currentCourse.quiz) return;
-    const questions = currentCourse.quiz.filter(q => (q.lessonIndex ?? null) === scopeLessonIndex);
+    const questions = currentCourse.quiz.filter(q => (q.lessonIndex ?? null) === scopeLessonIndex && isReleased(q));
     if (questions.length === 0) return;
     if (hasTakenQuizScope(scopeLessonIndex)) {
         alert('คุณทำแบบทดสอบส่วนนี้ไปแล้ว\nทำได้เพียงครั้งเดียวเท่านั้น');
