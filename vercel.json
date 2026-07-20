@@ -9,21 +9,5 @@
     { "source": "/create-course", "destination": "/create-course.html" },
     { "source": "/manage-courses", "destination": "/manage-courses.html" },
     { "source": "/check-model", "destination": "/check_model.html" }
-  ],
-  "headers": [
-    {
-      "source": "/course-content.html",
-      "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
-      ]
-    },
-    {
-      "source": "/course-content",
-      "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
-      ]
-    }
   ]
 }
