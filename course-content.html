@@ -129,6 +129,53 @@
             border: none;
         }
 
+        /* Video resume-choice overlay */
+        .video-resume-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10,10,20,0.92);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+        .video-resume-box {
+            text-align: center;
+            padding: 2rem;
+            max-width: 380px;
+        }
+        .video-resume-box .vr-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .video-resume-box .vr-title { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.4rem; color: white; }
+        .video-resume-box .vr-sub { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .video-resume-box .vr-btns { display: flex; flex-direction: column; gap: 0.6rem; }
+        .btn-vr-resume, .btn-vr-restart {
+            padding: 0.8rem 1.2rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; border: none; width: 100%;
+        }
+        .btn-vr-resume { background: var(--primary-blue); color: white; }
+        .btn-vr-resume:hover { opacity: 0.9; }
+        .btn-vr-restart { background: rgba(255,255,255,0.08); color: var(--text-dim); border: 1px solid rgba(255,255,255,0.15); }
+        .btn-vr-restart:hover { background: rgba(255,255,255,0.14); }
+
+        /* Skip-blocked toast */
+        .video-skip-toast {
+            position: absolute;
+            top: 16px; left: 50%; transform: translateX(-50%) translateY(-10px);
+            background: rgba(15,15,25,0.92);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 0.6rem 1.1rem;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            z-index: 25;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .video-skip-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
         .lesson-wrapper img {
             object-fit: contain;
         }
@@ -1542,6 +1589,7 @@ function parseDurationToSeconds(dur) {
 let completedLessons = new Set();
 let totalLessons = 0;
 let enrollmentId = null;
+let videoPositions = {}; // { [lessonId]: { lastPosition: sec, maxWatched: sec, duration: sec } } — กันข้ามวิดีโอ + จำจุดที่ดูค้างไว้
 
 async function loadProgress(userId, courseId) {
     try {
@@ -1558,6 +1606,7 @@ async function loadProgress(userId, courseId) {
         if (data) {
             enrollmentId = data.id;
             completedLessons = new Set(data.completed_lessons || []);
+            videoPositions = data.video_positions || {};
             // ใช้ค่าจริงจากคอร์ส ไม่ใช่จาก DB ที่อาจเป็น 0
             totalLessons = realTotal || data.total_lessons || 0;
 
@@ -1577,6 +1626,7 @@ async function loadProgress(userId, courseId) {
             // ยังไม่มี row — สร้างใหม่ด้วย upsert
             totalLessons = realTotal;
             completedLessons = new Set();
+            videoPositions = {};
             await supabase
                 .from('enrollments')
                 .upsert({
@@ -2838,23 +2888,41 @@ function renderYouTubePlayer(container, fileUrl, title) {
 }
 
 function renderVideoPlayer(container, fileUrl) {
+    const lessonId = `lesson_${currentLessonIndex}`;
+    const saved = videoPositions[lessonId] || null;
+    const hasResumablePosition = saved && saved.lastPosition > 5; // เกิน 5 วิ ถึงจะถามว่าจะเล่นต่อไหม (กันเคสเผลอกดนิดเดียว)
+
     container.innerHTML = `
-        <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#000;">
+        <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#000;position:relative;">
             <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
                 background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
                 border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
-                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">🎬 วิดีโอ</span>
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">🎬 วิดีโอ • ต้องดูให้ครบ ข้ามไม่ได้</span>
                 <a href="${fileUrl}" download style="margin-left:auto;
                     background:rgba(59,130,246,0.5);color:white;padding:4px 10px;
                     border-radius:6px;font-size:0.75rem;text-decoration:none;">โหลด</a>
             </div>
-            <video id="lessonVideo" controls autoplay
+            <video id="lessonVideo" controls controlsList="nodownload"
                 style="flex:1;width:100%;height:0;min-height:0;object-fit:contain;background:#000;">
                 <source src="${fileUrl}">
                 เบราว์เซอร์ของคุณไม่รองรับวิดีโอ
             </video>
+            <div class="video-skip-toast" id="videoSkipToast">⏭️ ข้ามไม่ได้ — ต้องดูให้ครบก่อนถึงจะไปข้างหน้าได้</div>
+            ${hasResumablePosition ? `
+            <div class="video-resume-overlay" id="videoResumeOverlay">
+                <div class="video-resume-box">
+                    <div class="vr-icon">📺</div>
+                    <div class="vr-title">ดูวิดีโอนี้ค้างไว้ที่ ${formatVideoTime(saved.lastPosition)}</div>
+                    <div class="vr-sub">เลือกได้ว่าจะเล่นต่อจากเดิม หรือเริ่มดูใหม่ตั้งแต่ต้น</div>
+                    <div class="vr-btns">
+                        <button class="btn-vr-resume" onclick="resumeVideoFrom(${saved.lastPosition})">▶️ เล่นต่อจากเดิม</button>
+                        <button class="btn-vr-restart" onclick="restartVideoFromZero()">🔄 เริ่มดูใหม่ตั้งแต่ต้น</button>
+                    </div>
+                </div>
+            </div>` : ''}
         </div>
     `;
+
     // ติด event listener หลัง render
     setTimeout(() => {
         const vid = document.getElementById('lessonVideo');
@@ -2863,6 +2931,14 @@ function renderVideoPlayer(container, fileUrl) {
         let saveTimer = null;
         let watchStart = null;  // จับเวลาดูวิดีโอจริง
         window._watchStart = null;
+
+        // จุดที่ดูไกลสุดแล้ว (วินาที) — ใช้กันไม่ให้ลาก/กดข้ามไปไกลกว่านี้ เริ่มจากค่าที่บันทึกไว้เดิม (ถ้ามี)
+        let maxWatched = saved?.maxWatched || 0;
+        window._videoMaxWatched = maxWatched;
+
+        if (!hasResumablePosition) {
+            vid.play().catch(() => {}); // วิดีโอใหม่ ไม่มีจุดค้าง เล่นอัตโนมัติได้เลย
+        }
 
         vid.addEventListener('play', () => { watchStart = Date.now(); window._watchStart = watchStart; });
         vid.addEventListener('pause', () => {
@@ -2875,6 +2951,10 @@ function renderVideoPlayer(container, fileUrl) {
 
         vid.addEventListener('timeupdate', () => {
             if (!vid.duration) return;
+            if (vid.currentTime > maxWatched) {
+                maxWatched = vid.currentTime;
+                window._videoMaxWatched = maxWatched;
+            }
             const pct = Math.round((vid.currentTime / vid.duration) * 100);
             updateLessonProgress(pct);
 
@@ -2887,21 +2967,72 @@ function renderVideoPlayer(container, fileUrl) {
             if (pct > 0 && pct !== lastSavedPct && pct % 10 === 0) {
                 clearTimeout(saveTimer);
                 saveTimer = setTimeout(() => {
-                    saveVideoProgress(pct);
+                    saveVideoProgress(pct, vid.currentTime, maxWatched, vid.duration);
                 }, 2000);
             }
             lastSavedPct = pct;
         });
 
+        // กันข้าม: ถ้าลาก/กดข้ามไปไกลกว่าจุดที่เคยดูถึง ให้ดึงกลับ (ยอมให้ย้อนกลับไปดูซ้ำได้เสมอ)
+        const SKIP_TOLERANCE_SEC = 1.5;
+        vid.addEventListener('seeked', () => {
+            if (vid.currentTime > maxWatched + SKIP_TOLERANCE_SEC) {
+                vid.currentTime = maxWatched;
+                showVideoSkipToast();
+            }
+        });
+
         // บันทึกเมื่อ pause หรือออกจากหน้า
         vid.addEventListener('pause', () => {
-            if (lastSavedPct > 0) saveVideoProgress(lastSavedPct);
+            saveVideoProgress(lastSavedPct, vid.currentTime, maxWatched, vid.duration);
+        });
+        vid.addEventListener('ended', () => {
+            maxWatched = vid.duration;
+            window._videoMaxWatched = maxWatched;
+            saveVideoProgress(100, vid.duration, maxWatched, vid.duration);
         });
         window.addEventListener('beforeunload', () => {
-            if (lastSavedPct > 0) saveVideoProgress(lastSavedPct);
+            saveVideoProgress(lastSavedPct, vid.currentTime, maxWatched, vid.duration);
         });
     }, 500);
 }
+
+function formatVideoTime(sec) {
+    sec = Math.floor(sec || 0);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+let _videoSkipToastTimer = null;
+function showVideoSkipToast() {
+    const toast = document.getElementById('videoSkipToast');
+    if (!toast) return;
+    toast.classList.add('show');
+    clearTimeout(_videoSkipToastTimer);
+    _videoSkipToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+window.resumeVideoFrom = function(sec) {
+    const overlay = document.getElementById('videoResumeOverlay');
+    const vid = document.getElementById('lessonVideo');
+    if (overlay) overlay.remove();
+    if (vid) {
+        vid.currentTime = sec;
+        vid.play().catch(() => {});
+    }
+};
+
+window.restartVideoFromZero = function() {
+    const overlay = document.getElementById('videoResumeOverlay');
+    const vid = document.getElementById('lessonVideo');
+    if (overlay) overlay.remove();
+    if (vid) {
+        vid.currentTime = 0;
+        window._videoMaxWatched = 0; // เริ่มใหม่ = ต้องดูใหม่ตั้งแต่ต้น ข้ามจุดเดิมไม่ได้แล้ว
+        vid.play().catch(() => {});
+    }
+};
 
 // บันทึก video progress ลง Supabase โดยไม่ต้องกดปุ่ม
 // สะสม watch_seconds ใน memory ก่อน แล้วค่อย flush ตอน save
@@ -2910,7 +3041,7 @@ function accumulateWatchSeconds(sec) {
     if (sec > 0) _pendingWatchSec += sec;
 }
 
-async function saveVideoProgress(pct) {
+async function saveVideoProgress(pct, currentTimeSec, maxWatchedSec, durationSec) {
     if (!currentUser || !currentCourse) return;
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get('id');
@@ -2920,6 +3051,19 @@ async function saveVideoProgress(pct) {
     const baseProgress = (completedLessons.size / totalL) * 100;
     const lessonContrib = (pct / 100) * (1 / totalL) * 100;
     const overallProgress = Math.min(99, Math.round(baseProgress + lessonContrib));
+
+    // อัปเดตจุดที่ดูค้างไว้ของบทนี้ (ใช้ตอนกลับมาเปิดใหม่ ถามว่าจะเล่นต่อหรือเริ่มใหม่)
+    const lessonId = `lesson_${currentLessonIndex}`;
+    if (typeof currentTimeSec === 'number') {
+        videoPositions = {
+            ...videoPositions,
+            [lessonId]: {
+                lastPosition: currentTimeSec,
+                maxWatched: typeof maxWatchedSec === 'number' ? maxWatchedSec : (videoPositions[lessonId]?.maxWatched || 0),
+                duration: durationSec || videoPositions[lessonId]?.duration || 0
+            }
+        };
+    }
 
     // รวมเวลาที่ดูอยู่ตอนนี้ (ถ้ายังดูอยู่)
     const vid = document.getElementById('lessonVideo');
@@ -2951,6 +3095,7 @@ async function saveVideoProgress(pct) {
                 progress: overallProgress,
                 total_lessons: totalL,
                 watch_seconds: newWatch,
+                video_positions: videoPositions,
                 last_updated_at: new Date().toISOString()
             }, { onConflict: 'user_id,course_id' });
         console.log(`💾 Saved: ${overallProgress}% | watch: ${Math.round(newWatch/60)} นาที`);
