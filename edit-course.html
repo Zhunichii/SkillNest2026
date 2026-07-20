@@ -528,10 +528,10 @@ function addExistingLesson(lesson, idx) {
             </div>
             <div class="existing-file-badge">📂 ${fileLabel}</div>
             <div class="form-group">
-                <label>เปลี่ยนไฟล์ / URL (ไม่บังคับ)</label>
+                <label>เปลี่ยนไฟล์ PDF / URL (ไม่บังคับ)</label>
                 <div class="upload-method">
                     <div class="method-option ${!isYoutube ? 'active' : ''}" onclick="selectMethod('${lid}','file')">
-                        <div class="method-icon">📁</div><div>อัพโหลดไฟล์ใหม่</div>
+                        <div class="method-icon">📄</div><div>อัปโหลด PDF ใหม่</div>
                     </div>
                     <div class="method-option ${isYoutube ? 'active' : ''}" onclick="selectMethod('${lid}','youtube')">
                         <div class="method-icon">▶️</div><div>YouTube URL</div>
@@ -541,9 +541,10 @@ function addExistingLesson(lesson, idx) {
             <div id="uploadArea-${lid}" style="${isYoutube ? 'display:none;' : ''}">
                 <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
                     <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
-                    <p style="font-size:0.9rem;">คลิกเพื่ออัพโหลดไฟล์ใหม่</p>
+                    <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF ใหม่</p>
+                    <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                 </div>
-                <input type="file" id="lessonFileInput-${lid}" style="display:none;">
+                <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
                 <div id="lessonFilePreview-${lid}"></div>
             </div>
             <div id="youtubeArea-${lid}" style="${isYoutube ? '' : 'display:none;'}">
@@ -574,10 +575,10 @@ window.addLesson = function() {
                 <input type="number" class="form-control lesson-duration" placeholder="เช่น 15">
             </div>
             <div class="form-group">
-                <label>วิธีอัพโหลด</label>
+                <label>เลือกประเภทเนื้อหา</label>
                 <div class="upload-method">
                     <div class="method-option active" onclick="selectMethod('${lid}','file')">
-                        <div class="method-icon">📁</div><div>อัพโหลดไฟล์</div>
+                        <div class="method-icon">📄</div><div>ไฟล์ PDF</div>
                     </div>
                     <div class="method-option" onclick="selectMethod('${lid}','youtube')">
                         <div class="method-icon">▶️</div><div>YouTube URL</div>
@@ -587,10 +588,10 @@ window.addLesson = function() {
             <div id="uploadArea-${lid}">
                 <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
                     <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
-                    <p style="font-size:0.9rem;">คลิกเพื่ออัพโหลดไฟล์</p>
-                    <small style="color:var(--text-dim);">รองรับ PDF, PPT, DOC, รูปภาพ, วิดีโอ</small>
+                    <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF</p>
+                    <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                 </div>
-                <input type="file" id="lessonFileInput-${lid}" style="display:none;">
+                <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
                 <div id="lessonFilePreview-${lid}"></div>
             </div>
             <div id="youtubeArea-${lid}" style="display:none;">
@@ -607,6 +608,11 @@ function bindLessonFileInput(lid) {
     input.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
+        if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
+            alert('รองรับเฉพาะไฟล์ PDF เท่านั้นครับ กรุณาเลือกไฟล์ .pdf');
+            e.target.value = '';
+            return;
+        }
         const ld = lessons.find(l => l.id === lid);
         if (ld) ld.file = file;
         document.getElementById(`lessonFilePreview-${lid}`).innerHTML = `

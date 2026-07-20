@@ -1407,10 +1407,10 @@ window.addLesson = function() {
                 <input type="number" class="form-control lesson-duration" placeholder="เช่น 15">
             </div>
             <div class="form-group">
-                <label>เลือกวิธีอัพโหลด</label>
+                <label>เลือกประเภทเนื้อหา</label>
                 <div class="upload-method">
                     <div class="method-option active" onclick="selectMethod('${lessonId}', 'file')">
-                        <div class="method-icon">📁</div><div>อัพโหลดไฟล์</div>
+                        <div class="method-icon">📄</div><div>ไฟล์ PDF</div>
                     </div>
                     <div class="method-option" onclick="selectMethod('${lessonId}', 'youtube')">
                         <div class="method-icon">▶️</div><div>YouTube URL</div>
@@ -1420,10 +1420,10 @@ window.addLesson = function() {
             <div id="uploadArea-${lessonId}">
                 <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lessonId}').click()">
                     <div class="file-upload-icon">📤</div>
-                    <p>คลิกเพื่ออัพโหลดไฟล์</p>
-                    <small style="color:var(--text-dim);">รองรับ PDF, PPT, DOC, รูปภาพ</small>
+                    <p>คลิกเพื่ออัพโหลดไฟล์ PDF</p>
+                    <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                 </div>
-                <input type="file" id="lessonFileInput-${lessonId}" style="display:none;">
+                <input type="file" id="lessonFileInput-${lessonId}" accept=".pdf,application/pdf" style="display:none;">
                 <div id="lessonFilePreview-${lessonId}"></div>
             </div>
             <div id="youtubeArea-${lessonId}" style="display:none;">
@@ -1432,7 +1432,13 @@ window.addLesson = function() {
         </div>`;
     document.getElementById('lessonsList').insertAdjacentHTML('beforeend', lessonHTML);
     document.getElementById(`lessonFileInput-${lessonId}`).addEventListener('change', function(e) {
-        handleLessonFileUpload(lessonId, e.target.files[0]);
+        const file = e.target.files[0];
+        if (file && !/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
+            alert('รองรับเฉพาะไฟล์ PDF เท่านั้นครับ กรุณาเลือกไฟล์ .pdf');
+            e.target.value = '';
+            return;
+        }
+        handleLessonFileUpload(lessonId, file);
     });
 };
 

@@ -2858,34 +2858,173 @@ function detectFileType(url) {
     return 'unknown';
 }
 
-function renderYouTubePlayer(container, fileUrl, title) {
-    let embedUrl = fileUrl;
+function extractYouTubeId(fileUrl) {
     if (fileUrl.includes('watch?v=')) {
-        const videoId = fileUrl.split('v=')[1].split('&')[0];
-        embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+        return fileUrl.split('v=')[1].split('&')[0];
     } else if (fileUrl.includes('youtu.be/')) {
-        const videoId = fileUrl.split('youtu.be/')[1].split('?')[0];
-        embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+        return fileUrl.split('youtu.be/')[1].split('?')[0];
+    } else if (fileUrl.includes('/embed/')) {
+        return fileUrl.split('/embed/')[1].split('?')[0];
     }
+    return fileUrl;
+}
+
+// โหลด YouTube IFrame Player API ครั้งเดียว (ใช้ควบคุม player แบบเดียวกับวิดีโอที่อัปโหลดเอง เพื่อกันข้าม)
+let _ytApiLoadPromise = null;
+function loadYouTubeAPI() {
+    if (window.YT && window.YT.Player) return Promise.resolve();
+    if (_ytApiLoadPromise) return _ytApiLoadPromise;
+    _ytApiLoadPromise = new Promise((resolve) => {
+        window.onYouTubeIframeAPIReady = () => resolve();
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+    });
+    return _ytApiLoadPromise;
+}
+
+let ytPlayer = null;
+let ytPollTimer = null;
+let ytMaxWatched = 0;
+let ytWatchStart = null;
+
+async function renderYouTubePlayer(container, fileUrl, title) {
+    const videoId = extractYouTubeId(fileUrl);
+    const lessonId = `lesson_${currentLessonIndex}`;
+    const saved = videoPositions[lessonId] || null;
+    const hasResumablePosition = saved && saved.lastPosition > 5;
+    const hostId = `ytHost_${lessonId}`;
+    // enablejsapi=1 จำเป็น เพื่อให้ YT.Player() ควบคุม iframe นี้ได้ (ดูรายละเอียดหมายเหตุด้านล่าง)
+    const embedSrc = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1`;
 
     container.innerHTML = `
-        <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#000;">
+        <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#000;position:relative;">
             <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
                 background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
                 border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
-                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">▶ YouTube</span>
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">▶ YouTube • ต้องดูให้ครบ ข้ามไม่ได้</span>
                 <span style="font-size:0.82rem;color:rgba(255,255,255,0.5);">— ${title}</span>
                 <a href="${fileUrl}" target="_blank" style="margin-left:auto;
                     background:rgba(255,255,255,0.1);color:white;padding:4px 10px;
                     border-radius:6px;font-size:0.75rem;text-decoration:none;">เปิดใหม่</a>
             </div>
-            <iframe src="${embedUrl}"
-                title="${title}" frameborder="0" credentialless
+            <!-- สร้าง iframe เองตรงนี้ (ไม่ให้ YT.Player() สร้างให้) เพื่อคง attribute credentialless ไว้
+                 ซึ่งจำเป็นสำหรับเบราว์เซอร์ที่เปิด COEP อยู่ (ดู middleware.js) ไม่งั้น YouTube จะโหลดไม่ขึ้น -->
+            <iframe id="${hostId}" src="${embedSrc}" credentialless
+                title="${title}" frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen style="flex:1;width:100%;border:none;"></iframe>
+            <div class="video-skip-toast" id="videoSkipToast">⏭️ ข้ามไม่ได้ — ต้องดูให้ครบก่อนถึงจะไปข้างหน้าได้</div>
+            ${hasResumablePosition ? `
+            <div class="video-resume-overlay" id="videoResumeOverlay">
+                <div class="video-resume-box">
+                    <div class="vr-icon">📺</div>
+                    <div class="vr-title">ดูวิดีโอนี้ค้างไว้ที่ ${formatVideoTime(saved.lastPosition)}</div>
+                    <div class="vr-sub">เลือกได้ว่าจะเล่นต่อจากเดิม หรือเริ่มดูใหม่ตั้งแต่ต้น</div>
+                    <div class="vr-btns">
+                        <button class="btn-vr-resume" onclick="resumeYouTubeFrom(${saved.lastPosition})">▶️ เล่นต่อจากเดิม</button>
+                        <button class="btn-vr-restart" onclick="restartYouTubeFromZero()">🔄 เริ่มดูใหม่ตั้งแต่ต้น</button>
+                    </div>
+                </div>
+            </div>` : ''}
         </div>
     `;
+
+    await loadYouTubeAPI();
+
+    ytMaxWatched = saved?.maxWatched || 0;
+    ytWatchStart = null;
+    clearInterval(ytPollTimer);
+    if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        try { ytPlayer.destroy(); } catch(e) {}
+    }
+
+    // ส่ง element ของ iframe ที่สร้างเองเข้าไปตรงๆ (ไม่ใช่แค่ id) — YT.Player() จะเข้าคุม iframe นี้แทนที่จะสร้างใหม่
+    const existingIframe = document.getElementById(hostId);
+    ytPlayer = new YT.Player(existingIframe, {
+        events: {
+            onStateChange: (e) => {
+                if (e.data === YT.PlayerState.PLAYING) {
+                    ytWatchStart = Date.now();
+                    startYtPolling();
+                } else {
+                    stopYtWatchAccumulation();
+                    clearInterval(ytPollTimer);
+                    if (e.data === YT.PlayerState.ENDED) {
+                        const dur = ytPlayer.getDuration();
+                        ytMaxWatched = dur;
+                        saveVideoProgress(100, dur, ytMaxWatched, dur);
+                    } else {
+                        try {
+                            saveVideoProgress(
+                                Math.round((ytPlayer.getCurrentTime()/ytPlayer.getDuration())*100) || 0,
+                                ytPlayer.getCurrentTime(), ytMaxWatched, ytPlayer.getDuration()
+                            );
+                        } catch(err) {}
+                    }
+                }
+            }
+        }
+    });
 }
+
+function stopYtWatchAccumulation() {
+    if (ytWatchStart) {
+        const sec = Math.round((Date.now() - ytWatchStart) / 1000);
+        accumulateWatchSeconds(sec);
+        ytWatchStart = null;
+    }
+}
+
+function startYtPolling() {
+    clearInterval(ytPollTimer);
+    let lastSavedPct = -1;
+    const SKIP_TOLERANCE_SEC = 2; // หย่อนกว่าวิดีโอปกตินิดหน่อย เพราะ poll ทุก 1 วิ ไม่ใช่ทุก frame
+    ytPollTimer = setInterval(() => {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+        let cur, duration;
+        try {
+            cur = ytPlayer.getCurrentTime();
+            duration = ytPlayer.getDuration();
+        } catch(e) { return; }
+        if (!duration) return;
+
+        // กันข้าม: ถ้ากระโดดไปไกลกว่าจุดที่เคยดูถึงเกิน tolerance ให้ดึงกลับ (ย้อนหลังทำได้เสมอ)
+        if (cur > ytMaxWatched + SKIP_TOLERANCE_SEC) {
+            ytPlayer.seekTo(ytMaxWatched, true);
+            showVideoSkipToast();
+            return;
+        }
+        if (cur > ytMaxWatched) ytMaxWatched = cur;
+
+        const pct = Math.round((cur / duration) * 100);
+        updateLessonProgress(pct);
+        if (pct >= 90 && lastSavedPct < 90) autoMarkLessonDone();
+        if (pct > 0 && pct !== lastSavedPct && pct % 10 === 0) {
+            saveVideoProgress(pct, cur, ytMaxWatched, duration);
+        }
+        lastSavedPct = pct;
+    }, 1000);
+}
+
+window.resumeYouTubeFrom = function(sec) {
+    const overlay = document.getElementById('videoResumeOverlay');
+    if (overlay) overlay.remove();
+    if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+        ytPlayer.seekTo(sec, true);
+        ytPlayer.playVideo();
+    }
+};
+
+window.restartYouTubeFromZero = function() {
+    const overlay = document.getElementById('videoResumeOverlay');
+    if (overlay) overlay.remove();
+    if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+        ytPlayer.seekTo(0, true);
+        ytMaxWatched = 0; // เริ่มใหม่ = ต้องดูใหม่ตั้งแต่ต้น ข้ามจุดเดิมไม่ได้แล้ว
+        ytPlayer.playVideo();
+    }
+};
 
 function renderVideoPlayer(container, fileUrl) {
     const lessonId = `lesson_${currentLessonIndex}`;
