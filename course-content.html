@@ -87,6 +87,49 @@
             flex-shrink: 0;
         }
 
+        /* สารบัญหัวข้อย่อยของบทที่กำลังดูอยู่ */
+        .lesson-subtopics-panel {
+            margin: 1rem 2rem 0;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .subtopics-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 1.1rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--text-main, #fff);
+            user-select: none;
+        }
+        .subtopics-panel-header:hover { background: rgba(255,255,255,0.03); }
+        #subtopicsToggleIcon { color: var(--text-dim, #a0a0ba); transition: transform 0.2s; font-size: 0.8rem; }
+        .lesson-subtopics-panel.collapsed #subtopicsToggleIcon { transform: rotate(-90deg); }
+        .lesson-subtopics-panel.collapsed .subtopics-panel-list { display: none; }
+        .subtopics-panel-list {
+            list-style: none;
+            margin: 0;
+            padding: 0 1.1rem 0.9rem;
+        }
+        .subtopics-panel-list li {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            padding: 0.45rem 0;
+            font-size: 0.86rem;
+            color: var(--text-dim, #a0a0ba);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .subtopics-panel-list li:first-child { border-top: none; }
+        .subtopics-panel-list .st-num { color: #8b5cf6; font-weight: 600; flex-shrink: 0; }
+        .subtopics-panel-list .st-title { color: var(--text-main, #fff); flex: 1; }
+        .subtopics-panel-list .st-note { font-size: 0.78rem; color: var(--text-dim, #7a7a90); flex-shrink: 0; }
+
         /* Video: คงอัตราส่วน 16:9 */
         .lesson-wrapper {
             width: 100%;
@@ -1440,6 +1483,14 @@
             </div>
         </div>
 
+        <div class="lesson-subtopics-panel" id="lessonSubtopicsPanel" style="display:none;">
+            <div class="subtopics-panel-header" onclick="toggleSubtopicsPanel()">
+                <span>📑 เนื้อหาในบทนี้</span>
+                <span id="subtopicsToggleIcon">▾</span>
+            </div>
+            <ul class="subtopics-panel-list" id="subtopicsPanelList"></ul>
+        </div>
+
         <div class="lesson-info-area">
         <div class="course-info">
             <h1 id="courseTitle">กำลังโหลด...</h1>
@@ -2721,6 +2772,30 @@ function getFileTypeLabel(type) {
     return labels[type] || 'ไฟล์';
 }
 
+function renderSubtopicsPanel(lesson) {
+    const panel = document.getElementById('lessonSubtopicsPanel');
+    const list = document.getElementById('subtopicsPanelList');
+    if (!panel || !list) return;
+
+    const subtopics = (lesson?.subtopics || []).filter(s => s && s.title);
+    if (subtopics.length === 0) {
+        panel.style.display = 'none';
+        return;
+    }
+    panel.style.display = 'block';
+    list.innerHTML = subtopics.map((s, i) => `
+        <li>
+            <span class="st-num">${i + 1}.</span>
+            <span class="st-title">${s.title}</span>
+            ${s.note ? `<span class="st-note">${s.note}</span>` : ''}
+        </li>`).join('');
+}
+
+window.toggleSubtopicsPanel = function() {
+    const panel = document.getElementById('lessonSubtopicsPanel');
+    if (panel) panel.classList.toggle('collapsed');
+};
+
 window.playLesson = function(index) {
     currentLessonIndex = index;
 
@@ -2778,6 +2853,8 @@ window.playLesson = function(index) {
 
     const container = document.getElementById("lessonPlayer");
     const lesson = currentCourse.lessons[index];
+
+    renderSubtopicsPanel(lesson);
 
     if (!lesson || !lesson.fileUrl) {
         container.innerHTML = '<div class="loading-screen"><div>❌ ไม่พบไฟล์บทเรียน</div></div>';
@@ -2902,7 +2979,7 @@ async function renderYouTubePlayer(container, fileUrl, title) {
             <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
                 background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
                 border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
-                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">▶ YouTube •</span>
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">▶ YouTube • ต้องดูให้ครบ ข้ามไม่ได้</span>
                 <span style="font-size:0.82rem;color:rgba(255,255,255,0.5);">— ${title}</span>
                 <a href="${fileUrl}" target="_blank" style="margin-left:auto;
                     background:rgba(255,255,255,0.1);color:white;padding:4px 10px;

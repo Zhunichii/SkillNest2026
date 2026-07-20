@@ -526,6 +526,10 @@ function addExistingLesson(lesson, idx) {
                 <label>ระยะเวลา (นาที)</label>
                 <input type="number" class="form-control lesson-duration" value="${lesson.duration || ''}">
             </div>
+            <div class="form-group">
+                <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
+                <textarea class="form-control lesson-desc" rows="2">${lesson.description || ''}</textarea>
+            </div>
             <div class="existing-file-badge">📂 ${fileLabel}</div>
             <div class="form-group">
                 <label>เปลี่ยนไฟล์ PDF / URL (ไม่บังคับ)</label>
@@ -550,9 +554,21 @@ function addExistingLesson(lesson, idx) {
             <div id="youtubeArea-${lid}" style="${isYoutube ? '' : 'display:none;'}">
                 <input type="text" class="form-control lesson-youtube-url" placeholder="YouTube URL" value="${isYoutube ? escapeAttr(lesson.fileUrl || '') : ''}">
             </div>
+
+            <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
+                <label>📑 หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')">✨ AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')">📄 แตกหัวข้อจากไฟล์ PDF</button>
+                </div>
+                <div id="subtopicStatus-${lid}" class="ai-loading-text"></div>
+                <div id="subtopicsList-${lid}"></div>
+                <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addSubtopicRow('${lid}')">+ เพิ่มหัวข้อย่อยเอง</button>
+            </div>
         </div>`;
     document.getElementById('lessonsList').insertAdjacentHTML('beforeend', html);
     bindLessonFileInput(lid);
+    (lesson.subtopics || []).forEach(st => addSubtopicRow(lid, st));
 }
 
 window.addLesson = function() {
@@ -573,6 +589,10 @@ window.addLesson = function() {
             <div class="form-group">
                 <label>ระยะเวลา (นาที)</label>
                 <input type="number" class="form-control lesson-duration" placeholder="เช่น 15">
+            </div>
+            <div class="form-group">
+                <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
+                <textarea class="form-control lesson-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
             </div>
             <div class="form-group">
                 <label>เลือกประเภทเนื้อหา</label>
@@ -596,6 +616,17 @@ window.addLesson = function() {
             </div>
             <div id="youtubeArea-${lid}" style="display:none;">
                 <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
+            </div>
+
+            <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
+                <label>📑 หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')">✨ AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')">📄 แตกหัวข้อจากไฟล์ PDF ที่อัปโหลด</button>
+                </div>
+                <div id="subtopicStatus-${lid}" class="ai-loading-text"></div>
+                <div id="subtopicsList-${lid}"></div>
+                <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addSubtopicRow('${lid}')">+ เพิ่มหัวข้อย่อยเอง</button>
             </div>
         </div>`;
     document.getElementById('lessonsList').insertAdjacentHTML('beforeend', html);
@@ -650,6 +681,138 @@ window.removeLessonFile = function(lid) {
 window.removeLesson = function(lid) {
     document.getElementById(lid).remove();
     lessons = lessons.filter(l => l.id !== lid);
+};
+
+// === หัวข้อย่อยในบทเรียน (สารบัญ) ===
+window.addSubtopicRow = function(lessonId, data = null) {
+    const container = document.getElementById(`subtopicsList-${lessonId}`);
+    if (!container) return;
+    const rowId = `subtopic-${lessonId}-${container.children.length}-${Date.now()}`;
+    container.insertAdjacentHTML('beforeend', `
+        <div class="subtopic-row" id="${rowId}" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
+            <input type="text" class="form-control subtopic-title" placeholder="ชื่อหัวข้อย่อย เช่น ตัวแปรและชนิดข้อมูล"
+                value="${escapeAttr(data?.title || '')}" style="flex:2;">
+            <input type="text" class="form-control subtopic-note" placeholder="หมายเหตุ เช่น นาที 0-5 / หน้า 1-3 (ไม่บังคับ)"
+                value="${escapeAttr(data?.note || '')}" style="flex:1;">
+            <button type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()">✕</button>
+        </div>`);
+};
+
+function collectSubtopics(lessonId) {
+    const container = document.getElementById(`subtopicsList-${lessonId}`);
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('.subtopic-row')).map(row => ({
+        title: row.querySelector('.subtopic-title').value.trim(),
+        note: row.querySelector('.subtopic-note').value.trim()
+    })).filter(s => s.title);
+}
+
+function clearSubtopics(lessonId) {
+    const container = document.getElementById(`subtopicsList-${lessonId}`);
+    if (container) container.innerHTML = '';
+}
+
+window.generateSubtopicsWithAI = async function(lessonId) {
+    const lessonItem = document.getElementById(lessonId);
+    const title = lessonItem.querySelector('.lesson-title').value.trim();
+    const desc = lessonItem.querySelector('.lesson-desc').value.trim();
+    if (!title) {
+        alert('กรุณากรอกชื่อบทเรียนก่อนครับ');
+        lessonItem.querySelector('.lesson-title').focus();
+        return;
+    }
+    const statusEl = document.getElementById(`subtopicStatus-${lessonId}`);
+    statusEl.classList.add('show');
+    statusEl.textContent = '⏳ AI กำลังคิดโครงหัวข้อย่อย...';
+
+    const prompt = `คุณเป็นผู้ช่วยออกแบบเนื้อหาการสอน ช่วยแตกโครงหัวข้อย่อย (สารบัญ) สำหรับบทเรียนต่อไปนี้ เรียงลำดับให้เข้าใจง่ายจากพื้นฐานไปซับซ้อน
+ชื่อบทเรียน: ${title}
+คำอธิบาย: ${desc || '(ไม่มีคำอธิบายเพิ่มเติม ให้ประเมินจากชื่อบทเรียน)'}
+
+สร้างหัวข้อย่อยประมาณ 4-8 ข้อ แต่ละข้อสั้นกระชับ 1 บรรทัด
+ตอบเป็น JSON array เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+[{"title":"ชื่อหัวข้อย่อยสั้นๆ","note":"คำอธิบายสั้นๆ 1 บรรทัด (ไม่บังคับ ถ้าไม่มีให้เว้นว่าง)"}]`;
+
+    try {
+        const res = await fetch('/api/generate-quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'outline', prompt })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const jsonStr = (data.text || '').replace(/```json|```/g, '').trim();
+        const items = JSON.parse(jsonStr);
+        if (!Array.isArray(items) || items.length === 0) throw new Error('AI ไม่พบหัวข้อย่อยจากข้อมูลนี้');
+
+        clearSubtopics(lessonId);
+        items.forEach(it => addSubtopicRow(lessonId, it));
+        statusEl.textContent = `✅ AI แนะนำหัวข้อย่อยให้แล้ว ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+    } catch (err) {
+        console.error('generateSubtopicsWithAI error:', err);
+        statusEl.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+    }
+};
+
+// แตกหัวข้อจาก PDF — รองรับทั้งไฟล์ใหม่ที่เพิ่งเลือก และไฟล์ PDF เดิมที่มีอยู่แล้ว (ดึงจาก URL เดิมมาอ่าน)
+window.extractSubtopicsFromPDF = async function(lessonId) {
+    const lessonData = lessons.find(l => l.id === lessonId);
+    const statusEl = document.getElementById(`subtopicStatus-${lessonId}`);
+    statusEl.classList.add('show');
+
+    let pdfBlob = null;
+    try {
+        if (lessonData?.file) {
+            pdfBlob = lessonData.file;
+        } else if (lessonData?.existingType === 'pdf' && lessonData?.existingUrl) {
+            statusEl.textContent = '⏳ กำลังดึงไฟล์ PDF เดิมมาอ่าน...';
+            const resp = await fetch(lessonData.existingUrl);
+            if (!resp.ok) throw new Error('ดึงไฟล์ PDF เดิมไม่สำเร็จ');
+            pdfBlob = await resp.blob();
+        } else {
+            alert('กรุณาอัปโหลดไฟล์ PDF ของบทเรียนนี้ก่อนครับ ถึงจะแตกหัวข้อจากเนื้อหาไฟล์ได้\n(ถ้ายังไม่มีไฟล์ ลองใช้ปุ่ม "AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย" แทน)');
+            return;
+        }
+
+        statusEl.textContent = '⏳ กำลังอ่านไฟล์ PDF...';
+        const analyzed = await analyzePdfFile(pdfBlob);
+        if (!analyzed.text || !analyzed.text.trim()) {
+            throw new Error('ไม่พบข้อความในไฟล์นี้ ลองใช้ปุ่มแนะนำจากชื่อ/คำอธิบายแทน');
+        }
+
+        statusEl.textContent = 'AI กำลังวิเคราะห์โครงเนื้อหา...';
+        const prompt = `ต่อไปนี้คือเนื้อหาที่ดึงมาจากไฟล์ PDF ของบทเรียนหนึ่ง ช่วยแตกโครงหัวข้อย่อย (สารบัญ) ตามลำดับเนื้อหาที่ปรากฏจริงในไฟล์
+สร้างหัวข้อย่อยประมาณ 4-10 ข้อ ตามหัวข้อ/ส่วนที่แบ่งไว้จริงในเอกสาร
+ตอบเป็น JSON array เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+[{"title":"ชื่อหัวข้อย่อยสั้นๆ","note":"เช่น หน้า 1-3 (ไม่บังคับ ถ้าไม่แน่ใจให้เว้นว่าง)"}]
+
+เนื้อหา:
+${analyzed.text}`;
+
+        const requestBody = {
+            type: 'outline',
+            prompt,
+            images: analyzed.pageImages.length > 0 ? analyzed.pageImages.map(p => ({ data: p.data, mimeType: p.mimeType })) : undefined
+        };
+
+        const res = await fetch('/api/generate-quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const jsonStr = (data.text || '').replace(/```json|```/g, '').trim();
+        const items = JSON.parse(jsonStr);
+        if (!Array.isArray(items) || items.length === 0) throw new Error('AI ไม่พบหัวข้อย่อยจากไฟล์นี้');
+
+        clearSubtopics(lessonId);
+        items.forEach(it => addSubtopicRow(lessonId, it));
+        statusEl.textContent = `✅ แตกหัวข้อจากไฟล์ PDF ได้ ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+    } catch (err) {
+        console.error('extractSubtopicsFromPDF error:', err);
+        statusEl.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+    }
 };
 
 function getFileIcon(name) {
@@ -1302,6 +1465,8 @@ window.saveCourse = async function() {
                 fileUrl,
                 type: fileType,
                 duration: lessonDuration ? parseInt(lessonDuration) : null,
+                description: item.querySelector('.lesson-desc')?.value.trim() || '',
+                subtopics: collectSubtopics(ld.id),
                 order: i
             });
         }
