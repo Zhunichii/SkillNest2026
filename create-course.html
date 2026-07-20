@@ -92,9 +92,23 @@
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.75rem;
             letter-spacing: -0.005em;
         }
+        .section-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(59,130,246,0.12);
+            color: var(--primary-blue);
+            flex-shrink: 0;
+        }
+        .section-icon svg { width: 18px; height: 18px; }
+        .section-icon.icon-ai { background: rgba(139,92,246,0.14); color: var(--ai-1); }
+        .section-icon.icon-success { background: rgba(16,185,129,0.14); color: var(--success-green); }
 
         .form-group { margin-bottom: 1.4rem; }
         .form-group label {
@@ -142,7 +156,10 @@
             transition: border-color 0.25s var(--ease), background 0.25s var(--ease), transform 0.25s var(--ease);
         }
         .file-upload-area:hover { border-color: var(--primary-blue); background: rgba(59,130,246,0.05); transform: translateY(-1px); }
-        .file-upload-icon { font-size: 2.6rem; margin-bottom: 0.5rem; opacity: 0.9; }
+        .file-upload-icon { margin-bottom: 0.6rem; opacity: 0.75; display: flex; justify-content: center; }
+        .file-upload-icon svg { width: 34px; height: 34px; }
+        .method-icon { margin-bottom: 0.5rem; display: flex; justify-content: center; opacity: 0.85; }
+        .method-icon svg { width: 22px; height: 22px; }
 
         .file-preview {
             display: flex;
@@ -167,11 +184,12 @@
         .lesson-item:hover { border-color: rgba(255,255,255,0.18); }
         .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem; }
         .lesson-number {
-            background: var(--primary-blue);
-            color: white;
+            background: rgba(59,130,246,0.12);
+            border: 1px solid rgba(59,130,246,0.28);
+            color: #7db4fb;
             padding: 0.3rem 0.85rem;
-            border-radius: 99px;
-            font-size: 0.82rem;
+            border-radius: 7px;
+            font-size: 0.8rem;
             font-weight: 600;
             letter-spacing: 0.01em;
         }
@@ -215,7 +233,6 @@
         }
         .method-option:hover { border-color: var(--primary-blue); transform: translateY(-1px); }
         .method-option.active { border-color: var(--primary-blue); background: rgba(59,130,246,0.1); }
-        .method-icon { font-size: 1.85rem; margin-bottom: 0.4rem; }
 
         .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(6,8,20,0.88); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 9999; }
         .loading-overlay.show { display: flex; }
@@ -234,7 +251,7 @@
         /* Quiz */
         .quiz-item { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem; position: relative; }
         .quiz-question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
-        .quiz-question-number { background: linear-gradient(135deg, var(--ai-1), #6d28d9); color: white; padding: 0.3rem 0.85rem; border-radius: 99px; font-size: 0.82rem; font-weight: 600; }
+        .quiz-question-number { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); color: #b39ef9; padding: 0.3rem 0.85rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; }
         .quiz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.75rem; }
         .quiz-choice-item { display: flex; align-items: center; gap: 0.5rem; }
         .quiz-choice-item input[type="text"] { flex: 1; }
@@ -262,7 +279,7 @@
         /* Homework */
         .hw-item { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem; }
         .hw-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
-        .hw-number-badge { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 0.3rem 0.85rem; border-radius: 99px; font-size: 0.82rem; font-weight: 600; }
+        .hw-number-badge { background: rgba(245,158,11,0.13); border: 1px solid rgba(245,158,11,0.32); color: #f5b449; padding: 0.3rem 0.85rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; }
         .hw-type-selector { display: flex; gap: 0.7rem; margin-top: 0.75rem; flex-wrap: wrap; }
         .hw-type-btn { flex: 1; min-width: 110px; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--input-bg); color: var(--text-dim); cursor: pointer; font-size: 0.84rem; text-align: center; transition: all 0.2s var(--ease); }
         .hw-type-btn:hover { border-color: rgba(245,158,11,0.5); }
@@ -319,9 +336,9 @@
         }
         .wizard-progress-item.done .wizard-dot {
             border-color: transparent;
-            background: rgba(16,185,129,0.16);
-            color: #10b981;
-            box-shadow: inset 0 0 0 1.5px rgba(16,185,129,0.4);
+            background: var(--success-green);
+            color: #fff;
+            box-shadow: 0 8px 18px -10px rgba(16,185,129,0.55);
         }
         .wizard-progress-item.optional .wizard-dot::after {
             content: '';
@@ -401,7 +418,7 @@
     <!-- STEP 1: ข้อมูลคอร์ส -->
     <div class="wizard-panel active" id="wizardStep1" data-step="1">
     <div class="section">
-        <h2 class="section-title">📝 ข้อมูลคอร์ส</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></span>ข้อมูลคอร์ส</h2>
         <div class="form-group">
             <label>ชื่อคอร์ส <span class="required">*</span></label>
             <input type="text" id="courseTitle" class="form-control" placeholder="เช่น Python สำหรับผู้เริ่มต้น">
@@ -447,10 +464,10 @@
     <!-- STEP 2: รูปปกคอร์ส -->
     <div class="wizard-panel" id="wizardStep2" data-step="2">
     <div class="section">
-        <h2 class="section-title">🖼️ รูปปกคอร์ส</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span>รูปปกคอร์ส</h2>
 
         <div class="ai-gen-area">
-            <div class="ai-gen-title">✨ ให้ AI สร้างรูปปกให้</div>
+            <div class="ai-gen-title">ให้ AI สร้างรูปปกให้</div>
             <div class="form-group">
                 <label>อธิบายรูปปกที่ต้องการ</label>
                 <textarea id="thumbPromptInput" class="form-control" rows="2" placeholder="เช่น ภาพประกอบเกี่ยวกับการเขียนโปรแกรม Python สไตล์การ์ตูนแบนสีสันสดใส"></textarea>
@@ -466,15 +483,15 @@
                 </select>
             </div>
             <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
-                <button class="btn btn-ai" id="btnGenThumbnail" onclick="generateThumbnailWithAI()">🎨 สร้างรูปปกด้วย AI</button>
+                <button class="btn btn-ai" id="btnGenThumbnail" onclick="generateThumbnailWithAI()">สร้างรูปปกด้วย AI</button>
                 <small style="color:var(--text-dim);">ใช้เวลาประมาณ 10-20 วินาที</small>
             </div>
             <div id="thumbGenStatus" class="ai-loading-text"></div>
             <div id="thumbGenPreviewWrap" style="display:none;margin-top:1rem;">
                 <img id="thumbGenPreviewImg" style="width:100%;max-width:420px;border-radius:12px;border:1px solid var(--border-color);display:block;" alt="ตัวอย่างรูปปกที่ AI สร้าง">
                 <div style="display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;">
-                    <button class="btn btn-success" onclick="useAIThumbnail()">✅ ใช้รูปนี้</button>
-                    <button class="btn btn-outline" id="btnRegenThumbnail" onclick="generateThumbnailWithAI()">🔄 สร้างใหม่อีกครั้ง</button>
+                    <button class="btn btn-success" onclick="useAIThumbnail()">ใช้รูปนี้</button>
+                    <button class="btn btn-outline" id="btnRegenThumbnail" onclick="generateThumbnailWithAI()">สร้างใหม่อีกครั้ง</button>
                 </div>
             </div>
         </div>
@@ -483,7 +500,7 @@
             <label style="font-weight:600;">หรืออัปโหลดรูปเอง</label>
         </div>
         <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
-            <div class="file-upload-icon">📷</div>
+            <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
             <p>คลิกเพื่ออัพโหลดรูปปก</p>
             <small style="color: var(--text-dim);">รองรับ JPG, PNG, WEBP (แนะนำ 16:9)</small>
         </div>
@@ -502,9 +519,9 @@
     <p class="wizard-step-intro">ขั้นตอนนี้ไม่บังคับ — ใช้ AI ช่วยร่างผลลัพธ์การเรียนรู้ (CLO) และโครงสร้างบทเรียน/Quiz/การบ้านให้อัตโนมัติ หรือข้ามไปสร้างบทเรียนเองในขั้นถัดไปก็ได้</p>
     <!-- CLO Generator -->
     <div class="section">
-        <h2 class="section-title">🎯 สร้าง CLO ด้วย AI</h2>
+        <h2 class="section-title"><span class="section-icon icon-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span>สร้าง CLO ด้วย AI</h2>
         <div class="ai-gen-area">
-            <div class="ai-gen-title">✨ AI จะช่วยสร้าง Course Learning Outcomes (CLO) ตามมาตรฐาน Bloom's Taxonomy</div>
+            <div class="ai-gen-title">AI จะช่วยสร้าง Course Learning Outcomes (CLO) ตามมาตรฐาน Bloom's Taxonomy</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
                 <div class="form-group" style="flex:2;min-width:220px;">
                     <label>ชื่อรายวิชา / หัวข้อคอร์ส <span class="required">*</span></label>
@@ -538,7 +555,7 @@
             </div>
             <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;">
                 <button class="btn btn-ai" id="btnGenCLO" onclick="generateCLOWithAI()">
-                    🎯 สร้าง CLO ด้วย AI
+                    สร้าง CLO ด้วย AI
                 </button>
                 <span id="cloStatus" style="font-size:0.85rem;color:#a0a0ba;"></span>
             </div>
@@ -548,9 +565,9 @@
         <!-- CLO Result (editable) -->
         <div id="cloResult" style="display:none;margin-top:16px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-                <label style="font-weight:600;font-size:0.9rem;">📋 CLO ที่สร้างแล้ว (แก้ไขได้)</label>
+                <label style="font-weight:600;font-size:0.9rem;">CLO ที่สร้างแล้ว (แก้ไขได้)</label>
                 <div style="display:flex;gap:8px;">
-                    <button onclick="recheckCLOs()" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.35);color:#60a5fa;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;">🔍 ตรวจสอบ Bloom's Taxonomy</button>
+                    <button onclick="recheckCLOs()" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.35);color:#60a5fa;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;">ตรวจสอบ Bloom's Taxonomy</button>
                     <button onclick="addCLORow()" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#a78bfa;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;">+ เพิ่ม CLO</button>
                 </div>
             </div>
@@ -561,9 +578,9 @@
 
     <!-- AI Outline Generator -->
     <div class="section">
-        <h2 class="section-title">🤖 สร้างโครงสร้างคอร์สด้วย AI</h2>
+        <h2 class="section-title"><span class="section-icon icon-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>สร้างโครงสร้างคอร์สด้วย AI</h2>
         <div class="ai-gen-area">
-            <div class="ai-gen-title">✨ Gemini จะช่วยสร้าง บทเรียน + Quiz + การบ้าน ให้อัตโนมัติ</div>
+            <div class="ai-gen-title">Gemini จะช่วยสร้าง บทเรียน + Quiz + การบ้าน ให้อัตโนมัติ</div>
             <div class="form-group">
                 <label>หัวข้อหลักของคอร์ส <span class="required">*</span></label>
                 <input type="text" id="aiOutlineTopic" class="form-control"
@@ -608,7 +625,7 @@
             </div>
             <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;">
                 <button class="btn btn-ai" id="btnGenOutline" onclick="generateOutlineWithAI()">
-                    🚀 สร้างโครงสร้างคอร์สด้วย AI
+                    สร้างโครงสร้างคอร์สด้วย AI
                 </button>
                 <span id="aiOutlineStatus" style="font-size:0.85rem;color:#a0a0ba;"></span>
             </div>
@@ -626,7 +643,7 @@
     <!-- STEP 4: บทเรียน -->
     <div class="wizard-panel" id="wizardStep4" data-step="4">
     <div class="section">
-        <h2 class="section-title">📚 บทเรียน</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span>บทเรียน</h2>
         <div id="lessonsList"></div>
         <button class="btn btn-primary" onclick="addLesson()">+ เพิ่มบทเรียน</button>
     </div>
@@ -641,9 +658,9 @@
     <div class="wizard-panel" id="wizardStep5" data-step="5">
     <p class="wizard-step-intro">ขั้นตอนนี้ไม่บังคับ — เพิ่ม Quiz ให้นักเรียนทำหลังเรียนจบ หรือข้ามไปได้เลย</p>
     <div class="section">
-        <h2 class="section-title">🧠 แบบทดสอบ (Quiz)</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span>แบบทดสอบ (Quiz)</h2>
         <div class="ai-gen-area">
-            <div class="ai-gen-title">✨ สร้าง Quiz ด้วย AI</div>
+            <div class="ai-gen-title">สร้าง Quiz ด้วย AI</div>
             <div class="ai-gen-row">
                 <div class="form-group">
                     <label>หัวข้อหรือเนื้อหาที่ต้องการสร้าง Quiz</label>
@@ -666,7 +683,7 @@
                 </div>
             </div>
             <div style="margin-top: 0.75rem;">
-                <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()">✨ สร้างด้วย AI</button>
+                <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()">สร้างด้วย AI</button>
             </div>
             <div id="aiLoadingText" class="ai-loading-text">⏳ AI กำลังสร้างแบบทดสอบ กรุณารอสักครู่...</div>
         </div>
@@ -684,15 +701,15 @@
     <div class="wizard-panel" id="wizardStep6" data-step="6">
     <p class="wizard-step-intro">ขั้นตอนนี้ไม่บังคับ — เพิ่มการบ้านให้นักเรียนส่งหลังเรียนจบ หรือข้ามไปได้เลย</p>
     <div class="section">
-        <h2 class="section-title">📋 การบ้าน (Homework)</h2>
-        <div class="alert alert-info" style="margin-bottom:1.5rem;">💡 รับการบ้านเป็นข้อความหรือไฟล์แนบก็ได้ ตั้งค่าได้ในแต่ละข้อด้านล่าง</div>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>การบ้าน (Homework)</h2>
+        <div class="alert alert-info" style="margin-bottom:1.5rem;">รับการบ้านเป็นข้อความหรือไฟล์แนบก็ได้ ตั้งค่าได้ในแต่ละข้อด้านล่าง</div>
 
         <div class="ai-gen-area">
-            <div class="ai-gen-title">✨ ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ</div>
+            <div class="ai-gen-title">ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ</div>
             <div class="form-group">
                 <label>อัปโหลดไฟล์ (PDF หรือรูปภาพโจทย์)</label>
                 <div class="file-upload-area" onclick="document.getElementById('hwSourceFileInput').click()">
-                    <div class="file-upload-icon">📤</div>
+                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
                     <p>คลิกเพื่ออัปโหลดไฟล์การบ้าน</p>
                     <small style="color:var(--text-dim);">รองรับ PDF, Word (.docx) และรูปภาพ (JPG, PNG)</small>
                 </div>
@@ -704,7 +721,7 @@
                 <textarea id="hwSourceText" class="form-control" rows="4" placeholder="วางข้อความการบ้าน/โจทย์ที่นี่ (ถ้าไม่มีไฟล์)"></textarea>
             </div>
             <div style="display:flex; gap:0.75rem; align-items:center;">
-                <button class="btn btn-ai" id="btnExtractHomework" onclick="extractHomeworkWithAI()">🤖 ให้ AI แตกเป็นข้อๆ</button>
+                <button class="btn btn-ai" id="btnExtractHomework" onclick="extractHomeworkWithAI()">ให้ AI แตกเป็นข้อๆ</button>
                 <small style="color:var(--text-dim);">AI จะเติมลงฟอร์มการบ้านด้านล่างให้ แก้ไขต่อได้ตามต้องการ</small>
             </div>
             <div id="hwExtractStatus" class="ai-loading-text"></div>
@@ -723,14 +740,14 @@
     <!-- STEP 7: ตรวจสอบและสร้างคอร์ส -->
     <div class="wizard-panel" id="wizardStep7" data-step="7">
     <div class="section">
-        <h2 class="section-title">✅ ตรวจสอบก่อนสร้างคอร์ส</h2>
+        <h2 class="section-title"><span class="section-icon icon-success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg></span>ตรวจสอบก่อนสร้างคอร์ส</h2>
         <div class="wizard-review-grid" id="wizardReviewGrid"></div>
         <p class="wizard-review-note">ถ้าต้องการแก้ไขส่วนไหน คลิกขั้นตอนนั้นด้านบน หรือกดย้อนกลับได้เลย</p>
     </div>
     <div class="wizard-nav">
         <button class="btn btn-outline" onclick="wizardPrev()">← ย้อนกลับ</button>
         <div class="spacer"></div>
-        <button class="btn btn-success" onclick="createCourse()" style="font-size: 1.1rem; padding: 1rem 3rem;">✅ สร้างคอร์ส</button>
+        <button class="btn btn-success" onclick="createCourse()" style="font-size: 1.1rem; padding: 1rem 3rem;">สร้างคอร์ส</button>
     </div>
     </div><!-- /wizardStep7 -->
 </div>
@@ -757,7 +774,7 @@ let currentUser = null;
 let currentUserName = 'ครู'; // ← ใช้ใน notification message
 
 // =============================================
-// 🧭 Wizard (สร้างคอร์สทีละขั้นตอน)
+// Wizard (สร้างคอร์สทีละขั้นตอน)
 // =============================================
 const WIZARD_STEPS = [
     { label: 'ข้อมูลคอร์ส' },
@@ -962,7 +979,7 @@ window.generateThumbnailWithAI = async function() {
         status.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
     } finally {
         btn.disabled = false;
-        btn.textContent = '🎨 สร้างรูปปกด้วย AI';
+        btn.textContent = 'สร้างรูปปกด้วย AI';
         if (regenBtn) regenBtn.disabled = false;
     }
 };
@@ -1146,7 +1163,7 @@ ${verbBankText}
         cloItems = result.clos || [];
         status.textContent = `✅ สร้าง ${cloItems.length} CLO เสร็จแล้ว`;
         btn.disabled = false;
-        btn.textContent = '🎯 สร้าง CLO ด้วย AI';
+        btn.textContent = 'สร้าง CLO ด้วย AI';
 
         renderCLOPreview(result);
         renderCLOResult(cloItems);
@@ -1155,7 +1172,7 @@ ${verbBankText}
         console.error('CLO error:', e);
         status.textContent = `❌ ${e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'}`;
         btn.disabled = false;
-        btn.textContent = '🎯 สร้าง CLO ด้วย AI';
+        btn.textContent = 'สร้าง CLO ด้วย AI';
     }
 };
 
@@ -1189,9 +1206,9 @@ function renderCLOPreview(result) {
             <div style="flex:1;">
                 <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${c.statement}${warn ? ` <span title="${warn.join(' / ')}" style="color:#f87171;font-size:0.8rem;cursor:help;">⚠️ ตรวจสอบ</span>` : ''}</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">📚 ${c.level}</span>
-                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">🔑 ${c.actionVerb}</span>
-                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">📝 ${c.assessment}</span>
+                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">${c.level}</span>
+                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">${c.actionVerb}</span>
+                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">${c.assessment}</span>
                 </div>
             </div>
         </div>`;
@@ -1200,12 +1217,12 @@ function renderCLOPreview(result) {
     el.innerHTML = `
     <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:20px;">
         <div style="font-weight:600;color:#a78bfa;margin-bottom:14px;font-size:0.95rem;">
-            🎯 CLO สำหรับ "${result.courseName}" — ตรวจสอบก่อน Apply
+            CLO สำหรับ "${result.courseName}" — ตรวจสอบก่อน Apply
         </div>
         ${summaryHtml}
         <div style="margin-bottom:16px;">${rows}</div>
         <div style="display:flex;gap:10px;">
-            <button class="btn btn-ai" onclick="applyCLO()">✅ Apply CLO ทั้งหมด</button>
+            <button class="btn btn-ai" onclick="applyCLO()">Apply CLO ทั้งหมด</button>
             <button class="btn" onclick="document.getElementById('cloPreview').style.display='none'"
                 style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);">✕ ปิด</button>
         </div>
@@ -1243,7 +1260,7 @@ function refreshCLOList(check) {
             ).join('')}
         </select>
         <button onclick="removeCLO(${i})"
-            style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;">🗑</button>
+            style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
     </div>`;
     }).join('');
 }
@@ -1356,7 +1373,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
 
         status.textContent = '✅ สร้างเสร็จแล้ว! ตรวจสอบก่อน Apply';
         btn.disabled = false;
-        btn.textContent = '🚀 สร้างโครงสร้างคอร์สด้วย AI';
+        btn.textContent = 'สร้างโครงสร้างคอร์สด้วย AI';
 
         renderOutlinePreview(outline);
 
@@ -1364,7 +1381,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
         console.error('AI Outline error:', e);
         status.textContent = `❌ ${e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'}`;
         btn.disabled = false;
-        btn.textContent = '🚀 สร้างโครงสร้างคอร์สด้วย AI';
+        btn.textContent = 'สร้างโครงสร้างคอร์สด้วย AI';
     }
 };
 
@@ -1374,7 +1391,7 @@ function renderOutlinePreview(outline) {
 
     let html = `
     <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:20px;margin-top:12px;">
-        <div style="font-weight:600;color:#a78bfa;margin-bottom:16px;font-size:1rem;">📋 ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
+        <div style="font-weight:600;color:#a78bfa;margin-bottom:16px;font-size:1rem;">ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
 
         <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;margin-bottom:12px;">
             <div style="font-size:0.75rem;color:#a0a0ba;margin-bottom:4px;">ชื่อคอร์สที่แนะนำ</div>
@@ -1393,7 +1410,7 @@ function renderOutlinePreview(outline) {
             </div>`).join('')}
 
         ${(outline.quiz||[]).length > 0 ? `
-        <div style="font-size:0.82rem;color:#10b981;font-weight:600;margin:12px 0 8px;">🧠 ${outline.quiz.length} ข้อ Quiz</div>
+        <div style="font-size:0.82rem;color:#10b981;font-weight:600;margin:12px 0 8px;">${outline.quiz.length} ข้อ Quiz</div>
         ${outline.quiz.slice(0,2).map((q,i) => `
             <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.82rem;">
                 ${i+1}. ${q.question}
@@ -1401,18 +1418,18 @@ function renderOutlinePreview(outline) {
         ${outline.quiz.length > 2 ? `<div style="font-size:0.78rem;color:#a0a0ba;padding-top:6px;">และอีก ${outline.quiz.length-2} ข้อ...</div>` : ''}` : ''}
 
         ${(outline.homework||[]).length > 0 ? `
-        <div style="font-size:0.82rem;color:#f59e0b;font-weight:600;margin:12px 0 8px;">📋 ${outline.homework.length} การบ้าน</div>
+        <div style="font-size:0.82rem;color:#f59e0b;font-weight:600;margin:12px 0 8px;">${outline.homework.length} การบ้าน</div>
         ${outline.homework.map(h => `
             <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.82rem;">
-                📌 ${h.title} — ${h.description}
+                ${h.title} — ${h.description}
             </div>`).join('')}` : ''}
 
         <div style="display:flex;gap:10px;margin-top:16px;">
             <button class="btn btn-ai" onclick="applyOutline(${JSON.stringify(outline).replace(/"/g,'&quot;')})">
-                ✅ Apply โครงสร้างนี้
+                Apply โครงสร้างนี้
             </button>
             <button class="btn btn-outline" onclick="document.getElementById('aiOutlinePreview').style.display='none'">
-                ✕ ปิด
+                ปิด
             </button>
         </div>
     </div>`;
@@ -1520,16 +1537,16 @@ window.addLesson = function() {
                 <label>เลือกประเภทเนื้อหา</label>
                 <div class="upload-method">
                     <div class="method-option active" onclick="selectMethod('${lessonId}', 'file')">
-                        <div class="method-icon">📄</div><div>ไฟล์ PDF</div>
+                        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></div><div>ไฟล์ PDF</div>
                     </div>
                     <div class="method-option" onclick="selectMethod('${lessonId}', 'youtube')">
-                        <div class="method-icon">▶️</div><div>YouTube URL</div>
+                        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4Z"/></svg></div><div>YouTube URL</div>
                     </div>
                 </div>
             </div>
             <div id="uploadArea-${lessonId}">
                 <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lessonId}').click()">
-                    <div class="file-upload-icon">📤</div>
+                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
                     <p>คลิกเพื่ออัพโหลดไฟล์ PDF</p>
                     <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                 </div>
@@ -1541,10 +1558,10 @@ window.addLesson = function() {
             </div>
 
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
-                <label>📑 หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
+                <label>หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lessonId}')">✨ AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lessonId}')">📄 แตกหัวข้อจากไฟล์ PDF ที่อัปโหลด</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lessonId}')">AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lessonId}')">แตกหัวข้อจากไฟล์ PDF ที่อัปโหลด</button>
                 </div>
                 <div id="subtopicStatus-${lessonId}" class="ai-loading-text"></div>
                 <div id="subtopicsList-${lessonId}"></div>
@@ -1750,7 +1767,7 @@ let quizCounter = 0;
 
 // สร้าง <option> รายชื่อบทเรียนปัจจุบัน ให้เลือกผูก Quiz/การบ้านกับบทใดบทหนึ่งได้ (หรือ "ทั้งคอร์ส")
 function buildLessonOptionsHtml(selectedValue) {
-    let html = `<option value="">📌 ทั้งคอร์ส (ไม่ระบุบท)</option>`;
+    let html = `<option value="">ทั้งคอร์ส (ไม่ระบุบท)</option>`;
     lessons.forEach((l, i) => {
         const title = (l.title || `บทที่ ${i+1}`).slice(0, 40);
         const sel = String(selectedValue) === String(i) ? 'selected' : '';
@@ -1835,7 +1852,7 @@ function renderQuizAnswerArea(qId, qType, data) {
             <label>คำตอบตัวอย่าง/เกณฑ์การให้คะแนน (สำหรับอาจารย์อ้างอิงตอนตรวจ ไม่บังคับ)</label>
             <textarea class="form-control quiz-sample-answer" rows="2" placeholder="เช่น ต้องกล่าวถึง...">${data?.sampleAnswer || ''}</textarea>
         </div>
-        <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.82rem;">📝 คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
+        <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.82rem;">คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
     } else {
         area.innerHTML = `
         <div class="quiz-choices">
@@ -2218,7 +2235,7 @@ window.extractHomeworkWithAI = async function() {
         status.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
     } finally {
         btn.disabled = false;
-        btn.textContent = '🤖 ให้ AI แตกเป็นข้อๆ';
+        btn.textContent = 'ให้ AI แตกเป็นข้อๆ';
     }
 };
 
@@ -2262,11 +2279,11 @@ window.addHomework = function() {
             <div class="form-group">
                 <label>ประเภทการส่งงาน</label>
                 <div class="hw-type-selector">
-                    <div class="hw-type-btn active" onclick="setHwType('${hwId}','text',this)">✍️ พิมพ์ข้อความ</div>
-                    <div class="hw-type-btn" onclick="setHwType('${hwId}','file',this)">📎 อัปโหลดไฟล์</div>
-                    <div class="hw-type-btn" onclick="setHwType('${hwId}','both',this)">✍️📎 ทั้งสองแบบ</div>
-                    <div class="hw-type-btn" onclick="setHwType('${hwId}','code',this)">💻 เขียนโค้ด (IDE)</div>
-                    <div class="hw-type-btn" onclick="setHwType('${hwId}','form',this)">📋 แบบฟอร์มหลายคำถาม</div>
+                    <div class="hw-type-btn active" onclick="setHwType('${hwId}','text',this)">พิมพ์ข้อความ</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','file',this)">อัปโหลดไฟล์</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','both',this)">ทั้งสองแบบ</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','code',this)">เขียนโค้ด (IDE)</div>
+                    <div class="hw-type-btn" onclick="setHwType('${hwId}','form',this)">แบบฟอร์มหลายคำถาม</div>
                 </div>
                 <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:none;margin-top:0.75rem;">
                     <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
@@ -2279,7 +2296,7 @@ window.addHomework = function() {
                     </select>
                 </div>
                 <div class="hw-form-opts" id="hw-form-opts-${hwId}" style="display:none;margin-top:0.75rem;">
-                    <div class="alert alert-info" style="margin-bottom:1rem;">💡 แบบฟอร์มหลายคำถาม — นักเรียนทำทีละข้อแบบ Google Forms ข้อปรนัย/เลือกหลายข้อ/ถูกผิด ระบบตรวจให้อัตโนมัติ ส่วนข้อตอบสั้น/เรียงความ อาจารย์ต้องตรวจเองทีหลัง</div>
+                    <div class="alert alert-info" style="margin-bottom:1rem;">แบบฟอร์มหลายคำถาม — นักเรียนทำทีละข้อแบบ Google Forms ข้อปรนัย/เลือกหลายข้อ/ถูกผิด ระบบตรวจให้อัตโนมัติ ส่วนข้อตอบสั้น/เรียงความ อาจารย์ต้องตรวจเองทีหลัง</div>
                     <div id="hw-form-questions-${hwId}"></div>
                     <button type="button" class="btn btn-outline" onclick="addFormQuestion('${hwId}')">+ เพิ่มคำถามในฟอร์ม</button>
                 </div>
@@ -2489,7 +2506,7 @@ window.createCourse = async function() {
         for (const hw of homeworkData) {
             await sendNotification({
                 type:         'homework',
-                title:        '📋 มีการบ้านใหม่!',
+                title:        'มีการบ้านใหม่!',
                 message:      `"${hw.title}" ในคอร์ส ${title}${hw.deadline ? ` — กำหนดส่ง ${new Date(hw.deadline).toLocaleDateString('th-TH')}` : ''}`,
                 link:         `course-content.html?id=${docRef.id}`,
                 targetUserId: 'broadcast'   // 'broadcast' = ส่งให้ทุกคน
@@ -2497,7 +2514,7 @@ window.createCourse = async function() {
         }
 
         hideLoading();
-        alert('🎉 สร้างคอร์สสำเร็จ!\n\nระบบได้ส่งการแจ้งเตือนให้นักเรียนทุกคนแล้ว ✅');
+        alert('สร้างคอร์สสำเร็จ!\n\nระบบได้ส่งการแจ้งเตือนให้นักเรียนทุกคนแล้ว');
         window.location.href = 'dashboard.html';
 
     } catch (error) {
