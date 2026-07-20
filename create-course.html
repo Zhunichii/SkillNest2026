@@ -417,11 +417,8 @@
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
                     <label>จำนวน CLO</label>
-                    <select id="cloCount" class="form-control">
-                        <option value="3">3 CLO</option>
-                        <option value="5" selected>5 CLO</option>
-                        <option value="7">7 CLO</option>
-                    </select>
+                    <input type="number" id="cloCount" class="form-control" min="1" max="20" value="5" placeholder="เช่น 5">
+                    <small style="color:var(--text-dim);">แนะนำ 3-10 ข้อ</small>
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
                     <label>เน้น Domain</label>
@@ -444,10 +441,14 @@
         <div id="cloPreview" style="display:none;margin-top:12px;"></div>
         <!-- CLO Result (editable) -->
         <div id="cloResult" style="display:none;margin-top:16px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
                 <label style="font-weight:600;font-size:0.9rem;">📋 CLO ที่สร้างแล้ว (แก้ไขได้)</label>
-                <button onclick="addCLORow()" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#a78bfa;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;">+ เพิ่ม CLO</button>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="recheckCLOs()" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.35);color:#60a5fa;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;">🔍 ตรวจสอบ Bloom's Taxonomy</button>
+                    <button onclick="addCLORow()" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#a78bfa;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;">+ เพิ่ม CLO</button>
+                </div>
             </div>
+            <div id="cloValidationSummary" style="margin-bottom:10px;"></div>
             <div id="cloList"></div>
         </div>
     </div>
@@ -874,6 +875,79 @@ window.useAIThumbnail = function() {
 // ============ CLO GENERATOR ============
 let cloItems = []; // เก็บ CLO ที่สร้าง
 
+// บัญชีคำกริยามาตรฐานของ Bloom's Taxonomy (ฉบับปรับปรุง) แต่ละระดับ ใช้ทั้งสร้าง prompt และตรวจสอบผลลัพธ์ภายหลัง
+const BLOOM_LEVELS = ['Remember','Understand','Apply','Analyze','Evaluate','Create'];
+const BLOOM_VERB_BANK = {
+    'Remember':   { th:['ระบุ','บอกชื่อ','จำ','กล่าวถึง','บรรยาย','ระบุรายการ','จับคู่','เลือก','ทบทวน','นิยาม'], en:['identify','list','name','recall','define','describe','state','label','match','recognize'] },
+    'Understand': { th:['อธิบาย','สรุป','ตีความ','จำแนก','เปรียบเทียบ','อภิปราย','ยกตัวอย่าง','แปลความ'], en:['explain','summarize','interpret','classify','compare','discuss','paraphrase','illustrate'] },
+    'Apply':      { th:['ประยุกต์ใช้','สาธิต','ใช้งาน','นำไปใช้','แก้ปัญหา','คำนวณ','ปฏิบัติ','ดำเนินการ','ทดลองใช้'], en:['apply','demonstrate','use','implement','solve','calculate','execute','operate'] },
+    'Analyze':    { th:['วิเคราะห์','แยกแยะ','เปรียบเทียบความแตกต่าง','ตรวจสอบ','จัดหมวดหมู่','สืบค้น','แยกองค์ประกอบ'], en:['analyze','differentiate','contrast','examine','categorize','deconstruct','investigate'] },
+    'Evaluate':   { th:['ประเมิน','วิพากษ์','ตัดสิน','ให้เหตุผล','แนะนำ','วิจารณ์','ตรวจประเมิน'], en:['evaluate','justify','critique','assess','judge','defend','argue','recommend'] },
+    'Create':     { th:['สร้างสรรค์','ออกแบบ','พัฒนา','สร้าง','วางแผน','ประดิษฐ์','ผลิต','ประกอบ','คิดค้น'], en:['create','design','develop','construct','formulate','compose','produce','plan','generate'] }
+};
+
+// ตรวจสอบว่าแต่ละ CLO: (1) level เป็น 1 ใน 6 ระดับมาตรฐานจริง (2) actionVerb สอดคล้องกับ level ที่ระบุ (3) ครอบคลุมกี่ระดับ
+function validateCLOs(clos) {
+    const coveredLevels = new Set();
+    const flagged = [];
+    (clos || []).forEach((c, i) => {
+        const levelOk = BLOOM_LEVELS.includes(c.level);
+        if (levelOk) coveredLevels.add(c.level);
+
+        let verbOk = true;
+        if (levelOk && c.actionVerb) {
+            const bank = BLOOM_VERB_BANK[c.level];
+            const verbLower = String(c.actionVerb).toLowerCase();
+            verbOk = bank.th.some(v => c.actionVerb.includes(v)) || bank.en.some(v => verbLower.includes(v));
+        }
+        // เช็คว่า statement มีการใช้ actionVerb ที่ระบุจริงหรือไม่ (แบบคร่าวๆ)
+        const statementUsesVerb = !c.actionVerb || !c.statement || c.statement.includes(c.actionVerb);
+
+        if (!levelOk || !verbOk || !statementUsesVerb) {
+            const reasons = [];
+            if (!levelOk) reasons.push('ระดับ Bloom ไม่ตรงกับ 6 ระดับมาตรฐาน');
+            if (levelOk && !verbOk) reasons.push('คำกริยาอาจไม่ตรงกับระดับ Bloom ที่ระบุ');
+            if (!statementUsesVerb) reasons.push('ข้อความ CLO อาจไม่ได้ใช้คำกริยาที่ระบุไว้จริง');
+            flagged.push({ index: i, id: c.id, reasons });
+        }
+    });
+    return {
+        coveredLevels: BLOOM_LEVELS.filter(l => coveredLevels.has(l)),
+        missingLevels: BLOOM_LEVELS.filter(l => !coveredLevels.has(l)),
+        flagged
+    };
+}
+
+function renderCLOValidationSummary(check, total) {
+    const el = document.getElementById('cloValidationSummary');
+    if (!el) return;
+    const coveredCount = check.coveredLevels.length;
+    const allGood = check.missingLevels.length === 0 && check.flagged.length === 0;
+    const color = allGood ? '#10b981' : (coveredCount >= 4 && check.flagged.length === 0 ? '#f59e0b' : '#ef4444');
+    const bg = allGood ? 'rgba(16,185,129,0.1)' : (coveredCount >= 4 && check.flagged.length === 0 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)');
+
+    let html = `<div style="background:${bg};border:1px solid ${color}55;border-radius:10px;padding:12px 14px;font-size:0.85rem;">
+        <div style="font-weight:600;color:${color};margin-bottom:4px;">
+            ${allGood ? '✅' : '⚠️'} ครอบคลุม ${coveredCount}/6 ระดับ Bloom's Taxonomy จาก ${total} ข้อ
+        </div>`;
+    if (check.missingLevels.length > 0) {
+        html += `<div style="color:var(--text-dim);">ยังไม่มีระดับ: ${check.missingLevels.join(', ')}</div>`;
+    }
+    if (check.flagged.length > 0) {
+        html += `<div style="color:#f87171;margin-top:4px;">พบ ${check.flagged.length} ข้อที่อาจไม่สอดคล้องกัน: ${check.flagged.map(f => f.id).join(', ')} — ดูรายละเอียดที่ป้ายเตือนข้างข้อนั้นๆ ด้านล่าง</div>`;
+    }
+    html += `</div>`;
+    el.innerHTML = html;
+}
+
+// ให้ตรวจสอบ CLO ปัจจุบันใหม่อีกครั้ง (ใช้หลังแก้ไขด้วยมือ หรือหลัง Apply แล้วอยากเช็คซ้ำ)
+window.recheckCLOs = function() {
+    if (!cloItems.length) { alert('ยังไม่มี CLO ให้ตรวจสอบ'); return; }
+    const check = validateCLOs(cloItems);
+    renderCLOValidationSummary(check, cloItems.length);
+    refreshCLOList(check);
+};
+
 window.generateCLOWithAI = async function() {
     const topic  = document.getElementById('cloTopic').value.trim();
     const level  = document.getElementById('cloLevel').value;
@@ -885,6 +959,11 @@ window.generateCLOWithAI = async function() {
         document.getElementById('cloTopic').focus();
         return;
     }
+    if (!count || count < 1 || count > 20) {
+        alert('กรุณาใส่จำนวน CLO ระหว่าง 1-20 ข้อ');
+        document.getElementById('cloCount').focus();
+        return;
+    }
 
     const btn    = document.getElementById('btnGenCLO');
     const status = document.getElementById('cloStatus');
@@ -892,17 +971,33 @@ window.generateCLOWithAI = async function() {
     btn.textContent = '⏳ กำลังสร้าง CLO...';
     status.textContent = 'Gemini กำลังวิเคราะห์...';
 
-    const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการออกแบบหลักสูตร (Curriculum Designer) 
-ช่วยสร้าง Course Learning Outcomes (CLO) สำหรับรายวิชา "${topic}" 
-ระดับ: ${level}
+    // บัญชีคำกริยาต่อระดับ ฝังลง prompt ตรงๆ เพื่อให้ AI เลือกคำกริยาที่ตรงกับระดับที่ระบุจริง ไม่ใช่เดาเอง
+    const verbBankText = BLOOM_LEVELS.map(l =>
+        `- ${l}: ${BLOOM_VERB_BANK[l].th.join(', ')} (หรือ ${BLOOM_VERB_BANK[l].en.join(', ')})`
+    ).join('\n');
+
+    const distributionNote = count >= 6
+        ? `ต้องมี CLO อย่างน้อย 1 ข้อในแต่ละระดับ Bloom ให้ครบทั้ง 6 ระดับ (Remember, Understand, Apply, Analyze, Evaluate, Create) ถ้าจำนวนข้อมากกว่า 6 ให้เพิ่มน้ำหนักที่ระดับ Apply และ Analyze ซึ่งวัดผลได้จริงในคอร์สออนไลน์`
+        : `เลือก ${count} ระดับที่กระจายจากง่ายไปยากให้ครอบคลุมช่วงของ Bloom's Taxonomy มากที่สุดเท่าที่จำนวนข้ออนุญาต ห้ามเลือกระดับเดียวกันซ้ำถ้าไม่จำเป็น เรียงจากระดับต่ำไปสูงตามลำดับข้อ`;
+
+    const prompt = `คุณเป็นผู้เชี่ยวชาญด้านการออกแบบหลักสูตร (Curriculum Designer) และเชี่ยวชาญ Bloom's Taxonomy (ฉบับปรับปรุง)
+ช่วยสร้าง Course Learning Outcomes (CLO) สำหรับรายวิชา "${topic}"
+ระดับผู้เรียน: ${level}
 Domain: ${domain}
 จำนวน: ${count} CLO
 
+บัญชีคำกริยามาตรฐานที่ต้อง "เลือกใช้จากรายการนี้เท่านั้น" ให้ตรงกับระดับ Bloom ที่ระบุในแต่ละข้อ:
+${verbBankText}
+
+การกระจายระดับ: ${distributionNote}
+
 กรุณาสร้าง CLO ที่:
 1. เขียนตามหลัก SMART (Specific, Measurable, Achievable, Relevant, Time-bound)
-2. ใช้ Action Verbs จาก Bloom's Taxonomy ที่เหมาะสม
-3. วัดผลได้จริงในบริบทการเรียนออนไลน์
-4. เขียนเป็นภาษาไทย
+2. actionVerb ที่เลือก "ต้องอยู่ในบัญชีคำกริยาของ level ที่ระบุเท่านั้น" ห้ามใช้คำกริยาข้ามระดับ
+3. statement ต้องใช้ actionVerb ที่ระบุจริงๆ ปรากฏอยู่ในประโยค ไม่ใช่แค่ความหมายใกล้เคียง
+4. วัดผลได้จริงในบริบทการเรียนออนไลน์
+5. เขียนเป็นภาษาไทย
+6. ก่อนตอบ ให้ตรวจทานตัวเองว่า: (ก) actionVerb แต่ละข้อตรงกับ level ที่ประกาศไว้ (ข) statement ใช้ actionVerb นั้นจริง (ค) รวมกันครอบคลุมการกระจายระดับตามที่กำหนดข้างต้น
 
 ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
 {
@@ -910,10 +1005,10 @@ Domain: ${domain}
   "clos": [
     {
       "id": "CLO1",
-      "level": "ระดับ Bloom เช่น Remember / Understand / Apply / Analyze / Evaluate / Create",
+      "level": "ต้องเป็นค่าใดค่าหนึ่งจาก Remember, Understand, Apply, Analyze, Evaluate, Create เท่านั้น (ภาษาอังกฤษตรงตัว)",
       "domain": "Cognitive / Psychomotor / Affective",
-      "actionVerb": "คำกริยาที่ใช้ เช่น อธิบาย / วิเคราะห์ / สร้าง",
-      "statement": "ข้อความ CLO เต็ม เช่น นักศึกษาสามารถอธิบาย...",
+      "actionVerb": "คำกริยาจากบัญชีของ level นั้นเท่านั้น",
+      "statement": "ข้อความ CLO เต็ม เช่น นักศึกษาสามารถอธิบาย... (ต้องมีคำว่า actionVerb ปรากฏอยู่จริง)",
       "assessment": "วิธีวัดผล เช่น แบบทดสอบ / การนำเสนอ / โปรเจกต์"
     }
   ]
@@ -966,13 +1061,27 @@ function renderCLOPreview(result) {
         'Remember':'#6b7280','Understand':'#3b82f6','Apply':'#10b981',
         'Analyze':'#f59e0b','Evaluate':'#ef4444','Create':'#8b5cf6'
     };
+    const check = validateCLOs(result.clos || []);
+    const flaggedMap = {};
+    check.flagged.forEach(f => { flaggedMap[f.index] = f.reasons; });
+
+    const coveredCount = check.coveredLevels.length;
+    const allGood = check.missingLevels.length === 0 && check.flagged.length === 0;
+    const sumColor = allGood ? '#10b981' : (coveredCount >= 4 && check.flagged.length === 0 ? '#f59e0b' : '#ef4444');
+    const summaryHtml = `
+        <div style="background:${sumColor}1a;border:1px solid ${sumColor}55;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;">
+            <div style="font-weight:600;color:${sumColor};">${allGood ? '✅' : '⚠️'} ครอบคลุม ${coveredCount}/6 ระดับ Bloom's Taxonomy</div>
+            ${check.missingLevels.length ? `<div style="color:var(--text-dim);margin-top:2px;">ยังไม่มีระดับ: ${check.missingLevels.join(', ')}</div>` : ''}
+            ${check.flagged.length ? `<div style="color:#f87171;margin-top:2px;">พบ ${check.flagged.length} ข้อที่อาจไม่สอดคล้องกัน (ดูป้าย ⚠️ ที่ข้อนั้นด้านล่าง)</div>` : ''}
+        </div>`;
 
     const rows = (result.clos||[]).map((c,i) => {
         const color = levelColor[c.level] || '#8b5cf6';
+        const warn = flaggedMap[i];
         return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start;">
             <div style="background:${color};color:white;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-top:2px;">${c.id}</div>
             <div style="flex:1;">
-                <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${c.statement}</div>
+                <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${c.statement}${warn ? ` <span title="${warn.join(' / ')}" style="color:#f87171;font-size:0.8rem;cursor:help;">⚠️ ตรวจสอบ</span>` : ''}</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                     <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">📚 ${c.level}</span>
                     <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">🔑 ${c.actionVerb}</span>
@@ -987,6 +1096,7 @@ function renderCLOPreview(result) {
         <div style="font-weight:600;color:#a78bfa;margin-bottom:14px;font-size:0.95rem;">
             🎯 CLO สำหรับ "${result.courseName}" — ตรวจสอบก่อน Apply
         </div>
+        ${summaryHtml}
         <div style="margin-bottom:16px;">${rows}</div>
         <div style="display:flex;gap:10px;">
             <button class="btn btn-ai" onclick="applyCLO()">✅ Apply CLO ทั้งหมด</button>
@@ -999,26 +1109,37 @@ function renderCLOPreview(result) {
 function renderCLOResult(clos) {
     const el = document.getElementById('cloResult');
     el.style.display = 'block';
-    refreshCLOList();
+    const check = validateCLOs(clos);
+    renderCLOValidationSummary(check, clos.length);
+    refreshCLOList(check);
 }
 
-function refreshCLOList() {
+function refreshCLOList(check) {
     const el = document.getElementById('cloList');
-    el.innerHTML = cloItems.map((c, i) => `
+    const flaggedMap = {};
+    if (check) check.flagged.forEach(f => { flaggedMap[f.index] = f.reasons; });
+
+    el.innerHTML = cloItems.map((c, i) => {
+        const warn = flaggedMap[i];
+        return `
     <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;" id="cloRow_${i}">
         <div style="background:#8b5cf6;color:white;padding:4px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-top:8px;">${c.id}</div>
-        <input type="text" value="${c.statement}"
-            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 12px;color:white;font-size:0.85rem;"
-            onchange="cloItems[${i}].statement = this.value" placeholder="ข้อความ CLO">
+        <div style="flex:1;">
+            <input type="text" value="${c.statement}"
+                style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 12px;color:white;font-size:0.85rem;box-sizing:border-box;"
+                onchange="cloItems[${i}].statement = this.value" placeholder="ข้อความ CLO">
+            ${warn ? `<div style="color:#f87171;font-size:0.75rem;margin-top:4px;" title="${warn.join(' / ')}">⚠️ ${warn[0]}</div>` : ''}
+        </div>
         <select onchange="cloItems[${i}].level = this.value"
             style="background:#1a1a3e;border:1px solid rgba(255,255,255,0.15);color:white;padding:6px 8px;border-radius:8px;font-size:0.8rem;flex-shrink:0;">
-            ${['Remember','Understand','Apply','Analyze','Evaluate','Create'].map(l =>
+            ${BLOOM_LEVELS.map(l =>
                 `<option ${c.level===l?'selected':''}>${l}</option>`
             ).join('')}
         </select>
         <button onclick="removeCLO(${i})"
             style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;">🗑</button>
-    </div>`).join('');
+    </div>`;
+    }).join('');
 }
 
 window.applyCLO = function() {
