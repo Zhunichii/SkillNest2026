@@ -297,202 +297,6 @@
             color: #60a5fa;
         }
 
-        /* ── Floating AI Button (Gemini-style) ── */
-        .ai-fab {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            z-index: 1200;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            color: #1a1a3e;
-            border: none;
-            border-radius: 99px;
-            padding: 10px 18px 10px 12px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-            transition: box-shadow 0.2s, transform 0.15s;
-            user-select: none;
-        }
-        .ai-fab:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.45); transform: translateY(-1px); }
-        .ai-fab:active { transform: translateY(0); }
-        .ai-fab-icon {
-            width: 26px; height: 26px;
-            background: linear-gradient(135deg,#4285f4,#a142f4,#34a853);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .ai-fab-icon svg { width: 14px; height: 14px; fill: white; }
-        .ai-fab-label { white-space: nowrap; }
-
-        /* ── Slide-in Chat Panel ── */
-        .chat-overlay {
-            position: fixed; inset: 0; z-index: 1100;
-            background: rgba(0,0,0,0.25);
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.25s;
-        }
-        .chat-overlay.open { opacity: 1; pointer-events: all; }
-
-        .chat-section {
-            position: fixed;
-            top: 0; right: 0; bottom: 0;
-            width: 380px;
-            max-width: 94vw;
-            z-index: 1150;
-            background: #f8f9ff;
-            display: flex;
-            flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-            border-left: 1px solid #e0e0f0;
-            box-shadow: -8px 0 32px rgba(0,0,0,0.18);
-        }
-        .chat-section.open { transform: translateX(0); }
-
-        .chat-header {
-            padding: 16px 16px 14px;
-            border-bottom: 1px solid #e8e8f0;
-            background: white;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .chat-header-icon {
-            width: 32px; height: 32px;
-            background: linear-gradient(135deg,#4285f4,#a142f4,#34a853);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .chat-header-icon svg { width: 16px; height: 16px; fill: white; }
-        .chat-header-title {
-            flex: 1;
-            font-weight: 600; font-size: 0.95rem; color: #1a1a3e;
-        }
-        .chat-header-close {
-            width: 28px; height: 28px;
-            border: none; background: transparent; cursor: pointer;
-            border-radius: 50%; color: #666;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1rem; transition: background 0.15s;
-        }
-        .chat-header-close:hover { background: #f0f0f8; }
-
-
-
-        .msg-user {
-            align-self: flex-end;
-            background: #4285f4;
-            color: white;
-            padding: 0.6rem 0.9rem;
-            border-radius: 18px 18px 4px 18px;
-            max-width: 82%;
-            font-size: 0.88rem;
-            line-height: 1.5;
-        }
-
-        .msg-bot {
-            align-self: flex-start;
-            background: white;
-            color: #1a1a3e;
-            padding: 0.6rem 0.9rem;
-            border-radius: 18px 18px 18px 4px;
-            max-width: 82%;
-            font-size: 0.88rem;
-            line-height: 1.5;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        }
-
-        .msg-typing {
-            align-self: flex-start;
-            background: white;
-            color: #666;
-            padding: 0.6rem 0.9rem;
-            border-radius: 18px 18px 18px 4px;
-            max-width: 82%;
-            font-size: 0.88rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .typing-dots span {
-            width: 6px;
-            height: 6px;
-            background: #94a3b8;
-            border-radius: 50%;
-            animation: typingBounce 1.2s infinite ease-in-out;
-        }
-
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingBounce {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-6px); opacity: 1; }
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.7rem;
-            background: #f0f2f9;
-        }
-
-        .chat-input {
-            display: flex;
-            gap: 8px;
-            padding: 12px 14px;
-            border-top: 1px solid #e8e8f0;
-            background: white;
-            align-items: center;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 9px 14px;
-            border-radius: 22px;
-            border: 1.5px solid #e0e0f0;
-            outline: none;
-            background: #f5f5ff;
-            color: #1a1a3e;
-            font-size: 0.88rem;
-            transition: border-color 0.2s;
-        }
-        .chat-input input:focus { border-color: #4285f4; background: white; }
-        .chat-input input::placeholder { color: #aaa; }
-
-        .chat-input button {
-            width: 36px; height: 36px;
-            background: #4285f4;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            color: white;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            font-size: 1rem;
-            transition: background 0.15s;
-        }
-        .chat-input button:hover { background: #3367d6; }
-        .chat-input button:disabled { background: #c5d0e8; cursor: default; }
-
         .loading-screen {
             display: flex;
             flex-direction: column;
@@ -659,9 +463,6 @@
         @media (max-width: 968px) {
             .content-container {
                 grid-template-columns: 1fr;
-            }
-            .chat-section {
-                display: none;
             }
         }
 
@@ -1565,41 +1366,7 @@
         </div>
         </div><!-- end lesson-info-area -->
     </div>
-
-    <!-- Floating AI Button -->
-    <button class="ai-fab" id="aiFab" onclick="toggleChat()">
-        <div class="ai-fab-icon">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 1.5L13.5 9.5L21.5 12L13.5 14.5L12 22.5L10.5 14.5L2.5 12L10.5 9.5L12 1.5Z"/>
-            </svg>
-        </div>
-        <span class="ai-fab-label">Ask AI</span>
-    </button>
-
-    <!-- Overlay -->
-    <div class="chat-overlay" id="chatOverlay" onclick="toggleChat()"></div>
-
-    <!-- Slide-in Chat Panel -->
-    <div class="chat-section" id="chatPanel">
-        <div class="chat-header">
-            <div class="chat-header-icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 1.5L13.5 9.5L21.5 12L13.5 14.5L12 22.5L10.5 14.5L2.5 12L10.5 9.5L12 1.5Z"/>
-                </svg>
-            </div>
-            <div class="chat-header-title">AI Assistant</div>
-            <button class="chat-header-close" onclick="toggleChat()" title="ปิด">✕</button>
-        </div>
-        <div id="pdfContextIndicator" style="display:none;padding:6px 14px;background:rgba(16,185,129,0.1);border-bottom:1px solid rgba(16,185,129,0.2);font-size:11px;color:#10b981;"></div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="msg-bot">สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ? 😊</div>
-        </div>
-        <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="พิมพ์ข้อความ...">
-            <button id="sendBtn">➤</button>
-        </div>
-    </div>
-</div>
+</div><!-- end content-container -->
 
 <div class="error-modal" id="errorModal">
     <h3>⚠️ เกิดข้อผิดพลาด</h3>
@@ -1826,26 +1593,6 @@ window.markCurrentLessonDone = async function() {
         btn.disabled = false;
     }
 };
-
-// ── Toggle chat panel (Gemini-style) ──
-window.toggleChat = function() {
-    const panel   = document.getElementById('chatPanel');
-    const overlay = document.getElementById('chatOverlay');
-    const fab     = document.getElementById('aiFab');
-    const isOpen  = panel.classList.contains('open');
-
-    if (isOpen) {
-        panel.classList.remove('open');
-        overlay.classList.remove('open');
-        fab.style.display = 'flex';
-    } else {
-        panel.classList.add('open');
-        overlay.classList.add('open');
-        fab.style.display = 'none';
-        // focus input
-        setTimeout(() => document.getElementById('chatInput')?.focus(), 320);
-    }
-}
 
 async function initCourseContent() {
     // โหลด Pollinations key จาก server
@@ -2839,9 +2586,8 @@ window.playLesson = function(index) {
         avatarLessonMemory[currentLessonIndex] = avatarChatHistory.slice(-6);
     }
 
-    // reset PDF context และ chat history เมื่อเปลี่ยนบทเรียน
+    // reset PDF context เมื่อเปลี่ยนบทเรียน
     lessonPdfContext = '';
-    chatHistory = [];
     const indicator = document.getElementById('pdfContextIndicator');
     if (indicator) indicator.style.display = 'none';
 
@@ -3693,13 +3439,8 @@ window.openPDFInNewTab = function(url) {
     window.open(url, '_blank');
 }
 
-const chatMessages = document.getElementById("chatMessages");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-
-// ============ PDF CONTEXT SYSTEM ============
-let lessonPdfContext = '';   // เก็บ text จาก PDF ของบทเรียนปัจจุบัน
-let chatHistory = [];        // เก็บ chat history สำหรับ multi-turn
+// ============ PDF CONTEXT SYSTEM (ใช้ร่วมกับ Avatar AI) ============
+let lessonPdfContext = '';   // เก็บ text จาก PDF ของบทเรียนปัจจุบัน — Avatar ใช้ context นี้ตอบคำถาม
 
 // โหลด PDF text เมื่อ lesson เปลี่ยน
 async function loadPdfContext(fileUrl) {
@@ -3734,9 +3475,8 @@ async function loadPdfContext(fileUrl) {
 
         // จำกัดความยาว context ไม่เกิน 4,000 chars
         lessonPdfContext = fullText.slice(0, 4000);
-        chatHistory = []; // reset history เมื่อเปลี่ยนบทเรียน
 
-        // แสดง indicator ว่า AI อ่าน PDF แล้ว
+        // แสดง indicator ว่า AI อ่าน PDF แล้ว (อยู่ในแผง Avatar)
         const indicator = document.getElementById('pdfContextIndicator');
         if (indicator) {
             indicator.style.display = 'flex';
@@ -3746,119 +3486,6 @@ async function loadPdfContext(fileUrl) {
     } catch(e) {
         console.warn('PDF context load failed:', e);
         lessonPdfContext = '';
-    }
-}
-
-// ============ CHAT FUNCTIONS ============
-sendBtn.addEventListener("click", sendMessage);
-chatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
-
-async function sendMessage() {
-    const userMessage = chatInput.value.trim();
-    if (!userMessage) return;
-
-    addUserMessage(userMessage);
-    chatInput.value = "";
-    chatInput.disabled = true;
-    sendBtn.disabled = true;
-
-    const typingDiv = addTypingIndicator();
-    const botReply = await sendMessageWithContext(userMessage);
-    typingDiv.remove();
-
-    addBotMessage(botReply);
-    chatInput.disabled = false;
-    sendBtn.disabled = false;
-    chatInput.focus();
-}
-
-function addTypingIndicator() {
-    const div = document.createElement("div");
-    div.className = "msg-typing";
-    div.innerHTML = `
-        <span>AI Bot กำลังตอบคำถาม กรุณารอสักครู่</span>
-        <div class="typing-dots">
-            <span></span><span></span><span></span>
-        </div>
-    `;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return div;
-}
-
-function addUserMessage(text) {
-    const div = document.createElement("div");
-    div.className = "msg-user";
-    div.innerText = text;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    // เพิ่มใน history
-    chatHistory.push({ role: 'user', content: text });
-    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-}
-
-function addBotMessage(text) {
-    const div = document.createElement("div");
-    div.className = "msg-bot";
-    div.innerText = text;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    // เพิ่มใน history
-    chatHistory.push({ role: 'assistant', content: text });
-}
-
-// ส่งคำถามพร้อม PDF context + chat history
-async function sendMessageWithContext(userMessage) {
-    try {
-        const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนปัจจุบัน';
-        const courseTitle = currentCourse?.title || 'คอร์สเรียน';
-
-        // สร้าง system prompt พร้อม context
-        let systemPrompt;
-        if (lessonPdfContext) {
-            // ยึดเนื้อหา PDF จริงเป็นหลัก ไม่ยึดชื่อคอร์ส (กันชื่อคอร์สขัดกับเนื้อหา)
-            systemPrompt = `คุณเป็น AI Tutor บน SkillNest
-ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย
-
-สำคัญมาก: ให้ยึด "เนื้อหาจากเอกสาร" ด้านล่างเป็นหลักในการตอบเสมอ
-ชื่อคอร์ส ("${courseTitle}") เป็นเพียงป้ายกำกับ อาจไม่ตรงกับเนื้อหาจริง
-ถ้าชื่อคอร์สกับเนื้อหาขัดกัน ให้เชื่อเนื้อหาเอกสารจริงเท่านั้น
-
-เนื้อหาจากเอกสาร PDF ของบทเรียนนี้:
----
-${lessonPdfContext}
----
-ตอบคำถามโดยอ้างอิงเนื้อหาข้างต้นเป็นหลัก ถ้าถามนอกเนื้อหาให้บอกว่าอยู่นอกขอบเขตบทเรียนนี้`;
-        } else {
-            // ไม่มี PDF → ใช้ชื่อคอร์สเป็น context ได้
-            systemPrompt = `คุณเป็น AI Tutor สำหรับคอร์ส "${courseTitle}" บทเรียน "${lessonTitle}" บน SkillNest
-ตอบเป็นภาษาไทย กระชับ เข้าใจง่าย`;
-        }
-
-        const response = await fetch('/api/groq-analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                systemPrompt,
-                messages: chatHistory,
-                prompt: userMessage
-            })
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            if (response.status === 429) return 'API เต็มชั่วคราว กรุณารอแล้วลองใหม่';
-            return 'เกิดข้อผิดพลาด: ' + (err.error || 'unknown');
-        }
-
-        const data = await response.json();
-        return data.text || 'AI ไม่สามารถตอบได้ในขณะนี้';
-
-    } catch (error) {
-        console.error('Chat error:', error);
-        return `❌ เกิดข้อผิดพลาด: ${error.message}`;
     }
 }
 
@@ -5130,6 +4757,8 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
                     </button>
                 </div>
             </div>
+
+            <div id="pdfContextIndicator" style="display:none;padding:5px 12px;background:rgba(16,185,129,0.1);border-bottom:1px solid rgba(16,185,129,0.2);font-size:11px;color:#10b981;"></div>
 
             <div class="avatar-speech" id="avatarSpeech">
                 สวัสดีครับ! มีคำถามอะไรไหมครับ? 😊
