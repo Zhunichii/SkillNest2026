@@ -269,6 +269,11 @@
             border-left: 3px solid var(--primary-blue);
         }
 
+        .lesson-item.locked { cursor: not-allowed; opacity: 0.45; }
+        .lesson-item.locked:hover { background: transparent; }
+        .lesson-item.locked .lesson-number { display: flex; align-items: center; justify-content: center; }
+        .lesson-item.locked .lesson-number svg { width: 14px; height: 14px; }
+
         .lesson-number {
             color: var(--text-dim);
             font-size: 0.9rem;
@@ -1787,7 +1792,7 @@ window.markCurrentLessonDone = async function() {
         if (upsertErr) throw upsertErr;
 
         updateProgressUI();
-        markCompletedLessonsInList();
+        renderLessonList(currentCourse.lessons); // re-render เพื่อปลดล็อกบทถัดไป + ใส่ badge เรียนจบ
         btn.textContent = '✅ บันทึกแล้ว!';
         btn.style.background = 'linear-gradient(135deg,#6b7280,#4b5563)';
 
@@ -2733,6 +2738,17 @@ function showError(message) {
     modal.classList.add("show");
 }
 
+// บทเรียนที่ N จะปลดล็อกได้ก็ต่อเมื่อบทเรียนที่ 0..N-1 เรียนจบครบทุกบทแล้ว (เรียนตามลำดับ)
+function isLessonUnlocked(index) {
+    if (index <= 0) return true;
+    for (let i = 0; i < index; i++) {
+        if (!completedLessons.has(`lesson_${i}`)) return false;
+    }
+    return true;
+}
+
+const LOCK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
 function renderLessonList(lessons) {
     const listContainer = document.getElementById("lessonList");
     document.getElementById("lessonCount").innerText = `${lessons.length} บทเรียน`;
@@ -2740,19 +2756,22 @@ function renderLessonList(lessons) {
     listContainer.innerHTML = lessons.map((lesson, index) => {
         const fileType = detectFileType(lesson.fileUrl);
         const typeLabel = getFileTypeLabel(fileType);
-        
+        const unlocked = isLessonUnlocked(index);
+        const isDone = completedLessons.has(`lesson_${index}`);
+
         return `
-            <div class="lesson-item ${index === 0 ? 'active' : ''}" 
-                 data-index="${index}" 
+            <div class="lesson-item ${index === currentLessonIndex ? 'active' : ''} ${unlocked ? '' : 'locked'}"
+                 data-index="${index}"
                  onclick="playLesson(${index})">
-                <div class="lesson-number">${index + 1}</div>
+                <div class="lesson-number">${unlocked ? (index + 1) : LOCK_ICON_SVG}</div>
                 <div class="lesson-details">
                     <span class="lesson-title">
                         ${lesson.title || 'บทเรียนที่ ' + (index + 1)}
                         <span class="lesson-type-badge">${typeLabel}</span>
                     </span>
-                    <span class="lesson-duration">${lesson.duration || 'ไม่ระบุเวลา'}</span>
+                    <span class="lesson-duration">${unlocked ? (lesson.duration || 'ไม่ระบุเวลา') : 'เรียนบทก่อนหน้าให้จบก่อน'}</span>
                 </div>
+                ${isDone ? `<span class="lesson-done-badge" style="color:#10b981;font-weight:700;margin-left:auto;flex-shrink:0;">✓</span>` : ''}
             </div>
         `;
     }).join('');
@@ -2797,6 +2816,10 @@ window.toggleSubtopicsPanel = function() {
 };
 
 window.playLesson = function(index) {
+    if (!isLessonUnlocked(index)) {
+        alert('ต้องเรียนบทก่อนหน้าให้จบก่อน ถึงจะปลดล็อกบทนี้ได้ครับ');
+        return;
+    }
     currentLessonIndex = index;
 
     // รีเฟรชแท็บแบบทดสอบ/การบ้านให้ตรงกับบทที่เพิ่งเลือก (ทำก่อนส่วนอื่นเผื่อไฟล์บทเรียนโหลดไม่สำเร็จ)
