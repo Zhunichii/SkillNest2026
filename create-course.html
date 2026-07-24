@@ -979,7 +979,7 @@ window.generateThumbnailWithAI = async function() {
     document.getElementById('thumbGenPreviewWrap').style.display = 'none';
 
     try {
-        const res = await fetch('/api/generate-thumbnail', {
+        const res = await fetch('/api/ai?fn=thumbnail', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: `${promptText} สไตล์ภาพ: ${style}` })
@@ -1161,7 +1161,7 @@ ${verbBankText}
 }`;
 
     try {
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt, type: 'outline' })
@@ -1365,7 +1365,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
 }`;
 
     try {
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt, type: 'outline' })
@@ -1696,7 +1696,7 @@ window.generateSubtopicsWithAI = async function(lessonId) {
 [{"title":"ชื่อหัวข้อย่อยสั้นๆ","note":"คำอธิบายสั้นๆ 1 บรรทัด (ไม่บังคับ ถ้าไม่มีให้เว้นว่าง)"}]`;
 
     try {
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: 'outline', prompt })
@@ -1748,7 +1748,7 @@ ${analyzed.text}`;
             images: analyzed.pageImages.length > 0 ? analyzed.pageImages.map(p => ({ data: p.data, mimeType: p.mimeType })) : undefined
         };
 
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
@@ -1972,7 +1972,7 @@ window.generateQuizWithAI = async function() {
 ${type === 'true_false' ? `[{"question":"คำถาม","type":"true_false","correct":"A หรือ B"}]` : `[{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D"}]`}`;
 
     try {
-        const response = await fetch('/api/generate-quiz', {
+        const response = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2203,7 +2203,7 @@ window.extractCourseDescriptionFromFile = async function() {
         }
 
         status.textContent = 'AI กำลังสรุปคำอธิบายคอร์ส...';
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
@@ -2331,7 +2331,7 @@ window.extractHomeworkWithAI = async function() {
         }
 
         status.textContent = 'AI กำลังแตกเป็นข้อๆ...';
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)

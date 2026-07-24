@@ -734,7 +734,7 @@ window.generateSubtopicsWithAI = async function(lessonId) {
 [{"title":"ชื่อหัวข้อย่อยสั้นๆ","note":"คำอธิบายสั้นๆ 1 บรรทัด (ไม่บังคับ ถ้าไม่มีให้เว้นว่าง)"}]`;
 
     try {
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: 'outline', prompt })
@@ -795,7 +795,7 @@ ${analyzed.text}`;
             images: analyzed.pageImages.length > 0 ? analyzed.pageImages.map(p => ({ data: p.data, mimeType: p.mimeType })) : undefined
         };
 
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
@@ -1241,7 +1241,7 @@ window.extractHomeworkWithAI = async function() {
         }
 
         status.textContent = 'AI กำลังแตกเป็นข้อๆ...';
-        const res = await fetch('/api/generate-quiz', {
+        const res = await fetch('/api/ai?fn=quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
