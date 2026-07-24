@@ -428,6 +428,25 @@
             <label>คำอธิบายคอร์ส <span class="required">*</span></label>
             <textarea id="courseDescription" class="form-control" placeholder="อธิบายสิ่งที่ผู้เรียนจะได้เรียนรู้..."></textarea>
         </div>
+
+        <div class="ai-gen-area">
+            <div class="ai-gen-title">มีไฟล์คำอธิบายรายวิชาอยู่แล้ว? ให้ AI ดึงมาใส่ให้</div>
+            <div class="form-group" style="margin-bottom:0.75rem;">
+                <label>อัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ — ไม่บังคับ)</label>
+                <div class="file-upload-area" onclick="document.getElementById('courseDescFileInput').click()">
+                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
+                    <p>คลิกเพื่ออัปโหลดไฟล์คำอธิบายรายวิชา</p>
+                    <small style="color:var(--text-dim);">รองรับ PDF และรูปภาพ (JPG, PNG)</small>
+                </div>
+                <input type="file" id="courseDescFileInput" accept=".pdf,application/pdf,image/*" style="display:none;">
+                <div id="courseDescFilePreview"></div>
+            </div>
+            <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                <button type="button" class="btn btn-ai" id="btnExtractCourseDesc" onclick="extractCourseDescriptionFromFile()">ให้ AI ดึงคำอธิบายจากไฟล์มาใส่ให้</button>
+                <small style="color:var(--text-dim);">AI จะเติมลงช่อง "คำอธิบายคอร์ส" ด้านบนให้ แก้ไขต่อได้ตามต้องการ</small>
+            </div>
+            <div id="courseDescStatus" class="ai-loading-text"></div>
+        </div>
         <div class="grid">
             <div class="form-group">
                 <label>หมวดหมู่ <span class="required">*</span></label>
@@ -1077,6 +1096,7 @@ window.generateCLOWithAI = async function() {
     const level  = document.getElementById('cloLevel').value;
     const count  = parseInt(document.getElementById('cloCount').value);
     const domain = document.getElementById('cloDomain').value;
+    const courseDesc = document.getElementById('courseDescription')?.value.trim() || '';
 
     if (!topic) {
         alert('กรุณากรอกชื่อรายวิชา / หัวข้อคอร์สก่อนครับ');
@@ -1109,6 +1129,7 @@ window.generateCLOWithAI = async function() {
 ระดับผู้เรียน: ${level}
 Domain: ${domain}
 จำนวน: ${count} CLO
+${courseDesc ? `\nคำอธิบายรายวิชา (ใช้เป็นบริบทหลักในการออกแบบ CLO ให้ตรงกับเนื้อหาที่ระบุไว้จริง):\n${courseDesc}\n` : ''}
 
 บัญชีคำกริยามาตรฐานที่ต้อง "เลือกใช้จากรายการนี้เท่านั้น" ให้ตรงกับระดับ Bloom ที่ระบุในแต่ละข้อ:
 ${verbBankText}
@@ -1121,7 +1142,8 @@ ${verbBankText}
 3. statement ต้องใช้ actionVerb ที่ระบุจริงๆ ปรากฏอยู่ในประโยค ไม่ใช่แค่ความหมายใกล้เคียง
 4. วัดผลได้จริงในบริบทการเรียนออนไลน์
 5. เขียนเป็นภาษาไทย
-6. ก่อนตอบ ให้ตรวจทานตัวเองว่า: (ก) actionVerb แต่ละข้อตรงกับ level ที่ประกาศไว้ (ข) statement ใช้ actionVerb นั้นจริง (ค) รวมกันครอบคลุมการกระจายระดับตามที่กำหนดข้างต้น
+6. ${courseDesc ? 'ให้เนื้อหาของ CLO สอดคล้องกับคำอธิบายรายวิชาที่ให้ไว้ข้างต้นจริงๆ ไม่ใช่แค่ชื่อวิชาเฉยๆ' : 'ประเมินเนื้อหาที่เหมาะสมจากชื่อรายวิชา'}
+7. ก่อนตอบ ให้ตรวจทานตัวเองว่า: (ก) actionVerb แต่ละข้อตรงกับ level ที่ประกาศไว้ (ข) statement ใช้ actionVerb นั้นจริง (ค) รวมกันครอบคลุมการกระจายระดับตามที่กำหนดข้างต้น
 
 ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
 {
@@ -2104,6 +2126,106 @@ async function analyzePdfFile(file) {
 
     return { text: fullText.slice(0, 6000), pageImages };
 }
+
+// === คำอธิบายรายวิชา: ให้ AI ดึงจากไฟล์ PDF/รูปภาพที่อาจารย์มีอยู่แล้ว ===
+let courseDescFile = null;
+
+document.getElementById('courseDescFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    courseDescFile = file;
+    const icon = file.type.startsWith('image/') ? '🖼️' : '📄';
+    document.getElementById('courseDescFilePreview').innerHTML = `
+        <div class="file-preview">
+            <div style="font-size:2rem;">${icon}</div>
+            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button class="btn btn-danger" onclick="removeCourseDescFile()">✕</button>
+        </div>`;
+});
+
+window.removeCourseDescFile = function() {
+    courseDescFile = null;
+    document.getElementById('courseDescFileInput').value = '';
+    document.getElementById('courseDescFilePreview').innerHTML = '';
+};
+
+const COURSE_DESC_EXTRACT_INSTRUCTION = `คุณเป็นผู้ช่วยอาจารย์เตรียมข้อมูลคอร์สเรียนออนไลน์
+ต่อไปนี้คือเนื้อหาที่ดึงมาจากเอกสารคำอธิบายรายวิชา (course syllabus) ที่อาจารย์แนบมา
+กรุณาอ่านและสรุปเป็น "คำอธิบายคอร์ส" สำหรับแสดงให้ผู้เรียนดูก่อนตัดสินใจสมัครเรียน โดย:
+1. ใช้เนื้อหาจากเอกสารจริงเป็นหลัก ห้ามแต่งเติมข้อมูลที่ไม่มีอยู่ในเอกสาร
+2. เขียนเป็นภาษาไทย ความยาวประมาณ 3-6 ประโยค อ่านเข้าใจง่าย น่าสนใจสำหรับผู้เรียนทั่วไป
+3. เน้นเนื้อหาที่จะได้เรียนและประโยชน์ที่ผู้เรียนจะได้รับ
+4. ถ้าเอกสารเขียนด้วยสำนวนวิชาการ/ทางการมาก ให้ปรับสำนวนให้เป็นกันเองขึ้นสำหรับหน้าคอร์สออนไลน์ แต่ยังคงความถูกต้องของเนื้อหาเดิม
+
+ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+{"description": "คำอธิบายคอร์สที่สรุปได้"}
+
+เนื้อหาจากเอกสาร:
+`;
+
+window.extractCourseDescriptionFromFile = async function() {
+    const btn = document.getElementById('btnExtractCourseDesc');
+    const status = document.getElementById('courseDescStatus');
+
+    if (!courseDescFile) {
+        alert('กรุณาอัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ) ก่อนครับ');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'AI กำลังอ่านไฟล์...';
+    status.classList.add('show');
+    status.textContent = 'กำลังอ่านเนื้อหา...';
+
+    try {
+        let requestBody;
+
+        if (courseDescFile.type.startsWith('image/')) {
+            status.textContent = 'AI กำลังอ่านรูปภาพ...';
+            const base64 = await fileToBase64(courseDescFile);
+            requestBody = {
+                type: 'outline',
+                prompt: COURSE_DESC_EXTRACT_INSTRUCTION + '(เนื้อหาอยู่ในรูปภาพที่แนบมา อ่านจากภาพโดยตรง)',
+                image: base64,
+                mimeType: courseDescFile.type
+            };
+        } else {
+            status.textContent = 'กำลังดึงข้อความจาก PDF...';
+            const analyzed = await analyzePdfFile(courseDescFile);
+            if (!analyzed.text.trim() && analyzed.pageImages.length === 0) {
+                throw new Error('ไม่พบข้อความในไฟล์นี้ ลองอัปโหลดไฟล์อื่นหรือพิมพ์คำอธิบายเองแทน');
+            }
+            requestBody = {
+                type: 'outline',
+                prompt: COURSE_DESC_EXTRACT_INSTRUCTION + analyzed.text,
+                images: analyzed.pageImages.length > 0 ? analyzed.pageImages.map(p => ({ data: p.data, mimeType: p.mimeType })) : undefined
+            };
+        }
+
+        status.textContent = 'AI กำลังสรุปคำอธิบายคอร์ส...';
+        const res = await fetch('/api/generate-quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        const jsonStr = (data.text || '').replace(/```json|```/g, '').trim();
+        const result = JSON.parse(jsonStr);
+        if (!result.description) throw new Error('AI ไม่พบคำอธิบายรายวิชาจากไฟล์นี้');
+
+        document.getElementById('courseDescription').value = result.description;
+        status.textContent = 'ดึงคำอธิบายจากไฟล์มาใส่ให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ';
+
+    } catch (err) {
+        console.error('extractCourseDescriptionFromFile error:', err);
+        status.textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'ให้ AI ดึงคำอธิบายจากไฟล์มาใส่ให้';
+    }
+};
 
 // โหลด mammoth.js จาก CDN (สำหรับอ่านไฟล์ .docx)
 async function ensureMammothLoaded() {

@@ -204,6 +204,17 @@
         }
         .btn-save-review:hover { opacity:0.9; }
         .btn-save-review:disabled { opacity:0.5; cursor:not-allowed; }
+        .btn-ai-review {
+            background:linear-gradient(135deg,#8b5cf6,#3b82f6); color:white; border:none; padding:7px 16px;
+            border-radius:8px; font-size:0.85rem; cursor:pointer;
+        }
+        .btn-ai-review:hover { opacity:0.92; }
+        .btn-ai-review:disabled { opacity:0.5; cursor:not-allowed; }
+        .review-ai-suggestion {
+            background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.25);
+            border-left:3px solid #8b5cf6; border-radius:8px; padding:10px 12px;
+            font-size:0.85rem; color:#c4b5fd; margin-bottom:10px; line-height:1.5;
+        }
 
         /* ── Student Score Table ── */
         .score-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
@@ -371,8 +382,11 @@ function renderPage() {
 
     <!-- Review Queue: ตรวจข้อเรียงความ/ตอบสั้นที่รอตรวจ -->
     <div class="card full-card" id="reviewQueueCard" style="display:none;">
-        <div class="card-title">🖊️ รอตรวจข้อเรียงความ <span id="reviewQueueCount" style="font-size:0.8rem;color:var(--text-dim);font-weight:400;"></span></div>
-        <div id="reviewQueueList"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div class="card-title" style="margin-bottom:0;">🖊️ รอตรวจข้อเรียงความ <span id="reviewQueueCount" style="font-size:0.8rem;color:var(--text-dim);font-weight:400;"></span></div>
+            <button class="btn-ai-review" onclick="aiGradeAllReviewItems()" id="btnAiGradeAll">🤖 ให้ AI ช่วยตรวจทั้งหมด</button>
+        </div>
+        <div id="reviewQueueList" style="margin-top:14px;"></div>
     </div>
 
     <!-- Mid: Progress + Pie -->
@@ -585,11 +599,14 @@ function renderReviewQueue(subs, quiz, courses) {
 
     quiz.filter(q => q.needs_review).forEach(qs => {
         const course = allCourses.find(c => c.id === qs.course_id);
+        const qDef = (course?.quiz || []);
         (qs.answers || []).forEach((a, ai) => {
             if (a.type === 'short_answer' && a.needsReview) {
+                const def = qDef.find(q => q.question === a.question);
                 items.push({
                     kind: 'quiz', userId: qs.user_id, courseId: qs.course_id, courseTitle: course?.title || '',
-                    question: a.question, answerText: a.answerText, maxPoints: a.maxPoints || 1, answerIndex: ai
+                    question: a.question, answerText: a.answerText, maxPoints: a.maxPoints || 1, answerIndex: ai,
+                    sampleAnswer: def?.sampleAnswer || ''
                 });
             }
         });
@@ -597,12 +614,16 @@ function renderReviewQueue(subs, quiz, courses) {
 
     subs.filter(s => s.submission_kind === 'form' && Array.isArray(s.form_answers)).forEach(sub => {
         const course = allCourses.find(c => c.id === sub.course_id);
+        const hwDef = course?.homework?.[sub.homework_index];
+        const qDef = hwDef?.formQuestions || [];
         (sub.form_answers || []).forEach((a, ai) => {
             if (a.type === 'short_answer' && a.needsReview) {
+                const def = qDef.find(q => q.question === a.question);
                 items.push({
                     kind: 'submission', rowId: sub.id, userId: sub.user_id, courseId: sub.course_id, courseTitle: course?.title || '',
                     homeworkTitle: sub.homework_title, question: a.question, answerText: a.answerText,
-                    maxPoints: a.maxPoints || 1, answerIndex: ai
+                    maxPoints: a.maxPoints || 1, answerIndex: ai,
+                    sampleAnswer: def?.sampleAnswer || ''
                 });
             }
         });
@@ -624,15 +645,71 @@ function renderReviewQueue(subs, quiz, courses) {
             </div>
             <div class="review-question">${it.question}</div>
             <div class="review-answer">${(it.answerText || '(ไม่ได้ตอบ)').replace(/</g,'&lt;')}</div>
+            <div id="review-ai-note-${i}"></div>
             <div class="review-grade-row">
                 <label style="font-size:0.85rem;color:var(--text-dim);">ให้คะแนน:</label>
                 <input type="number" min="0" max="${it.maxPoints}" step="0.5" id="review-score-${i}" placeholder="0-${it.maxPoints}">
+                <button class="btn-ai-review" onclick="aiGradeReviewItem(${i})" id="review-ai-btn-${i}">🤖 ให้ AI ช่วยตรวจ</button>
                 <button class="btn-save-review" onclick="saveReviewItem(${i})">บันทึกคะแนน</button>
                 <span id="review-status-${i}" style="font-size:0.8rem;color:var(--success);"></span>
             </div>
         </div>
     `).join('');
 }
+
+window.aiGradeAllReviewItems = async function() {
+    const items = window._reviewQueueItems || [];
+    if (!items.length) return;
+    const bulkBtn = document.getElementById('btnAiGradeAll');
+    bulkBtn.disabled = true;
+    const originalText = bulkBtn.textContent;
+    for (let i = 0; i < items.length; i++) {
+        bulkBtn.textContent = `🤖 กำลังตรวจ ${i+1}/${items.length}...`;
+        // ข้ามข้อที่บันทึกไปแล้ว (input ถูก disable หลังกดบันทึกคะแนน)
+        const input = document.getElementById(`review-score-${i}`);
+        if (input && input.disabled) continue;
+        try {
+            await aiGradeReviewItem(i);
+        } catch (e) { /* ข้ามไปข้อถัดไปถ้าข้อใดข้อหนึ่ง error */ }
+    }
+    bulkBtn.disabled = false;
+    bulkBtn.textContent = originalText;
+};
+
+window.aiGradeReviewItem = async function(i) {
+    const it = window._reviewQueueItems[i];
+    const btn = document.getElementById(`review-ai-btn-${i}`);
+    const noteEl = document.getElementById(`review-ai-note-${i}`);
+    btn.disabled = true;
+    btn.textContent = 'AI กำลังตรวจ...';
+    noteEl.innerHTML = '';
+    try {
+        const res = await fetch('/api/grade-answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: it.question,
+                answerText: it.answerText,
+                sampleAnswer: it.sampleAnswer,
+                maxPoints: it.maxPoints
+            })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById(`review-score-${i}`).value = data.suggestedScore;
+        noteEl.innerHTML = `
+            <div class="review-ai-suggestion">
+                🤖 AI เสนอ ${data.suggestedScore}/${it.maxPoints} คะแนน — ${data.reasoning || ''}
+                <span style="display:block;color:var(--text-dim);font-size:0.74rem;margin-top:3px;">เป็นแค่ข้อเสนอแนะ ตรวจสอบและแก้คะแนนก่อนกด "บันทึกคะแนน" ได้ตามดุลยพินิจ</span>
+            </div>`;
+    } catch (e) {
+        noteEl.innerHTML = `<div class="review-ai-suggestion" style="color:#f87171;">เกิดข้อผิดพลาด: ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🤖 ให้ AI ช่วยตรวจ';
+    }
+};
 
 window.saveReviewItem = async function(i) {
     const it = window._reviewQueueItems[i];
