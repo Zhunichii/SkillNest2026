@@ -253,7 +253,15 @@
         /* === Progress Bars === */
         .progress-item {
             margin-bottom: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 6px 8px;
+            margin-left: -8px;
+            margin-right: -8px;
+            transition: background 0.2s;
         }
+        .progress-item:hover { background: var(--card-hover); }
+        .progress-item:last-child { margin-bottom: 0; }
 
         .progress-row {
             display: flex;
@@ -390,6 +398,29 @@
             font-size: 0.75rem;
             text-align: center;
         }
+
+        /* === Follow-up list (การบ้าน/Quiz ที่ต้องติดตาม) === */
+        .followup-row {
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
+            padding: 10px 8px; margin: 0 -8px; border-radius: 8px;
+            cursor: pointer; transition: background 0.2s; font-size: 0.86rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .followup-row:last-child { border-bottom: none; }
+        .followup-row:hover { background: var(--card-hover); }
+        .followup-course { font-size: 0.74rem; color: var(--text-dim); margin-top: 2px; }
+        .followup-badge { font-size: 0.74rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+
+        /* === Quiz list per course === */
+        .quizlist-row {
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
+            padding: 10px 8px; margin: 0 -8px; border-radius: 8px;
+            cursor: pointer; transition: background 0.2s; font-size: 0.86rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .quizlist-row:last-child { border-bottom: none; }
+        .quizlist-row:hover { background: var(--card-hover); }
+        .quizlist-pct { font-weight: 700; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -477,6 +508,18 @@
         </div>
     </div>
 
+    <!-- Follow-up: การบ้านที่ต้องติดตาม + คะแนน Quiz แต่ละคอร์ส -->
+    <div class="mid-grid" style="margin-bottom:28px;">
+        <div class="card">
+            <div class="card-title">📋 การบ้านที่ต้องติดตาม</div>
+            <div id="homeworkFollowupList"><div style="color:var(--text-dim);font-size:0.9rem;">กำลังโหลด...</div></div>
+        </div>
+        <div class="card">
+            <div class="card-title">📝 คะแนน Quiz แต่ละคอร์ส</div>
+            <div id="quizListByCourse"><div style="color:var(--text-dim);font-size:0.9rem;">กำลังโหลด...</div></div>
+        </div>
+    </div>
+
     <!-- Bottom: AI + Heatmap + Badges -->
     <div class="bottom-grid">
 
@@ -518,10 +561,14 @@ function themeVar(name, fallback) {
     return v || fallback;
 }
 
-// ============ FILTER TABS ============
+// ============ FILTER TABS (ใช้งานได้จริง — กรองตามช่วงเวลา) ============
+let _filterDays = null; // null = ทั้งหมด, ไม่งั้นเป็นจำนวนวันย้อนหลัง
 function setFilter(btn) {
     document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    const label = btn.textContent.trim();
+    _filterDays = label === '7 วัน' ? 7 : label === '30 วัน' ? 30 : label === '3 เดือน' ? 90 : null;
+    renderFilteredStats();
 }
 window.setFilter = setFilter;
 
@@ -602,14 +649,19 @@ function renderHeatmap(enrollments) {
 }
 
 // ============ MAIN LOAD ============
+// เก็บข้อมูลดิบไว้ใช้ซ้ำตอนเปลี่ยน filter (ไม่ต้อง fetch ใหม่ทุกครั้ง)
+let _rawEnrollments = [];
+let _rawQuizScores  = [];
+let _rawSubmissions = [];
+
 async function loadLearningData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.location.href = '../login-page/login.html'; return; }
 
-    // 1. โหลด enrollments + courses (รวม lessons เพื่อคำนวณ total และเวลาจริง)
+    // 1. โหลด enrollments + courses (รวม lessons และ homework เพื่อคำนวณ total และไว้ตรวจการบ้านที่ต้องส่ง)
     const { data: enrollments } = await supabase
         .from('enrollments')
-        .select('*, courses(id, title, lessons)')
+        .select('*, courses(id, title, lessons, homework)')
         .eq('user_id', user.id)
         .order('last_updated_at', { ascending: false, nullsFirst: false });
 
@@ -619,8 +671,58 @@ async function loadLearningData() {
         .select('*')
         .eq('user_id', user.id);
 
-    const enrList   = enrollments || [];
-    const quizList  = quizScores  || [];
+    // 3. โหลดการส่งการบ้านทั้งหมด (ทุกคอร์สที่ลงทะเบียนไว้)
+    const { data: submissions } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('user_id', user.id);
+
+    _rawEnrollments = enrollments || [];
+    _rawQuizScores  = quizScores  || [];
+    _rawSubmissions = submissions || [];
+
+    // ===== ส่วนที่ขึ้นกับช่วงเวลา (filter tab) — เรียกซ้ำได้เมื่อเปลี่ยน filter =====
+    renderFilteredStats();
+
+    // ===== AI ANALYSIS — เรียก Gemini วิเคราะห์จริง (ไม่ผูกกับ filter เวลา) =====
+    _enrCache  = _rawEnrollments;
+    _quizCache = _rawQuizScores;
+    const aiBox = document.getElementById('aiAnalysis');
+    await runAIAnalysis(_rawEnrollments, _rawQuizScores, aiBox);
+
+    // ===== HEATMAP =====
+    renderHeatmap(_rawEnrollments);
+
+    // ===== BADGES =====
+    const badgesGrid = document.getElementById('badgesGrid');
+    const earned = computeBadges(_rawEnrollments, _rawQuizScores);
+    if (earned.length === 0) {
+        badgesGrid.innerHTML = '<div style="color:var(--text-dim);grid-column:1/-1;">ยังไม่ได้รับ Badge ใดเลย เริ่มเรียนเลย!</div>';
+    } else {
+        badgesGrid.innerHTML = earned.map(b => `
+            <div class="badge-item">
+                <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.icon}</div>
+                <div class="badge-name" style="color:${b.color}">${b.name}</div>
+            </div>`).join('');
+    }
+
+    // ===== การบ้านที่ต้องติดตาม + คะแนน Quiz แต่ละคอร์ส (ไม่ผูกกับ filter เวลา — อยากเห็นทุกงานที่ค้างอยู่เสมอ) =====
+    renderHomeworkFollowup();
+    renderQuizListByCourse();
+}
+
+// ไปดูรายละเอียดเจาะลึกของคอร์สนั้น (เชื่อมกับแท็บ "ผลการเรียนของฉัน" ใน course-content.html)
+window.goToCourseResults = function(courseId) {
+    if (!courseId) return;
+    window.location.href = `course-content.html?id=${courseId}&tab=results`;
+};
+
+// ===== ส่วนที่ขึ้นกับ filter เวลา: stat cards, course progress list, bar chart =====
+function renderFilteredStats() {
+    const enrList = _rawEnrollments;
+    // ช่วงเวลาที่เลือก ใช้กรอง "คะแนน Quiz" (มี timestamp ชัดเจนจาก updated_at) ได้แม่นยำ
+    const cutoff = _filterDays ? Date.now() - _filterDays * 86400000 : null;
+    const quizList = cutoff ? _rawQuizScores.filter(q => q.updated_at && new Date(q.updated_at).getTime() >= cutoff) : _rawQuizScores;
 
     // คำนวณสถานะจาก completed_lessons จริง (ไม่ใช่แค่ progress field ที่อาจค้าง)
     const calcPct = (e) => {
@@ -632,20 +734,15 @@ async function loadLearningData() {
     };
     const completed  = enrList.filter(e => calcPct(e) >= 100);
     const inProgress = enrList.filter(e => { const p = calcPct(e); return p > 0 && p < 100; });
-    const notStarted = enrList.filter(e => calcPct(e) === 0);
 
-    // คำนวณเวลาเรียนรวมจาก watch_seconds จริง (ดีกว่าประมาณจาก duration)
+    // "เวลาเรียนรวม" เก็บเป็นยอดสะสมในตาราง enrollments ไม่มี timestamp รายครั้ง เลยกรองตามช่วงเวลาไม่ได้แม่นยำ
+    // จึงแสดงเป็นยอดสะสมทั้งหมดเสมอ (ไม่ขึ้นกับ filter) และบอกไว้ให้ชัดเจนกันเข้าใจผิด
     const totalWatchSec = enrList.reduce((s, e) => s + (e.watch_seconds || 0), 0);
     let displayTime;
-    if (totalWatchSec >= 3600) {
-        displayTime = `${(totalWatchSec / 3600).toFixed(1)} ชม.`;
-    } else if (totalWatchSec >= 60) {
-        displayTime = `${Math.floor(totalWatchSec / 60)} นาที`;
-    } else if (totalWatchSec > 0) {
-        displayTime = `${totalWatchSec} วินาที`;
-    } else {
-        displayTime = '0 นาที';
-    }
+    if (totalWatchSec >= 3600) displayTime = `${(totalWatchSec / 3600).toFixed(1)} ชม.`;
+    else if (totalWatchSec >= 60) displayTime = `${Math.floor(totalWatchSec / 60)} นาที`;
+    else if (totalWatchSec > 0) displayTime = `${totalWatchSec} วินาที`;
+    else displayTime = '0 นาที';
 
     const avgQuiz = quizList.length
         ? Math.round(quizList.reduce((s, q) => s + (q.pct || 0), 0) / quizList.length)
@@ -653,7 +750,7 @@ async function loadLearningData() {
 
     // ===== STAT CARDS =====
     document.getElementById('statTotalHours').innerHTML =
-        `${displayTime} <small style="font-size:0.85rem;color:var(--text-dim)">${totalWatchSec > 0 ? '(จริง)' : ''}</small>`;
+        `${displayTime} <small style="font-size:0.85rem;color:var(--text-dim)">(สะสมทั้งหมด)</small>`;
     document.getElementById('statCourseDone').innerHTML =
         `${completed.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
     document.getElementById('statCourseActive').innerHTML =
@@ -661,8 +758,10 @@ async function loadLearningData() {
     document.getElementById('statAvgQuiz').innerHTML = quizList.length
         ? `${avgQuiz} <small style="font-size:1rem;color:var(--text-dim)">%</small>`
         : `— <small style="font-size:1rem;color:var(--text-dim)">%</small>`;
+    document.getElementById('statQuizSub').textContent =
+        _filterDays ? `จาก Quiz ${quizList.length} ครั้งในช่วงนี้` : `จาก Quiz ทั้งหมด ${quizList.length} ครั้ง`;
 
-    // ===== COURSE PROGRESS LIST =====
+    // ===== COURSE PROGRESS LIST (คลิกดูรายละเอียดเจาะลึกได้) =====
     const progressEl = document.getElementById('courseProgressList');
     if (enrList.length === 0) {
         progressEl.innerHTML = '<div style="color:var(--text-dim);">ยังไม่ได้ลงทะเบียนคอร์สใดเลย</div>';
@@ -671,11 +770,9 @@ async function loadLearningData() {
         progressEl.innerHTML = enrList.map((e, i) => {
             const title    = e.courses?.title || 'คอร์สไม่ระบุชื่อ';
             const done     = (e.completed_lessons || []).length;
-            // คำนวณ total จาก lessons จริง ถ้า DB เป็น 0
             const total    = e.total_lessons > 0
                 ? e.total_lessons
                 : (e.courses?.lessons?.length || done || 1);
-            // คำนวณ pct ใหม่จากข้อมูลจริง แทนที่จะใช้ e.progress ที่อาจค้างค่า
             const pct      = done > 0
                 ? Math.min(100, Math.round((done / total) * 100))
                 : (e.progress || 0);
@@ -683,12 +780,13 @@ async function loadLearningData() {
             const statusText = pct >= 100 ? '✅ จบแล้ว'
                 : pct > 0 ? `📖 ${done}/${total} บท`
                 : '⏳ ยังไม่เริ่ม';
-            return `<div class="progress-item">
+            return `<div class="progress-item" onclick="goToCourseResults('${e.course_id}')" title="ดูรายละเอียดเจาะลึกของคอร์สนี้">
                 <div class="progress-row">
                     <span>${title}</span>
                     <span style="display:flex;gap:8px;align-items:center;">
                         <span style="font-size:0.75rem;color:var(--text-dim);">${statusText}</span>
                         <span>${pct}%</span>
+                        <span style="color:var(--text-dim);">›</span>
                     </span>
                 </div>
                 <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
@@ -696,7 +794,7 @@ async function loadLearningData() {
         }).join('');
     }
 
-    // ===== BAR CHART (quiz scores by day of week) =====
+    // ===== BAR CHART (quiz scores by day of week ในช่วงที่เลือก) =====
     const dayData = [0,0,0,0,0,0,0];
     quizList.forEach(q => {
         if (q.updated_at) {
@@ -706,28 +804,72 @@ async function loadLearningData() {
         }
     });
     renderBarChart(dayData);
+}
 
-    // ===== AI ANALYSIS — เรียก Gemini วิเคราะห์จริง =====
-    _enrCache = enrList;
-    _quizCache = quizList;
-    const aiBox = document.getElementById('aiAnalysis');
-    await runAIAnalysis(enrList, quizList, aiBox);
+// ===== การบ้านที่ต้องติดตาม: ยังไม่ส่ง + ส่งแล้วรอตรวจ ข้ามทุกคอร์ส =====
+function renderHomeworkFollowup() {
+    const el = document.getElementById('homeworkFollowupList');
+    if (!el) return;
 
-    // ===== HEATMAP =====
-    renderHeatmap(enrList);
+    const items = [];
+    _rawEnrollments.forEach(e => {
+        const course = e.courses;
+        if (!course || !Array.isArray(course.homework)) return;
+        course.homework.forEach((hw, idx) => {
+            const sub = _rawSubmissions.find(s => s.course_id === e.course_id && s.homework_index === idx);
+            if (!sub) {
+                items.push({ courseId: e.course_id, courseTitle: course.title, hwTitle: hw.title, status: 'not_submitted', deadline: hw.deadline });
+            } else if (sub.status === 'submitted') {
+                items.push({ courseId: e.course_id, courseTitle: course.title, hwTitle: hw.title, status: 'pending_review' });
+            }
+        });
+    });
 
-    // ===== BADGES =====
-    const badgesGrid = document.getElementById('badgesGrid');
-    const earned = computeBadges(enrList, quizList);
-    if (earned.length === 0) {
-        badgesGrid.innerHTML = '<div style="color:var(--text-dim);grid-column:1/-1;">ยังไม่ได้รับ Badge ใดเลย เริ่มเรียนเลย!</div>';
-    } else {
-        badgesGrid.innerHTML = earned.map(b => `
-            <div class="badge-item">
-                <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.icon}</div>
-                <div class="badge-name" style="color:${b.color}">${b.name}</div>
-            </div>`).join('');
+    if (items.length === 0) {
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:0.9rem;">ไม่มีงานค้าง ทำได้ครบทุกอย่างแล้ว 🎉</div>';
+        return;
     }
+
+    // เรียงงานที่ "ยังไม่ส่ง" ขึ้นก่อน (ต้องรีบทำ) แล้วค่อยงานที่รอตรวจ
+    items.sort((a,b) => (a.status === 'not_submitted' ? 0 : 1) - (b.status === 'not_submitted' ? 0 : 1));
+
+    el.innerHTML = items.slice(0, 8).map(it => {
+        const badge = it.status === 'not_submitted'
+            ? `<span class="followup-badge" style="background:rgba(239,68,68,0.15);color:var(--danger);">ยังไม่ส่ง</span>`
+            : `<span class="followup-badge" style="background:rgba(245,158,11,0.15);color:var(--warning);">รอครูตรวจ</span>`;
+        const deadlineTxt = it.deadline ? ` • กำหนดส่ง ${new Date(it.deadline).toLocaleDateString('th-TH')}` : '';
+        return `<div class="followup-row" onclick="goToCourseResults('${it.courseId}')">
+            <div>
+                <div>${it.hwTitle}</div>
+                <div class="followup-course">${it.courseTitle}${deadlineTxt}</div>
+            </div>
+            ${badge}
+        </div>`;
+    }).join('') + (items.length > 8 ? `<div style="text-align:center;color:var(--text-dim);font-size:0.78rem;padding-top:8px;">และอีก ${items.length - 8} งาน</div>` : '');
+}
+
+// ===== คะแนน Quiz แยกตามคอร์ส (แทนที่จะมีแค่ค่าเฉลี่ยรวม) =====
+function renderQuizListByCourse() {
+    const el = document.getElementById('quizListByCourse');
+    if (!el) return;
+
+    if (_rawQuizScores.length === 0) {
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:0.9rem;">ยังไม่ได้ทำ Quiz คอร์สไหนเลย</div>';
+        return;
+    }
+
+    el.innerHTML = _rawQuizScores.map(q => {
+        const enr = _rawEnrollments.find(e => e.course_id === q.course_id);
+        const title = enr?.courses?.title || 'คอร์สไม่ระบุชื่อ';
+        const lvl = getLevel(q.pct || 0);
+        return `<div class="quizlist-row" onclick="goToCourseResults('${q.course_id}')">
+            <div>
+                <div>${title}</div>
+                <div class="followup-course">${q.score}/${q.total} คะแนน${q.needs_review ? ' • รอตรวจบางข้อ' : ''}</div>
+            </div>
+            <span class="quizlist-pct skill-badge ${lvl.cls}">${q.pct}%</span>
+        </div>`;
+    }).join('');
 }
 
 // ============ AI ANALYSIS FUNCTION ============
