@@ -288,18 +288,7 @@
             transition: width 0.6s ease;
         }
 
-        /* === AI Analysis === */
-        .skill-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.88rem;
-        }
-
-        .skill-row:last-child { border-bottom: none; }
-
+        /* === Quiz level badge (ใช้กับรายการคะแนน Quiz แต่ละคอร์ส) === */
         .skill-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -310,18 +299,6 @@
         .badge-green { background: rgba(16,185,129,0.15); color: var(--success); }
         .badge-yellow { background: rgba(245,158,11,0.15); color: var(--warning); }
         .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); }
-
-        .ai-suggestion {
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .suggestion-item {
-            font-size: 0.8rem;
-            color: var(--warning);
-            padding: 4px 0;
-        }
 
         /* === Heatmap === */
         .heatmap-grid {
@@ -501,7 +478,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">เวลาเรียนรายวัน (ชม.)</div>
+            <div class="card-title">คะแนน Quiz เฉลี่ยตามวันในสัปดาห์</div>
             <div style="position:relative; height:200px;">
                 <canvas id="chartBar"></canvas>
             </div>
@@ -587,30 +564,40 @@ function renderBarChart(data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx) => ctx.parsed.y > 0 ? `เฉลี่ย ${ctx.parsed.y}%` : 'ไม่มีข้อมูล' } }
+            },
             scales: {
                 x: { grid: { display: false }, ticks: { color: themeVar('--text-dim','#a0a0ba') } },
-                y: { grid: { color: themeVar('--line','rgba(255,255,255,0.05)') }, ticks: { color: themeVar('--text-dim','#a0a0ba') } }
+                y: { min: 0, max: 100, grid: { color: themeVar('--line','rgba(255,255,255,0.05)') }, ticks: { color: themeVar('--text-dim','#a0a0ba'), callback: (v) => v + '%' } }
             }
         }
     });
 }
 
 // ============ BADGE LOGIC ============
+// คำนวณ % คืบหน้าแบบเดียวกับที่ใช้ทั่วทั้งหน้า (จาก completed_lessons จริง ไม่ใช่ e.progress ที่อาจค้างค่า)
+function calcCoursePct(e) {
+    const done  = (e.completed_lessons || []).length;
+    const total = e.total_lessons > 0 ? e.total_lessons : (e.courses?.lessons?.length || done || 1);
+    return done > 0 ? Math.min(100, Math.round((done / total) * 100)) : (e.progress || 0);
+}
+
+// คืนค่า badge "ทุกอัน" พร้อมสถานะ earned/locked — ให้เห็นทั้งที่ได้แล้วและยังไม่ได้ (แรงจูงใจให้ทำต่อ)
 function computeBadges(enrollments, quizScores) {
-    const badges = [];
     const totalEnrolled = enrollments.length;
-    const completed = enrollments.filter(e => e.progress >= 100).length;
+    const completed = enrollments.filter(e => calcCoursePct(e) >= 100).length;
     const avgQuiz = quizScores.length
         ? Math.round(quizScores.reduce((s, q) => s + (q.pct || 0), 0) / quizScores.length)
         : 0;
 
-    if (totalEnrolled >= 1)  badges.push({ icon: '⭐', name: 'เริ่มต้น',      color: '#f59e0b' });
-    if (completed >= 1)      badges.push({ icon: '🏆', name: 'จบคอร์ส',       color: '#10b981' });
-    if (avgQuiz >= 80)       badges.push({ icon: '🎯', name: 'เซียน Quiz',    color: '#8b5cf6' });
-    if (totalEnrolled >= 3)  badges.push({ icon: '📚', name: 'นักเรียนตัวยง', color: '#3b82f6' });
-
-    return badges;
+    return [
+        { icon: '⭐', name: 'เริ่มต้น',      color: '#f59e0b', earned: totalEnrolled >= 1, requirement: 'ลงทะเบียนคอร์สแรก' },
+        { icon: '🏆', name: 'จบคอร์ส',       color: '#10b981', earned: completed >= 1,     requirement: 'เรียนจบ 1 คอร์ส' },
+        { icon: '🎯', name: 'เซียน Quiz',    color: '#8b5cf6', earned: avgQuiz >= 80,      requirement: 'คะแนน Quiz เฉลี่ย 80% ขึ้นไป' },
+        { icon: '📚', name: 'นักเรียนตัวยง', color: '#3b82f6', earned: totalEnrolled >= 3, requirement: 'ลงทะเบียน 3 คอร์สขึ้นไป' },
+    ];
 }
 
 // ============ LEVEL HELPER ============
@@ -620,20 +607,24 @@ function getLevel(score) {
     return             { text: 'ต้องฝึกเพิ่ม', cls: 'badge-red' };
 }
 
-// ============ HEATMAP (from enrollments updated_at) ============
+// ============ HEATMAP (from enrollments last_updated_at) ============
+// หมายเหตุ: DB เก็บแค่ "วันที่แก้ไขล่าสุด" ต่อคอร์ส ไม่ใช่ log ทุกวันที่เข้าเรียนจริง
+// จึงเป็นการประมาณจากข้อมูลที่มี — "เรียนหนัก" นิยามจากวันที่มีการอัปเดตความคืบหน้าในหลายคอร์สพร้อมกัน (2 คอร์สขึ้นไปในวันเดียว)
 function renderHeatmap(enrollments) {
     const heatmap = document.getElementById('heatmap');
     if (!heatmap) return;
     heatmap.innerHTML = '';
 
-    // สร้าง set ของวันที่มีการเรียน (28 วันย้อนหลัง)
-    const activeDays = new Set();
-    const heavyDays  = new Set();
+    // นับจำนวนคอร์สที่ถูกอัปเดตต่อวัน เพื่อแยก "เรียนธรรมดา" กับ "เรียนหนัก"
+    const dayCourseCount = {};
     enrollments.forEach(e => {
         if (e.last_updated_at) {
-            activeDays.add(e.last_updated_at.split('T')[0]);
+            const dateStr = e.last_updated_at.split('T')[0];
+            dayCourseCount[dateStr] = (dayCourseCount[dateStr] || 0) + 1;
         }
     });
+    const activeDays = new Set(Object.keys(dayCourseCount));
+    const heavyDays  = new Set(Object.keys(dayCourseCount).filter(d => dayCourseCount[d] >= 2));
 
     // สร้าง 28 cells (4 สัปดาห์)
     for (let i = 27; i >= 0; i--) {
@@ -642,8 +633,9 @@ function renderHeatmap(enrollments) {
         const dateStr = d.toISOString().split('T')[0];
         const cell = document.createElement('div');
         const isActive = activeDays.has(dateStr);
-        cell.className = 'heat-cell ' + (isActive ? 'heat-on' : 'heat-off');
-        cell.title = dateStr;
+        const isHeavy  = heavyDays.has(dateStr);
+        cell.className = 'heat-cell ' + (isHeavy ? 'heat-on hot' : isActive ? 'heat-on' : 'heat-off');
+        cell.title = dateStr + (isHeavy ? ' • เรียนหลายคอร์สวันนี้' : isActive ? ' • มีการเรียน' : '');
         heatmap.appendChild(cell);
     }
 }
@@ -693,18 +685,14 @@ async function loadLearningData() {
     // ===== HEATMAP =====
     renderHeatmap(_rawEnrollments);
 
-    // ===== BADGES =====
+    // ===== BADGES: แสดงทั้งที่ได้แล้ว (สีสด) และยังไม่ได้ (จางๆ มีเงื่อนไข) =====
     const badgesGrid = document.getElementById('badgesGrid');
-    const earned = computeBadges(_rawEnrollments, _rawQuizScores);
-    if (earned.length === 0) {
-        badgesGrid.innerHTML = '<div style="color:var(--text-dim);grid-column:1/-1;">ยังไม่ได้รับ Badge ใดเลย เริ่มเรียนเลย!</div>';
-    } else {
-        badgesGrid.innerHTML = earned.map(b => `
-            <div class="badge-item">
-                <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.icon}</div>
-                <div class="badge-name" style="color:${b.color}">${b.name}</div>
-            </div>`).join('');
-    }
+    const allBadges = computeBadges(_rawEnrollments, _rawQuizScores);
+    badgesGrid.innerHTML = allBadges.map(b => `
+        <div class="badge-item ${b.earned ? '' : 'locked'}" title="${b.earned ? 'ปลดล็อกแล้ว' : 'เงื่อนไข: ' + b.requirement}">
+            <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.earned ? b.icon : '🔒'}</div>
+            <div class="badge-name" style="color:${b.earned ? b.color : 'var(--text-dim)'}">${b.name}</div>
+        </div>`).join('');
 
     // ===== การบ้านที่ต้องติดตาม + คะแนน Quiz แต่ละคอร์ส (ไม่ผูกกับ filter เวลา — อยากเห็นทุกงานที่ค้างอยู่เสมอ) =====
     renderHomeworkFollowup();
@@ -724,16 +712,9 @@ function renderFilteredStats() {
     const cutoff = _filterDays ? Date.now() - _filterDays * 86400000 : null;
     const quizList = cutoff ? _rawQuizScores.filter(q => q.updated_at && new Date(q.updated_at).getTime() >= cutoff) : _rawQuizScores;
 
-    // คำนวณสถานะจาก completed_lessons จริง (ไม่ใช่แค่ progress field ที่อาจค้าง)
-    const calcPct = (e) => {
-        const done  = (e.completed_lessons || []).length;
-        const total = e.total_lessons > 0
-            ? e.total_lessons
-            : (e.courses?.lessons?.length || done || 1);
-        return done > 0 ? Math.min(100, Math.round((done / total) * 100)) : (e.progress || 0);
-    };
-    const completed  = enrList.filter(e => calcPct(e) >= 100);
-    const inProgress = enrList.filter(e => { const p = calcPct(e); return p > 0 && p < 100; });
+    // คำนวณสถานะจาก completed_lessons จริง (ไม่ใช่แค่ progress field ที่อาจค้าง) — ใช้ calcCoursePct() ตัวเดียวกับที่ badge ใช้
+    const completed  = enrList.filter(e => calcCoursePct(e) >= 100);
+    const inProgress = enrList.filter(e => { const p = calcCoursePct(e); return p > 0 && p < 100; });
 
     // "เวลาเรียนรวม" เก็บเป็นยอดสะสมในตาราง enrollments ไม่มี timestamp รายครั้ง เลยกรองตามช่วงเวลาไม่ได้แม่นยำ
     // จึงแสดงเป็นยอดสะสมทั้งหมดเสมอ (ไม่ขึ้นกับ filter) และบอกไว้ให้ชัดเจนกันเข้าใจผิด
@@ -751,10 +732,22 @@ function renderFilteredStats() {
     // ===== STAT CARDS =====
     document.getElementById('statTotalHours').innerHTML =
         `${displayTime} <small style="font-size:0.85rem;color:var(--text-dim)">(สะสมทั้งหมด)</small>`;
+    document.getElementById('statHoursSub').textContent =
+        enrList.length > 0 ? `เฉลี่ย ${Math.round(totalWatchSec / enrList.length / 60)} นาที/คอร์ส` : '';
+
     document.getElementById('statCourseDone').innerHTML =
         `${completed.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
+    document.getElementById('statCourseSub').textContent =
+        enrList.length > 0 ? `จากทั้งหมด ${enrList.length} คอร์สที่ลงทะเบียน` : 'ยังไม่ได้ลงทะเบียนคอร์ส';
+
     document.getElementById('statCourseActive').innerHTML =
         `${inProgress.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
+    const avgActivePct = inProgress.length
+        ? Math.round(inProgress.reduce((s,e) => s + calcCoursePct(e), 0) / inProgress.length)
+        : 0;
+    document.getElementById('statActiveSub').textContent =
+        inProgress.length > 0 ? `เฉลี่ยคืบหน้า ${avgActivePct}% ในคอร์สที่กำลังเรียน` : '';
+
     document.getElementById('statAvgQuiz').innerHTML = quizList.length
         ? `${avgQuiz} <small style="font-size:1rem;color:var(--text-dim)">%</small>`
         : `— <small style="font-size:1rem;color:var(--text-dim)">%</small>`;
@@ -794,15 +787,20 @@ function renderFilteredStats() {
         }).join('');
     }
 
-    // ===== BAR CHART (quiz scores by day of week ในช่วงที่เลือก) =====
-    const dayData = [0,0,0,0,0,0,0];
+    // ===== BAR CHART: คะแนน Quiz เฉลี่ยตามวันในสัปดาห์ (ในช่วงที่เลือก) =====
+    // หมายเหตุ: DB เก็บเวลาเรียนเป็นยอดสะสมรวมต่อคอร์สเท่านั้น ไม่มี timestamp รายวัน
+    // จึงคำนวณ "ชั่วโมงเรียนรายวัน" จริงไม่ได้ — ใช้ "คะแนน Quiz เฉลี่ยตามวัน" แทน ซึ่งเป็นข้อมูลที่มี timestamp แม่นยำจริง
+    const daySum   = [0,0,0,0,0,0,0];
+    const dayCount = [0,0,0,0,0,0,0];
     quizList.forEach(q => {
         if (q.updated_at) {
             const day = new Date(q.updated_at).getDay(); // 0=อาทิตย์
             const idx = day === 0 ? 6 : day - 1; // map จ=0 ... อา=6
-            dayData[idx] += q.pct || 0;
+            daySum[idx]   += q.pct || 0;
+            dayCount[idx] += 1;
         }
     });
+    const dayData = daySum.map((sum, i) => dayCount[i] ? Math.round(sum / dayCount[i]) : 0);
     renderBarChart(dayData);
 }
 
