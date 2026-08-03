@@ -680,6 +680,47 @@
             margin-bottom: 1rem;
         }
         .quiz-scope-title { font-weight: 600; margin-bottom: 0.75rem; }
+
+        /* === Results Tab (ผลการเรียนของฉัน) === */
+        .res-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem; }
+        .res-stat-card {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 1rem 1.1rem;
+        }
+        .res-stat-label { font-size: 0.76rem; color: var(--text-dim); margin-bottom: 0.35rem; }
+        .res-stat-value { font-size: 1.4rem; font-weight: 700; }
+        .res-stat-sub { font-size: 0.74rem; color: var(--text-dim); margin-top: 0.2rem; }
+        .res-section { margin-bottom: 1.75rem; }
+        .res-section-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+        .res-lesson-row {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.88rem;
+        }
+        .res-lesson-row:last-child { border-bottom: none; }
+        .res-lesson-icon { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; }
+        .res-lesson-icon.done { background: rgba(16,185,129,0.18); color: #10b981; }
+        .res-lesson-icon.pending { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+        .res-lesson-icon.locked { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+        .res-lesson-title { flex: 1; }
+        .res-review-tip {
+            background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+            border-left: 3px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1.1rem;
+            font-size: 0.85rem; margin-bottom: 1.5rem; line-height: 1.6;
+        }
+        .res-qa-item { padding: 0.7rem 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.85rem; }
+        .res-qa-item:first-child { border-top: none; }
+        .res-qa-q { margin-bottom: 0.3rem; }
+        .res-qa-answer { color: var(--text-dim); font-size: 0.8rem; }
+        .res-qa-result { font-weight: 600; }
+        .res-qa-result.correct { color: #10b981; }
+        .res-qa-result.wrong { color: #ef4444; }
+        .res-qa-result.pending { color: #f59e0b; }
+        .res-hw-row {
+            display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;
+            padding: 0.7rem 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.86rem;
+        }
+        .res-hw-row:first-child { border-top: none; }
+        .res-hw-comment { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.2rem; }
         .hw-card {
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
@@ -1332,6 +1373,7 @@
                 <div class="lesson-tab active" onclick="switchTab('lessons', this)">📚 บทเรียน</div>
                 <div class="lesson-tab" id="quizTabBtn" onclick="switchTab('quiz', this)" style="display:none;">📝 แบบทดสอบ</div>
                 <div class="lesson-tab" id="hwTabBtn" onclick="switchTab('homework', this)" style="display:none;">📋 การบ้าน</div>
+                <div class="lesson-tab" id="resultsTabBtn" onclick="switchTab('results', this)">📊 ผลการเรียนของฉัน</div>
             </div>
 
             <!-- Lesson list panel -->
@@ -1361,6 +1403,13 @@
                     <div id="hwPanelList">
                         <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Results panel (ฝั่งนักเรียน: วิเคราะห์ผลการเรียนของตัวเอง) -->
+            <div id="tabResults" class="tab-panel">
+                <div id="resultsPanelContent">
+                    <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
                 </div>
             </div>
         </div>
@@ -2463,8 +2512,8 @@ async function loadCourseData() {
 
         // เปิดแท็บอัตโนมัติถ้ามี ?tab= ใน URL (มาจากหน้า "แบบฝึกหัดของฉัน")
         const _tabParam = new URLSearchParams(window.location.search).get('tab');
-        if (_tabParam === 'quiz' || _tabParam === 'homework') {
-            const tabBtnId = _tabParam === 'quiz' ? 'quizTabBtn' : 'hwTabBtn';
+        if (_tabParam === 'quiz' || _tabParam === 'homework' || _tabParam === 'results') {
+            const tabBtnId = _tabParam === 'quiz' ? 'quizTabBtn' : _tabParam === 'homework' ? 'hwTabBtn' : 'resultsTabBtn';
             const tabBtn = document.getElementById(tabBtnId);
             if (tabBtn && tabBtn.style.display !== 'none') {
                 switchTab(_tabParam, tabBtn);
@@ -3121,7 +3170,9 @@ let _pdfTotalPages   = 0;
 let _pdfScale        = 1.0;
 let _pdfUrl          = '';
 let _pdfRenderedPages = new Set(); // หน้าที่ถูก render ไปแล้ว (lazy render ตามที่เลื่อนไปเจอ)
-let _pdfMaxPageSeen  = 1;          // หน้าที่ไกลสุดที่เคยเลื่อนไปถึง (ใช้คิด progress แบบเดียวกับวิดีโอ)
+let _pdfReadPages    = new Set();  // หน้าที่ "อยู่นิ่งดูจริง" นานพอ ถึงจะนับว่าอ่านแล้ว (กันเลื่อนเร็วๆ ข้ามไปหน้าสุดท้ายแล้วนับว่าอ่านจบ)
+let _pdfDwellTimer   = null;       // ตัวจับเวลาว่าหน้าปัจจุบันอยู่นิ่งพอที่จะนับว่า "อ่านแล้ว" หรือยัง
+const PDF_DWELL_MS   = 1800;       // ต้องอยู่หน้าเดิมอย่างน้อยเท่านี้ (มิลลิวินาที) ถึงจะนับว่าอ่านหน้านั้นแล้ว
 let _pdfPageObserver = null;
 let _pdfResizeTimer  = null;
 
@@ -3146,7 +3197,9 @@ async function renderPDFViewer(container, fileUrl, title) {
     _pdfDoc           = null;
     _pdfScale         = 1.0;
     _pdfRenderedPages = new Set();
-    _pdfMaxPageSeen   = 1;
+    _pdfReadPages     = new Set();
+    clearTimeout(_pdfDwellTimer);
+    _pdfDwellTimer    = null;
     if (_pdfPageObserver) { _pdfPageObserver.disconnect(); _pdfPageObserver = null; }
 
     container.innerHTML = `
@@ -3291,6 +3344,14 @@ async function renderPDFViewer(container, fileUrl, title) {
 
         setupPdfScrollObserver();
 
+        // เริ่มจับเวลา dwell ของหน้าแรกทันที (onPdfPageChanged ทำงานเฉพาะตอน "เปลี่ยน" หน้า
+        // ถ้าไม่เริ่มไว้ตรงนี้ หน้าแรกที่เห็นตั้งแต่เปิดจะไม่มีวันถูกนับว่า "อ่านแล้ว" เลยถ้าไม่เลื่อนออกแล้วเลื่อนกลับ)
+        clearTimeout(_pdfDwellTimer);
+        _pdfDwellTimer = setTimeout(() => {
+            _pdfReadPages.add(_pdfCurPage);
+            updatePdfReadProgress();
+        }, PDF_DWELL_MS);
+
         // โหลดเนื้อหา PDF ให้ผู้ช่วย AI ใช้ตอบคำถาม
         loadPdfContext(fileUrl);
 
@@ -3400,7 +3461,7 @@ function setupPdfScrollObserver() {
     document.querySelectorAll('.pdf-page-wrap').forEach(el => _pdfPageObserver.observe(el));
 }
 
-// เรียกทุกครั้งที่ "หน้าปัจจุบัน" เปลี่ยนตอนเลื่อน — อัปเดต progress / เลขหน้า / ให้ Avatar อธิบาย
+// เรียกทุกครั้งที่ "หน้าปัจจุบัน" เปลี่ยนตอนเลื่อน — อัปเดตเลขหน้า / ตั้งตัวจับเวลาว่าจะนับว่า "อ่านแล้ว" ไหม / ให้ Avatar อธิบาย
 function onPdfPageChanged(pageNum) {
     if (pageNum === _pdfCurPage) return;
     _pdfCurPage = pageNum;
@@ -3408,14 +3469,13 @@ function onPdfPageChanged(pageNum) {
     const pageInput = document.getElementById('pdfPageInput');
     if (pageInput) pageInput.value = pageNum;
 
-    // progress คิดจาก "หน้าที่ไกลสุดที่เคยเลื่อนไปถึง" เหมือนหลักการกันข้ามของวิดีโอ (เลื่อนย้อนกลับไปทวนไม่ทำให้ % ลด)
-    if (pageNum > _pdfMaxPageSeen) _pdfMaxPageSeen = pageNum;
-    const pct   = Math.round((_pdfMaxPageSeen / _pdfTotalPages) * 100);
-    const label = document.getElementById('pdfProgressLabel');
-    if (label) label.textContent = pct + '%';
-
-    updateLessonProgress(pct);
-    if (pct >= 90) autoMarkLessonDone();
+    // กันเลื่อนเร็วๆ (ลาก scrollbar/หมุนเมาส์รัวๆ) ข้ามจากหน้าแรกไปหน้าสุดท้ายแล้วนับว่า "อ่านจบ" ทั้งที่ไม่ได้อ่านเลย
+    // เงื่อนไข: ต้องอยู่หน้าเดิมนิ่งๆ อย่างน้อย PDF_DWELL_MS ก่อน ถึงจะนับว่าอ่านหน้านั้นแล้ว — เปลี่ยนหน้าก่อนครบเวลา ตัวจับเวลาจะถูกยกเลิก ไม่นับ
+    clearTimeout(_pdfDwellTimer);
+    _pdfDwellTimer = setTimeout(() => {
+        _pdfReadPages.add(pageNum);
+        updatePdfReadProgress();
+    }, PDF_DWELL_MS);
 
     // Avatar อธิบายหน้าที่กำลังดูอยู่ (debounce 2 วิ กันเรียกถี่เกินตอนเลื่อนเร็วๆ)
     if (document.getElementById('avatarScene')?.classList.contains('open') && !avatarSpeaking) {
@@ -3424,6 +3484,16 @@ function onPdfPageChanged(pageNum) {
             avatarExplainCurrentPage(_pdfCurPage);
         }, 2000);
     }
+}
+
+// คำนวณ progress จาก "จำนวนหน้าที่อ่านจริง" (มี dwell time ผ่านเกณฑ์) ไม่ใช่แค่หน้าที่ไกลสุดที่เลื่อนผ่าน
+function updatePdfReadProgress() {
+    const pct = Math.round((_pdfReadPages.size / _pdfTotalPages) * 100);
+    const label = document.getElementById('pdfProgressLabel');
+    if (label) label.textContent = pct + '%';
+
+    updateLessonProgress(pct);
+    if (pct >= 90) autoMarkLessonDone();
 }
 
 function updateZoomLabel() {
@@ -3567,7 +3637,153 @@ window.switchTab = function(tab, btn) {
     btn.classList.add('active');
     const panelId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
     document.getElementById(panelId).classList.add('active');
+    if (tab === 'results') renderResultsTab();
 };
+
+// === Results Tab (ผลการเรียนของฉัน) — วิเคราะห์ผลการเรียนส่วนตัวของนักเรียนคนนี้ในคอร์สนี้ ===
+let cachedMySubmissions = null; // แคชการส่งงานทั้งหมดของ user คนนี้ในคอร์สนี้
+
+async function renderResultsTab() {
+    const container = document.getElementById('resultsPanelContent');
+    if (!container || !currentCourse) return;
+    container.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+
+    // ดึงคะแนน quiz ล่าสุด (เผื่อพึ่งทำเสร็จ) + การส่งงานทั้งหมดของคอร์สนี้
+    await loadQuizScoreCache();
+    if (currentUser && courseId) {
+        try {
+            const { data } = await supabase.from('submissions').select('*')
+                .eq('user_id', currentUser.id).eq('course_id', courseId);
+            cachedMySubmissions = data || [];
+        } catch(e) { cachedMySubmissions = []; }
+    } else {
+        cachedMySubmissions = [];
+    }
+
+    const lessons     = currentCourse.lessons || [];
+    const totalL       = lessons.length || 1;
+    const doneCount     = completedLessons.size;
+    const overallPct    = Math.round((doneCount / totalL) * 100);
+
+    let watchSecTotal = 0;
+    Object.values(videoPositions || {}).forEach(v => { if (v && v.lastPosition) watchSecTotal += v.lastPosition; });
+    const watchMin = Math.round(watchSecTotal / 60);
+
+    const qz = cachedQuizScoreRow;
+    const gradedHw   = cachedMySubmissions.filter(s => s.status === 'graded' && s.grade != null);
+    const pendingHw  = cachedMySubmissions.filter(s => s.status === 'submitted');
+    const hwAvg      = gradedHw.length ? Math.round(gradedHw.reduce((s,x)=>s+(x.grade||0),0)/gradedHw.length) : null;
+    const totalHwCount = (currentCourse.homework || []).length;
+
+    // หา insight ง่ายๆ: บทที่ตอบผิดเยอะสุดใน Quiz ควรกลับไปทบทวน
+    let reviewTip = '';
+    if (qz && Array.isArray(qz.answers)) {
+        const wrongByLesson = {};
+        qz.answers.forEach(a => {
+            if (a.isCorrect === false) {
+                const li  = a.lessonIndex;
+                const key = li == null ? 'ทั้งคอร์ส' : (lessons[li]?.title || `บทที่ ${li+1}`);
+                wrongByLesson[key] = (wrongByLesson[key]||0) + 1;
+            }
+        });
+        const entries = Object.entries(wrongByLesson).sort((a,b) => b[1]-a[1]);
+        if (entries.length) {
+            reviewTip = `💡 ลองทบทวนเพิ่มเติม: <strong>${entries[0][0]}</strong> (ตอบผิด ${entries[0][1]} ข้อ)`;
+        }
+    }
+
+    let html = `
+    <div class="res-stats-grid">
+        <div class="res-stat-card">
+            <div class="res-stat-label">ความคืบหน้ารวม</div>
+            <div class="res-stat-value">${overallPct}%</div>
+            <div class="res-stat-sub">${doneCount}/${totalL} บทเรียน</div>
+        </div>
+        <div class="res-stat-card">
+            <div class="res-stat-label">คะแนน Quiz</div>
+            <div class="res-stat-value">${qz ? qz.pct+'%' : '—'}</div>
+            <div class="res-stat-sub">${qz ? qz.score+'/'+qz.total+' คะแนน'+(qz.needs_review?' • รอตรวจบางข้อ':'') : 'ยังไม่ได้ทำ'}</div>
+        </div>
+        <div class="res-stat-card">
+            <div class="res-stat-label">การบ้านเฉลี่ย</div>
+            <div class="res-stat-value">${hwAvg !== null ? hwAvg+'%' : '—'}</div>
+            <div class="res-stat-sub">${gradedHw.length}/${totalHwCount} ชิ้นตรวจแล้ว</div>
+        </div>
+        <div class="res-stat-card">
+            <div class="res-stat-label">เวลาเรียน (วิดีโอ)</div>
+            <div class="res-stat-value">${watchMin >= 60 ? (Math.round(watchMin/60*10)/10)+' ชม.' : watchMin+' น.'}</div>
+            <div class="res-stat-sub">${pendingHw.length > 0 ? pendingHw.length+' งานรอครูตรวจ' : 'ไม่มีงานค้าง'}</div>
+        </div>
+    </div>`;
+
+    if (reviewTip) html += `<div class="res-review-tip">${reviewTip}</div>`;
+
+    // ความคืบหน้าตามบทเรียน
+    html += `<div class="res-section">
+        <div class="res-section-title">📚 ความคืบหน้าตามบทเรียน</div>
+        <div class="quiz-scope-block">`;
+    lessons.forEach((lesson, i) => {
+        const isDone   = completedLessons.has(`lesson_${i}`);
+        const unlocked = isLessonUnlocked(i);
+        const iconCls  = isDone ? 'done' : unlocked ? 'pending' : 'locked';
+        const iconTxt  = isDone ? '✓' : unlocked ? (i+1) : '🔒';
+        const statusTxt = isDone ? 'เรียนจบแล้ว' : unlocked ? 'ยังไม่จบ' : 'ยังไม่ปลดล็อก';
+        html += `<div class="res-lesson-row">
+            <div class="res-lesson-icon ${iconCls}">${iconTxt}</div>
+            <div class="res-lesson-title">${lesson.title || 'บทที่ '+(i+1)}</div>
+            <div style="color:var(--text-dim);font-size:0.78rem;">${statusTxt}</div>
+        </div>`;
+    });
+    html += `</div></div>`;
+
+    // รายละเอียด Quiz แต่ละข้อ
+    if (qz && Array.isArray(qz.answers) && qz.answers.length > 0) {
+        html += `<div class="res-section">
+            <div class="res-section-title">📝 รายละเอียด Quiz</div>
+            <div class="quiz-scope-block">`;
+        qz.answers.forEach(a => {
+            let resultLabel, resultCls;
+            if (a.needsReview)      { resultLabel = 'รอครูตรวจ';                         resultCls = 'pending'; }
+            else if (a.isCorrect)   { resultLabel = `ถูก (+${a.pointsEarned}/${a.maxPoints})`; resultCls = 'correct'; }
+            else                    { resultLabel = `ผิด (0/${a.maxPoints})`;             resultCls = 'wrong'; }
+            const answerShown = a.answerText || a.selected || (a.selectedMultiple||[]).join(', ') || '(ไม่ได้ตอบ)';
+            html += `<div class="res-qa-item">
+                <div class="res-qa-q">${a.question}</div>
+                <div class="res-qa-answer">คำตอบของคุณ: ${answerShown} — <span class="res-qa-result ${resultCls}">${resultLabel}</span></div>
+            </div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    // รายละเอียดการบ้าน
+    if (totalHwCount > 0) {
+        html += `<div class="res-section">
+            <div class="res-section-title">📋 รายละเอียดการบ้าน</div>
+            <div class="quiz-scope-block">`;
+        (currentCourse.homework || []).forEach((hw, idx) => {
+            const sub = cachedMySubmissions.find(s => s.homework_index === idx);
+            let badge, comment = '';
+            if (!sub) {
+                badge = `<span style="color:var(--text-dim);">ยังไม่ส่ง</span>`;
+            } else if (sub.status === 'graded') {
+                badge = `<span style="color:#10b981;font-weight:600;">${sub.grade}/${hw.maxScore||100}</span>`;
+                if (sub.comment) comment = `<div class="res-hw-comment">💬 ${sub.comment}</div>`;
+            } else {
+                badge = `<span style="color:#f59e0b;">รอตรวจ</span>`;
+            }
+            html += `<div class="res-hw-row">
+                <div><div>${hw.title}</div>${comment}</div>
+                ${badge}
+            </div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    container.innerHTML = html;
+}
 
 // === Homework Panel ===
 async function loadHomeworkPanel() {
