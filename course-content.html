@@ -3114,13 +3114,16 @@ function renderImageViewer(container, fileUrl, title) {
     `;
 }
 
-// ============ PDF.js VIEWER — Teams-style ============
-let _pdfDoc        = null;
-let _pdfCurPage    = 1;
-let _pdfTotalPages = 0;
-let _pdfRendering  = false;
-let _pdfScale      = 1.0;
-let _pdfUrl        = '';
+// ============ PDF.js VIEWER — Continuous Scroll (responsive) ============
+let _pdfDoc          = null;
+let _pdfCurPage      = 1;
+let _pdfTotalPages   = 0;
+let _pdfScale        = 1.0;
+let _pdfUrl          = '';
+let _pdfRenderedPages = new Set(); // หน้าที่ถูก render ไปแล้ว (lazy render ตามที่เลื่อนไปเจอ)
+let _pdfMaxPageSeen  = 1;          // หน้าที่ไกลสุดที่เคยเลื่อนไปถึง (ใช้คิด progress แบบเดียวกับวิดีโอ)
+let _pdfPageObserver = null;
+let _pdfResizeTimer  = null;
 
 async function ensurePdfJs() {
     if (window.pdfjsLib) return true;
@@ -3138,10 +3141,13 @@ async function ensurePdfJs() {
 }
 
 async function renderPDFViewer(container, fileUrl, title) {
-    _pdfUrl      = fileUrl;
-    _pdfCurPage  = 1;
-    _pdfDoc      = null;
-    _pdfScale    = 1.0;
+    _pdfUrl           = fileUrl;
+    _pdfCurPage       = 1;
+    _pdfDoc           = null;
+    _pdfScale         = 1.0;
+    _pdfRenderedPages = new Set();
+    _pdfMaxPageSeen   = 1;
+    if (_pdfPageObserver) { _pdfPageObserver.disconnect(); _pdfPageObserver = null; }
 
     container.innerHTML = `
         <div id="pdfViewer" style="
@@ -3149,7 +3155,7 @@ async function renderPDFViewer(container, fileUrl, title) {
             width:100%; height:100%;
             background:#1a1a2e; border-radius:8px; overflow:hidden;">
 
-            <!-- Toolbar แบบ Teams -->
+            <!-- Toolbar -->
             <div id="pdfToolbar" style="
                 display:flex; align-items:center; justify-content:center;
                 gap:6px; padding:8px 16px;
@@ -3157,14 +3163,14 @@ async function renderPDFViewer(container, fileUrl, title) {
                 border-bottom:1px solid rgba(255,255,255,0.08);
                 flex-shrink:0; flex-wrap:wrap;">
 
-                <button onclick="pdfPrevPage()" title="หน้าก่อนหน้า"
+                <button onclick="pdfPrevPage()" title="เลื่อนขึ้นหน้าก่อนหน้า"
                     style="background:rgba(255,255,255,0.1);border:none;color:white;
                     width:32px;height:32px;border-radius:6px;cursor:pointer;
                     font-size:1rem;display:flex;align-items:center;justify-content:center;
                     transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#9650;</button>
 
-                <button onclick="pdfNextPage()" title="หน้าถัดไป"
+                <button onclick="pdfNextPage()" title="เลื่อนไปหน้าถัดไป"
                     style="background:rgba(255,255,255,0.1);border:none;color:white;
                     width:32px;height:32px;border-radius:6px;cursor:pointer;
                     font-size:1rem;display:flex;align-items:center;justify-content:center;
@@ -3207,7 +3213,7 @@ async function renderPDFViewer(container, fileUrl, title) {
 
                 <span id="pdfProgressLabel" style="font-size:0.78rem;color:#8b5cf6;font-weight:600;"></span>
 
-                <div style="margin-left:auto;display:flex;gap:6px;">
+                <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;">
                     <button onclick="onAvatarExplainPage()"
                         id="btnAvatarExplain"
                         title="ให้อาจารย์ AI อธิบายหน้านี้"
@@ -3230,14 +3236,14 @@ async function renderPDFViewer(container, fileUrl, title) {
                 </div>
             </div>
 
-            <!-- Canvas area -->
+            <!-- Scroll area: ทุกหน้าเรียงต่อกันแนวตั้ง เลื่อนขึ้น-ลงได้ -->
             <div id="pdfCanvasWrap" style="
-                flex:1; overflow-y:auto; overflow-x:auto;
-                display:flex; justify-content:center; align-items:center;
-                padding:8px; background:#1e1e2e;">
-                <canvas id="pdfCanvas" style="
-                    box-shadow:0 4px 32px rgba(0,0,0,0.6);
-                    border-radius:2px; display:block;"></canvas>
+                flex:1; overflow-y:auto; overflow-x:hidden;
+                background:#1e1e2e; padding:16px 8px 32px;
+                scroll-behavior:smooth;">
+                <div id="pdfPagesContainer" style="
+                    display:flex; flex-direction:column; align-items:center; gap:16px;
+                    max-width:100%;"></div>
             </div>
 
             <!-- Loading overlay -->
@@ -3275,14 +3281,17 @@ async function renderPDFViewer(container, fileUrl, title) {
         if (totalEl)   totalEl.textContent  = `/ ${_pdfTotalPages}`;
         if (pageInput) pageInput.max        = _pdfTotalPages;
 
+        buildPdfPagePlaceholders();
         document.getElementById('pdfLoadingMsg').style.display = 'none';
 
-        // Auto-fit หลังจาก browser render container แล้ว
+        // รอ browser วาง layout ก่อนคำนวณความกว้างที่พอดี
         await new Promise(r => requestAnimationFrame(r));
         await new Promise(r => requestAnimationFrame(r));
         await pdfAutoFit();
 
-        // Load PDF context for chatbot
+        setupPdfScrollObserver();
+
+        // โหลดเนื้อหา PDF ให้ผู้ช่วย AI ใช้ตอบคำถาม
         loadPdfContext(fileUrl);
 
     } catch(e) {
@@ -3294,72 +3303,127 @@ async function renderPDFViewer(container, fileUrl, title) {
     }
 }
 
+// สร้างกล่องของแต่ละหน้าไว้ล่วงหน้า (ยังไม่ render เนื้อหา — จะ render ตอนเลื่อนไปเจอจริง)
+function buildPdfPagePlaceholders() {
+    const pagesContainer = document.getElementById('pdfPagesContainer');
+    if (!pagesContainer) return;
+    pagesContainer.innerHTML = '';
+    for (let i = 1; i <= _pdfTotalPages; i++) {
+        const wrap = document.createElement('div');
+        wrap.className = 'pdf-page-wrap';
+        wrap.id = `pdfPage-${i}`;
+        wrap.dataset.pageNum = i;
+        wrap.style.cssText = 'position:relative;box-shadow:0 4px 24px rgba(0,0,0,0.5);border-radius:2px;background:#fff;flex-shrink:0;';
+        wrap.innerHTML = `
+            <canvas id="pdfCanvas-${i}" style="display:block;width:100%;height:100%;"></canvas>
+            <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.55);color:#fff;
+                font-size:0.7rem;padding:2px 7px;border-radius:5px;pointer-events:none;">${i} / ${_pdfTotalPages}</div>`;
+        pagesContainer.appendChild(wrap);
+    }
+}
+
+// คำนวณ scale ให้พอดีความกว้างจอ (responsive) แล้วตั้งขนาดกล่องทุกหน้าไว้ล่วงหน้า กัน layout กระโดดตอนเลื่อน
 async function pdfAutoFit() {
     if (!_pdfDoc) return;
     try {
-        const page      = await _pdfDoc.getPage(_pdfCurPage || 1);
-        const viewport0 = page.getViewport({ scale: 1 });
+        const page0     = await _pdfDoc.getPage(1);
+        const viewport0 = page0.getViewport({ scale: 1 });
         const wrap      = document.getElementById('pdfCanvasWrap');
         if (!wrap) return;
-        const availW = wrap.clientWidth  - 16;
-        const availH = wrap.clientHeight - 16;
-        const scaleW = availW / viewport0.width;
-        const scaleH = availH / viewport0.height;
-        _pdfScale    = Math.min(scaleW, scaleH, 3.0);
+        const availW = Math.max(wrap.clientWidth - 32, 200);
+        _pdfScale    = Math.min(availW / viewport0.width, 3.0);
         updateZoomLabel();
-        await pdfRenderPage(_pdfCurPage || 1);
+        await resizeAllPdfPages();
     } catch(e) { console.warn('autoFit error:', e); }
 }
 
-async function pdfRenderPage(pageNum) {
-    if (!_pdfDoc || _pdfRendering) return;
-    _pdfRendering = true;
-    _pdfCurPage   = Math.max(1, Math.min(pageNum, _pdfTotalPages));
+// ตั้งขนาดกล่องของทุกหน้าตาม scale ปัจจุบัน แล้ว re-render เฉพาะหน้าที่เคย render ไปแล้ว
+async function resizeAllPdfPages() {
+    if (!_pdfDoc) return;
+    for (let i = 1; i <= _pdfTotalPages; i++) {
+        try {
+            const page = await _pdfDoc.getPage(i);
+            const vp   = page.getViewport({ scale: _pdfScale });
+            const el   = document.getElementById(`pdfPage-${i}`);
+            if (el) { el.style.width = vp.width + 'px'; el.style.height = vp.height + 'px'; }
+        } catch(e) { /* ข้ามหน้าที่มีปัญหาไป ไม่ให้ทั้งฟังก์ชันหยุด */ }
+    }
+    const already = Array.from(_pdfRenderedPages);
+    for (const p of already) await renderSinglePdfPage(p);
+}
 
+// render เนื้อหาจริงของหน้าเดียว (เรียกตอน lazy-load เจอ หรือตอน zoom เปลี่ยน)
+async function renderSinglePdfPage(pageNum) {
+    if (!_pdfDoc) return;
     try {
-        const page     = await _pdfDoc.getPage(_pdfCurPage);
+        const page     = await _pdfDoc.getPage(pageNum);
         const viewport = page.getViewport({ scale: _pdfScale });
-        const canvas   = document.getElementById('pdfCanvas');
-        if (!canvas) { _pdfRendering = false; return; }
+        const canvas   = document.getElementById(`pdfCanvas-${pageNum}`);
+        if (!canvas) return;
 
         const dpr = window.devicePixelRatio || 1;
-        canvas.width        = viewport.width  * dpr;
-        canvas.height       = viewport.height * dpr;
+        canvas.width  = viewport.width  * dpr;
+        canvas.height = viewport.height * dpr;
         canvas.style.width  = viewport.width  + 'px';
         canvas.style.height = viewport.height + 'px';
-        canvas.style.display = 'block';
-        canvas.style.margin  = '0 auto';
 
         const ctx = canvas.getContext('2d');
-        ctx.scale(dpr, dpr);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, viewport.width, viewport.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
 
-        // Scroll canvas wrap to top on page change
-        const wrap = document.getElementById('pdfCanvasWrap');
-        if (wrap) wrap.scrollTop = 0;
+        _pdfRenderedPages.add(pageNum);
+    } catch(e) { console.warn('renderSinglePdfPage error:', pageNum, e); }
+}
 
-        // Update UI
-        const pageInput = document.getElementById('pdfPageInput');
-        if (pageInput) pageInput.value = _pdfCurPage;
+// สังเกตว่าผู้ใช้เลื่อนไปหน้าไหน: lazy-render หน้าที่เพิ่งเห็น + อัปเดต "หน้าปัจจุบัน" ตามหน้าที่เห็นเยอะสุดตอนนี้
+function setupPdfScrollObserver() {
+    const wrap = document.getElementById('pdfCanvasWrap');
+    if (!wrap) return;
+    if (_pdfPageObserver) _pdfPageObserver.disconnect();
 
-        const pct   = Math.round((_pdfCurPage / _pdfTotalPages) * 100);
-        const label = document.getElementById('pdfProgressLabel');
-        if (label) label.textContent = pct + '%';
+    _pdfPageObserver = new IntersectionObserver((entries) => {
+        let bestPage = null, bestRatio = 0;
+        entries.forEach(entry => {
+            const pageNum = parseInt(entry.target.dataset.pageNum);
+            if (entry.isIntersecting && !_pdfRenderedPages.has(pageNum)) {
+                renderSinglePdfPage(pageNum);
+            }
+            if (entry.intersectionRatio > bestRatio) {
+                bestRatio = entry.intersectionRatio;
+                bestPage  = pageNum;
+            }
+        });
+        if (bestPage && bestRatio > 0.15) onPdfPageChanged(bestPage);
+    }, { root: wrap, threshold: [0, 0.15, 0.3, 0.5, 0.75, 1] });
 
-        updateLessonProgress(pct);
-        if (pct >= 90) autoMarkLessonDone();
+    document.querySelectorAll('.pdf-page-wrap').forEach(el => _pdfPageObserver.observe(el));
+}
 
-        // Avatar อธิบายหน้าที่กำลังดูอยู่ (debounce 2 วิ)
-        if (document.getElementById('avatarScene')?.classList.contains('open') && !avatarSpeaking) {
-            clearTimeout(window._avatarPageTimer);
-            window._avatarPageTimer = setTimeout(() => {
-                avatarExplainCurrentPage(_pdfCurPage);
-            }, 2000);
-        }
+// เรียกทุกครั้งที่ "หน้าปัจจุบัน" เปลี่ยนตอนเลื่อน — อัปเดต progress / เลขหน้า / ให้ Avatar อธิบาย
+function onPdfPageChanged(pageNum) {
+    if (pageNum === _pdfCurPage) return;
+    _pdfCurPage = pageNum;
 
-    } catch(e) { console.error('pdfRenderPage error:', e); }
-    _pdfRendering = false;
+    const pageInput = document.getElementById('pdfPageInput');
+    if (pageInput) pageInput.value = pageNum;
+
+    // progress คิดจาก "หน้าที่ไกลสุดที่เคยเลื่อนไปถึง" เหมือนหลักการกันข้ามของวิดีโอ (เลื่อนย้อนกลับไปทวนไม่ทำให้ % ลด)
+    if (pageNum > _pdfMaxPageSeen) _pdfMaxPageSeen = pageNum;
+    const pct   = Math.round((_pdfMaxPageSeen / _pdfTotalPages) * 100);
+    const label = document.getElementById('pdfProgressLabel');
+    if (label) label.textContent = pct + '%';
+
+    updateLessonProgress(pct);
+    if (pct >= 90) autoMarkLessonDone();
+
+    // Avatar อธิบายหน้าที่กำลังดูอยู่ (debounce 2 วิ กันเรียกถี่เกินตอนเลื่อนเร็วๆ)
+    if (document.getElementById('avatarScene')?.classList.contains('open') && !avatarSpeaking) {
+        clearTimeout(window._avatarPageTimer);
+        window._avatarPageTimer = setTimeout(() => {
+            avatarExplainCurrentPage(_pdfCurPage);
+        }, 2000);
+    }
 }
 
 function updateZoomLabel() {
@@ -3367,17 +3431,23 @@ function updateZoomLabel() {
     if (el) el.textContent = Math.round(_pdfScale * 100) + '%';
 }
 
-window.pdfPrevPage  = function() { if (_pdfCurPage > 1) pdfRenderPage(_pdfCurPage - 1); };
+function scrollToPdfPage(pageNum) {
+    pageNum = Math.max(1, Math.min(pageNum, _pdfTotalPages || 1));
+    const el = document.getElementById(`pdfPage-${pageNum}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-// Re-fit on window resize
+window.pdfPrevPage = function() { scrollToPdfPage(_pdfCurPage - 1); };
+window.pdfNextPage = function() { scrollToPdfPage(_pdfCurPage + 1); };
+window.pdfGoToPage = function(p) { scrollToPdfPage(p); };
+window.pdfZoomIn   = async function() { _pdfScale = Math.min(_pdfScale + 0.2, 3.0); updateZoomLabel(); await resizeAllPdfPages(); };
+window.pdfZoomOut  = async function() { _pdfScale = Math.max(_pdfScale - 0.2, 0.4); updateZoomLabel(); await resizeAllPdfPages(); };
+window.pdfFitWidth = function() { pdfAutoFit(); };
+
+// ปรับขนาดใหม่อัตโนมัติเมื่อหน้าจอเปลี่ยนขนาด (responsive)
 window.addEventListener('resize', () => {
-    if (_pdfDoc) setTimeout(pdfAutoFit, 100);
+    if (_pdfDoc) { clearTimeout(_pdfResizeTimer); _pdfResizeTimer = setTimeout(pdfAutoFit, 200); }
 });
-window.pdfNextPage  = function() { if (_pdfCurPage < _pdfTotalPages) pdfRenderPage(_pdfCurPage + 1); };
-window.pdfGoToPage  = function(p) { if (p >= 1 && p <= _pdfTotalPages) pdfRenderPage(p); };
-window.pdfZoomIn    = function() { _pdfScale = Math.min(_pdfScale + 0.2, 3.0); updateZoomLabel(); pdfRenderPage(_pdfCurPage); };
-window.pdfZoomOut   = function() { _pdfScale = Math.max(_pdfScale - 0.2, 0.4); updateZoomLabel(); pdfRenderPage(_pdfCurPage); };
-window.pdfFitWidth  = function() { pdfAutoFit(); };
 
 window.openPDFInNewTab = function(url) { window.open(url, '_blank'); };
 
@@ -3391,6 +3461,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === '+' || e.key === '=') pdfZoomIn();
     if (e.key === '-')                  pdfZoomOut();
 });
+
 
 
 function renderDocumentViewer(container, fileUrl, title, fileType) {
