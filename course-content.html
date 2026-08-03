@@ -1313,6 +1313,7 @@
             display:flex; flex-direction:column; align-items:center; padding-bottom:12px;
         }
     </style>
+<script src="tour.js"></script>
 </head>
 <body>
 
@@ -2395,7 +2396,17 @@ document.addEventListener('keydown', (e) => {
 supabase.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_OUT') window.location.href = '../login-page/login.html';
 });
-initCourseContent();
+initCourseContent().then(() => {
+    const tourSteps = [
+        { title: '👋 ยินดีต้อนรับสู่ SkillNest', text: 'ทัวร์สั้นๆ นี้จะพาไปรู้จักหน้าจอเรียนคอร์สภายใน 30 วินาที กดข้ามได้ตลอดถ้าไม่ต้องการดู' },
+        { target: '#lessonList', title: 'รายการบทเรียน', text: 'บทเรียนทั้งหมดของคอร์สอยู่ตรงนี้ เรียงตามลำดับ ต้องเรียนบทก่อนหน้าให้จบก่อน ถึงจะปลดล็อกบทถัดไปได้', placement: 'right' },
+        { target: '#lessonPlayer', title: 'พื้นที่เรียน', text: 'เนื้อหาบทเรียน (วิดีโอ/PDF) จะแสดงตรงนี้ ระบบจะบันทึกความคืบหน้าให้อัตโนมัติระหว่างเรียน', placement: 'bottom' },
+        { target: '.lesson-tabs', title: 'แท็บต่างๆ ของบทเรียน', text: 'สลับดู "แบบทดสอบ", "การบ้าน" และ "ผลการเรียนของฉัน" ได้จากแท็บเหล่านี้ (จะโชว์เฉพาะแท็บที่มีเนื้อหาจริง)', placement: 'bottom' },
+        { target: '#avatarFab', title: '🎓 อาจารย์ AI ผู้ช่วย', text: 'ติดขัดตรงไหนกดปุ่มนี้ได้เลย ถามได้ทั้งพิมพ์และพูด อาจารย์ AI จะช่วยอธิบายเนื้อหาที่กำลังเรียนอยู่ให้', placement: 'left' },
+    ];
+    SkillNestTour.autoStart(tourSteps, 'course-content');
+    SkillNestTour.mountHelpButton(tourSteps, 'course-content', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
+});
 
 async function loadAvatarConfig(creatorId) {
     if (!creatorId) return;

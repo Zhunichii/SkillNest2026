@@ -399,6 +399,7 @@
         .quizlist-row:hover { background: var(--card-hover); }
         .quizlist-pct { font-weight: 700; flex-shrink: 0; }
     </style>
+<script src="tour.js"></script>
 </head>
 <body>
 
@@ -958,7 +959,17 @@ window.rerunAIAnalysis = async function() {
     await runAIAnalysis(_enrCache, _quizCache, aiBox);
 };
 
-loadLearningData();
+loadLearningData().then(() => {
+    const tourSteps = [
+        { title: '👋 ยินดีต้อนรับสู่หน้าผลการเรียน', text: 'หน้านี้รวมภาพรวมการเรียนของคุณทุกคอร์สไว้ที่เดียว ไปดูกันทีละส่วนสั้นๆ' },
+        { target: '.stats-grid', title: 'สรุปภาพรวม', text: 'เวลาเรียนรวม, คอร์สที่เรียนจบ, คอร์สที่กำลังเรียน และคะแนน Quiz เฉลี่ย — ปรับช่วงเวลาดูได้ที่ปุ่มมุมขวาบน', placement: 'bottom' },
+        { target: '#courseProgressList', title: 'ความคืบหน้าคอร์ส', text: 'คลิกที่คอร์สไหนก็ได้ในนี้ เพื่อดูรายละเอียดเจาะลึก (คะแนน Quiz รายข้อ, การบ้านทุกชิ้น) ของคอร์สนั้นทันที', placement: 'right' },
+        { target: '#homeworkFollowupList', title: 'การบ้านที่ต้องติดตาม', text: 'รวมงานที่ยังไม่ส่งหรือรอครูตรวจจากทุกคอร์สไว้ที่เดียว ไม่ต้องเข้าไปเช็คทีละคอร์ส', placement: 'right' },
+        { target: '#badgesGrid', title: 'Badge ความสำเร็จ', text: 'สะสม Badge จากการเรียน — อันที่ยังไม่ปลดล็อกจะจางๆ พร้อมบอกเงื่อนไข ลองเอาเมาส์ไปชี้ดูได้', placement: 'top' },
+    ];
+    SkillNestTour.autoStart(tourSteps, 'learning');
+    SkillNestTour.mountHelpButton(tourSteps, 'learning', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
+});
 </script>
 
 <script src="theme-switcher.js"></script>

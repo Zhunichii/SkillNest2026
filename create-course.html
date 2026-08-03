@@ -403,6 +403,7 @@
             .wizard-progress-item.active .wizard-label { display: block; position: absolute; top: 42px; white-space: nowrap; max-width: none; }
         }
     </style>
+<script src="tour.js"></script>
 </head>
 <body>
 
@@ -2662,6 +2663,15 @@ window.createCourse = async function() {
     }
 };
 
+// ============ TUTORIAL TOUR ============
+const _createCourseTourSteps = [
+    { title: '👋 ยินดีต้อนรับสู่การสร้างคอร์ส', text: 'ขั้นตอนสร้างคอร์สแบ่งเป็น 7 ขั้นตอนย่อย ทำทีละขั้น ย้อนกลับไปแก้ไขขั้นก่อนหน้าได้ตลอดเวลา ไปดูภาพรวมกันสั้นๆ ก่อนเริ่ม' },
+    { target: '#wizardProgress', title: '7 ขั้นตอนของการสร้างคอร์ส', text: 'ข้อมูลคอร์ส → รูปปก → ผู้ช่วย AI → บทเรียน → แบบทดสอบ → การบ้าน → ตรวจสอบ — คลิกที่ขั้นตอนไหนก็ได้ที่เคยผ่านมาแล้ว เพื่อย้อนกลับไปแก้ไข', placement: 'bottom' },
+    { target: '#courseTitle', title: 'เริ่มจากข้อมูลพื้นฐาน', text: 'กรอกชื่อคอร์สและคำอธิบายที่นี่ก่อน — ถ้ามีไฟล์คำอธิบายรายวิชาอยู่แล้ว (PDF/รูปภาพ) เลื่อนลงไปหน่อย มีปุ่มให้ AI ช่วยดึงมาใส่ให้อัตโนมัติ', placement: 'bottom' },
+    { target: '.ai-gen-area', title: '✨ มีผู้ช่วย AI อยู่แทบทุกขั้นตอน', text: 'กล่องสีม่วงแบบนี้จะโผล่มาในหลายขั้นตอน ให้ AI ช่วยสร้าง CLO, โครงคอร์ส, Quiz, หรือแตกหัวข้อการบ้านจากไฟล์ให้อัตโนมัติ ลองใช้ดูได้ ไม่บังคับ', placement: 'bottom' },
+];
+SkillNestTour.autoStart(_createCourseTourSteps, 'create-course');
+SkillNestTour.mountHelpButton(_createCourseTourSteps, 'create-course', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
 </script>
 <script src="theme-switcher.js"></script>
 </body>

@@ -316,6 +316,7 @@
         .sd-hw-comment { font-size:0.78rem; color:var(--text-dim); margin-top:2px; }
         .sd-empty { color:var(--text-dim); font-size:0.85rem; padding:8px 0; }
     </style>
+<script src="tour.js"></script>
 </head>
 <body>
 
@@ -1188,7 +1189,16 @@ supabase.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_OUT') window.location.href = 'login-page/login.html';
 });
 
-init();
+init().then(() => {
+    const tourSteps = [
+        { title: '👋 ยินดีต้อนรับสู่หน้าวิเคราะห์การสอน', text: 'หน้านี้ช่วยให้คุณดูภาพรวมการสอนทั้งหมด หรือเจาะลึกทีละคอร์ส/ทีละนักเรียนได้ ไปดูกันทีละส่วน' },
+        { target: '#courseFilter', title: 'เลือกดูภาพรวม หรือเจาะลึกคอร์สเดียว', text: 'กด "ทุกคอร์ส" เพื่อดูภาพรวมทั้งหมด หรือเลือกคอร์สใดคอร์สหนึ่งเพื่อเจาะลึกเฉพาะคอร์สนั้น ข้อมูลทั้งหน้าจะเปลี่ยนตามที่เลือกทันที', placement: 'bottom' },
+        { target: '#aiCard', title: '🤖 AI วิเคราะห์ภาพรวมการสอน', text: 'ให้ AI สรุปจุดแข็ง-จุดที่ควรปรับปรุงจากข้อมูลการสอนจริง กดปุ่ม "วิเคราะห์ใหม่" ได้เมื่ออยากอัปเดต', placement: 'bottom' },
+        { target: '#studentScoreTable', title: 'รายชื่อนักเรียน — คลิกเพื่อเจาะลึกรายบุคคล', text: 'คลิกที่ชื่อนักเรียนคนไหนก็ได้ในตาราง เพื่อดูรายละเอียดเจาะลึก (คะแนน Quiz รายข้อ, การบ้านทุกชิ้น) ของคนนั้นทุกคอร์สที่เรียนกับคุณ', placement: 'top' },
+    ];
+    SkillNestTour.autoStart(tourSteps, 'teacher-analytics');
+    SkillNestTour.mountHelpButton(tourSteps, 'teacher-analytics', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
+});
 </script>
 <script src="theme-switcher.js"></script>
 </body>
