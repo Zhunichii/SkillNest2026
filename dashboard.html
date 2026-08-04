@@ -811,6 +811,7 @@
         .btn-cancel-enroll:hover { color: var(--text-main); }
         .enrolled-tag { position: absolute; top: 10px; left: 10px; background: rgba(16,185,129,0.85); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
     </style>
+<script src="tour.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -1408,7 +1409,20 @@
             }
         });
 
-        initDashboard();
+        initDashboard().then(() => {
+            const commonSteps = [
+                { title: '👋 ยินดีต้อนรับสู่ SkillNest', text: 'ทัวร์สั้นๆ นี้จะพาไปรู้จักหน้า Dashboard ภายใน 30 วินาที กดข้ามได้ตลอดถ้าไม่ต้องการดู' },
+                { target: '#searchBarWrapper', title: 'ค้นหาคอร์ส', text: 'พิมพ์ค้นหาคอร์สที่สนใจได้ตรงนี้ มีแท็กยอดนิยมและประวัติการค้นหาล่าสุดให้เลือกด้วย', placement: 'bottom' },
+                { target: '.sidebar', title: 'เมนูหลัก', text: 'สลับไปมาระหว่างหน้าต่างๆ ได้จากเมนูด้านข้างนี้ เมนูจะปรับตามบทบาทของคุณ (อาจารย์/นักเรียน)', placement: 'right' },
+                { target: '#notifWrapper', title: 'การแจ้งเตือน', text: 'คอร์สใหม่ การบ้านใหม่ หรือผลตรวจงาน จะแจ้งเตือนที่นี่', placement: 'bottom' },
+                { target: '#profileBtn', title: 'โปรไฟล์ของคุณ', text: 'ตั้งค่าบัญชี หรือออกจากระบบได้จากตรงนี้', placement: 'bottom' },
+                { target: '#courseGrid', title: 'รายการคอร์ส', text: window._currentUserType === 'teacher'
+                    ? 'คอร์สที่คุณสอนอยู่ทั้งหมดจะแสดงตรงนี้ กดปุ่ม "สร้างคอร์ส" มุมบนขวาเพื่อเริ่มสร้างคอร์สใหม่ได้เลย'
+                    : 'คอร์สทั้งหมดที่เปิดสอนแสดงตรงนี้ คลิกคอร์สที่สนใจเพื่อดูรายละเอียดและสมัครเรียนได้เลย', placement: 'top' },
+            ];
+            SkillNestTour.autoStart(commonSteps, 'dashboard');
+            SkillNestTour.mountHelpButton(commonSteps, 'dashboard', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
+        });
 
         // =============================================
         // DROPDOWN + LOGOUT

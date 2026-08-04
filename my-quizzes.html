@@ -205,152 +205,6 @@
             color: var(--text-main);
         }
 
-        /* === Modal === */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(6px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .modal-overlay.show { display: flex; }
-
-        .quiz-modal {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            width: 100%;
-            max-width: 680px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
-        .quiz-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .quiz-progress-info { font-size: 0.9rem; color: var(--text-dim); }
-
-        .btn-close-modal {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-dim);
-            padding: 0.4rem 0.75rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .quiz-modal-progress-bar {
-            height: 6px;
-            background: var(--card-hover);
-            border-radius: 3px;
-            margin-bottom: 2rem;
-            overflow: hidden;
-        }
-
-        .quiz-modal-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--purple), var(--primary-blue));
-            border-radius: 3px;
-            transition: width 0.4s ease;
-        }
-
-        .question-text { font-size: 1.15rem; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.6; }
-
-        .choice-option {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.25rem;
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            margin-bottom: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .choice-option:hover { border-color: var(--purple); background: rgba(139,92,246,0.08); }
-        .choice-option.selected { border-color: var(--primary-blue); background: rgba(59,130,246,0.12); }
-        .choice-option.correct { border-color: var(--success-green) !important; background: rgba(16,185,129,0.12) !important; }
-        .choice-option.wrong   { border-color: var(--danger-red) !important;    background: rgba(239,68,68,0.12) !important; }
-
-        .choice-letter {
-            background: var(--card-hover);
-            border-radius: 8px;
-            padding: 0.3rem 0.65rem;
-            font-weight: 700;
-            font-size: 0.9rem;
-            min-width: 36px;
-            text-align: center;
-        }
-
-        .btn-next {
-            width: 100%;
-            margin-top: 1.5rem;
-            padding: 0.9rem;
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
-        .btn-next:not(:disabled):hover { background: #2563eb; }
-
-        /* === Result === */
-        .result-screen { text-align: center; padding: 1rem 0; }
-        .result-emoji  { font-size: 4.5rem; margin-bottom: 1rem; }
-        .result-score  { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .result-sub    { color: var(--text-dim); margin-bottom: 2rem; }
-
-        .result-detail {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .result-stat { background: var(--card-bg); border-radius: 12px; padding: 1rem; }
-        .result-stat-num   { font-size: 1.6rem; font-weight: 700; }
-        .result-stat-label { font-size: 0.8rem; color: var(--text-dim); }
-
-        .btn-retry {
-            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-            color: white;
-            border: none;
-            padding: 0.9rem 2.5rem;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-right: 0.75rem;
-        }
-
-        .btn-close-result {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 0.9rem 2.5rem;
-            border-radius: 12px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
         /* === Empty / Loading === */
         .empty-state { text-align: center; padding: 80px 20px; color: var(--text-dim); }
         .empty-icon  { font-size: 4rem; margin-bottom: 1rem; }
@@ -373,6 +227,7 @@
             .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
         }
     </style>
+<script src="tour.js"></script>
 </head>
 <body>
 <div class="app-container">
@@ -406,11 +261,6 @@
     </main>
 </div>
 
-<!-- Quiz Modal -->
-<div id="quizModalOverlay" class="modal-overlay">
-    <div class="quiz-modal" id="quizModal"></div>
-</div>
-
 <script type="module">
 import { supabase } from './supabase.js';
 
@@ -431,8 +281,15 @@ let allCourses = [];   // คอร์สที่ลงทะเบียน + 
         }
     } catch(e) {}
 
-    loadQuizzes();
-})();
+    await loadQuizzes();
+})().then(() => {
+    const tourSteps = [
+        { title: '👋 ยินดีต้อนรับสู่แบบฝึกหัดของฉัน', text: 'หน้านี้รวม Quiz และการบ้านจากทุกคอร์สที่คุณลงทะเบียนไว้ที่เดียว ไม่ต้องเข้าไปเช็คทีละคอร์ส' },
+        { target: '#quizGrid', title: 'การ์ดแต่ละคอร์ส', text: 'แต่ละการ์ดจะบอกจำนวน Quiz/การบ้าน คะแนนล่าสุด (ถ้าเคยทำ) กดปุ่มเพื่อไปทำหรือดูรายละเอียดต่อได้เลย', placement: 'bottom' },
+    ];
+    SkillNestTour.autoStart(tourSteps, 'my-quizzes');
+    SkillNestTour.mountHelpButton(tourSteps, 'my-quizzes', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
+});
 
 async function loadQuizzes() {
     const grid = document.getElementById('quizGrid');
@@ -459,7 +316,6 @@ async function loadQuizzes() {
 
         const scoresMap = {};
         (quizScores || []).forEach(s => { scoresMap[s.course_id] = s; });
-        window.__completedQuiz = scoresMap;
         const subMap = {};
         (submissions || []).forEach(s => { subMap[`${s.course_id}_${s.homework_index}`] = s; });
 
@@ -489,21 +345,22 @@ async function loadQuizzes() {
             let hwDone = 0;
             hwArr.forEach((hw, hi) => { if (subMap[`${course.id}_${hi}`]) hwDone++; });
 
-            // ส่วน quiz ในการ์ด
+            // ส่วน quiz ในการ์ด — ลิงก์ไปทำที่ course-content.html โดยตรง (จุดเดียวที่มี logic ที่ถูกต้องครบ:
+            // แบ่งเป็นชุดตามบทเรียน, รองรับโจทย์แบบเลือกได้หลายข้อ/ตอบสั้น, เช็ควันเวลาเปิดให้ทำ)
             let quizSection = '';
             if (quizCount > 0) {
                 quizSection = `
                     <div class="quiz-meta">📋 แบบทดสอบ ${quizCount} ข้อ</div>
                     ${hasScore ? `
                         <div class="quiz-score-bar"><div class="quiz-score-fill" style="width:${pct}%"></div></div>
-                        <div class="quiz-score-label"><span>คะแนนของคุณ</span><span>${scoreData.score}/${scoreData.total} (${pct}%)</span></div>
+                        <div class="quiz-score-label"><span>คะแนนล่าสุดของคุณ</span><span>${scoreData.score}/${scoreData.total} (${pct}%)</span></div>
                         <div class="quiz-card-actions">
-                            <button class="btn-start-quiz" disabled style="opacity:0.55;cursor:not-allowed;">✅ ทำแบบทดสอบแล้ว</button>
+                            <a href="course-content.html?id=${course.id}&tab=quiz" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">📋 ดูผล / ทำส่วนที่เหลือ</a>
                         </div>
                     ` : `
-                        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำแบบทดสอบ • ทำได้ครั้งเดียว</p>
+                        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำแบบทดสอบ</p>
                         <div class="quiz-card-actions">
-                            <button class="btn-start-quiz" onclick="startQuiz('${course.id}')">▶️ เริ่มทำแบบทดสอบ</button>
+                            <a href="course-content.html?id=${course.id}&tab=quiz" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">▶️ เริ่มทำแบบทดสอบ</a>
                         </div>
                     `}`;
             }
@@ -534,7 +391,6 @@ async function loadQuizzes() {
             grid.appendChild(card);
         });
 
-        window.__coursesWithQuiz = allCourses;
 
     } catch(err) {
         console.error('loadQuizzes error:', err);
@@ -545,129 +401,6 @@ async function loadQuizzes() {
 function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
-let currentQuiz = null;
-
-window.startQuiz = function(courseId) {
-    // ทำได้ครั้งเดียว — ถ้าทำแล้วแจ้งเตือนและไม่ให้ทำซ้ำ
-    if (window.__completedQuiz && window.__completedQuiz[courseId]) {
-        const s = window.__completedQuiz[courseId];
-        alert(`คุณทำแบบทดสอบนี้ไปแล้ว\nคะแนนของคุณ: ${s.score}/${s.total} (${s.pct}%)\n\nแบบทดสอบทำได้เพียงครั้งเดียวเท่านั้น`);
-        return;
-    }
-    const course = window.__coursesWithQuiz.find(c => c.id === courseId);
-    if (!course) return;
-    currentQuiz = { courseId, courseName: course.title, questions: course.quiz, currentIndex: 0, score: 0, selected: null, answered: false };
-    renderQuestion();
-    document.getElementById('quizModalOverlay').classList.add('show');
-};
-
-function renderQuestion() {
-    const { questions, currentIndex, courseName } = currentQuiz;
-    const q = questions[currentIndex];
-    const total = questions.length;
-    const pct = Math.round((currentIndex / total) * 100);
-    const choices = q.type === 'true_false' ? ['ถูก','ผิด'] : (q.choices || []);
-    const labels  = ['A','B','C','D'];
-
-    document.getElementById('quizModal').innerHTML = `
-        <div class="quiz-modal-header">
-            <div>
-                <div style="font-weight:600;margin-bottom:0.25rem;">${courseName}</div>
-                <div class="quiz-progress-info">ข้อที่ ${currentIndex+1} / ${total}</div>
-            </div>
-            <button class="btn-close-modal" onclick="closeQuizModal()">✕ ออก</button>
-        </div>
-        <div class="quiz-modal-progress-bar">
-            <div class="quiz-modal-progress-fill" style="width:${pct}%"></div>
-        </div>
-        <div class="question-text">${currentIndex+1}. ${q.question}</div>
-        <div id="choiceList">
-            ${choices.map((c,i) => `
-                <div class="choice-option" id="choice-${i}" onclick="selectChoice(${i})">
-                    <span class="choice-letter">${labels[i]}</span>
-                    <span>${c}</span>
-                </div>`).join('')}
-        </div>
-        <button class="btn-next" id="btnNext" disabled onclick="nextQuestion()">
-            ${currentIndex+1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯'}
-        </button>`;
-
-    currentQuiz.selected = null;
-    currentQuiz.answered = false;
-}
-
-window.selectChoice = function(index) {
-    if (currentQuiz.answered) return;
-    const { questions, currentIndex } = currentQuiz;
-    const q = questions[currentIndex];
-    const labels = ['A','B','C','D'];
-    const correctIndex = labels.indexOf(q.correct);
-
-    currentQuiz.selected = index;
-    currentQuiz.answered = true;
-    document.querySelectorAll('.choice-option').forEach((el,i) => { if (i===index) el.classList.add('selected'); });
-
-    setTimeout(() => {
-        document.querySelectorAll('.choice-option').forEach((el,i) => {
-            if (i === correctIndex) el.classList.add('correct');
-            if (i === index && i !== correctIndex) el.classList.add('wrong');
-        });
-        if (index === correctIndex) currentQuiz.score++;
-        document.getElementById('btnNext').disabled = false;
-    }, 300);
-};
-
-window.nextQuestion = function() {
-    const { questions, currentIndex } = currentQuiz;
-    if (currentIndex + 1 < questions.length) { currentQuiz.currentIndex++; renderQuestion(); }
-    else { showResult(); }
-};
-
-async function showResult() {
-    const { questions, score, courseName, courseId } = currentQuiz;
-    const total = questions.length;
-    const pct   = Math.round((score/total)*100);
-    const emoji = pct>=80 ? '🎉' : pct>=60 ? '👍' : '📚';
-    const msg   = pct>=80 ? 'ยอดเยี่ยม!' : pct>=60 ? 'ทำได้ดี!' : 'ทำได้ดีแล้ว สู้ๆ นะ';
-
-    try {
-        await supabase.from('quiz_scores').upsert({
-            user_id: currentUser.id,
-            course_id: courseId,
-            score, total, pct,
-            updated_at: new Date().toISOString()
-        });
-        // mark ว่าทำแล้วทันที กันทำซ้ำในเซสชันเดียวกัน
-        if (!window.__completedQuiz) window.__completedQuiz = {};
-        window.__completedQuiz[courseId] = { score, total, pct };
-    } catch(e) { console.error('Save score error:', e); }
-
-    document.getElementById('quizModal').innerHTML = `
-        <div class="result-screen">
-            <div class="result-emoji">${emoji}</div>
-            <div class="result-score">${score} / ${total}</div>
-            <div class="result-sub">${msg} — คะแนน ${pct}%</div>
-            <div class="result-detail">
-                <div class="result-stat"><div class="result-stat-num" style="color:var(--success-green);">${score}</div><div class="result-stat-label">ถูก</div></div>
-                <div class="result-stat"><div class="result-stat-num" style="color:var(--danger-red);">${total-score}</div><div class="result-stat-label">ผิด</div></div>
-                <div class="result-stat"><div class="result-stat-num" style="color:var(--primary-blue);">${pct}%</div><div class="result-stat-label">คะแนน</div></div>
-            </div>
-            <p style="color:var(--text-dim);font-size:0.82rem;margin:4px 0 16px;">📌 แบบทดสอบนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว</p>
-            <button class="btn-close-result" onclick="closeQuizModal()">กลับหน้าหลัก</button>
-        </div>`;
-
-    loadQuizzes();
-}
-
-window.closeQuizModal = function() {
-    document.getElementById('quizModalOverlay').classList.remove('show');
-    currentQuiz = null;
-};
-
-document.getElementById('quizModalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeQuizModal();
-});
 </script>
 <script src="theme-switcher.js"></script>
 </body>

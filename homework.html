@@ -177,6 +177,7 @@
             .main-content { margin-left:70px; width:calc(100% - 70px); padding:20px; }
         }
     </style>
+<script src="tour.js"></script>
 </head>
 <body>
 <div class="app-container">
@@ -439,6 +440,15 @@ window.confirmGrade = async function() {
 document.getElementById('gradeModalOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeGradeModal();
 });
+
+// ============ TUTORIAL TOUR ============
+const _homeworkTourSteps = [
+    { title: '👋 ยินดีต้อนรับสู่หน้าตรวจการบ้าน', text: 'หน้านี้รวมงานที่นักเรียนส่งมาจากทุกคอร์สของคุณ ไปดูวิธีใช้งานสั้นๆ กัน' },
+    { target: '#courseTabs', title: 'เลือกคอร์สที่จะตรวจ', text: 'คลิกชื่อคอร์สเพื่อดูการบ้านทั้งหมดของคอร์สนั้น (แสดงเฉพาะคอร์สที่มีการบ้านจริง)', placement: 'bottom' },
+    { target: '#hwContent', title: 'รายการงานที่ส่งมา', text: 'แต่ละการบ้านจะแยกเป็นการ์ด บอกจำนวนที่ส่งแล้ว/รอตรวจ/ตรวจแล้ว กดปุ่ม "ให้คะแนน" ที่แถวนักเรียนเพื่อเปิดหน้าต่างตรวจงาน', placement: 'top' },
+];
+SkillNestTour.autoStart(_homeworkTourSteps, 'homework');
+SkillNestTour.mountHelpButton(_homeworkTourSteps, 'homework', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
 </script>
 <script src="theme-switcher.js"></script>
 </body>
