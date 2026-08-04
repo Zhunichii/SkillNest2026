@@ -1697,7 +1697,6 @@ async function initCourseContent() {
 let avatarChatHistory  = [];   // history session ปัจจุบัน
 let avatarLessonMemory = {};   // จำสรุปแต่ละบท key = lessonIndex
 let avatarSpeaking     = false;
-let avatarSynth        = window.speechSynthesis;
 let avatarRecognition  = null;
 let avatarTalkInterval = null;
 
@@ -1919,20 +1918,8 @@ function avatarSpeak(text, addToHistory = true) {
     if (bubble) { bubble.classList.remove('typing'); bubble.textContent = text; }
     if (addToHistory) addAvatarMsg('ai', text);
 
-    // ลำดับความสำคัญ: Gemini Speech (เสียงอาจารย์) → XTTS → Web Speech
-    if (window._useGeminiTTS !== false) {
-        avatarSpeakGemini(text);
-        return;
-    }
-
-    // ใช้ XTTS ถ้ามี speaker audio
-    if (window._speakerAudioBase64) {
-        avatarSpeakXTTS(text);
-        return;
-    }
-
-    // fallback: Web Speech API
-    avatarSpeakWebSpeech(text);
+    // ใช้ Gemini TTS (AI Studio) เพียงอย่างเดียว — เลือกเสียงได้ที่หน้าตั้งค่า
+    avatarSpeakGemini(text);
 }
 
 // ── Gemini Speech (TTS) — เสียงอาจารย์ ──
@@ -1964,60 +1951,10 @@ async function avatarSpeakGemini(text) {
         _geminiAudio.onerror  = () => { avatarSpeaking = false; stopTalking(); };
         await _geminiAudio.play();
     } catch(e) {
-        console.warn('Gemini TTS error, fallback:', e.message);
+        // ไม่มี fallback อื่นแล้ว (ใช้ Gemini TTS อย่างเดียว) — พูดไม่ได้ก็ยังเห็นข้อความในบับเบิลตามปกติ
+        console.warn('Gemini TTS error:', e.message);
         avatarSpeaking = false; stopTalking();
-        // fallback ตามลำดับ
-        if (window._speakerAudioBase64) avatarSpeakXTTS(text);
-        else avatarSpeakWebSpeech(text);
     }
-}
-
-// ── XTTS-v2 TTS ──
-let _xttsAudio = null;
-async function avatarSpeakXTTS(text) {
-    try {
-        avatarSpeaking = true; startTalking();
-        const res = await fetch('/api/elevenlabs-tts', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                text,
-                speakerAudioBase64: window._speakerAudioBase64,
-                speakerAudioMime:   window._speakerAudioMime || 'audio/webm',
-            })
-        });
-
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || `HTTP ${res.status}`);
-        }
-
-        const blob = await res.blob();
-        const url  = URL.createObjectURL(blob);
-        if (_xttsAudio) { _xttsAudio.pause(); _xttsAudio = null; }
-        _xttsAudio = new Audio(url);
-        _xttsAudio.onended  = () => { avatarSpeaking = false; stopTalking(); };
-        _xttsAudio.onerror  = () => { avatarSpeaking = false; stopTalking(); };
-        await _xttsAudio.play();
-    } catch(e) {
-        console.warn('XTTS error, fallback:', e.message);
-        avatarSpeaking = false; stopTalking();
-        avatarSpeakWebSpeech(text);
-    }
-}
-function avatarSpeakWebSpeech(text) {
-    if (!avatarSynth) return;
-    const utter  = new SpeechSynthesisUtterance(text);
-    const saved  = getAvatarVoiceSettings();
-    utter.lang   = 'th-TH';
-    utter.rate   = saved.rate || 0.92;
-    utter.pitch  = saved.pitch || 1.05;
-    const voices = avatarSynth.getVoices();
-    const voice  = voices.find(v => v.lang.startsWith('th')) || voices.find(v => v.lang.startsWith('en-US'));
-    if (voice) utter.voice = voice;
-    utter.onstart = () => { avatarSpeaking = true; startTalking(); };
-    utter.onend   = () => { avatarSpeaking = false; stopTalking(); };
-    utter.onerror = () => { avatarSpeaking = false; stopTalking(); };
-    avatarSynth.speak(utter);
 }
 
 // เก็บ/โหลด voice settings
@@ -2027,8 +1964,8 @@ function saveAvatarVoiceSettings(settings) {
 function getAvatarVoiceSettings() {
     try {
         const s = JSON.parse(localStorage.getItem('avatarVoiceSettings') || '{}');
-        return { rate: s.rate ?? 0.92, pitch: s.pitch ?? 1.05, volume: s.volume ?? 1.0, voiceName: s.voiceName || null };
-    } catch(e) { return { rate: 0.92, pitch: 1.05, volume: 1.0, voiceName: null }; }
+        return { rate: s.rate ?? 0.92, volume: s.volume ?? 1.0 };
+    } catch(e) { return { rate: 0.92, volume: 1.0 }; }
 }
 
 // เปิด/ปิด voice settings panel
@@ -2060,17 +1997,7 @@ window.toggleAvatarVoiceSettings = function() {
 };
 
 function buildVoiceSettingsPanel() {
-    const voices  = avatarSynth.getVoices();
-    const saved   = getAvatarVoiceSettings();
-    const thVoices = voices.filter(v => v.lang.startsWith('th'));
-    const enVoices = voices.filter(v => v.lang.startsWith('en'));
-
-    // สร้าง options
-    const voiceOptions = [
-        '<option value="">-- Auto (ภาษาไทย) --</option>',
-        ...thVoices.map(v => `<option value="${v.name}" ${saved.voiceName===v.name?'selected':''}>${v.name} (TH)</option>`),
-        ...enVoices.slice(0,5).map(v => `<option value="${v.name}" ${saved.voiceName===v.name?'selected':''}>${v.name} (EN)</option>`)
-    ].join('');
+    const saved = getAvatarVoiceSettings();
 
     const panel = document.createElement('div');
     panel.id    = 'avatarVoiceSettingsPanel';
@@ -2093,12 +2020,9 @@ function buildVoiceSettingsPanel() {
                 onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='#a0a0ba'">✕</button>
         </div>
 
-        <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">เลือกเสียง</label>
-        <select id="voiceSelect" style="width:100%;background:#1a1a3e;border:1px solid rgba(255,255,255,0.15);
-            color:white;padding:6px 8px;border-radius:8px;font-size:0.78rem;margin-bottom:10px;"
-            onchange="previewVoice(this.value)">
-            ${voiceOptions}
-        </select>
+        <div style="font-size:0.72rem;color:#7a7a90;margin-bottom:12px;line-height:1.5;">
+            ใช้เสียง Gemini TTS — เลือกเสียงที่ใช้พูดได้ที่หน้า <strong>ตั้งค่า & โปรไฟล์</strong> ที่นี่ปรับได้แค่ความเร็ว/ความดังของเสียงที่เล่นอยู่
+        </div>
 
         <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">
             ความเร็ว: <span id="rateVal">${saved.rate}</span>x
@@ -2107,14 +2031,6 @@ function buildVoiceSettingsPanel() {
             style="width:100%;accent-color:#8b5cf6;margin-bottom:10px;"
             oninput="document.getElementById('rateVal').textContent=this.value"
             id="rateSlider">
-
-        <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">
-            ระดับเสียง: <span id="pitchVal">${saved.pitch}</span>
-        </label>
-        <input type="range" min="0.5" max="2.0" step="0.1" value="${saved.pitch}"
-            style="width:100%;accent-color:#8b5cf6;margin-bottom:10px;"
-            oninput="document.getElementById('pitchVal').textContent=this.value"
-            id="pitchSlider">
 
         <label style="font-size:0.75rem;color:#a0a0ba;display:block;margin-bottom:4px;">
             ความดัง: <span id="volumeVal">${saved.volume}</span>
@@ -2130,7 +2046,7 @@ function buildVoiceSettingsPanel() {
                 color:white;padding:7px;border-radius:8px;cursor:pointer;font-size:0.78rem;">
                 ✅ บันทึก
             </button>
-            <button onclick="previewVoice(document.getElementById('voiceSelect').value)"
+            <button onclick="previewVoice()"
                 style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
                 color:#a0a0ba;padding:7px;border-radius:8px;cursor:pointer;font-size:0.78rem;">
                 ▶ ทดสอบ
@@ -2152,28 +2068,24 @@ function buildVoiceSettingsPanel() {
     }
 }
 
-window.previewVoice = function(voiceName) {
-    const rate   = parseFloat(document.getElementById('rateSlider')?.value || 0.92);
-    const pitch  = parseFloat(document.getElementById('pitchSlider')?.value || 1.05);
-    const volume = parseFloat(document.getElementById('volumeSlider')?.value || 1.0);
+window.previewVoice = function() {
+    // ใช้ค่าจาก slider ปัจจุบันตอนทดสอบเลย (ไม่ต้องกด "บันทึก" ก่อน)
+    const rateEl = document.getElementById('rateSlider');
+    const volEl  = document.getElementById('volumeSlider');
+    if (rateEl && volEl) {
+        saveAvatarVoiceSettings({
+            rate:   parseFloat(rateEl.value || 0.92),
+            volume: parseFloat(volEl.value || 1.0),
+        });
+    }
     avatarStopSpeaking();
-    const utter  = new SpeechSynthesisUtterance('สวัสดีครับ ผมอาจารย์ AI ยินดีช่วยสอนครับ');
-    utter.lang   = 'th-TH';
-    utter.rate   = rate; utter.pitch = pitch; utter.volume = volume;
-    const voices = avatarSynth.getVoices();
-    const voice  = voiceName ? voices.find(v => v.name === voiceName) : voices.find(v => v.lang.startsWith('th'));
-    if (voice) utter.voice = voice;
-    utter.onstart = () => startTalking();
-    utter.onend   = () => stopTalking();
-    avatarSynth.speak(utter);
+    avatarSpeakGemini('สวัสดีครับ ผมอาจารย์ AI ยินดีช่วยสอนครับ');
 };
 
 window.applyVoiceSettings = function() {
     const settings = {
-        voiceName: document.getElementById('voiceSelect')?.value || null,
-        rate:      parseFloat(document.getElementById('rateSlider')?.value || 0.92),
-        pitch:     parseFloat(document.getElementById('pitchSlider')?.value || 1.05),
-        volume:    parseFloat(document.getElementById('volumeSlider')?.value || 1.0),
+        rate:   parseFloat(document.getElementById('rateSlider')?.value || 0.92),
+        volume: parseFloat(document.getElementById('volumeSlider')?.value || 1.0),
     };
     saveAvatarVoiceSettings(settings);
     document.getElementById('avatarVoiceSettingsPanel')?.remove();
@@ -2182,8 +2094,6 @@ window.applyVoiceSettings = function() {
 };
 
 function avatarStopSpeaking() {
-    if (avatarSynth) avatarSynth.cancel();
-    if (_xttsAudio) { _xttsAudio.pause(); _xttsAudio = null; }
     if (_geminiAudio) { _geminiAudio.pause(); _geminiAudio = null; }
     avatarSpeaking = false; stopTalking();
 }
@@ -2411,9 +2321,8 @@ initCourseContent().then(() => {
 async function loadAvatarConfig(creatorId) {
     if (!creatorId) return;
     try {
-        // ดึงทั้ง avatar_config และ speaker_audio_base64 แยก column
         const { data } = await supabase.from('users')
-            .select('avatar_config,first_name,last_name,speaker_audio_base64,speaker_audio_mime')
+            .select('avatar_config,first_name,last_name')
             .eq('id', creatorId).single();
         if (!data?.avatar_config) return;
         const cfg = data.avatar_config;
@@ -2462,17 +2371,8 @@ async function loadAvatarConfig(creatorId) {
         window._avatarPersonalityPrompt = P_PROMPTS[cfg.personality] || '';
         if (cfg.greeting) window._avatarCustomGreeting = cfg.greeting;
 
-        // Gemini Speech — เสียงอาจารย์ (ครูเลือกเสียงได้ใน avatar_config)
+        // Gemini Speech — เสียงอาจารย์ (ครูเลือกเสียงได้ในหน้าตั้งค่า) — เป็นระบบเสียงเดียวที่ใช้งาน
         window._geminiVoiceName = cfg.geminiVoiceName || 'Charon';
-        window._useGeminiTTS = cfg.useGeminiTTS !== false; // default เปิดใช้
-
-        // XTTS voice — โหลดจาก speaker_audio_base64 column (เป็น fallback)
-        if (cfg.useXTTS && data.speaker_audio_base64) {
-            window._speakerAudioBase64 = data.speaker_audio_base64;
-            window._speakerAudioMime   = data.speaker_audio_mime || 'audio/webm';
-            const status = document.getElementById('avatarStatusText');
-            if (status) status.title = '🎙️ ใช้เสียงครู';
-        }
 
     } catch(e) { console.warn('loadAvatarConfig:', e); }
 }
