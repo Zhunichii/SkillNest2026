@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════
    SkillNest — Unified Theme System
-   โหมด: dark (default) / light / deuteranopia / protanopia
+   โหมด: dark (default) / light
    ใช้งาน: <link rel="stylesheet" href="theme.css"> ในทุกหน้า
    สลับโหมดด้วยการตั้ง data-theme="xxx" ที่ <html>
    ════════════════════════════════════════════════════════════ */
@@ -107,111 +107,6 @@ html[data-theme="light"] {
     color-scheme: light;
 }
 
-/* ── DEUTERANOPIA-SAFE (ตาบอดสีแดง-เขียว พบบ่อยสุด) ──
-   หลักการ: เลี่ยงคู่แดง-เขียวทั้งหมด ใช้ฟ้า/ส้มแทนความหมาย success/danger
-   คงพื้นหลังมืดไว้ (ดัดแปลงจาก dark theme) */
-html[data-theme="deuteranopia"] {
-    --bg-color: #0A0E27;
-    --bg: #0A0E27;
-    --bg-elevated: #11152E;
-
-    --primary-blue: #6366F1;
-    --primary-purple: #6366F1;
-    --primary: #6366F1;
-    --primary-2: #4338CA;
-    --accent-cyan: #22D3EE;
-
-    /* แทนเขียว → ฟ้าอมเขียว (cyan) / แทนแดง → ส้มเหลือง (amber) */
-    --success-green: #38BDF8;
-    --success: #38BDF8;
-    --danger-red: #FB923C;
-    --danger: #FB923C;
-    --warning: #FBBF24;
-
-    --text-main: #E2E8F0;
-    --text: #E2E8F0;
-    --text-dim: #8B92AE;
-    --text-faint: #545B78;
-
-    --nav-bg: rgba(226,232,240,0.04);
-    --card-bg: rgba(226,232,240,0.04);
-    --card: rgba(226,232,240,0.04);
-    --card-hover: rgba(226,232,240,0.07);
-    --border-color: rgba(226,232,240,0.09);
-    --border: rgba(226,232,240,0.09);
-    --border-focus: rgba(99,102,241,0.6);
-    --input-bg: rgba(226,232,240,0.05);
-    --active-lesson: rgba(99,102,241,0.16);
-    --chat-bg: #060818;
-
-    --bg-grad: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
-    --bg-grad-size: 100% 100%;
-    --dot-grid: rgba(226,232,240,0.025);
-
-    --line: rgba(226,232,240,0.08);
-    --line-strong: rgba(226,232,240,0.16);
-    --footer-bg: rgba(10,14,39,0.5);
-    --nav-h: 70px;
-    --purple: #6366F1;
-
-    /* บังคับใช้ไอคอน/สัญลักษณ์เสริมเสมอ ไม่พึ่งสีอย่างเดียว */
-    --correct-icon: "✓";
-    --wrong-icon: "✕";
-
-    color-scheme: dark;
-}
-
-/* ── PROTANOPIA-SAFE (ตาบอดสีแดงเข้ม) ──
-   หลักการคล้าย deuteranopia แต่ปรับ hue ต่างเล็กน้อยตามงานวิจัย CVD */
-html[data-theme="protanopia"] {
-    --bg-color: #0A0E27;
-    --bg: #0A0E27;
-    --bg-elevated: #11152E;
-
-    --primary-blue: #6366F1;
-    --primary-purple: #6366F1;
-    --primary: #6366F1;
-    --primary-2: #4338CA;
-    --accent-cyan: #22D3EE;
-
-    --success-green: #2DD4BF;
-    --success: #2DD4BF;
-    --danger-red: #F59E0B;
-    --danger: #F59E0B;
-    --warning: #FBBF24;
-
-    --text-main: #E2E8F0;
-    --text: #E2E8F0;
-    --text-dim: #8B92AE;
-    --text-faint: #545B78;
-
-    --nav-bg: rgba(226,232,240,0.04);
-    --card-bg: rgba(226,232,240,0.04);
-    --card: rgba(226,232,240,0.04);
-    --card-hover: rgba(226,232,240,0.07);
-    --border-color: rgba(226,232,240,0.09);
-    --border: rgba(226,232,240,0.09);
-    --border-focus: rgba(99,102,241,0.6);
-    --input-bg: rgba(226,232,240,0.05);
-    --active-lesson: rgba(99,102,241,0.16);
-    --chat-bg: #060818;
-
-    --bg-grad: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
-    --bg-grad-size: 100% 100%;
-    --dot-grid: rgba(226,232,240,0.025);
-
-    --line: rgba(226,232,240,0.08);
-    --line-strong: rgba(226,232,240,0.16);
-    --footer-bg: rgba(10,14,39,0.5);
-    --nav-h: 70px;
-    --purple: #6366F1;
-
-    --correct-icon: "✓";
-    --wrong-icon: "✕";
-
-    color-scheme: dark;
-}
-
 /* ════════════════════════════════════════════════════════════
    Shared font tokens (ไม่เปลี่ยนตามธีม)
    ════════════════════════════════════════════════════════════ */
@@ -234,8 +129,8 @@ body {
 }
 
 /* ════════════════════════════════════════════════════════════
-   Colorblind-safe quiz indicators — ไม่พึ่งสีอย่างเดียว
-   เพิ่มไอคอน ✓ / ✕ และเส้นขอบหนาขึ้นเพื่อแยกแยะได้แม้มองสีไม่ออก
+   Quiz correct/wrong indicators — ไม่พึ่งสีอย่างเดียว (ใช้ได้ทุกธีม)
+   เพิ่มไอคอน ✓ / ✕ และเส้นขอบหนาขึ้นเพื่อแยกแยะได้แม้มองสีไม่ถนัด
    ════════════════════════════════════════════════════════════ */
 .choice-option.correct,
 .task-icon.quiz.correct {
