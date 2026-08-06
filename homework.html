@@ -244,6 +244,31 @@
     </div>
 </div>
 
+<!-- Bulk Grade Modal -->
+<div class="modal-overlay" id="bulkGradeModalOverlay">
+    <div class="grade-modal">
+        <h3>✏️ ให้คะแนนพร้อมกันหลายคน</h3>
+        <div id="bulkGradeInfo" style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1rem;"></div>
+        <div id="bulkGradeStudentList" style="max-height:120px; overflow-y:auto; background:var(--card-hover);
+            border-radius:8px; padding:10px 12px; margin-bottom:1rem; font-size:0.82rem; color:var(--text-dim);"></div>
+        <div class="form-group">
+            <label>คะแนน (เต็ม <span id="bulkGradeMaxScore">100</span>) — ให้คะแนนเท่ากันทุกคนที่เลือก</label>
+            <input type="number" class="form-control" id="bulkGradeScore" min="0" placeholder="ใส่คะแนน">
+        </div>
+        <div class="form-group">
+            <label>ความคิดเห็น / Feedback (ใช้ข้อความเดียวกันทุกคน — เว้นว่างได้ถ้าไม่ต้องการ)</label>
+            <textarea class="form-control" id="bulkGradeComment" placeholder="ให้ feedback กับนักเรียนทุกคนที่เลือก..."></textarea>
+        </div>
+        <div class="form-group">
+            <small style="color:var(--warning);">⚠️ เหมาะกับงานที่ตรวจแบบเดียวกันได้ เช่น ทุกคนทำถูกให้เต็ม — ถ้าคะแนนแต่ละคนต่างกัน ควรตรวจทีละคนแทน</small>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-confirm-grade" id="btnConfirmBulkGrade" onclick="confirmBulkGrade()">✅ บันทึกคะแนนทั้งหมด</button>
+            <button class="btn-cancel-grade" onclick="closeBulkGradeModal()">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
 import { supabase } from './supabase.js';
 
@@ -352,7 +377,7 @@ async function loadHomeworksByCourse(courseId) {
 
         let rowsHtml = '';
         if (hwSubs.length === 0) {
-            rowsHtml = `<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:2rem;">ยังไม่มีนักเรียนส่งงาน</td></tr>`;
+            rowsHtml = `<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:2rem;">ยังไม่มีนักเรียนส่งงาน</td></tr>`;
         } else {
             rowsHtml = hwSubs.map(sub => {
                 const name = studentNames[sub.user_id] || sub.user_id;
@@ -368,6 +393,9 @@ async function loadHomeworksByCourse(courseId) {
                     ? `<a href="${sub.file_url}" target="_blank" class="view-link">📎 ไฟล์</a>` : '';
 
                 return `<tr>
+                    <td><input type="checkbox" class="hw-row-check" data-hwidx="${idx}"
+                        value="${sub.id}" data-uid="${sub.user_id}" data-name="${escapeHtml(name)}"
+                        onchange="updateBulkBar(${idx})"></td>
                     <td>${name}</td>
                     <td>${submittedAt}</td>
                     <td>${workHtml} ${fileHtml}</td>
@@ -395,8 +423,21 @@ async function loadHomeworksByCourse(courseId) {
                     <div class="hw-stat">ตรวจแล้ว <span>${gradedCount}</span></div>
                 </div>
             </div>
+            <div id="bulkBar-${idx}" style="display:none;align-items:center;justify-content:space-between;
+                background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);
+                border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:0.85rem;">
+                <span id="bulkCount-${idx}" style="color:var(--primary-blue);font-weight:600;"></span>
+                <button onclick="openBulkGradeModal(${idx}, ${hw.maxScore||100}, '${escapeHtml(hw.title||'')}')"
+                    style="background:var(--primary-blue);border:none;color:white;padding:6px 14px;
+                    border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">
+                    ✏️ ให้คะแนนพร้อมกัน
+                </button>
+            </div>
             <table class="submissions-table">
-                <thead><tr><th>นักเรียน</th><th>เวลาส่ง</th><th>งาน</th><th>สถานะ</th><th>ดำเนินการ</th></tr></thead>
+                <thead><tr>
+                    <th style="width:36px;"><input type="checkbox" onchange="toggleSelectAll(${idx}, this.checked)" title="เลือกทั้งหมด"></th>
+                    <th>นักเรียน</th><th>เวลาส่ง</th><th>งาน</th><th>สถานะ</th><th>ดำเนินการ</th>
+                </tr></thead>
                 <tbody>${rowsHtml}</tbody>
             </table>`;
         contentEl.appendChild(card);
@@ -475,6 +516,115 @@ window.confirmGrade = async function() {
 
 document.getElementById('gradeModalOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeGradeModal();
+});
+
+// ============ BULK GRADING ============
+let pendingBulkGrade = null;
+
+window.toggleSelectAll = function(hwIdx, checked) {
+    document.querySelectorAll(`.hw-row-check[data-hwidx="${hwIdx}"]`).forEach(cb => cb.checked = checked);
+    updateBulkBar(hwIdx);
+};
+
+window.updateBulkBar = function(hwIdx) {
+    const checked = document.querySelectorAll(`.hw-row-check[data-hwidx="${hwIdx}"]:checked`);
+    const bar   = document.getElementById(`bulkBar-${hwIdx}`);
+    const count = document.getElementById(`bulkCount-${hwIdx}`);
+    if (!bar || !count) return;
+    if (checked.length > 0) {
+        count.textContent = `เลือกไว้ ${checked.length} คน`;
+        bar.style.display = 'flex';
+    } else {
+        bar.style.display = 'none';
+    }
+};
+
+window.openBulkGradeModal = function(hwIdx, maxScore, hwTitle) {
+    const checked = [...document.querySelectorAll(`.hw-row-check[data-hwidx="${hwIdx}"]:checked`)];
+    if (checked.length === 0) return;
+
+    pendingBulkGrade = {
+        hwIdx, maxScore, hwTitle,
+        items: checked.map(cb => ({ subId: cb.value, uid: cb.dataset.uid, name: cb.dataset.name })),
+    };
+
+    document.getElementById('bulkGradeInfo').textContent = `การบ้าน: ${hwTitle} — เลือกไว้ ${checked.length} คน`;
+    document.getElementById('bulkGradeStudentList').innerHTML =
+        pendingBulkGrade.items.map(it => `• ${it.name}`).join('<br>');
+    document.getElementById('bulkGradeMaxScore').textContent = maxScore;
+    document.getElementById('bulkGradeScore').max = maxScore;
+    document.getElementById('bulkGradeScore').value = '';
+    document.getElementById('bulkGradeComment').value = '';
+    document.getElementById('bulkGradeModalOverlay').classList.add('show');
+};
+
+window.closeBulkGradeModal = function() {
+    document.getElementById('bulkGradeModalOverlay').classList.remove('show');
+    pendingBulkGrade = null;
+};
+
+window.confirmBulkGrade = async function() {
+    if (!pendingBulkGrade) return;
+    const score   = parseInt(document.getElementById('bulkGradeScore').value);
+    const comment = document.getElementById('bulkGradeComment').value.trim();
+
+    if (isNaN(score) || score < 0 || score > pendingBulkGrade.maxScore) {
+        alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingBulkGrade.maxScore}`); return;
+    }
+
+    const btn = document.getElementById('btnConfirmBulkGrade');
+    btn.disabled = true;
+    btn.textContent = `⏳ กำลังบันทึก 0/${pendingBulkGrade.items.length}...`;
+
+    const course = myCourses.find(c => c.id === currentCourseId);
+    let done = 0, failed = 0;
+
+    for (const item of pendingBulkGrade.items) {
+        try {
+            const { error } = await supabase
+                .from('submissions')
+                .update({
+                    grade: score,
+                    comment,
+                    status: 'graded',
+                    graded_at: new Date().toISOString()
+                })
+                .eq('id', item.subId);
+            if (error) throw error;
+
+            // แจ้งเตือนนักเรียนแต่ละคน (ไม่ให้พลาดจุดนี้ไปบล็อกคนอื่นในลูป)
+            try {
+                await supabase.from('notifications').insert({
+                    target_user_id: item.uid,
+                    type: 'homework',
+                    title: 'การบ้านของคุณถูกตรวจแล้ว',
+                    message: `"${pendingBulkGrade.hwTitle}" ในคอร์ส "${course?.title || ''}" — ได้คะแนน ${score}/${pendingBulkGrade.maxScore}`,
+                    link: `course-content.html?id=${currentCourseId}&tab=homework`,
+                    created_at: new Date().toISOString(),
+                });
+            } catch(notifErr) { console.warn('ส่งแจ้งเตือนไม่สำเร็จ:', item.name, notifErr); }
+
+            done++;
+        } catch(e) {
+            failed++;
+            console.error('bulk grade error:', item.name, e);
+        }
+        btn.textContent = `⏳ กำลังบันทึก ${done+failed}/${pendingBulkGrade.items.length}...`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✅ บันทึกคะแนนทั้งหมด';
+
+    if (failed > 0) {
+        alert(`บันทึกสำเร็จ ${done} คน ล้มเหลว ${failed} คน (เช็ค Console ดูรายละเอียด)`);
+    }
+
+    closeBulkGradeModal();
+    await loadHomeworksByCourse(currentCourseId);
+};
+
+document.getElementById('bulkGradeModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeBulkGradeModal();
 });
 
 // ============ EXPORT CSV ============
