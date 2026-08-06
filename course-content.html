@@ -711,6 +711,12 @@
         .res-qa-item:first-child { border-top: none; }
         .res-qa-q { margin-bottom: 0.3rem; }
         .res-qa-answer { color: var(--text-dim); font-size: 0.8rem; }
+        .res-qa-explanation {
+            margin-top: 0.4rem; padding: 0.5rem 0.7rem;
+            background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);
+            border-left: 3px solid #3b82f6; border-radius: 6px;
+            font-size: 0.8rem; color: #93c5fd; line-height: 1.5;
+        }
         .res-qa-result { font-weight: 600; }
         .res-qa-result.correct { color: #10b981; }
         .res-qa-result.wrong { color: #ef4444; }
@@ -1375,6 +1381,7 @@
                 <div class="lesson-tab" id="quizTabBtn" onclick="switchTab('quiz', this)" style="display:none;">📝 แบบทดสอบ</div>
                 <div class="lesson-tab" id="hwTabBtn" onclick="switchTab('homework', this)" style="display:none;">📋 การบ้าน</div>
                 <div class="lesson-tab" id="resultsTabBtn" onclick="switchTab('results', this)">📊 ผลการเรียนของฉัน</div>
+                <div class="lesson-tab" id="notesTabBtn" onclick="switchTab('notes', this)">📝 โน้ตของฉัน</div>
             </div>
 
             <!-- Lesson list panel -->
@@ -1412,6 +1419,21 @@
                 <div id="resultsPanelContent">
                     <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
                 </div>
+            </div>
+
+            <!-- Notes panel (ฝั่งนักเรียน: จดโน้ตระหว่างเรียน แยกเก็บตามบท) -->
+            <div id="tabNotes" class="tab-panel">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                    <div id="notesLessonLabel" style="font-weight:600;font-size:0.95rem;"></div>
+                    <span id="notesSaveStatus" style="font-size:0.78rem;color:var(--text-dim);"></span>
+                </div>
+                <textarea id="notesTextarea" placeholder="จดโน้ตระหว่างเรียนบทนี้ได้เลย... (บันทึกอัตโนมัติ)"
+                    style="width:100%;min-height:340px;padding:1rem;border-radius:12px;
+                    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+                    color:var(--text-main,#fff);font-size:0.92rem;line-height:1.6;resize:vertical;
+                    font-family:inherit;"
+                    oninput="onNotesInput()"></textarea>
+                <p style="color:var(--text-dim);font-size:0.78rem;margin-top:0.5rem;">💾 โน้ตจะถูกบันทึกอัตโนมัติแยกไว้ทีละบท เปลี่ยนบทแล้วกลับมาดูโน้ตเดิมได้เสมอ</p>
             </div>
         </div>
         </div><!-- end lesson-info-area -->
@@ -2529,6 +2551,13 @@ window.playLesson = function(index) {
     }
     currentLessonIndex = index;
 
+    // ถ้าอยู่ในแท็บโน้ตอยู่ตอนสลับบท: บันทึกโน้ตที่พิมพ์ค้างไว้ของบทเดิมก่อน (กันดีเลย์ debounce หาย) แล้วโหลดโน้ตของบทใหม่
+    if (document.getElementById('tabNotes')?.classList.contains('active')) {
+        clearTimeout(_notesSaveTimer);
+        if (_notesCurrentLessonIndex != null && _notesCurrentLessonIndex !== index) saveNoteNow();
+        loadNotesForCurrentLesson();
+    }
+
     // รีเฟรชแท็บแบบทดสอบ/การบ้านให้ตรงกับบทที่เพิ่งเลือก (ทำก่อนส่วนอื่นเผื่อไฟล์บทเรียนโหลดไม่สำเร็จ)
     renderQuizTab();
     loadHomeworkPanel();
@@ -3549,7 +3578,75 @@ window.switchTab = function(tab, btn) {
     const panelId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
     document.getElementById(panelId).classList.add('active');
     if (tab === 'results') renderResultsTab();
+    if (tab === 'notes') loadNotesForCurrentLesson();
 };
+
+// === Notes Tab (โน้ตของฉัน) — จดโน้ตแยกเก็บตามบทเรียน บันทึกอัตโนมัติ ===
+let _notesSaveTimer = null;
+let _notesCurrentLessonIndex = null;
+
+async function loadNotesForCurrentLesson() {
+    if (!currentCourse || !currentUser) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    if (!courseId) return;
+
+    _notesCurrentLessonIndex = currentLessonIndex;
+    const lesson = currentCourse.lessons?.[currentLessonIndex];
+    document.getElementById('notesLessonLabel').textContent =
+        `บทที่ ${currentLessonIndex + 1}: ${lesson?.title || ''}`;
+
+    const textarea = document.getElementById('notesTextarea');
+    const status = document.getElementById('notesSaveStatus');
+    textarea.value = '';
+    status.textContent = 'กำลังโหลด...';
+
+    try {
+        const { data } = await supabase.from('lesson_notes')
+            .select('content')
+            .eq('user_id', currentUser.id)
+            .eq('course_id', courseId)
+            .eq('lesson_index', currentLessonIndex)
+            .maybeSingle();
+        textarea.value = data?.content || '';
+        status.textContent = data?.content ? 'บันทึกไว้แล้ว' : '';
+    } catch (e) {
+        console.warn('loadNotesForCurrentLesson error:', e);
+        status.textContent = '';
+    }
+}
+
+window.onNotesInput = function() {
+    const status = document.getElementById('notesSaveStatus');
+    status.textContent = 'กำลังพิมพ์...';
+    clearTimeout(_notesSaveTimer);
+    _notesSaveTimer = setTimeout(saveNoteNow, 900);
+};
+
+async function saveNoteNow() {
+    if (!currentUser || _notesCurrentLessonIndex == null) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    if (!courseId) return;
+
+    const status = document.getElementById('notesSaveStatus');
+    const content = document.getElementById('notesTextarea').value;
+
+    try {
+        const { error } = await supabase.from('lesson_notes').upsert({
+            user_id: currentUser.id,
+            course_id: courseId,
+            lesson_index: _notesCurrentLessonIndex,
+            content,
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,course_id,lesson_index' });
+        if (error) throw error;
+        status.textContent = '✅ บันทึกแล้ว';
+    } catch (e) {
+        console.warn('saveNoteNow error:', e);
+        status.textContent = '❌ บันทึกไม่สำเร็จ';
+    }
+}
 
 // === Results Tab (ผลการเรียนของฉัน) — วิเคราะห์ผลการเรียนส่วนตัวของนักเรียนคนนี้ในคอร์สนี้ ===
 let cachedMySubmissions = null; // แคชการส่งงานทั้งหมดของ user คนนี้ในคอร์สนี้
@@ -3661,9 +3758,13 @@ async function renderResultsTab() {
             else if (a.isCorrect)   { resultLabel = `ถูก (+${a.pointsEarned}/${a.maxPoints})`; resultCls = 'correct'; }
             else                    { resultLabel = `ผิด (0/${a.maxPoints})`;             resultCls = 'wrong'; }
             const answerShown = a.answerText || a.selected || (a.selectedMultiple||[]).join(', ') || '(ไม่ได้ตอบ)';
+            const explanationHtml = a.explanation
+                ? `<div class="res-qa-explanation">💡 ${a.explanation}</div>`
+                : '';
             html += `<div class="res-qa-item">
                 <div class="res-qa-q">${a.question}</div>
                 <div class="res-qa-answer">คำตอบของคุณ: ${answerShown} — <span class="res-qa-result ${resultCls}">${resultLabel}</span></div>
+                ${explanationHtml}
             </div>`;
         });
         html += `</div></div>`;
@@ -3815,7 +3916,12 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
         }
 
         let submitFormHtml = '';
-        if (!isSubmitted) {
+        if (isOverdue) {
+            // เลยกำหนดส่งแล้วและยังไม่เคยส่ง — ปิดการส่งงานเลย (บังคับ deadline จริง ไม่ใช่แค่ติดป้ายเฉยๆ)
+            submitFormHtml = `<div class="hw-comment-display" style="color:#f87171;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);border-radius:8px;padding:10px 12px;margin-top:0.5rem;">
+                ⛔ เกินกำหนดส่งแล้ว ไม่สามารถส่งงานชิ้นนี้ได้อีก — หากมีเหตุผลพิเศษ กรุณาติดต่ออาจารย์ผู้สอนโดยตรง
+            </div>`;
+        } else if (!isSubmitted) {
             if (isForm) {
                 const qCount = (hw.formQuestions || []).length;
                 submitFormHtml = `
@@ -4756,7 +4862,7 @@ window.selectCourseChoice = function(idx) {
         cqState.answers.push({
             question: q.question, type: q.type || 'multiple_choice',
             selected: labels[idx], isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points,
-            lessonIndex: cqState.scopeLessonIndex
+            lessonIndex: cqState.scopeLessonIndex, explanation: q.explanation || ''
         });
         document.getElementById('cqBtnNext').disabled = false;
     }, 300);
@@ -4795,7 +4901,7 @@ window.confirmCourseCheckbox = function() {
     cqState.answers.push({
         question: q.question, type: 'checkbox',
         selectedMultiple: selectedLetters, isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points,
-        lessonIndex: cqState.scopeLessonIndex
+        lessonIndex: cqState.scopeLessonIndex, explanation: q.explanation || ''
     });
 
     const btn = document.getElementById('cqBtnNext');

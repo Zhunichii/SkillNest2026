@@ -1853,6 +1853,11 @@ function renderQuizAnswerArea(qId, qType, data) {
     const choices = data?.choices || ['', '', '', ''];
     const correct = data?.correct || 'A';
     const correctMultiple = data?.correctMultiple || [];
+    const explanationHtml = `
+        <div class="form-group" style="margin-top:0.75rem;">
+            <label>คำอธิบายเฉลย (ไม่บังคับ — โชว์ให้นักเรียนดูหลังทำ Quiz เสร็จ ช่วยให้เข้าใจว่าทำไมถูก/ผิด)</label>
+            <textarea class="form-control quiz-explanation" rows="2" placeholder="เช่น เพราะ...">${data?.explanation || ''}</textarea>
+        </div>`;
 
     if (qType === 'true_false') {
         area.innerHTML = `
@@ -1866,7 +1871,8 @@ function renderQuizAnswerArea(qId, qType, data) {
                 <option value="A" ${correct==='A'?'selected':''}>A - ถูก</option>
                 <option value="B" ${correct==='B'?'selected':''}>B - ผิด</option>
             </select>
-        </div>`;
+        </div>
+        ${explanationHtml}`;
     } else if (qType === 'checkbox') {
         area.innerHTML = `
         <div class="quiz-choices">
@@ -1884,7 +1890,8 @@ function renderQuizAnswerArea(qId, qType, data) {
                     <input type="checkbox" class="quiz-correct-multi" value="${l}" ${correctMultiple.includes(l)?'checked':''}> ${l}
                 </label>`).join('')}
             </div>
-        </div>`;
+        </div>
+        ${explanationHtml}`;
     } else if (qType === 'short_answer') {
         area.innerHTML = `
         <div class="form-group" style="margin-top:0.75rem;">
@@ -1906,7 +1913,8 @@ function renderQuizAnswerArea(qId, qType, data) {
             <select class="form-control quiz-correct">
                 ${['A','B','C','D'].map(l => `<option value="${l}" ${correct===l?'selected':''}>${l}</option>`).join('')}
             </select>
-        </div>`;
+        </div>
+        ${explanationHtml}`;
     }
 }
 
@@ -1981,15 +1989,15 @@ window.generateQuizWithAI = async function() {
     const TYPE_INFO = {
         multiple_choice: {
             label: 'ปรนัย 4 ตัวเลือก',
-            schema: `{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D"}`
+            schema: `{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D","explanation":"คำอธิบายสั้นๆ ว่าทำไมข้อนี้ถึงถูก ใช้โชว์ให้นักเรียนดูหลังทำเสร็จ"}`
         },
         true_false: {
             label: 'ถูก/ผิด',
-            schema: `{"question":"คำถาม","type":"true_false","correct":"A หรือ B (A="ถูก" B="ผิด")"}`
+            schema: `{"question":"คำถาม","type":"true_false","correct":"A หรือ B (A="ถูก" B="ผิด")","explanation":"คำอธิบายสั้นๆ ว่าทำไมข้อนี้ถึงถูก/ผิด"}`
         },
         checkbox: {
             label: 'เลือกได้หลายข้อ (มีคำตอบถูกมากกว่า 1 ข้อ)',
-            schema: `{"question":"คำถาม","type":"checkbox","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correctMultiple":["A","C"]}`
+            schema: `{"question":"คำถาม","type":"checkbox","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correctMultiple":["A","C"],"explanation":"คำอธิบายสั้นๆ ว่าทำไมข้อที่เลือกถึงถูก"}`
         },
         short_answer: {
             label: 'ตอบสั้น/เรียงความ (อาจารย์ตรวจเอง)',
@@ -2069,9 +2077,11 @@ function collectQuestionsFromItems(items) {
         } else if (type === 'checkbox') {
             q.choices = Array.from(item.querySelectorAll('.choice-input')).map(inp => inp.value.trim());
             q.correctMultiple = Array.from(item.querySelectorAll('.quiz-correct-multi:checked')).map(cb => cb.value);
+            q.explanation = item.querySelector('.quiz-explanation')?.value.trim() || '';
         } else {
             q.choices = Array.from(item.querySelectorAll('.choice-input')).map(inp => inp.value.trim());
             q.correct = item.querySelector('.quiz-correct')?.value || 'A';
+            q.explanation = item.querySelector('.quiz-explanation')?.value.trim() || '';
         }
         result.push(q);
     });
@@ -2669,28 +2679,59 @@ window.createCourse = async function() {
         if (insertErr) throw insertErr;
 
         // =============================================
-        // 🔔 ส่ง Notifications หลัง addDoc สำเร็จ
+        // 🔔 ส่ง Notifications หลัง insert สำเร็จ
         // =============================================
 
         // 1) แจ้งเตือนคอร์สใหม่ → broadcast ทุกคน
-        // ใช้ 'broadcast' แทน null เพราะ Firestore ไม่รองรับ query where == null
+        // ใช้ 'broadcast' แทนการระบุ user_id เจาะจง เพื่อส่งให้ทุกคนเห็น
         await sendNotification({
             type:         'course',
             title:        '📚 คอร์สใหม่มาแล้ว!',
             message:      `${currentUserName} เพิ่งเพิ่มคอร์ส "${title}" — เข้าไปดูได้เลย`,
             link:         `dashboard.html?page=explore`,
-            targetUserId: 'broadcast'   // 'broadcast' = ส่งให้ทุกคน
+            targetUserId: 'broadcast'
         });
 
-        // 2) ถ้ามีการบ้าน → ส่ง notification แยกสำหรับการบ้านแต่ละชิ้น
+        // 2) การบ้านแต่ละชิ้น — ข้อความบอกวันเปิดจริงถ้าตั้งเวลาไว้ล่วงหน้า
         for (const hw of homeworkData) {
+            const releaseNote = hw.releaseAt && new Date(hw.releaseAt) > new Date()
+                ? ` — จะเปิดให้ทำวันที่ ${new Date(hw.releaseAt).toLocaleString('th-TH')}`
+                : '';
             await sendNotification({
                 type:         'homework',
                 title:        'มีการบ้านใหม่!',
-                message:      `"${hw.title}" ในคอร์ส ${title}${hw.deadline ? ` — กำหนดส่ง ${new Date(hw.deadline).toLocaleDateString('th-TH')}` : ''}`,
-                link:         `course-content.html?id=${docRef.id}`,
-                targetUserId: 'broadcast'   // 'broadcast' = ส่งให้ทุกคน
+                message:      `"${hw.title}" ในคอร์ส ${title}${releaseNote}${hw.deadline ? ` — กำหนดส่ง ${new Date(hw.deadline).toLocaleDateString('th-TH')}` : ''}`,
+                link:         `course-content.html?id=${docRef.id}&tab=homework`,
+                targetUserId: 'broadcast'
             });
+        }
+
+        // 3) Quiz — รวมเป็น 1 แจ้งเตือนต่อบท (กันสแปมทีละข้อ) บอกวันเปิดจริงถ้าตั้งเวลาไว้ล่วงหน้า
+        if (quizData.length > 0) {
+            const scopeGroups = {};
+            quizData.forEach(q => {
+                const key = q.lessonIndex == null ? 'global' : String(q.lessonIndex);
+                (scopeGroups[key] = scopeGroups[key] || []).push(q);
+            });
+            for (const [key, qs] of Object.entries(scopeGroups)) {
+                const lessonIdx = key === 'global' ? null : parseInt(key);
+                const scopeLabel = lessonIdx == null ? 'ทั้งคอร์ส' : (lessonsData[lessonIdx]?.title || `บทที่ ${lessonIdx+1}`);
+                const earliestRelease = qs.reduce((min, q) => {
+                    if (!q.releaseAt) return min;
+                    const t = new Date(q.releaseAt);
+                    return (!min || t < min) ? t : min;
+                }, null);
+                const releaseNote = earliestRelease && earliestRelease > new Date()
+                    ? ` — จะเปิดให้ทำวันที่ ${earliestRelease.toLocaleString('th-TH')}`
+                    : '';
+                await sendNotification({
+                    type:         'course',
+                    title:        'มีแบบทดสอบใหม่!',
+                    message:      `Quiz "${scopeLabel}" (${qs.length} ข้อ) ในคอร์ส ${title}${releaseNote}`,
+                    link:         `course-content.html?id=${docRef.id}&tab=quiz`,
+                    targetUserId: 'broadcast'
+                });
+            }
         }
 
         hideLoading();

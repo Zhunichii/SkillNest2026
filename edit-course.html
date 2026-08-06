@@ -427,7 +427,7 @@
 </div>
 
 <script type="module">
-import { supabase } from './supabase.js';
+import { supabase, sendNotification } from './supabase.js';
 
 const CLOUDINARY_CLOUD_NAME = 'dtuvwwmm0';
 const CLOUDINARY_UPLOAD_PRESET = 'skillnest';
@@ -916,6 +916,11 @@ function renderQuizAnswerArea(qId, qType, data) {
     const choices = data?.choices || ['', '', '', ''];
     const correct = data?.correct || 'A';
     const correctMultiple = data?.correctMultiple || [];
+    const explanationHtml = `
+        <div class="form-group" style="margin-top:0.75rem;">
+            <label>คำอธิบายเฉลย (ไม่บังคับ — โชว์ให้นักเรียนดูหลังทำ Quiz เสร็จ)</label>
+            <textarea class="form-control quiz-explanation" rows="2">${data?.explanation || ''}</textarea>
+        </div>`;
 
     if (qType === 'true_false') {
         area.innerHTML = `
@@ -929,7 +934,8 @@ function renderQuizAnswerArea(qId, qType, data) {
                 <option value="A" ${correct==='A'?'selected':''}>A - ถูก</option>
                 <option value="B" ${correct==='B'?'selected':''}>B - ผิด</option>
             </select>
-        </div>`;
+        </div>
+        ${explanationHtml}`;
     } else if (qType === 'checkbox') {
         area.innerHTML = `
         <div class="quiz-choices">
@@ -947,7 +953,8 @@ function renderQuizAnswerArea(qId, qType, data) {
                     <input type="checkbox" class="quiz-correct-multi" value="${l}" ${correctMultiple.includes(l)?'checked':''}> ${l}
                 </label>`).join('')}
             </div>
-        </div>`;
+        </div>
+        ${explanationHtml}`;
     } else if (qType === 'short_answer') {
         area.innerHTML = `
         <div class="form-group" style="margin-top:0.75rem;">
@@ -969,7 +976,8 @@ function renderQuizAnswerArea(qId, qType, data) {
             <select class="form-control quiz-correct">
                 ${['A','B','C','D'].map(l=>`<option value="${l}" ${correct===l?'selected':''}>${l}</option>`).join('')}
             </select>
-        </div>`;
+        </div>
+        ${explanationHtml}`;
     }
 }
 
@@ -999,15 +1007,15 @@ window.generateQuizWithAI = async function() {
     const TYPE_INFO = {
         multiple_choice: {
             label: 'ปรนัย 4 ตัวเลือก',
-            schema: `{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D"}`
+            schema: `{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D","explanation":"คำอธิบายสั้นๆ ว่าทำไมข้อนี้ถึงถูก ใช้โชว์ให้นักเรียนดูหลังทำเสร็จ"}`
         },
         true_false: {
             label: 'ถูก/ผิด',
-            schema: `{"question":"คำถาม","type":"true_false","correct":"A หรือ B (A="ถูก" B="ผิด")"}`
+            schema: `{"question":"คำถาม","type":"true_false","correct":"A หรือ B (A="ถูก" B="ผิด")","explanation":"คำอธิบายสั้นๆ ว่าทำไมข้อนี้ถึงถูก/ผิด"}`
         },
         checkbox: {
             label: 'เลือกได้หลายข้อ (มีคำตอบถูกมากกว่า 1 ข้อ)',
-            schema: `{"question":"คำถาม","type":"checkbox","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correctMultiple":["A","C"]}`
+            schema: `{"question":"คำถาม","type":"checkbox","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correctMultiple":["A","C"],"explanation":"คำอธิบายสั้นๆ ว่าทำไมข้อที่เลือกถึงถูก"}`
         },
         short_answer: {
             label: 'ตอบสั้น/เรียงความ (อาจารย์ตรวจเอง)',
@@ -1071,9 +1079,11 @@ function collectQuestionsFromItems(items) {
         } else if (type === 'checkbox') {
             q.choices = Array.from(item.querySelectorAll('.choice-input')).map(i => i.value.trim());
             q.correctMultiple = Array.from(item.querySelectorAll('.quiz-correct-multi:checked')).map(cb => cb.value);
+            q.explanation = item.querySelector('.quiz-explanation')?.value.trim() || '';
         } else {
             q.choices = Array.from(item.querySelectorAll('.choice-input')).map(i => i.value.trim());
             q.correct = item.querySelector('.quiz-correct')?.value || 'A';
+            q.explanation = item.querySelector('.quiz-explanation')?.value.trim() || '';
         }
         result.push(q);
     });
@@ -1665,6 +1675,68 @@ window.saveCourse = async function() {
             updated_at: new Date().toISOString()
         }).eq('id', courseId);
         if (upErr) throw upErr;
+
+        // แจ้งเตือนนักเรียนที่ลงทะเบียนคอร์สนี้เฉพาะ "รายการที่เพิ่มใหม่จริงๆ" เทียบกับก่อนแก้ไข
+        // (เทียบด้วยชื่อหัวข้อ/คำถาม กันแจ้งเตือนซ้ำๆ ทุกครั้งที่แก้ไขเล็กน้อย เช่น แก้คำผิด)
+        try {
+            const oldHwTitles = new Set((originalCourse.homework || []).map(h => h.title));
+            const newHomeworks = homeworkData.filter(h => !oldHwTitles.has(h.title));
+
+            const oldQuizQuestions = new Set((originalCourse.quiz || []).map(q => q.question));
+            const newQuizQuestions = quizData.filter(q => !oldQuizQuestions.has(q.question));
+
+            if (newHomeworks.length > 0 || newQuizQuestions.length > 0) {
+                // หา user_id ของนักเรียนที่ลงทะเบียนคอร์สนี้อยู่ (แจ้งเฉพาะคนที่เรียนคอร์สนี้จริง ไม่ broadcast ทั้งระบบ)
+                const { data: enrolls } = await supabase.from('enrollments').select('user_id').eq('course_id', courseId);
+                const studentIds = [...new Set((enrolls || []).map(e => e.user_id))];
+
+                for (const hw of newHomeworks) {
+                    const releaseNote = hw.releaseAt && new Date(hw.releaseAt) > new Date()
+                        ? ` — จะเปิดให้ทำวันที่ ${new Date(hw.releaseAt).toLocaleString('th-TH')}`
+                        : '';
+                    for (const uid of studentIds) {
+                        await sendNotification({
+                            type: 'homework',
+                            title: 'มีการบ้านใหม่!',
+                            message: `"${hw.title}" ในคอร์ส ${title}${releaseNote}${hw.deadline ? ` — กำหนดส่ง ${new Date(hw.deadline).toLocaleDateString('th-TH')}` : ''}`,
+                            link: `course-content.html?id=${courseId}&tab=homework`,
+                            targetUserId: uid
+                        });
+                    }
+                }
+
+                if (newQuizQuestions.length > 0) {
+                    const scopeGroups = {};
+                    newQuizQuestions.forEach(q => {
+                        const key = q.lessonIndex == null ? 'global' : String(q.lessonIndex);
+                        (scopeGroups[key] = scopeGroups[key] || []).push(q);
+                    });
+                    for (const [key, qs] of Object.entries(scopeGroups)) {
+                        const lessonIdx = key === 'global' ? null : parseInt(key);
+                        const scopeLabel = lessonIdx == null ? 'ทั้งคอร์ส' : (lessonsData[lessonIdx]?.title || `บทที่ ${lessonIdx+1}`);
+                        const earliestRelease = qs.reduce((min, q) => {
+                            if (!q.releaseAt) return min;
+                            const t = new Date(q.releaseAt);
+                            return (!min || t < min) ? t : min;
+                        }, null);
+                        const releaseNote = earliestRelease && earliestRelease > new Date()
+                            ? ` — จะเปิดให้ทำวันที่ ${earliestRelease.toLocaleString('th-TH')}`
+                            : '';
+                        for (const uid of studentIds) {
+                            await sendNotification({
+                                type: 'course',
+                                title: 'มีแบบทดสอบใหม่!',
+                                message: `Quiz "${scopeLabel}" (${qs.length} ข้อ) ในคอร์ส ${title}${releaseNote}`,
+                                link: `course-content.html?id=${courseId}&tab=quiz`,
+                                targetUserId: uid
+                            });
+                        }
+                    }
+                }
+            }
+        } catch (notifErr) {
+            console.warn('ส่งแจ้งเตือนไม่สำเร็จ (บันทึกคอร์สแล้วปกติ):', notifErr);
+        }
 
         hideLoading();
         alert('✅ บันทึกการแก้ไขสำเร็จ!');

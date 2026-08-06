@@ -928,23 +928,46 @@ window.openStudentDetail = function(userId) {
         const qz = myQuizAll.find(q => q.course_id === e.course_id);
         const courseSubs = mySubsAll.filter(s => s.course_id === e.course_id);
 
-        // Quiz breakdown รายข้อ (เฉพาะของนักเรียนคนนี้)
+        // Quiz breakdown รายข้อ (เฉพาะของนักเรียนคนนี้) — แบ่งเป็นกลุ่มตามบท/ทั้งคอร์ส ให้รีเซ็ตแยกส่วนได้
         let quizHtml = '<div class="sd-empty">ยังไม่ได้ทำ Quiz ของคอร์สนี้</div>';
-        if (qz) {
-            const qaItems = (qz.answers || []).map(a => {
-                let resultLabel, resultCls;
-                if (a.needsReview) { resultLabel = 'รอครูตรวจ'; resultCls = 'pending'; }
-                else if (a.isCorrect) { resultLabel = `ถูก (+${a.pointsEarned}/${a.maxPoints})`; resultCls = 'correct'; }
-                else { resultLabel = `ผิด (0/${a.maxPoints})`; resultCls = 'wrong'; }
-                const answerShown = a.answerText || a.selected || (a.selectedMultiple||[]).join(', ') || '(ไม่ได้ตอบ)';
-                return `<div class="sd-qa-item">
-                    <div class="sd-qa-q">${a.question}</div>
-                    <div class="sd-qa-answer">คำตอบ: ${answerShown} — <span class="sd-qa-result ${resultCls}">${resultLabel}</span></div>
+        if (qz && Array.isArray(qz.answers) && qz.answers.length > 0) {
+            const scopeGroups = {};
+            qz.answers.forEach(a => {
+                const key = a.lessonIndex == null ? 'global' : String(a.lessonIndex);
+                (scopeGroups[key] = scopeGroups[key] || []).push(a);
+            });
+
+            quizHtml = `<div style="margin-bottom:8px;font-size:0.85rem;">คะแนนรวมทั้งหมด: <strong>${qz.score}/${qz.total}</strong> (${qz.pct}%)${qz.needs_review?' • มีข้อรอตรวจ':''}</div>`;
+            quizHtml += Object.entries(scopeGroups).map(([key, answers]) => {
+                const lessonIdx = key === 'global' ? null : parseInt(key);
+                const scopeLabel = lessonIdx == null
+                    ? '📌 ทั้งคอร์ส'
+                    : (course.lessons?.[lessonIdx]?.title ? `บทที่ ${lessonIdx+1}: ${course.lessons[lessonIdx].title}` : `บทที่ ${lessonIdx+1}`);
+                const scopeScore = answers.reduce((s,a)=>s+(a.pointsEarned||0),0);
+                const scopeMax   = answers.reduce((s,a)=>s+(a.maxPoints||1),0);
+                const qaItems = answers.map(a => {
+                    let resultLabel, resultCls;
+                    if (a.needsReview) { resultLabel = 'รอครูตรวจ'; resultCls = 'pending'; }
+                    else if (a.isCorrect) { resultLabel = `ถูก (+${a.pointsEarned}/${a.maxPoints})`; resultCls = 'correct'; }
+                    else { resultLabel = `ผิด (0/${a.maxPoints})`; resultCls = 'wrong'; }
+                    const answerShown = a.answerText || a.selected || (a.selectedMultiple||[]).join(', ') || '(ไม่ได้ตอบ)';
+                    return `<div class="sd-qa-item">
+                        <div class="sd-qa-q">${a.question}</div>
+                        <div class="sd-qa-answer">คำตอบ: ${answerShown} — <span class="sd-qa-result ${resultCls}">${resultLabel}</span></div>
+                    </div>`;
+                }).join('');
+                return `<div style="margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--border-color);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+                        <div style="font-weight:600;font-size:0.84rem;">${scopeLabel} — ${scopeScore}/${scopeMax}</div>
+                        <button onclick="resetQuizScope('${userId}','${e.course_id}',${lessonIdx==null?'null':lessonIdx})"
+                            style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
+                            padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.74rem;white-space:nowrap;">
+                            🔄 รีเซ็ตให้ทำใหม่
+                        </button>
+                    </div>
+                    ${qaItems}
                 </div>`;
             }).join('');
-            quizHtml = `
-                <div style="margin-bottom:8px;font-size:0.85rem;">คะแนนรวม: <strong>${qz.score}/${qz.total}</strong> (${qz.pct}%)${qz.needs_review?' • มีข้อรอตรวจ':''}</div>
-                ${qaItems || '<div class="sd-empty">ไม่มีรายละเอียดคำตอบ</div>'}`;
         }
 
         // การบ้านของคอร์สนี้
@@ -986,6 +1009,35 @@ window.openStudentDetail = function(userId) {
 
 window.closeStudentDetail = function() {
     document.getElementById('sdModalOverlay').classList.remove('open');
+};
+
+// ให้อาจารย์รีเซ็ต Quiz ส่วนใดส่วนหนึ่ง (บทเดียว หรือทั้งคอร์ส) ของนักเรียนคนหนึ่ง เพื่อให้ทำใหม่ได้
+// (ลบเฉพาะคำตอบของ scope นั้นออกจาก array ไม่กระทบ scope อื่นที่ทำไปแล้ว)
+window.resetQuizScope = async function(userId, courseId, lessonIndex) {
+    if (!confirm('ต้องการรีเซ็ต Quiz ส่วนนี้ให้นักเรียนทำใหม่ได้หรือไม่?\nคำตอบเดิมของส่วนนี้จะถูกลบออก (ส่วนอื่นที่ทำไปแล้วไม่กระทบ)')) return;
+    try {
+        const row = allQuiz.find(q => q.user_id === userId && q.course_id === courseId);
+        if (!row) return;
+
+        const remaining = (row.answers || []).filter(a => (a.lessonIndex ?? null) !== lessonIndex);
+        const course = allCourses.find(c => c.id === courseId);
+        const allTotal = (course?.quiz || []).reduce((s,q) => s + (q.points||1), 0);
+        const score = remaining.reduce((s,a) => s + (a.pointsEarned||0), 0);
+        const pct = allTotal > 0 ? Math.round((score/allTotal)*100) : 0;
+        const needsReview = remaining.some(a => a.needsReview);
+
+        const { error } = await supabase.from('quiz_scores')
+            .update({ answers: remaining, score, total: allTotal, pct, needs_review: needsReview, updated_at: new Date().toISOString() })
+            .eq('user_id', userId).eq('course_id', courseId);
+        if (error) throw error;
+
+        // อัปเดตแคชในหน้านี้แล้ว re-render ให้เห็นผลทันที
+        row.answers = remaining; row.score = score; row.total = allTotal; row.pct = pct; row.needs_review = needsReview;
+        openStudentDetail(userId);
+        updateAll();
+    } catch(e) {
+        alert('เกิดข้อผิดพลาด: ' + e.message);
+    }
 };
 
 document.addEventListener('keydown', (e) => {
