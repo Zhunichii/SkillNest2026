@@ -255,6 +255,25 @@
                 <label>คำอธิบายคอร์ส <span class="required">*</span></label>
                 <textarea id="courseDescription" class="form-control" placeholder="คำอธิบาย..."></textarea>
             </div>
+
+            <div class="ai-gen-area">
+                <div class="ai-gen-title">✨ มีไฟล์คำอธิบายรายวิชาอยู่แล้ว? ให้ AI ดึงมาใส่ให้</div>
+                <div class="form-group" style="margin-bottom:0.75rem;">
+                    <label>อัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ — ไม่บังคับ)</label>
+                    <div class="file-upload-area" onclick="document.getElementById('courseDescFileInput').click()">
+                        <div class="file-upload-icon">📤</div>
+                        <p>คลิกเพื่ออัปโหลดไฟล์คำอธิบายรายวิชา</p>
+                        <small style="color:var(--text-dim);">รองรับ PDF และรูปภาพ (JPG, PNG)</small>
+                    </div>
+                    <input type="file" id="courseDescFileInput" accept=".pdf,application/pdf,image/*" style="display:none;">
+                    <div id="courseDescFilePreview"></div>
+                </div>
+                <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-ai" id="btnExtractCourseDesc" onclick="extractCourseDescriptionFromFile()">ให้ AI ดึงคำอธิบายจากไฟล์มาใส่ให้</button>
+                    <small style="color:var(--text-dim);">AI จะเติมลงช่อง "คำอธิบายคอร์ส" ด้านบนให้ แก้ไขต่อได้ตามต้องการ</small>
+                </div>
+                <div id="courseDescStatus" class="ai-loading-text"></div>
+            </div>
             <div class="grid">
                 <div class="form-group">
                     <label>หมวดหมู่ <span class="required">*</span></label>
@@ -1211,6 +1230,104 @@ function fileToBase64(file) {
         reader.readAsDataURL(file);
     });
 }
+
+// === คำอธิบายรายวิชา: ให้ AI ดึงจากไฟล์ PDF/รูปภาพที่อาจารย์มีอยู่แล้ว ===
+let courseDescFile = null;
+
+document.getElementById('courseDescFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    courseDescFile = file;
+    const icon = file.type.startsWith('image/') ? '🖼️' : '📄';
+    document.getElementById('courseDescFilePreview').innerHTML = `
+        <div class="file-preview" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--input-bg,rgba(255,255,255,0.05));border-radius:8px;margin-top:0.5rem;">
+            <div style="font-size:2rem;">${icon}</div>
+            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button type="button" class="btn btn-danger" onclick="removeCourseDescFile()">✕</button>
+        </div>`;
+});
+
+window.removeCourseDescFile = function() {
+    courseDescFile = null;
+    document.getElementById('courseDescFileInput').value = '';
+    document.getElementById('courseDescFilePreview').innerHTML = '';
+};
+
+const COURSE_DESC_EXTRACT_INSTRUCTION = `คุณเป็นผู้ช่วยอาจารย์เตรียมข้อมูลคอร์สเรียนออนไลน์
+ต่อไปนี้คือเนื้อหาที่ดึงมาจากเอกสารคำอธิบายรายวิชา (course syllabus) ที่อาจารย์แนบมา
+กรุณาอ่านและสรุปเป็น "คำอธิบายคอร์ส" สำหรับแสดงให้ผู้เรียนดูก่อนตัดสินใจสมัครเรียน โดย:
+1. ใช้เนื้อหาจากเอกสารจริงเป็นหลัก ห้ามแต่งเติมข้อมูลที่ไม่มีอยู่ในเอกสาร
+2. เขียนเป็นภาษาไทย ความยาวประมาณ 3-6 ประโยค อ่านเข้าใจง่าย น่าสนใจสำหรับผู้เรียนทั่วไป
+3. เน้นเนื้อหาที่จะได้เรียนและประโยชน์ที่ผู้เรียนจะได้รับ
+4. ถ้าเอกสารเขียนด้วยสำนวนวิชาการ/ทางการมาก ให้ปรับสำนวนให้เป็นกันเองขึ้นสำหรับหน้าคอร์สออนไลน์ แต่ยังคงความถูกต้องของเนื้อหาเดิม
+
+ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+{"description": "คำอธิบายคอร์สที่สรุปได้"}
+
+เนื้อหาจากเอกสาร:
+`;
+
+window.extractCourseDescriptionFromFile = async function() {
+    const btn = document.getElementById('btnExtractCourseDesc');
+    const status = document.getElementById('courseDescStatus');
+
+    if (!courseDescFile) {
+        alert('กรุณาอัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ) ก่อนครับ');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'AI กำลังอ่านไฟล์...';
+    status.classList.add('show');
+    status.textContent = 'กำลังอ่านเนื้อหา...';
+
+    try {
+        let requestBody;
+
+        if (courseDescFile.type.startsWith('image/')) {
+            status.textContent = 'AI กำลังอ่านรูปภาพ...';
+            const base64 = await fileToBase64(courseDescFile);
+            requestBody = {
+                prompt: COURSE_DESC_EXTRACT_INSTRUCTION + '(เนื้อหาอยู่ในรูปภาพที่แนบมา อ่านจากภาพโดยตรง)',
+                image: base64,
+                mimeType: courseDescFile.type
+            };
+        } else {
+            status.textContent = 'กำลังดึงข้อความจาก PDF...';
+            const analyzed = await analyzePdfFile(courseDescFile);
+            if (!analyzed.text.trim() && analyzed.pageImages.length === 0) {
+                throw new Error('ไม่พบข้อความในไฟล์นี้ ลองอัปโหลดไฟล์อื่นหรือพิมพ์คำอธิบายเองแทน');
+            }
+            requestBody = {
+                prompt: COURSE_DESC_EXTRACT_INSTRUCTION + analyzed.text,
+                images: analyzed.pageImages.length > 0 ? analyzed.pageImages.map(p => ({ data: p.data, mimeType: p.mimeType })) : undefined
+            };
+        }
+
+        status.textContent = 'AI กำลังสรุปคำอธิบายคอร์ส...';
+        const res = await fetch('/api/ai?fn=quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        const jsonStr = (data.text || '').replace(/```json|```/g, '').trim();
+        const result = JSON.parse(jsonStr);
+        if (!result.description) throw new Error('AI ไม่พบคำอธิบายรายวิชาจากไฟล์นี้');
+
+        document.getElementById('courseDescription').value = result.description;
+        status.textContent = 'ดึงคำอธิบายจากไฟล์มาใส่ให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ';
+
+    } catch (err) {
+        console.error('extractCourseDescriptionFromFile error:', err);
+        status.textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'ให้ AI ดึงคำอธิบายจากไฟล์มาใส่ให้';
+    }
+};
 
 function toDatetimeLocalValue(deadlineStr) {
     if (!deadlineStr) return '';
