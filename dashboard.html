@@ -1097,11 +1097,14 @@
             const list = document.getElementById('notifList');
             if (!list) return;
 
-            const filtered = activeTab === 'all'
+            const filtered = (activeTab === 'all'
                 ? allNotifications
-                : allNotifications.filter(n => n.type === activeTab);
+                : allNotifications.filter(n => n.type === activeTab)
+            ).filter(n => !(n.dismissed_by || []).includes(userId));
 
-            const unreadCount = allNotifications.filter(n => !(n.read_by || []).includes(userId)).length;
+            const unreadCount = allNotifications.filter(n =>
+                !(n.read_by || []).includes(userId) && !(n.dismissed_by || []).includes(userId)
+            ).length;
             updateBadge(unreadCount);
 
             if (filtered.length === 0) {
@@ -1159,35 +1162,32 @@
         };
 
         document.getElementById('markAllReadBtn').addEventListener('click', async () => {
-            if (!currentUser || allNotifications.length === 0) return;
+            if (!currentUser) return;
+            const unread = allNotifications.filter(n => !(n.read_by || []).includes(currentUser.id));
+            if (unread.length === 0) return;
             try {
-                const batch = writeBatch(db);
-                const unread = allNotifications.filter(n => !(n.read_by || []).includes(currentUser.id));
-                unread.forEach(n => {
-                    batch.update(doc(db, 'notifications', n.id), {
-                        readBy: [...(n.read_by || []), currentUser.id]
-                    });
-                });
-                await batch.commit();
+                await Promise.all(unread.map(n =>
+                    supabase.rpc('append_to_read_by', { notif_id: n.id, user_id: currentUser.id })
+                ));
+                unread.forEach(n => { n.read_by = [...(n.read_by || []), currentUser.id]; });
+                renderNotifPanel(currentUser.id);
             } catch(e) { console.error('mark all read error:', e); }
         });
 
         document.getElementById('clearAllNotifsLink').addEventListener('click', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
+            const toDismiss = allNotifications.filter(n => !(n.dismissed_by || []).includes(currentUser.id));
+            if (toDismiss.length === 0) return;
             if (!confirm('ต้องการล้างการแจ้งเตือนทั้งหมดหรือไม่?')) return;
             try {
-                // ล้างโดย mark ว่าอ่านแล้วทุกอัน
-                const batch = writeBatch(db);
-                allNotifications.forEach(n => {
-                    if (!(n.read_by || []).includes(currentUser.id)) {
-                        batch.update(doc(db, 'notifications', n.id), {
-                            readBy: [...(n.read_by || []), currentUser.id]
-                        });
-                    }
-                });
-                await batch.commit();
-                closeNotifPanel();
+                // ล้างเฉพาะฝั่งเรา (ใช้ dismissed_by แยกจาก read_by เพราะ notification เป็นแถวที่ผู้ใช้หลายคนเห็นร่วมกัน
+                // ลบทิ้งจริงจะกระทบคนอื่นด้วย จึงซ่อนไว้เฉพาะฝั่งเราแทน)
+                await Promise.all(toDismiss.map(n =>
+                    supabase.rpc('append_to_dismissed_by', { notif_id: n.id, user_id: currentUser.id })
+                ));
+                toDismiss.forEach(n => { n.dismissed_by = [...(n.dismissed_by || []), currentUser.id]; });
+                renderNotifPanel(currentUser.id);
             } catch(e) { console.error('clear notif error:', e); }
         });
 
