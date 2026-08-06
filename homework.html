@@ -130,6 +130,11 @@
             padding:2rem; max-height:90vh; overflow-y:auto;
         }
         .grade-modal h3 { font-size:1.2rem; margin-bottom:1.5rem; }
+        .ai-grade-note {
+            background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.25);
+            border-left:3px solid #8b5cf6; border-radius:8px; padding:10px 12px;
+            font-size:0.85rem; color:#c4b5fd; margin-top:10px; line-height:1.5;
+        }
         .form-group { margin-bottom:1.25rem; }
         .form-group label { display:block; margin-bottom:0.4rem; font-size:0.9rem; color:var(--text-dim); }
         .form-control {
@@ -232,6 +237,14 @@
         <div class="form-group">
             <label>คะแนน (เต็ม <span id="gradeMaxScore">100</span>)</label>
             <input type="number" class="form-control" id="gradeScore" min="0" placeholder="ใส่คะแนน">
+        </div>
+        <div style="margin-bottom:1rem;">
+            <button type="button" id="btnAiGradeHw" onclick="aiGradeCurrentSubmission()"
+                style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);border:none;color:white;
+                padding:8px 16px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;">
+                🤖 ให้ AI ช่วยตรวจ
+            </button>
+            <div id="aiGradeNote"></div>
         </div>
         <div class="form-group">
             <label>ความคิดเห็น / Feedback</label>
@@ -401,7 +414,7 @@ async function loadHomeworksByCourse(courseId) {
                     <td>${workHtml} ${fileHtml}</td>
                     <td>${statusBadge}</td>
                     <td>
-                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}','${sub.user_id}','${courseId}','${escapeHtml(hw.title||'')}')">
+                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}','${sub.user_id}','${courseId}','${escapeHtml(hw.title||'')}','${escapeHtml(hw.description||'')}')">
                             ✏️ ${sub.status==='graded'?'แก้คะแนน':'ให้คะแนน'}
                         </button>
                     </td>
@@ -448,13 +461,14 @@ function escapeHtml(str) {
     return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
 }
 
-window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore, currentGrade, currentComment, studentUserId, courseId, hwTitle) {
-    pendingGrade = { subId, maxScore, studentUserId, courseId, hwTitle };
+window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore, currentGrade, currentComment, studentUserId, courseId, hwTitle, hwDescription) {
+    pendingGrade = { subId, maxScore, studentUserId, courseId, hwTitle, hwDescription, content, fileUrl };
     document.getElementById('gradeStudentInfo').textContent = `นักเรียน: ${studentName}`;
     document.getElementById('gradeMaxScore').textContent = maxScore;
     document.getElementById('gradeScore').max = maxScore;
     document.getElementById('gradeScore').value = currentGrade || '';
     document.getElementById('gradeComment').value = currentComment || '';
+    document.getElementById('aiGradeNote').innerHTML = '';
 
     let previewHtml = '';
     if (content) previewHtml += `<div>📝 งานที่ส่ง:<br><br>${content}</div>`;
@@ -517,6 +531,109 @@ window.confirmGrade = async function() {
 document.getElementById('gradeModalOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeGradeModal();
 });
+
+// ============ AI ช่วยตรวจ ============
+// โหลด PDF.js แบบเบา (ดึงแค่ข้อความ ไม่ render รูปหน้า — พอสำหรับ PDF ที่พิมพ์มา
+// ถ้าเป็น PDF ที่สแกนเป็นรูป (ไม่มี text layer) จะดึงข้อความไม่ได้ ต้องตรวจเองในกรณีนั้น)
+async function ensurePdfJsLoadedLite() {
+    if (window.pdfjsLib) return;
+    await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+}
+
+async function fetchFileAsBase64(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('ดึงไฟล์ไม่สำเร็จ');
+    const blob = await resp.blob();
+    const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+    return { base64, mimeType: blob.type };
+}
+
+// พยายามดึง "เนื้อหาที่อ่านได้" จากงานที่ส่งมา ไม่ว่าจะเป็นข้อความ / ไฟล์ PDF / รูปภาพ
+async function extractGradingContent(pendingGrade) {
+    // มีข้อความอยู่แล้ว (งานแบบพิมพ์ตอบ หรือโค้ด) — ใช้ตรงๆ
+    if (pendingGrade.content && pendingGrade.content.trim()) {
+        return { answerText: pendingGrade.content, images: null };
+    }
+    if (!pendingGrade.fileUrl) {
+        return { answerText: '', images: null };
+    }
+
+    const url = pendingGrade.fileUrl.toLowerCase();
+    if (url.includes('.pdf')) {
+        await ensurePdfJsLoadedLite();
+        const pdf = await window.pdfjsLib.getDocument(pendingGrade.fileUrl).promise;
+        let text = '';
+        const maxPages = Math.min(pdf.numPages, 15);
+        for (let i = 1; i <= maxPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(it => it.str).join(' ') + '\n';
+        }
+        if (!text.trim()) {
+            throw new Error('ไฟล์ PDF นี้ไม่มีข้อความให้อ่าน (อาจเป็นไฟล์สแกน/รูปภาพ) — กรุณาตรวจเองครับ');
+        }
+        return { answerText: text.slice(0, 6000), images: null };
+    }
+
+    if (/\.(jpg|jpeg|png|webp|gif)(\?|$)/.test(url) || url.startsWith('data:image')) {
+        const { base64, mimeType } = await fetchFileAsBase64(pendingGrade.fileUrl);
+        return { answerText: '', images: [{ data: base64, mimeType }] };
+    }
+
+    throw new Error('ไม่รองรับไฟล์ประเภทนี้สำหรับ AI ช่วยตรวจ (รองรับข้อความ, PDF ที่มีตัวอักษร, และรูปภาพ) กรุณาตรวจเองครับ');
+}
+
+window.aiGradeCurrentSubmission = async function() {
+    if (!pendingGrade) return;
+    const btn  = document.getElementById('btnAiGradeHw');
+    const note = document.getElementById('aiGradeNote');
+
+    btn.disabled = true;
+    btn.textContent = '🤖 กำลังอ่านงาน...';
+    note.innerHTML = '';
+
+    try {
+        const { answerText, images } = await extractGradingContent(pendingGrade);
+
+        btn.textContent = '🤖 AI กำลังตรวจ...';
+        const res = await fetch('/api/ai?fn=grade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: pendingGrade.hwDescription || pendingGrade.hwTitle || 'ไม่มีคำอธิบายโจทย์',
+                answerText,
+                images,
+                maxPoints: pendingGrade.maxScore,
+            })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('gradeScore').value = data.suggestedScore;
+        note.innerHTML = `<div class="ai-grade-note">
+            🤖 AI เสนอ ${data.suggestedScore}/${pendingGrade.maxScore} คะแนน — ${data.reasoning || ''}
+            <span style="display:block;color:var(--text-dim);font-size:0.74rem;margin-top:3px;">เป็นแค่ข้อเสนอแนะ ตรวจสอบและแก้คะแนนก่อนกด "บันทึกคะแนน" ได้ตามดุลยพินิจ</span>
+        </div>`;
+    } catch (e) {
+        note.innerHTML = `<div class="ai-grade-note" style="color:#f87171;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);">${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🤖 ให้ AI ช่วยตรวจ';
+    }
+};
 
 // ============ BULK GRADING ============
 let pendingBulkGrade = null;

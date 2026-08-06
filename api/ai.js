@@ -224,7 +224,7 @@ async function handleThumbnail(req, res) {
 async function handleGrade(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { question, answerText, sampleAnswer, maxPoints } = req.body;
+    const { question, answerText, sampleAnswer, maxPoints, images } = req.body;
     if (!question) return res.status(400).json({ error: 'question required' });
 
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY_CHAT || process.env.GEMINI_API_KEY;
@@ -233,11 +233,12 @@ async function handleGrade(req, res) {
     }
 
     const points = Number(maxPoints) || 1;
+    const hasImages = Array.isArray(images) && images.length > 0;
     const prompt = `คุณเป็นผู้ช่วยอาจารย์ตรวจข้อสอบ/การบ้านแบบอัตนัย (เขียนตอบ) ในแพลตฟอร์มเรียนออนไลน์ SkillNest
 โจทย์/คำถาม: ${question}
 ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอบตัวอย่างที่อาจารย์กำหนดไว้:\n${sampleAnswer}` : '(อาจารย์ไม่ได้ระบุเกณฑ์การให้คะแนนไว้ ให้ประเมินจากความถูกต้อง ความครบถ้วน และความสมเหตุสมผลของคำตอบตามความรู้ทั่วไปในหัวข้อนี้)'}
 
-คำตอบของนักเรียน: ${answerText && answerText.trim() ? answerText : '(นักเรียนไม่ได้ตอบ หรือส่งว่างเปล่า)'}
+คำตอบของนักเรียน: ${hasImages ? '(ดูจากภาพที่แนบมา' + (answerText && answerText.trim() ? ' ร่วมกับข้อความนี้)' : ')') + (answerText && answerText.trim() ? ' ' + answerText : '') : (answerText && answerText.trim() ? answerText : '(นักเรียนไม่ได้ตอบ หรือส่งว่างเปล่า)')}
 
 คะแนนเต็มข้อนี้คือ ${points} คะแนน (ให้คะแนนเป็นทศนิยม .5 ได้ เช่น 2.5)
 
@@ -247,6 +248,15 @@ ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอ�
 ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
 {"suggestedScore": ตัวเลข 0-${points}, "reasoning": "เหตุผลสั้นๆ"}`;
 
+    const parts = [{ text: prompt }];
+    if (hasImages) {
+        images.forEach(img => {
+            if (img && img.data) {
+                parts.push({ inlineData: { mimeType: img.mimeType || 'image/jpeg', data: img.data } });
+            }
+        });
+    }
+
     try {
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -254,7 +264,7 @@ ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอ�
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
+                    contents: [{ parts }],
                     generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
                 })
             }
