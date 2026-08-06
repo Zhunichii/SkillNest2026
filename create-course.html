@@ -695,12 +695,22 @@
                         <option value="10">10 ข้อ</option>
                     </select>
                 </div>
-                <div class="form-group" style="max-width: 160px;">
-                    <label>ประเภทคำถาม</label>
-                    <select id="aiQuizType" class="form-control">
-                        <option value="multiple_choice">ปรนัย 4 ตัวเลือก</option>
-                        <option value="true_false">ถูก/ผิด</option>
-                    </select>
+            </div>
+            <div class="form-group" style="margin-top:0.75rem;">
+                <label>ประเภทคำถาม (เลือกได้มากกว่า 1 แบบ — AI จะผสมสัดส่วนให้เอง)</label>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                        <input type="checkbox" class="ai-quiz-type-check" value="multiple_choice" checked> ปรนัย 4 ตัวเลือก
+                    </label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                        <input type="checkbox" class="ai-quiz-type-check" value="true_false"> ถูก/ผิด
+                    </label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                        <input type="checkbox" class="ai-quiz-type-check" value="checkbox"> เลือกได้หลายข้อ
+                    </label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                        <input type="checkbox" class="ai-quiz-type-check" value="short_answer"> ตอบสั้น/เรียงความ
+                    </label>
                 </div>
             </div>
             <div style="margin-top: 0.75rem;">
@@ -1950,27 +1960,58 @@ window.removeFormQuestion = function(qId) {
 window.generateQuizWithAI = async function() {
     const topic = document.getElementById('aiQuizTopic').value.trim();
     const count = document.getElementById('aiQuizCount').value;
-    const type = document.getElementById('aiQuizType').value;
-    
-    if (!topic) { 
-        alert('❌ กรุณาระบุหัวข้อหรือเนื้อหาก่อนสร้าง Quiz'); 
-        return; 
+    const selectedTypes = [...document.querySelectorAll('.ai-quiz-type-check:checked')].map(cb => cb.value);
+
+    if (!topic) {
+        alert('❌ กรุณาระบุหัวข้อหรือเนื้อหาก่อนสร้าง Quiz');
+        return;
     }
-    
+    if (selectedTypes.length === 0) {
+        alert('❌ กรุณาเลือกประเภทคำถามอย่างน้อย 1 แบบ');
+        return;
+    }
+
     const btn = document.getElementById('btnGenQuiz');
     const loadingText = document.getElementById('aiLoadingText');
-    
+
     btn.disabled = true;
     loadingText.classList.add('show');
-    
-    const typeDesc = type === 'true_false' 
-        ? 'ถูก/ผิด (True/False) โดยตัวเลือก A คือ "ถูก" และ B คือ "ผิด"' 
-        : 'ปรนัย 4 ตัวเลือก (A, B, C, D)';
-        
+
+    // schema + คำอธิบายของแต่ละประเภท ให้ AI เลือกใช้เฉพาะที่ติ๊กไว้
+    const TYPE_INFO = {
+        multiple_choice: {
+            label: 'ปรนัย 4 ตัวเลือก',
+            schema: `{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D"}`
+        },
+        true_false: {
+            label: 'ถูก/ผิด',
+            schema: `{"question":"คำถาม","type":"true_false","correct":"A หรือ B (A="ถูก" B="ผิด")"}`
+        },
+        checkbox: {
+            label: 'เลือกได้หลายข้อ (มีคำตอบถูกมากกว่า 1 ข้อ)',
+            schema: `{"question":"คำถาม","type":"checkbox","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correctMultiple":["A","C"]}`
+        },
+        short_answer: {
+            label: 'ตอบสั้น/เรียงความ (อาจารย์ตรวจเอง)',
+            schema: `{"question":"คำถาม","type":"short_answer","sampleAnswer":"คำตอบตัวอย่าง/เกณฑ์การให้คะแนนสั้นๆ สำหรับอาจารย์อ้างอิง"}`
+        },
+    };
+
+    const typeList = selectedTypes.map(t => `- ${TYPE_INFO[t].label}: ${TYPE_INFO[t].schema}`).join('\n');
+    const distributionNote = selectedTypes.length > 1
+        ? `กระจายจำนวนข้อให้ครบทุกประเภทที่เลือกไว้ ไม่ต้องเท่ากันเป๊ะ แต่ให้มีอย่างน้อย 1 ข้อต่อประเภท`
+        : `ทุกข้อเป็นประเภทเดียวกันหมด`;
+
     const prompt = `คุณคือผู้เชี่ยวชาญการสร้างข้อสอบภาษาไทย
-สร้างแบบทดสอบประเภท${typeDesc} จำนวน ${count} ข้อ เกี่ยวกับหัวข้อ: "${topic}"
-ตอบเป็น JSON array เท่านั้น ไม่ต้องมีข้อความอื่น ไม่ต้องใส่ markdown code block รูปแบบ:
-${type === 'true_false' ? `[{"question":"คำถาม","type":"true_false","correct":"A หรือ B"}]` : `[{"question":"คำถาม","type":"multiple_choice","choices":["ตัวเลือก A","ตัวเลือก B","ตัวเลือก C","ตัวเลือก D"],"correct":"A หรือ B หรือ C หรือ D"}]`}`;
+สร้างแบบทดสอบจำนวน ${count} ข้อ เกี่ยวกับหัวข้อ: "${topic}"
+
+ใช้ได้เฉพาะประเภทคำถามต่อไปนี้เท่านั้น (แต่ละแบบมีรูปแบบ JSON ที่ต้องตรงเป๊ะ):
+${typeList}
+
+การกระจายประเภท: ${distributionNote}
+
+ตอบเป็น JSON array เท่านั้น ไม่ต้องมีข้อความอื่น ไม่ต้องใส่ markdown code block
+แต่ละ object ต้องมี field "type" ตรงกับประเภทที่เลือกใช้เสมอ`;
 
     try {
         const response = await fetch('/api/ai?fn=quiz', {
@@ -1984,18 +2025,18 @@ ${type === 'true_false' ? `[{"question":"คำถาม","type":"true_false","c
         });
 
         const data = await response.json();
-        
+
         if (data.error) throw new Error(data.error);
         const rawText = data.text || '';
         const clean = rawText.replace(/```json|```/g, '').trim();
         const questions = JSON.parse(clean);
-        
+
         document.getElementById('quizList').innerHTML = '';
         quizQuestions = [];
         quizCounter = 0;
-        
+
         questions.forEach(q => addQuizQuestion(q));
-        
+
         loadingText.classList.remove('show');
         btn.disabled = false;
     } catch (err) {
