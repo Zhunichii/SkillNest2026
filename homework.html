@@ -205,6 +205,15 @@
             <div class="spinner-wrap"><div class="spinner"></div></div>
         </div>
 
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <button id="btnExportCsv" onclick="exportGradesCsv()"
+                style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);
+                color:#10b981;padding:8px 16px;border-radius:8px;cursor:pointer;
+                font-size:0.85rem;font-weight:600;display:none;align-items:center;gap:6px;">
+                📥 Export คะแนนเป็น CSV
+            </button>
+        </div>
+
         <div id="hwContent">
             <div class="empty-state">
                 <div class="empty-icon">📂</div>
@@ -241,6 +250,9 @@ import { supabase } from './supabase.js';
 let currentUser = null;
 let myCourses = [];
 let pendingGrade = null;
+let currentCourseId = null;
+let _lastLoadedSubmissions = [];
+let _lastLoadedStudentNames = {};
 
 // Auth check — teacher only
 const { data: { user } } = await supabase.auth.getUser();
@@ -296,8 +308,11 @@ window.selectCourse = async function(courseId, btn) {
 };
 
 async function loadHomeworksByCourse(courseId) {
+    currentCourseId = courseId;
     const contentEl = document.getElementById('hwContent');
+    const exportBtn = document.getElementById('btnExportCsv');
     contentEl.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+    if (exportBtn) exportBtn.style.display = 'none';
 
     const course = myCourses.find(c => c.id === courseId);
     if (!course || !course.homework) { contentEl.innerHTML = ''; return; }
@@ -321,6 +336,11 @@ async function loadHomeworksByCourse(courseId) {
             if (u) studentNames[uid] = `${u.first_name||''} ${u.last_name||''}`.trim() || u.email;
         } catch(e) {}
     }
+
+    // เก็บไว้ใช้ตอน export CSV (กันไม่ต้องดึงข้อมูลซ้ำ)
+    _lastLoadedSubmissions  = submissions;
+    _lastLoadedStudentNames = studentNames;
+    if (exportBtn) exportBtn.style.display = userIds.length > 0 ? 'inline-flex' : 'none';
 
     contentEl.innerHTML = '';
 
@@ -456,6 +476,64 @@ window.confirmGrade = async function() {
 document.getElementById('gradeModalOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeGradeModal();
 });
+
+// ============ EXPORT CSV ============
+// ครอบข้อความให้ปลอดภัยสำหรับ CSV (กัน comma/quote/ขึ้นบรรทัดใหม่ในชื่อ/ความเห็นทำให้ format พัง)
+function csvCell(val) {
+    const s = String(val ?? '');
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+}
+
+window.exportGradesCsv = function() {
+    const course = myCourses.find(c => c.id === currentCourseId);
+    if (!course || !course.homework) return;
+
+    const submissions   = _lastLoadedSubmissions;
+    const studentNames  = _lastLoadedStudentNames;
+    const studentIds    = [...new Set(submissions.map(s => s.user_id))];
+    if (studentIds.length === 0) { alert('ยังไม่มีนักเรียนส่งงานในคอร์สนี้'); return; }
+
+    // หัวตาราง: ชื่อนักเรียน + การบ้านแต่ละชิ้น + รวม/เต็ม/เปอร์เซ็นต์
+    const header = ['ชื่อนักเรียน', ...course.homework.map(hw => hw.title), 'คะแนนรวม', 'คะแนนเต็มรวม', 'เปอร์เซ็นต์'];
+    const rows = [header];
+
+    studentIds.forEach(uid => {
+        const name = studentNames[uid] || uid;
+        const row = [name];
+        let totalScore = 0, totalMax = 0;
+
+        course.homework.forEach((hw, idx) => {
+            const sub = submissions.find(s => s.user_id === uid && s.homework_index === idx);
+            const maxScore = hw.maxScore || 100;
+            if (!sub) {
+                row.push('ยังไม่ส่ง');
+            } else if (sub.status === 'graded') {
+                row.push(sub.grade ?? 0);
+                totalScore += sub.grade ?? 0;
+                totalMax   += maxScore;
+            } else {
+                row.push('รอตรวจ');
+            }
+        });
+
+        row.push(totalScore, totalMax, totalMax > 0 ? Math.round((totalScore/totalMax)*100) + '%' : '-');
+        rows.push(row);
+    });
+
+    // ใส่ BOM (\uFEFF) นำหน้า กัน Excel เปิดแล้วภาษาไทยเพี้ยน (encoding เดา ผิดถ้าไม่มี BOM)
+    const csvContent = '\uFEFF' + rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const safeTitle = (course.title || 'course').replace(/[^\p{L}\p{N}\- ]/gu, '').trim() || 'course';
+    a.href     = url;
+    a.download = `คะแนน-${safeTitle}-${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
 
 // ============ TUTORIAL TOUR ============
 const _homeworkTourSteps = [
