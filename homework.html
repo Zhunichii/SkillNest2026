@@ -353,7 +353,7 @@ async function loadHomeworksByCourse(courseId) {
                     <td>${workHtml} ${fileHtml}</td>
                     <td>${statusBadge}</td>
                     <td>
-                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}')">
+                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}','${sub.user_id}','${courseId}','${escapeHtml(hw.title||'')}')">
                             ✏️ ${sub.status==='graded'?'แก้คะแนน':'ให้คะแนน'}
                         </button>
                     </td>
@@ -387,8 +387,8 @@ function escapeHtml(str) {
     return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
 }
 
-window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore, currentGrade, currentComment) {
-    pendingGrade = { subId, maxScore };
+window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore, currentGrade, currentComment, studentUserId, courseId, hwTitle) {
+    pendingGrade = { subId, maxScore, studentUserId, courseId, hwTitle };
     document.getElementById('gradeStudentInfo').textContent = `นักเรียน: ${studentName}`;
     document.getElementById('gradeMaxScore').textContent = maxScore;
     document.getElementById('gradeScore').max = maxScore;
@@ -429,6 +429,22 @@ window.confirmGrade = async function() {
             .eq('id', pendingGrade.subId);
 
         if (error) throw error;
+
+        // แจ้งเตือนนักเรียนว่าตรวจงานเสร็จแล้ว (ไม่ให้ error ตรงนี้ไปบล็อกการบันทึกคะแนนที่สำเร็จแล้ว)
+        try {
+            const course = myCourses.find(c => c.id === pendingGrade.courseId);
+            await supabase.from('notifications').insert({
+                target_user_id: pendingGrade.studentUserId,
+                type: 'homework',
+                title: 'การบ้านของคุณถูกตรวจแล้ว',
+                message: `"${pendingGrade.hwTitle}" ในคอร์ส "${course?.title || ''}" — ได้คะแนน ${score}/${pendingGrade.maxScore}`,
+                link: `course-content.html?id=${pendingGrade.courseId}&tab=homework`,
+                created_at: new Date().toISOString(),
+            });
+        } catch(notifErr) {
+            console.warn('ส่งแจ้งเตือนไม่สำเร็จ (คะแนนบันทึกแล้วปกติ):', notifErr);
+        }
+
         closeGradeModal();
         const activeTab = document.querySelector('.course-tab-btn.active');
         if (activeTab) activeTab.click();
