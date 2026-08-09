@@ -69,14 +69,17 @@ async function handleQuiz(req, res) {
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts }],
                     generationConfig: {
-                        temperature: 0.7,
+                        // หมายเหตุ: Gemini 3.x ไม่รองรับ temperature/top_p/top_k แล้ว (ใส่ไปจะถูกเพิกเฉยเงียบๆ ไม่ error)
+                        // ใช้ thinkingLevel แทน — งานนี้ไม่ต้อง reasoning ลึก ใช้ LOW พอ ประหยัด token/เวลา
+                        // (thinking tokens ถูกคิดราคาเป็น output token ด้วย ยิ่ง thinking เยอะยิ่งแพง)
+                        thinkingConfig: { thinkingLevel: 'LOW' },
                         maxOutputTokens: reqType === 'outline' ? 16384 : 1500
                     }
                 })
@@ -259,13 +262,13 @@ ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอ�
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts }],
-                    generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
+                    generationConfig: { thinkingConfig: { thinkingLevel: 'LOW' }, maxOutputTokens: 600 }
                 })
             }
         );
