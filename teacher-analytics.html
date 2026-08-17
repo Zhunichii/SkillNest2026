@@ -958,8 +958,10 @@ window.openStudentDetail = function(userId) {
                     else if (a.isCorrect) { resultLabel = `ถูก (+${a.pointsEarned}/${a.maxPoints})`; resultCls = 'correct'; }
                     else { resultLabel = `ผิด (0/${a.maxPoints})`; resultCls = 'wrong'; }
                     const answerShown = a.answerText || a.selected || (a.selectedMultiple||[]).join(', ') || '(ไม่ได้ตอบ)';
+                    const imgHtml = a.imageUrl ? `<img src="${a.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;margin:0.4rem 0;">` : '';
                     return `<div class="sd-qa-item">
                         <div class="sd-qa-q">${a.question}</div>
+                        ${imgHtml}
                         <div class="sd-qa-answer">คำตอบ: ${answerShown} — <span class="sd-qa-result ${resultCls}">${resultLabel}</span></div>
                     </div>`;
                 }).join('');
@@ -1143,6 +1145,7 @@ function renderQuizQuestionBreakdown(quiz, courses) {
             const reviewedCount = relevantAnswers.filter(a => !a.needsReview).length;
             return `<div class="qbreak-item">
                 <div class="qbreak-q">${qi+1}. ${q.question} <span style="color:var(--text-dim);font-weight:400;font-size:0.8rem;">(ตอบสั้น/เรียงความ)</span></div>
+                ${q.imageUrl ? `<img src="${q.imageUrl}" style="max-width:200px;max-height:130px;border-radius:8px;display:block;margin:4px 0;">` : ''}
                 <div style="font-size:0.76rem;color:var(--primary-blue);margin-bottom:4px;">${lessonLabel}</div>
                 <div style="font-size:0.82rem;color:var(--text-dim);">ตรวจแล้ว ${reviewedCount}/${relevantAnswers.length} คน</div>
             </div>`;
@@ -1163,6 +1166,7 @@ function renderQuizQuestionBreakdown(quiz, courses) {
 
         return `<div class="qbreak-item">
             <div class="qbreak-q">${qi+1}. ${q.question} <span style="color:${correctPct>=60?'var(--success)':'var(--warning)'};font-weight:600;font-size:0.82rem;">(ถูก ${correctPct}%)</span></div>
+            ${q.imageUrl ? `<img src="${q.imageUrl}" style="max-width:200px;max-height:130px;border-radius:8px;display:block;margin:4px 0;">` : ''}
             <div style="font-size:0.76rem;color:var(--primary-blue);margin-bottom:4px;">${lessonLabel}</div>
             ${choiceCount.map(c => {
                 const pct = Math.round((c.count/totalAnswered)*100);

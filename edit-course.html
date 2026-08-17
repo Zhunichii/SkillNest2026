@@ -886,10 +886,63 @@ window.addQuizQuestion = function(data = null) {
                 <label>คำถาม <span class="required">*</span></label>
                 <textarea class="form-control quiz-question-text" rows="2">${data?.question || ''}</textarea>
             </div>
+            ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>
         </div>`);
     document.querySelector(`#${qId} .quiz-type-select`).value = qType;
     renderQuizAnswerArea(qId, qType, data);
+    document.getElementById(`${qId}-image-input`).addEventListener('change', function(e) {
+        handleQuizImageUpload(qId, e.target.files[0]);
+    });
+};
+
+// HTML สำหรับแนบรูปภาพประกอบคำถาม — ใช้ร่วมกันทั้ง Quiz และคำถามในการบ้านแบบฟอร์ม
+function quizImageUploadHtml(qId, data) {
+    return `
+            <div class="form-group">
+                <label>รูปภาพประกอบคำถาม (ไม่บังคับ)</label>
+                <div class="quiz-image-upload-area" onclick="document.getElementById('${qId}-image-input').click()"
+                    style="border:1.5px dashed var(--border-color);border-radius:8px;padding:0.6rem 1rem;
+                    cursor:pointer;font-size:0.82rem;color:var(--text-dim);text-align:center;transition:border-color 0.15s;"
+                    onmouseover="this.style.borderColor='var(--primary-blue)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                    📷 คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
+                </div>
+                <input type="file" id="${qId}-image-input" accept="image/*" style="display:none;">
+                <input type="hidden" class="quiz-image-url" value="${data?.imageUrl || ''}">
+                <div id="${qId}-image-preview">${data?.imageUrl ? `
+                    <div style="position:relative;display:inline-block;margin-top:0.6rem;">
+                        <img src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                        <button type="button" onclick="removeQuizQuestionImage('${qId}')"
+                            style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
+                            background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;">✕</button>
+                    </div>` : ''}</div>
+            </div>`;
+}
+
+async function handleQuizImageUpload(qId, file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { alert('กรุณาเลือกไฟล์รูปภาพเท่านั้นครับ'); return; }
+    const preview = document.getElementById(`${qId}-image-preview`);
+    preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-dim);">⏳ กำลังอัปโหลด...</div>`;
+    try {
+        const url = await uploadToCloudinary(file, 'skillnest/quiz-images');
+        document.querySelector(`#${qId} .quiz-image-url`).value = url;
+        preview.innerHTML = `
+            <div style="position:relative;display:inline-block;margin-top:0.6rem;">
+                <img src="${url}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                <button type="button" onclick="removeQuizQuestionImage('${qId}')"
+                    style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
+                    background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;">✕</button>
+            </div>`;
+    } catch (e) {
+        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;">❌ อัปโหลดไม่สำเร็จ: ${e.message}</div>`;
+    }
+}
+
+window.removeQuizQuestionImage = function(qId) {
+    document.querySelector(`#${qId} .quiz-image-url`).value = '';
+    document.getElementById(`${qId}-image-preview`).innerHTML = '';
+    document.getElementById(`${qId}-image-input`).value = '';
 };
 
 function renderQuizAnswerArea(qId, qType, data) {
@@ -1046,6 +1099,8 @@ function collectQuestionsFromItems(items) {
         const type = item.querySelector('.quiz-type-select')?.value || 'multiple_choice';
         const points = parseInt(item.querySelector('.quiz-points')?.value) || 1;
         const q = { question: questionText, type, points };
+        const imageUrl = item.querySelector('.quiz-image-url')?.value.trim();
+        if (imageUrl) q.imageUrl = imageUrl;
         const lessonSelect = item.querySelector('.quiz-lesson-select');
         if (lessonSelect) {
             q.lessonIndex = lessonSelect.value === '' ? null : parseInt(lessonSelect.value);
@@ -1108,10 +1163,14 @@ window.addFormQuestion = function(hwId, data = null) {
                 <label>คำถาม <span class="required">*</span></label>
                 <textarea class="form-control quiz-question-text" rows="2">${data?.question || ''}</textarea>
             </div>
+            ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>
         </div>`);
     document.querySelector(`#${qId} .quiz-type-select`).value = qType;
     renderQuizAnswerArea(qId, qType, data);
+    document.getElementById(`${qId}-image-input`).addEventListener('change', function(e) {
+        handleQuizImageUpload(qId, e.target.files[0]);
+    });
 };
 
 window.removeFormQuestion = function(qId) {

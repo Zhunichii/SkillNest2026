@@ -132,8 +132,13 @@
 
         /* Content tabs — บทเรียนที่มีทั้งวิดีโอและเอกสารพร้อมกัน */
         .lesson-content-tabs {
-            display: flex; gap: 8px; margin-bottom: 0.75rem;
+            display: flex; gap: 8px;
+            padding: 1.2rem 2rem 0;
+            margin-bottom: 0.75rem;
         }
+
+        /* บทเรียนที่ไม่มีแท็บ (มีแหล่งเนื้อหาแค่อย่างเดียว) — ให้ตัวเล่นเนื้อหาเองมีระยะห่างจากขอบบนแทน */
+        .lesson-wrapper.no-tabs { margin-top: 1.2rem; }
         .lesson-content-tab {
             padding: 8px 18px; border-radius: 8px; cursor: pointer;
             font-size: 0.86rem; font-weight: 600; color: var(--text-dim, #a0a0ba);
@@ -2719,6 +2724,7 @@ window.playLesson = function(index) {
     // มีทั้งวิดีโอและเอกสารพร้อมกัน → โชว์แท็บให้สลับดูได้ ค่าเริ่มต้นคือวิดีโอ (ถ้ามี)
     if (sources.videoUrl && sources.docUrl) {
         tabsBar.style.display = 'flex';
+        _lessonHasTabs = true;
         _lessonContentTab = _lessonContentTab || 'video';
         tabsBar.innerHTML = `
             <div class="lesson-content-tab ${_lessonContentTab==='video'?'active':''}" onclick="switchLessonContentTab('video')">🎥 วิดีโอ</div>
@@ -2729,10 +2735,14 @@ window.playLesson = function(index) {
         // มีแค่อย่างเดียว (เหมือนบทเรียนแบบเดิม) → ไม่ต้องโชว์แท็บ
         tabsBar.style.display = 'none';
         tabsBar.innerHTML = '';
+        _lessonHasTabs = false;
         _lessonContentTab = sources.videoUrl ? 'video' : 'doc';
         renderLessonContentTab();
     }
 }
+
+// เก็บว่าตอนนี้บทเรียนนี้มีแท็บโชว์อยู่ไหม — ใช้ตัดสินใจว่าตัวเล่นเนื้อหาต้องมี margin-top เองไหม (กันซ้อนกับ padding ของแท็บ)
+let _lessonHasTabs = false;
 
 // เก็บว่าตอนนี้ดูแท็บไหนอยู่ (วิดีโอ/เอกสาร) — ใช้ตอนสลับแท็บโดยไม่ต้องโหลดบทใหม่ทั้งหมด
 let _lessonContentTab = 'video';
@@ -2803,6 +2813,8 @@ function renderLessonContentTab() {
         container.className = 'lesson-wrapper type-doc';
         renderUnsupportedFile(container, fileUrl, lesson.title, fileType);
     }
+
+    if (!_lessonHasTabs) container.classList.add('no-tabs');
 }
 
 function detectFileType(url) {
@@ -4030,8 +4042,12 @@ async function renderResultsTab() {
             const explanationHtml = a.explanation
                 ? `<div class="res-qa-explanation">💡 ${a.explanation}</div>`
                 : '';
+            const imageHtml = a.imageUrl
+                ? `<img src="${a.imageUrl}" style="max-width:280px;max-height:180px;border-radius:8px;display:block;margin:0.5rem 0;">`
+                : '';
             html += `<div class="res-qa-item">
                 <div class="res-qa-q">${a.question}</div>
+                ${imageHtml}
                 <div class="res-qa-answer">คำตอบของคุณ: ${answerShown} — <span class="res-qa-result ${resultCls}">${resultLabel}</span></div>
                 ${explanationHtml}
             </div>`;
@@ -4772,6 +4788,7 @@ function renderHwFormQuestion() {
         </div>
         <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
         <div class="qm-question">${index+1}. ${q.question}</div>
+        ${q.imageUrl ? `<div style="margin-bottom:1rem;"><img src="${q.imageUrl}" style="max-width:100%;max-height:320px;border-radius:12px;display:block;margin:0 auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);"></div>` : ''}
         ${bodyHtml}
         ${nextBtnHtml}
     `;
@@ -5105,6 +5122,7 @@ function renderCourseQuestion() {
         </div>
         <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
         <div class="qm-question">${index+1}. ${q.question}</div>
+        ${q.imageUrl ? `<div style="margin-bottom:1rem;"><img src="${q.imageUrl}" style="max-width:100%;max-height:320px;border-radius:12px;display:block;margin:0 auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);"></div>` : ''}
         ${bodyHtml}
         ${nextBtnHtml}
     `;
@@ -5131,7 +5149,7 @@ window.selectCourseChoice = function(idx) {
         cqState.answers.push({
             question: q.question, type: q.type || 'multiple_choice',
             selected: labels[idx], isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points,
-            lessonIndex: cqState.scopeLessonIndex, explanation: q.explanation || ''
+            lessonIndex: cqState.scopeLessonIndex, explanation: q.explanation || '', imageUrl: q.imageUrl || ''
         });
         document.getElementById('cqBtnNext').disabled = false;
     }, 300);
@@ -5170,7 +5188,7 @@ window.confirmCourseCheckbox = function() {
     cqState.answers.push({
         question: q.question, type: 'checkbox',
         selectedMultiple: selectedLetters, isCorrect, pointsEarned: isCorrect ? points : 0, maxPoints: points,
-        lessonIndex: cqState.scopeLessonIndex, explanation: q.explanation || ''
+        lessonIndex: cqState.scopeLessonIndex, explanation: q.explanation || '', imageUrl: q.imageUrl || ''
     });
 
     const btn = document.getElementById('cqBtnNext');
@@ -5190,7 +5208,7 @@ window.confirmCourseShortAnswer = function() {
     cqState.answers.push({
         question: q.question, type: 'short_answer',
         answerText, isCorrect: null, pointsEarned: 0, maxPoints: points, needsReview: true,
-        lessonIndex: cqState.scopeLessonIndex
+        lessonIndex: cqState.scopeLessonIndex, imageUrl: q.imageUrl || ''
     });
 
     const btn = document.getElementById('cqBtnNext');
