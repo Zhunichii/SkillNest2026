@@ -340,7 +340,10 @@
             signupBtn.disabled = true;
             signupBtn.textContent = 'กำลังสร้างบัญชี...';
 
-            const { data, error } = await supabase.auth.signUp({ email, password });
+            const { data, error } = await supabase.auth.signUp({
+                email, password,
+                options: { data: { first_name: firstName, last_name: lastName, user_type: userType } }
+            });
 
             if (error) {
                 let errorMsg = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
@@ -354,22 +357,29 @@
                 return;
             }
 
-            // อัปเดต first_name, last_name, user_type หลัง signUp
-            // (Trigger จาก Supabase สร้าง row ใน public.users แล้ว)
+            // อัปเดต first_name, last_name, user_type อีกรอบแบบ explicit (เผื่อ trigger ที่สร้างแถวใน public.users
+            // ไม่ได้อ่านค่าจาก auth metadata ที่เพิ่งส่งไปข้างบน — ทำสองทางไว้กันพลาด)
+            let profileSaveFailed = false;
             if (data.user) {
-                await supabase.from('users').update({
+                const { error: profileError } = await supabase.from('users').update({
                     first_name: firstName,
                     last_name: lastName,
                     user_type: userType
                 }).eq('id', data.user.id);
+                if (profileError) {
+                    console.error('บันทึกข้อมูลโปรไฟล์ไม่สำเร็จ:', profileError);
+                    profileSaveFailed = true;
+                }
             }
 
-            successMessage.textContent = 'สร้างบัญชีสำเร็จแล้ว กำลังพาไปหน้าเข้าสู่ระบบ...';
+            successMessage.textContent = profileSaveFailed
+                ? 'สร้างบัญชีสำเร็จแล้ว แต่บันทึกชื่อ-นามสกุล/ประเภทผู้ใช้ไม่สำเร็จ กรุณาไปแก้ไขที่หน้าตั้งค่าหลังเข้าสู่ระบบ — กำลังพาไปหน้าเข้าสู่ระบบ...'
+                : 'สร้างบัญชีสำเร็จแล้ว กำลังพาไปหน้าเข้าสู่ระบบ...';
             successMessage.style.display = 'block';
 
             setTimeout(() => {
                 window.location.href = 'login.html';
-            }, 2000);
+            }, profileSaveFailed ? 3500 : 2000);
         });
     </script>
 
