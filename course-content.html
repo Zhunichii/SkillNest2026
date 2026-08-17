@@ -130,6 +130,21 @@
         .subtopics-panel-list .st-title { color: var(--text-main, #fff); flex: 1; }
         .subtopics-panel-list .st-note { font-size: 0.78rem; color: var(--text-dim, #7a7a90); flex-shrink: 0; }
 
+        /* Content tabs — บทเรียนที่มีทั้งวิดีโอและเอกสารพร้อมกัน */
+        .lesson-content-tabs {
+            display: flex; gap: 8px; margin-bottom: 0.75rem;
+        }
+        .lesson-content-tab {
+            padding: 8px 18px; border-radius: 8px; cursor: pointer;
+            font-size: 0.86rem; font-weight: 600; color: var(--text-dim, #a0a0ba);
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.15s;
+        }
+        .lesson-content-tab:hover { background: rgba(255,255,255,0.08); }
+        .lesson-content-tab.active {
+            background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); color: #60a5fa;
+        }
+
         /* Video: คงอัตราส่วน 16:9 */
         .lesson-wrapper {
             width: 100%;
@@ -1384,6 +1399,7 @@
 
 <div class="content-container">
     <div class="lesson-section">
+        <div class="lesson-content-tabs" id="lessonContentTabs" style="display:none;"></div>
         <div class="lesson-wrapper" id="lessonPlayer">
             <div class="loading-screen">
                 <div class="spinner"></div>
@@ -2554,8 +2570,15 @@ function renderLessonList(lessons) {
     document.getElementById("lessonCount").innerText = `${lessons.length} บทเรียน`;
 
     listContainer.innerHTML = lessons.map((lesson, index) => {
-        const fileType = detectFileType(lesson.fileUrl);
-        const typeLabel = getFileTypeLabel(fileType);
+        const sources = getLessonSources(lesson);
+        let typeLabel;
+        if (sources.videoUrl && sources.docUrl) {
+            typeLabel = 'YouTube + PDF';
+        } else if (sources.videoUrl) {
+            typeLabel = getFileTypeLabel('youtube');
+        } else {
+            typeLabel = getFileTypeLabel(sources.docType || detectFileType(sources.docUrl));
+        }
         const unlocked = isLessonUnlocked(index);
         const isDone = completedLessons.has(`lesson_${index}`);
 
@@ -2681,30 +2704,79 @@ window.playLesson = function(index) {
     }
 
     const container = document.getElementById("lessonPlayer");
+    const tabsBar = document.getElementById("lessonContentTabs");
     const lesson = currentCourse.lessons[index];
 
     renderSubtopicsPanel(lesson);
 
-    if (!lesson || !lesson.fileUrl) {
+    const sources = getLessonSources(lesson);
+    if (!sources.videoUrl && !sources.docUrl) {
+        tabsBar.style.display = 'none';
         container.innerHTML = '<div class="loading-screen"><div>❌ ไม่พบไฟล์บทเรียน</div></div>';
         return;
     }
 
-    const fileUrl = lesson.fileUrl;
-    // ถ้า type ที่บันทึกไว้เป็น unknown ให้ detect ใหม่จาก URL
-    const fileType = (lesson.type && lesson.type !== 'unknown')
-        ? lesson.type
-        : detectFileType(fileUrl);
+    // มีทั้งวิดีโอและเอกสารพร้อมกัน → โชว์แท็บให้สลับดูได้ ค่าเริ่มต้นคือวิดีโอ (ถ้ามี)
+    if (sources.videoUrl && sources.docUrl) {
+        tabsBar.style.display = 'flex';
+        _lessonContentTab = _lessonContentTab || 'video';
+        tabsBar.innerHTML = `
+            <div class="lesson-content-tab ${_lessonContentTab==='video'?'active':''}" onclick="switchLessonContentTab('video')">🎥 วิดีโอ</div>
+            <div class="lesson-content-tab ${_lessonContentTab==='doc'?'active':''}" onclick="switchLessonContentTab('doc')">📄 เอกสารประกอบ</div>
+        `;
+        renderLessonContentTab();
+    } else {
+        // มีแค่อย่างเดียว (เหมือนบทเรียนแบบเดิม) → ไม่ต้องโชว์แท็บ
+        tabsBar.style.display = 'none';
+        tabsBar.innerHTML = '';
+        _lessonContentTab = sources.videoUrl ? 'video' : 'doc';
+        renderLessonContentTab();
+    }
+}
 
-    console.log("Playing lesson:", { 
-        title: lesson.title, 
-        type: fileType, 
-        url: fileUrl,
-        detectedType: detectFileType(fileUrl)
-    });
+// เก็บว่าตอนนี้ดูแท็บไหนอยู่ (วิดีโอ/เอกสาร) — ใช้ตอนสลับแท็บโดยไม่ต้องโหลดบทใหม่ทั้งหมด
+let _lessonContentTab = 'video';
 
-    const lessonSection = document.querySelector('.lesson-section');
-    const infoArea = document.querySelector('.lesson-info-area');
+window.switchLessonContentTab = function(tab) {
+    _lessonContentTab = tab;
+    document.querySelectorAll('.lesson-content-tab').forEach(el => el.classList.remove('active'));
+    const idx = tab === 'video' ? 0 : 1;
+    document.querySelectorAll('.lesson-content-tab')[idx]?.classList.add('active');
+    renderLessonContentTab();
+};
+
+// รองรับทั้งบทเรียนเก่า (fileUrl+type เดี่ยวๆ) และใหม่ (videoUrl+docUrl แยกกัน มีทั้งคู่พร้อมกันได้)
+function getLessonSources(lesson) {
+    if (!lesson) return { videoUrl: '', docUrl: '', docType: '' };
+    if (lesson.videoUrl !== undefined || lesson.docUrl !== undefined) {
+        return { videoUrl: lesson.videoUrl || '', docUrl: lesson.docUrl || '', docType: lesson.docType || '' };
+    }
+    // schema เก่า: fileUrl+type รวมกันเป็นค่าเดียว
+    if (!lesson.fileUrl) return { videoUrl: '', docUrl: '', docType: '' };
+    if (lesson.type === 'youtube') return { videoUrl: lesson.fileUrl, docUrl: '', docType: '' };
+    return { videoUrl: '', docUrl: lesson.fileUrl, docType: lesson.type || detectFileType(lesson.fileUrl) };
+}
+
+// render เนื้อหาตามแท็บที่เลือกอยู่ตอนนี้ (วิดีโอ หรือ เอกสาร) ของบทเรียนปัจจุบัน
+function renderLessonContentTab() {
+    const container = document.getElementById("lessonPlayer");
+    const lesson = currentCourse.lessons[currentLessonIndex];
+    const sources = getLessonSources(lesson);
+
+    let fileUrl, fileType;
+    if (_lessonContentTab === 'video' && sources.videoUrl) {
+        fileUrl = sources.videoUrl;
+        fileType = 'youtube';
+    } else if (sources.docUrl) {
+        fileUrl = sources.docUrl;
+        fileType = (sources.docType && sources.docType !== 'unknown') ? sources.docType : detectFileType(sources.docUrl);
+    } else {
+        // เผื่อกรณีสลับแท็บไปฝั่งที่ไม่มีข้อมูล (ไม่ควรเกิดขึ้นเพราะซ่อนแท็บไว้แล้ว แต่กันไว้)
+        fileUrl = sources.videoUrl;
+        fileType = 'youtube';
+    }
+
+    console.log("Playing lesson content:", { title: lesson.title, tab: _lessonContentTab, type: fileType, url: fileUrl });
 
     if (fileType === 'pdf') {
         container.className = 'lesson-wrapper type-pdf';

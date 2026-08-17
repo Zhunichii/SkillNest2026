@@ -533,13 +533,22 @@ window.removeThumbnail = function() {
 };
 
 // ─── Lessons ────────────────────────────────────────────────────
+// รองรับทั้งบทเรียนเก่า (fileUrl+type เดี่ยวๆ) และใหม่ (videoUrl+docUrl แยกกัน มีทั้งคู่พร้อมกันได้)
+function getLessonSources(lesson) {
+    if (lesson.videoUrl !== undefined || lesson.docUrl !== undefined) {
+        return { videoUrl: lesson.videoUrl || '', docUrl: lesson.docUrl || '', docType: lesson.docType || '' };
+    }
+    if (lesson.type === 'youtube') return { videoUrl: lesson.fileUrl || '', docUrl: '', docType: '' };
+    return { videoUrl: '', docUrl: lesson.fileUrl || '', docType: lesson.type || '' };
+}
+
 function addExistingLesson(lesson, idx) {
     lessonCounter++;
     const lid = 'lesson-' + lessonCounter;
-    lessons.push({ id: lid, method: lesson.type === 'youtube' ? 'youtube' : 'file', file: null, existingUrl: lesson.fileUrl, existingType: lesson.type });
+    const src = getLessonSources(lesson);
+    lessons.push({ id: lid, file: null, existingVideoUrl: src.videoUrl, existingDocUrl: src.docUrl, existingDocType: src.docType });
 
-    const isYoutube = lesson.type === 'youtube';
-    const fileLabel = isYoutube ? `▶️ YouTube: ${lesson.fileUrl.substring(0,50)}...` : `📎 ไฟล์เดิม: ${lesson.fileUrl ? lesson.fileUrl.split('/').pop().substring(0,40) : 'ไม่มีไฟล์'}`;
+    const docLabel = src.docUrl ? `📎 เอกสารเดิม: ${src.docUrl.split('/').pop().substring(0,40)}` : '📎 ยังไม่มีเอกสาร';
 
     const html = `
         <div class="lesson-item existing" id="${lid}">
@@ -559,29 +568,23 @@ function addExistingLesson(lesson, idx) {
                 <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
                 <textarea class="form-control lesson-desc" rows="2">${lesson.description || ''}</textarea>
             </div>
-            <div class="existing-file-badge">📂 ${fileLabel}</div>
             <div class="form-group">
-                <label>เปลี่ยนไฟล์ PDF / URL (ไม่บังคับ)</label>
-                <div class="upload-method">
-                    <div class="method-option ${!isYoutube ? 'active' : ''}" onclick="selectMethod('${lid}','file')">
-                        <div class="method-icon">📄</div><div>อัปโหลด PDF ใหม่</div>
-                    </div>
-                    <div class="method-option ${isYoutube ? 'active' : ''}" onclick="selectMethod('${lid}','youtube')">
-                        <div class="method-icon">▶️</div><div>YouTube URL</div>
-                    </div>
-                </div>
+                <label>🎥 วิดีโอ YouTube (ไม่บังคับ)</label>
+                <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่" value="${escapeAttr(src.videoUrl)}">
             </div>
-            <div id="uploadArea-${lid}" style="${isYoutube ? 'display:none;' : ''}">
-                <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                    <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
-                    <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF ใหม่</p>
-                    <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
+            <div class="form-group">
+                <label>📄 เอกสารประกอบ PDF (ไม่บังคับ)</label>
+                <div class="existing-file-badge">${docLabel}</div>
+                <div id="uploadArea-${lid}">
+                    <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
+                        <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
+                        <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF ใหม่ (แทนที่ไฟล์เดิม)</p>
+                        <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น — ปล่อยว่างไว้ถ้าไม่ต้องการเปลี่ยน</small>
+                    </div>
+                    <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
+                    <div id="lessonFilePreview-${lid}"></div>
                 </div>
-                <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
-                <div id="lessonFilePreview-${lid}"></div>
-            </div>
-            <div id="youtubeArea-${lid}" style="${isYoutube ? '' : 'display:none;'}">
-                <input type="text" class="form-control lesson-youtube-url" placeholder="YouTube URL" value="${isYoutube ? escapeAttr(lesson.fileUrl || '') : ''}">
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;">💡 ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
             </div>
 
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
@@ -603,7 +606,7 @@ function addExistingLesson(lesson, idx) {
 window.addLesson = function() {
     lessonCounter++;
     const lid = 'lesson-' + lessonCounter;
-    lessons.push({ id: lid, method: 'file', file: null, existingUrl: '', existingType: '' });
+    lessons.push({ id: lid, file: null, existingVideoUrl: '', existingDocUrl: '', existingDocType: '' });
 
     const html = `
         <div class="lesson-item new-lesson" id="${lid}">
@@ -624,27 +627,21 @@ window.addLesson = function() {
                 <textarea class="form-control lesson-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
             </div>
             <div class="form-group">
-                <label>เลือกประเภทเนื้อหา</label>
-                <div class="upload-method">
-                    <div class="method-option active" onclick="selectMethod('${lid}','file')">
-                        <div class="method-icon">📄</div><div>ไฟล์ PDF</div>
-                    </div>
-                    <div class="method-option" onclick="selectMethod('${lid}','youtube')">
-                        <div class="method-icon">▶️</div><div>YouTube URL</div>
-                    </div>
-                </div>
-            </div>
-            <div id="uploadArea-${lid}">
-                <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                    <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
-                    <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF</p>
-                    <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
-                </div>
-                <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
-                <div id="lessonFilePreview-${lid}"></div>
-            </div>
-            <div id="youtubeArea-${lid}" style="display:none;">
+                <label>🎥 วิดีโอ YouTube (ไม่บังคับ)</label>
                 <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
+            </div>
+            <div class="form-group">
+                <label>📄 เอกสารประกอบ PDF (ไม่บังคับ)</label>
+                <div id="uploadArea-${lid}">
+                    <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
+                        <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
+                        <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF</p>
+                        <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
+                    </div>
+                    <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
+                    <div id="lessonFilePreview-${lid}"></div>
+                </div>
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;">💡 ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
             </div>
 
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
@@ -683,22 +680,6 @@ function bindLessonFileInput(lid) {
             </div>`;
     });
 }
-
-window.selectMethod = function(lid, method) {
-    const ld = lessons.find(l => l.id === lid);
-    if (ld) ld.method = method;
-    const el = document.getElementById(lid);
-    el.querySelectorAll('.method-option').forEach(o => o.classList.remove('active'));
-    if (method === 'file') {
-        el.querySelectorAll('.method-option')[0].classList.add('active');
-        document.getElementById(`uploadArea-${lid}`).style.display = 'block';
-        document.getElementById(`youtubeArea-${lid}`).style.display = 'none';
-    } else {
-        el.querySelectorAll('.method-option')[1].classList.add('active');
-        document.getElementById(`uploadArea-${lid}`).style.display = 'none';
-        document.getElementById(`youtubeArea-${lid}`).style.display = 'block';
-    }
-};
 
 window.removeLessonFile = function(lid) {
     const ld = lessons.find(l => l.id === lid);
@@ -793,9 +774,9 @@ window.extractSubtopicsFromPDF = async function(lessonId) {
     try {
         if (lessonData?.file) {
             pdfBlob = lessonData.file;
-        } else if (lessonData?.existingType === 'pdf' && lessonData?.existingUrl) {
+        } else if (lessonData?.existingDocType === 'pdf' && lessonData?.existingDocUrl) {
             statusEl.textContent = '⏳ กำลังดึงไฟล์ PDF เดิมมาอ่าน...';
-            const resp = await fetch(lessonData.existingUrl);
+            const resp = await fetch(lessonData.existingDocUrl);
             if (!resp.ok) throw new Error('ดึงไฟล์ PDF เดิมไม่สำเร็จ');
             pdfBlob = await resp.blob();
         } else {
@@ -1626,29 +1607,28 @@ window.saveCourse = async function() {
                 return;
             }
 
-            let fileUrl = ld.existingUrl || '';
-            let fileType = ld.existingType || '';
+            let videoUrl = item.querySelector('.lesson-youtube-url').value.trim();
+            if (!videoUrl && ld.existingVideoUrl) videoUrl = ld.existingVideoUrl;
 
-            if (ld.method === 'file' && ld.file) {
-                // มีไฟล์ใหม่ upload ขึ้น Cloudinary
+            let docUrl  = ld.existingDocUrl  || '';
+            let docType = ld.existingDocType || '';
+
+            if (ld.file) {
+                // มีไฟล์ PDF ใหม่ upload ขึ้น Cloudinary แทนที่ของเดิม
                 updateSubText(`กำลังอัปโหลดบทที่ ${i + 1}: ${lessonTitle}`);
-                fileUrl = await uploadToCloudinary(ld.file, 'skillnest/lessons');
-                fileType = detectFileType(ld.file.name);
-            } else if (ld.method === 'youtube') {
-                fileUrl = item.querySelector('.lesson-youtube-url').value.trim();
-                if (!fileUrl) {
-                    alert(`❌ กรุณาใส่ YouTube URL สำหรับบทเรียนที่ ${i + 1}`);
-                    hideLoading();
-                    return;
-                }
-                fileType = 'youtube';
+                docUrl  = await uploadToCloudinary(ld.file, 'skillnest/lessons');
+                docType = detectFileType(ld.file.name);
             }
-            // else: ใช้ existingUrl เดิม
+
+            if (!videoUrl && !docUrl) {
+                alert(`❌ บทเรียนที่ ${i + 1} ต้องมีวิดีโอ YouTube หรือไฟล์ PDF อย่างน้อย 1 อย่าง`);
+                hideLoading();
+                return;
+            }
 
             lessonsData.push({
                 title: lessonTitle,
-                fileUrl,
-                type: fileType,
+                videoUrl, docUrl, docType,
                 duration: lessonDuration ? parseInt(lessonDuration) : null,
                 description: item.querySelector('.lesson-desc')?.value.trim() || '',
                 subtopics: collectSubtopics(ld.id),

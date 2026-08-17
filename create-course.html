@@ -1548,7 +1548,7 @@ window.applyOutline = function(outlineStr) {
 window.addLesson = function() {
     lessonCounter++;
     const lessonId = 'lesson-' + lessonCounter;
-    lessons.push({ id: lessonId, method: 'file', file: null });
+    lessons.push({ id: lessonId, file: null });
     const lessonHTML = `
         <div class="lesson-item" id="${lessonId}">
             <div class="lesson-header">
@@ -1568,27 +1568,21 @@ window.addLesson = function() {
                 <textarea class="form-control lesson-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
             </div>
             <div class="form-group">
-                <label>เลือกประเภทเนื้อหา</label>
-                <div class="upload-method">
-                    <div class="method-option active" onclick="selectMethod('${lessonId}', 'file')">
-                        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></div><div>ไฟล์ PDF</div>
-                    </div>
-                    <div class="method-option" onclick="selectMethod('${lessonId}', 'youtube')">
-                        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4Z"/></svg></div><div>YouTube URL</div>
-                    </div>
-                </div>
-            </div>
-            <div id="uploadArea-${lessonId}">
-                <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lessonId}').click()">
-                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
-                    <p>คลิกเพื่ออัพโหลดไฟล์ PDF</p>
-                    <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
-                </div>
-                <input type="file" id="lessonFileInput-${lessonId}" accept=".pdf,application/pdf" style="display:none;">
-                <div id="lessonFilePreview-${lessonId}"></div>
-            </div>
-            <div id="youtubeArea-${lessonId}" style="display:none;">
+                <label>🎥 วิดีโอ YouTube (ไม่บังคับ — ใส่ได้ถ้ามี)</label>
                 <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
+            </div>
+            <div class="form-group">
+                <label>📄 เอกสารประกอบ PDF (ไม่บังคับ — แนบเพิ่มได้พร้อมวิดีโอ)</label>
+                <div id="uploadArea-${lessonId}">
+                    <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lessonId}').click()">
+                        <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
+                        <p>คลิกเพื่ออัพโหลดไฟล์ PDF</p>
+                        <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
+                    </div>
+                    <input type="file" id="lessonFileInput-${lessonId}" accept=".pdf,application/pdf" style="display:none;">
+                    <div id="lessonFilePreview-${lessonId}"></div>
+                </div>
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;">💡 ใส่วิดีโอ, เอกสาร, หรือทั้งสองอย่างก็ได้ แต่ต้องมีอย่างน้อย 1 อย่าง</small>
             </div>
 
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
@@ -1612,22 +1606,6 @@ window.addLesson = function() {
         }
         handleLessonFileUpload(lessonId, file);
     });
-};
-
-window.selectMethod = function(lessonId, method) {
-    const lessonData = lessons.find(l => l.id === lessonId);
-    if (lessonData) lessonData.method = method;
-    const lessonItem = document.getElementById(lessonId);
-    lessonItem.querySelectorAll('.method-option').forEach(opt => opt.classList.remove('active'));
-    if (method === 'file') {
-        lessonItem.querySelectorAll('.method-option')[0].classList.add('active');
-        document.getElementById(`uploadArea-${lessonId}`).style.display = 'block';
-        document.getElementById(`youtubeArea-${lessonId}`).style.display = 'none';
-    } else {
-        lessonItem.querySelectorAll('.method-option')[1].classList.add('active');
-        document.getElementById(`uploadArea-${lessonId}`).style.display = 'none';
-        document.getElementById(`youtubeArea-${lessonId}`).style.display = 'block';
-    }
 };
 
 function handleLessonFileUpload(lessonId, file) {
@@ -1730,7 +1708,7 @@ window.generateSubtopicsWithAI = async function(lessonId) {
 // AI แตกหัวข้อย่อยจากเนื้อหาไฟล์ PDF ที่อัปโหลดไว้จริง (ใช้ตัวอ่าน PDF ตัวเดียวกับฟีเจอร์การบ้าน)
 window.extractSubtopicsFromPDF = async function(lessonId) {
     const lessonData = lessons.find(l => l.id === lessonId);
-    if (!lessonData || lessonData.method !== 'file' || !lessonData.file) {
+    if (!lessonData || !lessonData.file) {
         alert('กรุณาอัปโหลดไฟล์ PDF ของบทเรียนนี้ก่อนครับ ถึงจะแตกหัวข้อจากเนื้อหาไฟล์ได้\n(ถ้ายังไม่มีไฟล์ ลองใช้ปุ่ม "AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย" แทน)');
         return;
     }
@@ -2631,26 +2609,30 @@ window.createCourse = async function() {
             const lessonDuration = lessonItem.querySelector('.lesson-duration').value.trim();
             if (!lessonTitle) { alert(`❌ กรุณากรอกชื่อบทเรียนที่ ${i+1}`); hideLoading(); showWizardStep(4); return; }
             const lessonData = lessons[i];
-            let fileUrl = '', fileType = '';
+            const youtubeUrl = lessonItem.querySelector('.lesson-youtube-url').value.trim();
+
+            if (!youtubeUrl && !lessonData.file) {
+                alert(`❌ บทเรียนที่ ${i+1} ต้องมีวิดีโอ YouTube หรือไฟล์ PDF อย่างน้อย 1 อย่าง`);
+                hideLoading(); showWizardStep(4); return;
+            }
+
             progress.push({ name: `บทที่ ${i+1}: ${lessonTitle}`, status: 'กำลังประมวลผล...', progress: 0 });
             updateProgress(progress);
-            if (lessonData.method === 'file') {
-                if (!lessonData.file) { alert(`❌ กรุณาเลือกไฟล์สำหรับบทเรียนที่ ${i+1}`); hideLoading(); showWizardStep(4); return; }
-                fileUrl  = await uploadToCloudinary(lessonData.file, 'skillnest/lessons');
-                fileType = detectFileType(lessonData.file.name);
-                progress[i + (thumbnailFile ? 1 : 0)].status   = '✅ อัพโหลดแล้ว';
-                progress[i + (thumbnailFile ? 1 : 0)].progress = 100;
-            } else if (lessonData.method === 'youtube') {
-                fileUrl = lessonItem.querySelector('.lesson-youtube-url').value.trim();
-                if (!fileUrl) { alert(`❌ กรุณาใส่ YouTube URL สำหรับบทเรียนที่ ${i+1}`); hideLoading(); showWizardStep(4); return; }
-                fileType = 'youtube';
-                progress[i + (thumbnailFile ? 1 : 0)].status   = '✅ บันทึก URL';
-                progress[i + (thumbnailFile ? 1 : 0)].progress = 100;
+
+            let docUrl = '', docType = '';
+            if (lessonData.file) {
+                docUrl  = await uploadToCloudinary(lessonData.file, 'skillnest/lessons');
+                docType = detectFileType(lessonData.file.name);
             }
+            progress[i + (thumbnailFile ? 1 : 0)].status   = '✅ บันทึกแล้ว';
+            progress[i + (thumbnailFile ? 1 : 0)].progress = 100;
             updateProgress(progress);
+
             const lessonDesc = lessonItem.querySelector('.lesson-desc')?.value.trim() || '';
             lessonsData.push({
-                title: lessonTitle, fileUrl, type: fileType,
+                title: lessonTitle,
+                videoUrl: youtubeUrl || '',
+                docUrl, docType,
                 duration: lessonDuration ? parseInt(lessonDuration) : null,
                 description: lessonDesc,
                 subtopics: collectSubtopics(lessons[i].id),
