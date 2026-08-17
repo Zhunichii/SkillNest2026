@@ -508,6 +508,12 @@ function renderPage() {
         <div id="quizQuestionBreakdown"></div>
     </div>
 
+    <!-- ผลการประเมินคอร์ส (CLO + อาจารย์ + คอร์สโดยรวม) — เฉพาะตอนเลือกคอร์สเดียว -->
+    <div class="card full-card" id="evalCard" style="display:none;">
+        <div class="card-title">📝 ผลการประเมินคอร์ส (จากนักเรียนที่เรียนจบแล้ว)</div>
+        <div id="evalContent"></div>
+    </div>
+
     <!-- Bottom: HW + Quiz summary -->
     <div class="bottom-grid" style="grid-template-columns:1fr 1fr;">
         <div class="card">
@@ -558,6 +564,7 @@ function updateAll() {
     renderReviewQueue(subs, quiz, courses);
     renderStudentScoreTable(enrolls, subs, quiz, courses);
     renderQuizQuestionBreakdown(quiz, courses);
+    renderEvalCard();
     renderHwSummary(subs, courses);
     renderQuizSummary(quiz, courses);
     renderBarChart(enrolls, courses);
@@ -1045,6 +1052,74 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── Quiz Question Breakdown: รายละเอียดต่อข้อ (เฉพาะตอนเลือกคอร์สเดียว) ──
+// ── ผลการประเมินคอร์ส (CLO + อาจารย์ + คอร์สโดยรวม) — เฉพาะตอนเลือกคอร์สเดียว ──
+async function renderEvalCard() {
+    const card = document.getElementById('evalCard');
+    const el = document.getElementById('evalContent');
+    if (!card || !el) return;
+
+    if (selectedId === 'all') { card.style.display = 'none'; return; }
+
+    const course = allCourses.find(c => c.id === selectedId);
+    if (!course) { card.style.display = 'none'; return; }
+
+    card.style.display = 'block';
+    el.innerHTML = '<div style="color:var(--text-dim);padding:1rem 0;">กำลังโหลด...</div>';
+
+    let evals = [];
+    try {
+        const { data } = await supabase.from('course_evaluations').select('*').eq('course_id', selectedId);
+        evals = data || [];
+    } catch (e) {
+        el.innerHTML = '<div style="color:var(--text-dim);padding:1rem 0;">โหลดผลประเมินไม่สำเร็จ</div>';
+        return;
+    }
+
+    if (evals.length === 0) {
+        el.innerHTML = '<div style="color:var(--text-dim);padding:1rem 0;">ยังไม่มีนักเรียนส่งแบบประเมินคอร์สนี้ (จะขึ้นให้กรอกเองตอนเรียนจบครบทุกบท)</div>';
+        return;
+    }
+
+    const avg = arr => arr.length ? (arr.reduce((s,v)=>s+v,0)/arr.length).toFixed(1) : '-';
+    const teacherAvg = avg(evals.map(e => e.teacher_rating).filter(Boolean));
+    const courseAvg  = avg(evals.map(e => e.course_rating).filter(Boolean));
+
+    let html = `<div class="sd-summary-grid" style="margin-bottom:1.25rem;">
+        <div class="sd-summary-card"><div class="sd-summary-label">จำนวนคนที่ประเมิน</div><div class="sd-summary-value">${evals.length}</div></div>
+        <div class="sd-summary-card"><div class="sd-summary-label">คะแนนอาจารย์เฉลี่ย</div><div class="sd-summary-value">⭐ ${teacherAvg}</div></div>
+        <div class="sd-summary-card"><div class="sd-summary-label">คะแนนคอร์สเฉลี่ย</div><div class="sd-summary-value">⭐ ${courseAvg}</div></div>
+    </div>`;
+
+    // เฉลี่ยรายข้อ CLO
+    const clos = course.clo || [];
+    if (clos.length > 0) {
+        html += `<div style="font-weight:600;font-size:0.9rem;margin-bottom:0.6rem;">📋 คะแนนเฉลี่ยแต่ละ CLO</div>`;
+        html += clos.map(c => {
+            const key = c.id || c.statement;
+            const ratings = evals.map(e => e.clo_ratings?.[key]).filter(v => v != null);
+            const cloAvg = avg(ratings);
+            return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--border-color);font-size:0.85rem;">
+                <span>${c.id ? `<strong>${c.id}:</strong> ` : ''}${c.statement || ''}</span>
+                <span style="white-space:nowrap;color:${cloAvg!=='-'&&cloAvg<3?'var(--danger)':'var(--success)'};font-weight:600;">⭐ ${cloAvg}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // Feedback comments
+    const teacherComments = evals.filter(e => e.teacher_feedback).map(e => e.teacher_feedback);
+    const courseComments  = evals.filter(e => e.course_feedback).map(e => e.course_feedback);
+    if (teacherComments.length > 0) {
+        html += `<div style="font-weight:600;font-size:0.9rem;margin:1rem 0 0.5rem;">💬 ความคิดเห็นถึงอาจารย์</div>`;
+        html += teacherComments.map(c => `<div style="padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;font-size:0.84rem;">"${c}"</div>`).join('');
+    }
+    if (courseComments.length > 0) {
+        html += `<div style="font-weight:600;font-size:0.9rem;margin:1rem 0 0.5rem;">💬 ความคิดเห็นเกี่ยวกับคอร์ส</div>`;
+        html += courseComments.map(c => `<div style="padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;font-size:0.84rem;">"${c}"</div>`).join('');
+    }
+
+    el.innerHTML = html;
+}
+
 function renderQuizQuestionBreakdown(quiz, courses) {
     const card = document.getElementById('qBreakdownCard');
     const el = document.getElementById('quizQuestionBreakdown');

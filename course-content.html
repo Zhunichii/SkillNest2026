@@ -339,6 +339,60 @@
 
         .error-modal.show { display: block; }
 
+        /* === Course Evaluation Modal === */
+        .ce-modal-overlay {
+            position: fixed; inset: 0; z-index: 3000;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .ce-modal-overlay.show { display: flex; }
+        .ce-modal {
+            background: #14162b; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; width: 100%; max-width: 560px;
+            max-height: 88vh; overflow-y: auto;
+        }
+        .ce-modal-header {
+            padding: 24px 28px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08));
+        }
+        .ce-modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+        .ce-modal-sub { font-size: 0.85rem; color: #a0a0ba; line-height: 1.5; }
+        .ce-modal-body { padding: 20px 28px; }
+        .ce-section { margin-bottom: 22px; }
+        .ce-section:last-child { margin-bottom: 0; }
+        .ce-section-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 10px; }
+        .ce-clo-item {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+        }
+        .ce-clo-statement { font-size: 0.85rem; margin-bottom: 8px; line-height: 1.5; }
+        .ce-star-row { display: flex; gap: 4px; }
+        .ce-star {
+            font-size: 1.5rem; cursor: pointer; color: rgba(255,255,255,0.15);
+            transition: color 0.15s, transform 0.1s;
+        }
+        .ce-star:hover { transform: scale(1.15); }
+        .ce-star.filled { color: #fbbf24; }
+        .ce-textarea {
+            width: 100%; min-height: 70px; margin-top: 8px; padding: 10px 12px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; color: #fff; font-size: 0.85rem; font-family: inherit; resize: vertical;
+        }
+        .ce-modal-footer {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 16px 28px 22px; border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .ce-btn-skip {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+            color: #a0a0ba; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 0.88rem;
+        }
+        .ce-btn-submit {
+            background: linear-gradient(135deg,#8b5cf6,#3b82f6); border: none;
+            color: white; padding: 9px 22px; border-radius: 8px; cursor: pointer;
+            font-size: 0.88rem; font-weight: 600;
+        }
+        .ce-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
         .error-modal h3 {
             color: #ef4444;
             margin-bottom: 1rem;
@@ -1440,6 +1494,21 @@
     </div>
 </div><!-- end content-container -->
 
+<!-- Course Evaluation Modal (โผล่ตอนเรียนจบคอร์ส) -->
+<div class="ce-modal-overlay" id="ceModalOverlay">
+    <div class="ce-modal">
+        <div class="ce-modal-header">
+            <div class="ce-modal-title">🎉 ยินดีด้วย! คุณเรียนจบคอร์สนี้แล้ว</div>
+            <div class="ce-modal-sub">ช่วยสละเวลาสักครู่ประเมินคอร์สนี้ให้อาจารย์นำไปปรับปรุงด้วยนะครับ</div>
+        </div>
+        <div class="ce-modal-body" id="ceModalBody"></div>
+        <div class="ce-modal-footer">
+            <button class="ce-btn-skip" onclick="skipCourseEvaluation()">ข้ามไปก่อน</button>
+            <button class="ce-btn-submit" id="ceSubmitBtn" onclick="submitCourseEvaluation()">✅ ส่งแบบประเมิน</button>
+        </div>
+    </div>
+</div>
+
 <div class="error-modal" id="errorModal">
     <h3>⚠️ เกิดข้อผิดพลาด</h3>
     <p id="errorMessage">ไม่พบข้อมูลที่ต้องการ กรุณาตรวจสอบ Course ID</p>
@@ -1645,6 +1714,8 @@ window.markCurrentLessonDone = async function() {
             if (progress >= 100) {
                 msg = `🎉 ยอดเยี่ยมมากครับ! คุณเรียนจบคอร์สนี้แล้ว! อย่าลืมทำ Quiz เพื่อทดสอบความรู้ด้วยนะครับ`;
                 btn.textContent = '🎉 เรียนจบคอร์สแล้ว!';
+                // เรียนจบครบทุกบทแล้ว — เช็คว่าเคยประเมินคอร์สนี้ไปหรือยัง ถ้ายังให้เปิดแบบประเมิน (ดีเลย์ไว้กันชนกับ toast ของ Avatar)
+                setTimeout(() => checkAndShowCourseEvaluation(courseId), 2500);
             } else {
                 msg = `เก่งมากครับ! เรียนจบบท "${lessonTitle}" แล้ว${hasQuiz ? ' ลองทำ Quiz ดูไหมครับ?' : ' ไปบทถัดไปได้เลยครับ'}`;
             }
@@ -3647,6 +3718,132 @@ async function saveNoteNow() {
         status.textContent = '❌ บันทึกไม่สำเร็จ';
     }
 }
+
+// === Course Evaluation (โผล่ตอนเรียนจบคอร์ส) — ประเมิน CLO + อาจารย์ผู้สอน + คอร์สโดยรวม ===
+let _ceRatings = { clo: {}, teacher: 0, course: 0 };
+
+async function checkAndShowCourseEvaluation(courseId) {
+    if (!currentUser || !courseId) return;
+    try {
+        const { data: existing } = await supabase.from('course_evaluations')
+            .select('id').eq('user_id', currentUser.id).eq('course_id', courseId).maybeSingle();
+        if (existing) return;
+    } catch (e) {
+        console.warn('checkAndShowCourseEvaluation error:', e);
+        return;
+    }
+    openCourseEvaluationModal();
+}
+
+function ceStarRow(groupKey, cloId) {
+    let html = '<div class="ce-star-row">';
+    for (let i = 1; i <= 5; i++) {
+        html += `<span class="ce-star" data-group="${groupKey}" data-clo="${cloId || ''}" data-val="${i}" onclick="ceSetRating('${groupKey}',${i},'${cloId||''}')">★</span>`;
+    }
+    html += '</div>';
+    return html;
+}
+
+function openCourseEvaluationModal() {
+    _ceRatings = { clo: {}, teacher: 0, course: 0 };
+    const clos = currentCourse?.clo || [];
+    const teacherName = currentCourse?.instructor || 'อาจารย์ผู้สอน';
+
+    let html = '';
+
+    if (clos.length > 0) {
+        html += `<div class="ce-section">
+            <div class="ce-section-title">📋 ประเมินผลลัพธ์การเรียนรู้ (CLO) — คุณบรรลุแต่ละข้อนี้มากน้อยแค่ไหน</div>
+            ${clos.map(c => `
+                <div class="ce-clo-item">
+                    <div class="ce-clo-statement">${c.id ? `<strong>${c.id}:</strong> ` : ''}${c.statement || ''}</div>
+                    ${ceStarRow('clo', c.id || c.statement)}
+                </div>`).join('')}
+        </div>`;
+    }
+
+    html += `<div class="ce-section">
+        <div class="ce-section-title">🧑‍🏫 ประเมิน ${teacherName}</div>
+        ${ceStarRow('teacher')}
+        <textarea class="ce-textarea" id="ceTeacherFeedback" placeholder="ความคิดเห็นเพิ่มเติมถึงอาจารย์ผู้สอน (ไม่บังคับ)"></textarea>
+    </div>`;
+
+    html += `<div class="ce-section">
+        <div class="ce-section-title">⭐ ให้คะแนนคอร์สนี้โดยรวม</div>
+        ${ceStarRow('course')}
+        <textarea class="ce-textarea" id="ceCourseFeedback" placeholder="ความคิดเห็นเพิ่มเติมเกี่ยวกับคอร์สนี้ (ไม่บังคับ)"></textarea>
+    </div>`;
+
+    document.getElementById('ceModalBody').innerHTML = html;
+    document.getElementById('ceModalOverlay').classList.add('show');
+}
+
+window.ceSetRating = function(groupKey, val, cloId) {
+    if (groupKey === 'clo') {
+        _ceRatings.clo[cloId] = val;
+    } else {
+        _ceRatings[groupKey] = val;
+    }
+    document.querySelectorAll(`.ce-star[data-group="${groupKey}"][data-clo="${cloId||''}"]`).forEach(star => {
+        star.classList.toggle('filled', parseInt(star.dataset.val) <= val);
+    });
+};
+
+window.skipCourseEvaluation = function() {
+    document.getElementById('ceModalOverlay').classList.remove('show');
+};
+
+window.submitCourseEvaluation = async function() {
+    if (!currentUser || !currentCourse) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    if (!courseId) return;
+
+    const clos = currentCourse?.clo || [];
+    if (clos.length > 0 && Object.keys(_ceRatings.clo).length < clos.length) {
+        alert('กรุณาให้คะแนน CLO ให้ครบทุกข้อก่อนส่งแบบประเมินครับ');
+        return;
+    }
+    if (!_ceRatings.teacher) {
+        alert('กรุณาให้คะแนนอาจารย์ผู้สอนก่อนส่งแบบประเมินครับ');
+        return;
+    }
+    if (!_ceRatings.course) {
+        alert('กรุณาให้คะแนนคอร์สโดยรวมก่อนส่งแบบประเมินครับ');
+        return;
+    }
+
+    const btn = document.getElementById('ceSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังส่ง...';
+
+    try {
+        const { error } = await supabase.from('course_evaluations').insert({
+            user_id: currentUser.id,
+            course_id: courseId,
+            clo_ratings: _ceRatings.clo,
+            teacher_rating: _ceRatings.teacher,
+            teacher_feedback: document.getElementById('ceTeacherFeedback')?.value.trim() || '',
+            course_rating: _ceRatings.course,
+            course_feedback: document.getElementById('ceCourseFeedback')?.value.trim() || '',
+            created_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+
+        document.getElementById('ceModalOverlay').classList.remove('show');
+        showAvatarToast('🙏 ขอบคุณที่สละเวลาประเมินคอร์สครับ!');
+    } catch (e) {
+        console.error('submitCourseEvaluation error:', e);
+        alert('เกิดข้อผิดพลาด: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ ส่งแบบประเมิน';
+    }
+};
+
+document.getElementById('ceModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) skipCourseEvaluation();
+});
 
 // === Results Tab (ผลการเรียนของฉัน) — วิเคราะห์ผลการเรียนส่วนตัวของนักเรียนคนนี้ในคอร์สนี้ ===
 let cachedMySubmissions = null; // แคชการส่งงานทั้งหมดของ user คนนี้ในคอร์สนี้

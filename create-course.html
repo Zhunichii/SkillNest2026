@@ -2672,7 +2672,8 @@ window.createCourse = async function() {
             creator_email: currentUser.email,
             lessons:       lessonsData,
             quiz:          quizData,
-            homework:      homeworkData
+            homework:      homeworkData,
+            clo:           cloItems
         };
 
         const { data: docRef, error: insertErr } = await supabase.from('courses').insert(courseData).select().single();

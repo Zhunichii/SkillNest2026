@@ -1,5 +1,5 @@
 // api/gemini-tts.js — Gemini Speech (TTS) สำหรับเสียงอาจารย์ Avatar AI
-// ใช้ Gemini 2.5 Flash Preview TTS — รองรับภาษาไทย + เลือกเสียงได้
+// ใช้ Gemini 3.1 Flash TTS (Preview) — รองรับภาษาไทย + เลือกเสียงได้
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -14,11 +14,13 @@ export default async function handler(req, res) {
 
     // เสียงที่ Gemini รองรับ (เลือกเสียงครูได้) — default = Charon (เสียงผู้ชาย โทนนุ่ม)
     // เสียงอื่น เช่น: Kore, Puck, Aoede, Fenrir, Leda, Orus, Zephyr ฯลฯ
+    // หมายเหตุ: ย้ายจาก gemini-2.5-flash-preview-tts (legacy) มาเป็น gemini-3.1-flash-tts-preview
+    // รูปแบบ request/response เหมือนเดิมทุกอย่าง แค่เปลี่ยนชื่อโมเดล — ถ้าเสียงบางชื่อใช้ไม่ได้ในรุ่นนี้ ให้เช็ครายชื่อเสียงที่รองรับใหม่จาก AI Studio
     const voice = voiceName || 'Charon';
 
     try {
         const apiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
