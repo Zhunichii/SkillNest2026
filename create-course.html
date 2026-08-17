@@ -1365,7 +1365,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
   "courseTitle": "ชื่อคอร์ส",
   "courseDescription": "คำอธิบายคอร์ส 2-3 ประโยค",
   "lessons": [
-    { "title": "ชื่อบทเรียน", "description": "สิ่งที่จะเรียนในบทนี้", "duration": 15 }
+    { "title": "ชื่อบทเรียน", "description": "สิ่งที่จะเรียนในบทนี้" }
   ]${numQuiz > 0 ? `,
   "quiz": [
     { "question": "คำถาม", "options": ["ก.", "ข.", "ค.", "ง."], "correct": 0, "explanation": "คำอธิบาย" }
@@ -1439,7 +1439,7 @@ function renderOutlinePreview(outline) {
                 <div style="background:#8b5cf6;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;">${i+1}</div>
                 <div>
                     <div style="font-weight:500;">${l.title}</div>
-                    <div style="font-size:0.8rem;color:#a0a0ba;">${l.description} • ${l.duration} นาที</div>
+                    <div style="font-size:0.8rem;color:#a0a0ba;">${l.description}</div>
                 </div>
             </div>`).join('')}
 
@@ -1500,9 +1500,7 @@ window.applyOutline = function(outlineStr) {
             const lastLesson = document.querySelector('#lessonsList .lesson-item:last-child');
             if (lastLesson) {
                 const titleInput = lastLesson.querySelector('.lesson-title');
-                const durInput   = lastLesson.querySelector('.lesson-duration');
                 if (titleInput) titleInput.value = l.title;
-                if (durInput)   durInput.value   = l.duration || 15;
             }
         });
     }
@@ -1558,10 +1556,6 @@ window.addLesson = function() {
             <div class="form-group">
                 <label>ชื่อบทเรียน <span class="required">*</span></label>
                 <input type="text" class="form-control lesson-title" placeholder="เช่น ติดตั้ง Python">
-            </div>
-            <div class="form-group">
-                <label>ระยะเวลา (นาที)</label>
-                <input type="number" class="form-control lesson-duration" placeholder="เช่น 15">
             </div>
             <div class="form-group">
                 <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
@@ -2665,7 +2659,6 @@ window.createCourse = async function() {
         for (let i = 0; i < lessons.length; i++) {
             const lessonItem = document.getElementById(lessons[i].id);
             const lessonTitle    = lessonItem.querySelector('.lesson-title').value.trim();
-            const lessonDuration = lessonItem.querySelector('.lesson-duration').value.trim();
             if (!lessonTitle) { alert(`❌ กรุณากรอกชื่อบทเรียนที่ ${i+1}`); hideLoading(); showWizardStep(4); return; }
             const lessonData = lessons[i];
             const youtubeUrl = lessonItem.querySelector('.lesson-youtube-url').value.trim();
@@ -2692,7 +2685,6 @@ window.createCourse = async function() {
                 title: lessonTitle,
                 videoUrl: youtubeUrl || '',
                 docUrl, docType,
-                duration: lessonDuration ? parseInt(lessonDuration) : null,
                 description: lessonDesc,
                 subtopics: collectSubtopics(lessons[i].id),
                 order: i
