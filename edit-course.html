@@ -1505,6 +1505,7 @@ window.addHomework = function(data = null) {
                 <label>คำอธิบาย / โจทย์</label>
                 <textarea class="form-control hw-desc" rows="3">${data?.description||''}</textarea>
             </div>
+            ${quizImageUploadHtml(hwId, data)}
             <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
                 <div class="form-group">
                     <label>เปิดให้ทำวันที่ (ไม่บังคับ)</label>
@@ -1546,6 +1547,9 @@ window.addHomework = function(data = null) {
                 </div>
             </div>
         </div>`);
+    document.getElementById(`${hwId}-image-input`).addEventListener('change', function(e) {
+        handleQuizImageUpload(hwId, e.target.files[0]);
+    });
 
     // โหลดคำถามเดิม (ถ้าเป็นการบ้านแบบฟอร์มที่มีอยู่แล้ว)
     if (initType === 'form' && Array.isArray(data?.formQuestions) && data.formQuestions.length > 0) {
@@ -1583,9 +1587,11 @@ function collectHomeworkData() {
         const hw = homeworks[i] || {};
         const isForm = hw.type === 'form';
         const lessonSelect = item.querySelector('.hw-lesson-select');
+        const imageUrl = item.querySelector('.quiz-image-url')?.value.trim();
         return {
             title,
             description: item.querySelector('.hw-desc').value.trim(),
+            imageUrl: imageUrl || '',
             releaseAt: item.querySelector('.hw-release')?.value || null,
             deadline: item.querySelector('.hw-deadline').value || null,
             maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,

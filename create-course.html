@@ -2481,6 +2481,7 @@ window.addHomework = function() {
                 <label>คำอธิบาย / โจทย์</label>
                 <textarea class="form-control hw-desc" rows="3" placeholder="อธิบายสิ่งที่นักเรียนต้องทำ..."></textarea>
             </div>
+            ${quizImageUploadHtml(hwId, null)}
             <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
                 <div class="form-group">
                     <label>เปิดให้ทำวันที่ (ไม่บังคับ)</label>
@@ -2522,6 +2523,9 @@ window.addHomework = function() {
                 </div>
             </div>
         </div>`);
+    document.getElementById(`${hwId}-image-input`).addEventListener('change', function(e) {
+        handleQuizImageUpload(hwId, e.target.files[0]);
+    });
 };
 
 window.removeHomework = function(hwId) {
@@ -2561,9 +2565,11 @@ function collectHomeworkData() {
         const hw = homeworks[i] || {};
         const isForm = hw.type === 'form';
         const lessonSelect = item.querySelector('.hw-lesson-select');
+        const imageUrl = item.querySelector('.quiz-image-url')?.value.trim();
         result.push({
             title,
             description: item.querySelector('.hw-desc').value.trim(),
+            imageUrl: imageUrl || '',
             releaseAt: item.querySelector('.hw-release')?.value || null,
             deadline: item.querySelector('.hw-deadline').value || null,
             maxScore: parseInt(item.querySelector('.hw-maxscore').value) || 100,

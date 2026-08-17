@@ -4277,6 +4277,7 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
             </div>
             <div class="hw-deadline">${deadlineText} • คะแนนเต็ม ${hw.maxScore || 100} คะแนน</div>
             ${hw.description ? `<div class="hw-desc-text">${hw.description}</div>` : ''}
+            ${hw.imageUrl ? `<img src="${hw.imageUrl}" style="max-width:100%;max-height:320px;border-radius:12px;display:block;margin:0.75rem 0;box-shadow:0 4px 20px rgba(0,0,0,0.3);">` : ''}
             ${scoreHtml}
             ${submittedHtml}
             ${submitFormHtml}
