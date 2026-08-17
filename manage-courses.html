@@ -209,7 +209,8 @@
         window.handleDelete = async (courseId, courseTitle) => {
             if (!confirm(`คุณต้องการลบคอร์ส "${courseTitle}" ใช่หรือไม่?\n(การกระทำนี้ไม่สามารถย้อนกลับได้)`)) return;
 
-            const { error } = await supabase.from('courses').delete().eq('id', courseId);
+            // เช็ค creator_id ซ้ำในคำสั่งลบเองด้วย (ไม่ใช่การป้องกันจริง แค่กันเรียกผิดพลาด — ตัวป้องกันจริงคือ RLS policy บนฐานข้อมูล)
+            const { error } = await supabase.from('courses').delete().eq('id', courseId).eq('creator_id', user.id);
             if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
             alert('ลบคอร์สเรียบร้อยแล้ว');
             location.reload();
