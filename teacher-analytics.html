@@ -1019,27 +1019,25 @@ window.closeStudentDetail = function() {
 };
 
 // ให้อาจารย์รีเซ็ต Quiz ส่วนใดส่วนหนึ่ง (บทเดียว หรือทั้งคอร์ส) ของนักเรียนคนหนึ่ง เพื่อให้ทำใหม่ได้
-// (ลบเฉพาะคำตอบของ scope นั้นออกจาก array ไม่กระทบ scope อื่นที่ทำไปแล้ว)
+// ใช้ RPC (SECURITY DEFINER) แทนการ update ตรงๆ เพราะแถวนี้เป็นของนักเรียน ไม่ใช่ของอาจารย์เอง
+// RLS ปกติมักอนุญาตให้เจ้าของแถวแก้ไขได้เท่านั้น — ฟังก์ชันฝั่ง server จะเช็คสิทธิ์ความเป็นเจ้าของคอร์สแทน
 window.resetQuizScope = async function(userId, courseId, lessonIndex) {
     if (!confirm('ต้องการรีเซ็ต Quiz ส่วนนี้ให้นักเรียนทำใหม่ได้หรือไม่?\nคำตอบเดิมของส่วนนี้จะถูกลบออก (ส่วนอื่นที่ทำไปแล้วไม่กระทบ)')) return;
     try {
-        const row = allQuiz.find(q => q.user_id === userId && q.course_id === courseId);
-        if (!row) return;
-
-        const remaining = (row.answers || []).filter(a => (a.lessonIndex ?? null) !== lessonIndex);
-        const course = allCourses.find(c => c.id === courseId);
-        const allTotal = (course?.quiz || []).reduce((s,q) => s + (q.points||1), 0);
-        const score = remaining.reduce((s,a) => s + (a.pointsEarned||0), 0);
-        const pct = allTotal > 0 ? Math.round((score/allTotal)*100) : 0;
-        const needsReview = remaining.some(a => a.needsReview);
-
-        const { error } = await supabase.from('quiz_scores')
-            .update({ answers: remaining, score, total: allTotal, pct, needs_review: needsReview, updated_at: new Date().toISOString() })
-            .eq('user_id', userId).eq('course_id', courseId);
+        const { error } = await supabase.rpc('reset_quiz_scope', {
+            p_user_id: userId,
+            p_course_id: courseId,
+            p_lesson_index: lessonIndex
+        });
         if (error) throw error;
 
-        // อัปเดตแคชในหน้านี้แล้ว re-render ให้เห็นผลทันที
-        row.answers = remaining; row.score = score; row.total = allTotal; row.pct = pct; row.needs_review = needsReview;
+        // ดึงแถวล่าสุดจาก DB มาอัปเดตแคชในหน้านี้ แล้ว re-render ให้เห็นผลทันที
+        const { data: freshRow } = await supabase.from('quiz_scores')
+            .select('*').eq('user_id', userId).eq('course_id', courseId).maybeSingle();
+        if (freshRow) {
+            const idx = allQuiz.findIndex(q => q.user_id === userId && q.course_id === courseId);
+            if (idx >= 0) allQuiz[idx] = freshRow;
+        }
         openStudentDetail(userId);
         updateAll();
     } catch(e) {

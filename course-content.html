@@ -4180,8 +4180,8 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
                 submittedHtml = `<div class="hw-comment-display">📝 งานที่ส่ง: ${sub.content}</div>`;
             }
         }
-        if (isSubmitted && sub.fileUrl) {
-            submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.fileUrl}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
+        if (isSubmitted && sub.file_url) {
+            submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.file_url}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
         }
 
         let submitFormHtml = '';
