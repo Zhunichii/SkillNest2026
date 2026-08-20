@@ -1625,7 +1625,17 @@ window.removeLessonFile = function(lessonId) {
 window.removeLesson = function(lessonId) {
     document.getElementById(lessonId).remove();
     lessons = lessons.filter(l => l.id !== lessonId);
+    renumberBadges('lessonsList', '.lesson-number', 'บทที่ ');
 };
+
+// เรียงเลขลำดับใหม่ให้ตรงกับตำแหน่งจริงในลิสต์ หลังลบรายการใดรายการหนึ่งออก
+function renumberBadges(containerId, badgeSelector, labelPrefix) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll(badgeSelector).forEach((badge, i) => {
+        badge.textContent = labelPrefix + (i + 1);
+    });
+}
 
 // === หัวข้อย่อยในบทเรียน (สารบัญ) ===
 window.addSubtopicRow = function(lessonId, data = null) {
@@ -1951,6 +1961,7 @@ window.onQuizTypeChange = function(qId) {
 window.removeQuizQuestion = function(qId) {
     document.getElementById(qId).remove();
     quizQuestions = quizQuestions.filter(q => q.id !== qId);
+    renumberBadges('quizList', '.quiz-question-number', 'ข้อที่ ');
 };
 
 // === Homework "แบบฟอร์มหลายคำถาม" — ใช้ตัวสร้างคำถามร่วมกับ Quiz (renderQuizAnswerArea) ===
@@ -1991,7 +2002,10 @@ window.addFormQuestion = function(hwId, data = null) {
 
 window.removeFormQuestion = function(qId) {
     const el = document.getElementById(qId);
-    if (el) el.remove();
+    if (!el) return;
+    const container = el.parentElement; // scope การเรียงเลขใหม่ไว้แค่ในการบ้านชิ้นนี้ ไม่ปนกับการบ้านอื่น
+    el.remove();
+    if (container) renumberBadges(container.id, '.quiz-question-number', 'ข้อที่ ');
 };
 
 window.generateQuizWithAI = async function() {
@@ -2531,6 +2545,7 @@ window.addHomework = function() {
 window.removeHomework = function(hwId) {
     document.getElementById(hwId).remove();
     homeworks = homeworks.filter(h => h.id !== hwId);
+    renumberBadges('homeworkList', '.hw-number-badge', 'การบ้านที่ ');
 };
 
 window.setHwType = function(hwId, type, btn) {
