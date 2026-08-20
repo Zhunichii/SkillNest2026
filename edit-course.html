@@ -1398,8 +1398,10 @@ const HOMEWORK_EXTRACT_INSTRUCTION = `คุณเป็นผู้ช่วย
 ข้อสำคัญมาก: ถ้าโจทย์มีโค้ดโปรแกรม (source code) อยู่ในกรอบสี่เหลี่ยมหรือในภาพหน้ากระดาษที่แนบมา
 ให้คัดลอกโค้ดนั้นมาใส่ใน description ให้ครบถ้วนตามต้นฉบับด้วย ห้ามตัดโค้ดออกหรือสรุปแทนโค้ดจริง
 ใส่โค้ดในเครื่องหมาย \`\`\` ... \`\`\` และ escape ขึ้นบรรทัดใหม่ในโค้ดด้วย \\n ให้ JSON ยังคง valid
+ถ้ามีภาพหน้ากระดาษแนบมาด้วย (ระบุเลขหน้ากำกับไว้) และข้อนั้นมีรูปภาพ/แผนภาพ/กราฟประกอบอยู่บนหน้านั้น
+ให้ใส่ field "pageNum" เป็นเลขหน้าที่รูปภาพนั้นอยู่ด้วย (ใส่เฉพาะตอนมีรูปประกอบจริงๆ ถ้าข้อนั้นมีแต่ข้อความไม่ต้องใส่ field นี้)
 ตอบเป็น JSON array เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
-[{"title":"ชื่อการบ้านสั้นๆ","description":"รายละเอียด/โจทย์ของข้อนี้ (รวมโค้ดถ้ามี)","deadline":"YYYY-MM-DD หรือเว้นว่างถ้าไม่ระบุ","maxScore":100}]
+[{"title":"ชื่อการบ้านสั้นๆ","description":"รายละเอียด/โจทย์ของข้อนี้ (รวมโค้ดถ้ามี)","deadline":"YYYY-MM-DD หรือเว้นว่างถ้าไม่ระบุ","maxScore":100,"pageNum":2}]
 ถ้าเนื้อหาไม่ได้แบ่งเป็นหลายข้อ ให้สรุปเป็นการบ้าน 1 ข้อ
 
 เนื้อหา:
@@ -1420,6 +1422,8 @@ window.extractHomeworkWithAI = async function() {
     status.classList.add('show');
     status.textContent = 'กำลังอ่านเนื้อหา...';
 
+    let pageImages = []; // เก็บไว้ระดับฟังก์ชัน เพื่อเอารูปหน้าที่ AI ระบุมาแนบให้แต่ละข้อทีหลัง
+
     try {
         let requestBody;
 
@@ -1434,7 +1438,6 @@ window.extractHomeworkWithAI = async function() {
             };
         } else {
             let contentText = pastedText;
-            let pageImages = [];
             if (hwSourceFile && hwSourceFile.type === 'application/pdf') {
                 status.textContent = 'กำลังอ่าน PDF (รวมภาพโค้ด/เนื้อหาที่ฝังอยู่ในไฟล์)...';
                 const analyzed = await analyzePdfFile(hwSourceFile);
@@ -1448,7 +1451,7 @@ window.extractHomeworkWithAI = async function() {
                 throw new Error('ไม่พบข้อความในไฟล์ที่อัปโหลด ลองวางข้อความแทนได้ครับ');
             }
             const imageNote = pageImages.length > 0
-                ? `(หมายเหตุ: แนบภาพหน้า ${pageImages.map(p => p.pageNum).join(', ')} มาด้วย เพราะมีเนื้อหา/โค้ดที่อยู่ในรูปภาพ ไม่ใช่ข้อความ กรุณาอ่านและรวมเข้ากับเนื้อหาด้านล่างด้วย)\n\n`
+                ? `(หมายเหตุ: แนบภาพหน้า ${pageImages.map(p => p.pageNum).join(', ')} มาด้วย เรียงตามลำดับเลขหน้า เพราะมีเนื้อหา/โค้ด/รูปภาพประกอบที่อยู่ในรูปภาพ ไม่ใช่ข้อความ กรุณาอ่านและรวมเข้ากับเนื้อหาด้านล่างด้วย)\n\n`
                 : '';
             requestBody = {
                 type: 'outline',
@@ -1472,16 +1475,34 @@ window.extractHomeworkWithAI = async function() {
             throw new Error('AI ไม่พบข้อการบ้านจากเนื้อหานี้');
         }
 
+        // อัปโหลดเฉพาะหน้าที่ AI ระบุว่ามีรูปประกอบจริงๆ (กันอัปโหลดซ้ำถ้าหลายข้ออ้างหน้าเดียวกัน)
+        const neededPages = [...new Set(items.map(it => it.pageNum).filter(p => p != null))];
+        const pageUrlMap = {};
+        if (neededPages.length > 0) {
+            status.textContent = `กำลังแนบรูปภาพประกอบ (${neededPages.length} หน้า)...`;
+            for (const pn of neededPages) {
+                const pageImg = pageImages.find(p => p.pageNum === pn);
+                if (!pageImg) continue;
+                try {
+                    pageUrlMap[pn] = await uploadBase64ToCloudinary(pageImg.data, pageImg.mimeType, 'skillnest/quiz-images');
+                } catch (e) {
+                    console.warn('อัปโหลดรูปหน้า', pn, 'ไม่สำเร็จ:', e);
+                }
+            }
+        }
+
         items.forEach(item => {
             addHomework({
                 title: item.title || '',
                 description: item.description || '',
                 deadline: toDatetimeLocalValue(item.deadline),
-                maxScore: item.maxScore || 100
+                maxScore: item.maxScore || 100,
+                imageUrl: item.pageNum != null ? (pageUrlMap[item.pageNum] || '') : ''
             });
         });
 
-        status.textContent = `✅ เพิ่มการบ้านให้แล้ว ${items.length} ข้อ — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
+        const imgCount = Object.keys(pageUrlMap).length;
+        status.textContent = `✅ เพิ่มการบ้านให้แล้ว ${items.length} ข้อ${imgCount > 0 ? ` (แนบรูปภาพให้ ${imgCount} หน้า)` : ''} — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
         document.getElementById('homeworkList').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (err) {
@@ -1621,6 +1642,18 @@ function collectHomeworkData() {
 }
 
 // ─── Cloudinary Upload ───────────────────────────────────────────
+// อัปโหลดรูปที่เป็น base64 ตรงๆ (เช่น รูปหน้า PDF ที่ render ไว้แล้ว) ขึ้น Cloudinary
+// ต่างจาก uploadToCloudinary ตรงที่ไม่ต้องมี File/Blob object ส่ง data URI ตรงๆ ให้ Cloudinary แกะเอง
+async function uploadBase64ToCloudinary(base64Data, mimeType, folder = 'skillnest') {
+    const form = new FormData();
+    form.append('file', `data:${mimeType};base64,${base64Data}`);
+    form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    form.append('folder', folder);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method:'POST', body:form });
+    if (!res.ok) throw new Error((await res.json()).error?.message || 'Upload failed');
+    return (await res.json()).secure_url;
+}
+
 async function uploadToCloudinary(file, folder = 'skillnest') {
     let resourceType = 'auto';
     if (file.type.startsWith('image/')) resourceType = 'image';
