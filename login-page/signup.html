@@ -346,10 +346,17 @@
             });
 
             if (error) {
-                let errorMsg = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
-                if (error.message.includes('already registered')) errorMsg = 'อีเมลนี้ถูกใช้สมัครแล้ว';
-                else if (error.message.includes('invalid')) errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
-                else if (error.message.includes('weak')) errorMsg = 'รหัสผ่านไม่ปลอดภัยเพียงพอ';
+                console.error('signUp error:', error); // เก็บ error จริงไว้ใน console เสมอ กันหาสาเหตุไม่ได้แบบครั้งนี้อีก
+                let errorMsg = `เกิดข้อผิดพลาด: ${error.message}`; // fallback ใส่ข้อความจริงจาก Supabase ไปด้วยเลย ไม่ใช่แค่ข้อความกลางๆ
+                if (error.message.includes('already registered') || error.message.includes('already exists')) {
+                    errorMsg = 'อีเมลนี้ถูกใช้สมัครแล้ว';
+                } else if (error.message.includes('invalid')) {
+                    errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+                } else if (error.message.includes('weak') || error.message.includes('Password')) {
+                    errorMsg = 'รหัสผ่านไม่ปลอดภัยเพียงพอ (ต้องยาวอย่างน้อย 6 ตัวอักษร)';
+                } else if (error.message.includes('rate limit') || error.message.includes('you can only request this after')) {
+                    errorMsg = 'สมัคร/ส่งอีเมลถี่เกินไป กรุณารอสักครู่แล้วลองใหม่อีกครั้ง (ระบบจำกัดจำนวนอีเมลที่ส่งได้ต่อชั่วโมง)';
+                }
                 errorMessage.textContent = errorMsg;
                 errorMessage.style.display = 'block';
                 signupBtn.disabled = false;
