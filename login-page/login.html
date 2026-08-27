@@ -244,6 +244,12 @@
         const loginBtn = document.getElementById('loginBtn');
         const errorMessage = document.getElementById('errorMessage');
 
+        // ถ้าถูกเด้งมาจาก auth-guard.js เพราะ session เดิมมาจากบัญชีที่ยังไม่ยืนยันอีเมล ให้บอกเหตุผลชัดเจน
+        if (new URLSearchParams(window.location.search).get('reason') === 'unconfirmed') {
+            errorMessage.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล กรุณาตรวจสอบกล่องจดหมายและกดยืนยันก่อนเข้าใช้งาน';
+            errorMessage.style.display = 'block';
+        }
+
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
