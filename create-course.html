@@ -2534,6 +2534,11 @@ window.addHomework = function() {
                 <label>คำอธิบาย / โจทย์</label>
                 <textarea class="form-control hw-desc" rows="3" placeholder="อธิบายสิ่งที่นักเรียนต้องทำ..."></textarea>
             </div>
+            <div class="form-group">
+                <label>🤖 เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>
+                <textarea class="form-control hw-grading-criteria" rows="3" placeholder="เช่น เน้นความถูกต้องของโค้ดเป็นหลัก ไม่หักคะแนนเรื่อง style, ต้องมี comment อธิบายทุกฟังก์ชันถึงจะได้คะแนนเต็ม, ถ้าไม่มี error handling หักคะแนน 20%..."></textarea>
+                <small style="color:var(--text-dim);">เขียนได้อิสระเลยว่าอยากให้ AI เข้มงวด/หย่อนแค่ไหน เน้นอะไร — ระบบจะเอาไปประกอบเป็นคำสั่งให้ AI ใช้ตอนกดปุ่ม "ให้ AI ช่วยตรวจ" ในหน้าตรวจงาน</small>
+            </div>
             ${quizImageUploadHtml(hwId, null)}
             <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
                 <div class="form-group">
@@ -2623,6 +2628,7 @@ function collectHomeworkData() {
         result.push({
             title,
             description: item.querySelector('.hw-desc').value.trim(),
+            gradingCriteria: item.querySelector('.hw-grading-criteria')?.value.trim() || '',
             imageUrl: imageUrl || '',
             releaseAt: item.querySelector('.hw-release')?.value || null,
             deadline: item.querySelector('.hw-deadline').value || null,
