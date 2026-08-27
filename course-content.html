@@ -2286,10 +2286,28 @@ async function avatarProcessQuestion(question) {
     if (status)  status.textContent = 'กำลังคิด...';
 
     try {
-        const lessonTitle   = currentCourse?.lessons?.[currentLessonIndex]?.title || 'บทเรียนปัจจุบัน';
-        const courseTitle   = currentCourse?.title || 'คอร์สนี้';
-        const _pPrompt      = window._avatarPersonalityPrompt || 'ตอบแบบเป็นกันเอง';
-        const wantsImage    = isImageRequest(question);
+        const lesson         = currentCourse?.lessons?.[currentLessonIndex];
+        const lessonTitle    = lesson?.title || 'บทเรียนปัจจุบัน';
+        const courseTitle    = currentCourse?.title || 'คอร์สนี้';
+        const _pPrompt       = window._avatarPersonalityPrompt || 'ตอบแบบเป็นกันเอง';
+        const wantsImage     = isImageRequest(question);
+
+        // คำสั่งกำหนดขอบเขต — ให้ตรงกับที่อาจารย์ตั้งไว้เสมอ ไม่ตอบเลื่อนลอยนอกเรื่อง
+        // แต่ก็ไม่เงียบใส่นักเรียนเฉยๆ (ตอบสั้นๆ อย่างสุภาพแล้วชวนกลับมาที่บทเรียน)
+        const scopeInstruction = `
+ขอบเขตการตอบ: ตอบเฉพาะคำถามที่เกี่ยวกับเนื้อหาบทเรียน/คอร์สนี้เท่านั้น
+ถ้านักเรียนถามเรื่องส่วนตัวหรือเรื่องที่ไม่เกี่ยวกับการเรียน (เช่น ถามชีวิตส่วนตัว เรื่องทั่วไปที่ไม่เกี่ยวกับวิชา)
+ห้ามเงียบหรือปล่อยว่างเด็ดขาด ให้ตอบสั้นๆ อย่างเป็นมิตร 1 ประโยคว่าตอบเรื่องนี้ไม่ได้ แล้วชวนกลับมาที่เนื้อหาบทเรียนแทน`;
+
+        // เนื้อหาเสริมจากที่อาจารย์เขียนไว้ตอนสร้างบทเรียน (คำอธิบาย + หัวข้อย่อย) — มีประโยชน์มากตอนเป็นวิดีโอ
+        // เพราะไม่มี transcript ให้อ่าน ถ้าไม่ใช้ข้อมูลนี้ AI จะรู้แค่ชื่อบทเรียนอย่างเดียว ตอบอะไรจริงจังไม่ได้เลย
+        const lessonDesc = lesson?.description?.trim();
+        const subtopics  = (lesson?.subtopics || []).filter(s => s?.title);
+        let extraContext = '';
+        if (lessonDesc) extraContext += `\nคำอธิบายบทเรียนนี้: ${lessonDesc}`;
+        if (subtopics.length > 0) {
+            extraContext += `\nหัวข้อย่อยในบทนี้: ${subtopics.map(s => s.title).join(', ')}`;
+        }
 
         let sys;
         if (lessonPdfContext) {
@@ -2297,6 +2315,7 @@ async function avatarProcessQuestion(question) {
             sys = `คุณคืออาจารย์ AI ผู้ช่วยสอนบน SkillNest
 ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง ไม่เกิน 3-4 ประโยค ไม่ใช้ markdown
 บุคลิก: ${_pPrompt}
+${scopeInstruction}
 
 สำคัญมาก: ให้ยึด "เนื้อหาบทเรียนจริง" ด้านล่างนี้เป็นหลักในการตอบเสมอ
 ชื่อคอร์ส ("${courseTitle}") เป็นเพียงป้ายกำกับ อาจไม่ตรงกับเนื้อหาจริงก็ได้
@@ -2307,10 +2326,12 @@ async function avatarProcessQuestion(question) {
 ${lessonPdfContext.slice(0, 2000)}
 ── จบเนื้อหา ──`;
         } else {
-            // ไม่มีเนื้อหา PDF → ใช้ชื่อคอร์ส/บทเรียนเป็น context ได้
+            // ไม่มีเนื้อหา PDF (เช่น บทเรียนเป็นวิดีโอ) → ใช้ชื่อคอร์ส/บทเรียน + คำอธิบาย/หัวข้อย่อยที่มีเป็น context แทน
             sys = `คุณคืออาจารย์ AI สอนวิชา "${courseTitle}" บทเรียน "${lessonTitle}"
 ตอบเป็นภาษาไทย กระชับ เหมาะกับออกเสียง ไม่เกิน 3-4 ประโยค ไม่ใช้ markdown
-บุคลิก: ${_pPrompt}`;
+บุคลิก: ${_pPrompt}
+${scopeInstruction}
+${extraContext || '\n(บทเรียนนี้เป็นวิดีโอ ยังไม่มีคำอธิบาย/หัวข้อย่อยเพิ่มเติมให้ — ตอบเท่าที่รู้จากชื่อบทเรียน ถ้าคำถามเจาะจงเกินกว่าที่รู้ ให้บอกตรงๆ ว่าไม่แน่ใจในรายละเอียดของคลิปนี้ แนะนำให้ลองดูวิดีโอซ้ำในช่วงที่เกี่ยวข้อง)'}`;
         }
 
         // ถ้าขอภาพ ให้ Groq สร้าง English image prompt ด้วย
@@ -2328,6 +2349,10 @@ ${lessonPdfContext.slice(0, 2000)}
         });
         const data = await res.json();
         let   ans  = data.text?.trim() || '';
+        // กัน bug "ไม่ตอบเลย" — ถ้า backend คืนข้อความว่างมา (เช่น โมเดลปฏิเสธคำถามแบบเงียบๆ) ให้มี fallback เสมอ ไม่ปล่อยฟองข้อความว่าง
+        if (!wantsImage && !ans) {
+            ans = 'ขอโทษครับ ไม่แน่ใจว่าจะตอบคำถามนี้ยังไงดี ลองถามใหม่อีกครั้ง หรือถามเกี่ยวกับเนื้อหาบทเรียนนี้ได้เลยครับ';
+        }
 
         bubble.classList.remove('typing');
 
