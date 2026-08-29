@@ -2511,6 +2511,92 @@ window.extractHomeworkWithAI = async function() {
 let homeworks = [];
 let hwCounter = 0;
 
+// ============ RUBRIC (เกณฑ์การให้คะแนนแยกหัวข้อ) ============
+let rubricRowCounter = 0;
+
+function rubricRowHtml(hwId, criterion, points) {
+    rubricRowCounter++;
+    const rowId = `rubric-row-${rubricRowCounter}`;
+    return `
+        <div class="rubric-row" id="${rowId}" style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
+            <input type="text" class="form-control rubric-criterion" placeholder="เช่น ความถูกต้องของโค้ด" value="${escapeAttrCourse(criterion||'')}" style="flex:1;" oninput="updateRubricTotal('${hwId}')">
+            <input type="number" class="form-control rubric-points" placeholder="คะแนน" min="0" value="${points??''}" style="width:100px;" oninput="updateRubricTotal('${hwId}')">
+            <button type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
+                style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
+                width:32px;height:32px;border-radius:6px;cursor:pointer;flex-shrink:0;">✕</button>
+        </div>`;
+}
+
+// escape เบาๆ กันค่าที่มี " หลุดออกจาก attribute (ไฟล์นี้ยังไม่มี helper กลางสำหรับ escape attribute)
+function escapeAttrCourse(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+window.addRubricRow = function(hwId, criterion, points) {
+    document.getElementById(`hw-rubric-rows-${hwId}`).insertAdjacentHTML('beforeend', rubricRowHtml(hwId, criterion, points));
+    updateRubricTotal(hwId);
+};
+
+window.updateRubricTotal = function(hwId) {
+    const container = document.getElementById(`hw-rubric-rows-${hwId}`);
+    const totalEl = document.getElementById(`hw-rubric-total-${hwId}`);
+    if (!container || !totalEl) return;
+    const points = Array.from(container.querySelectorAll('.rubric-points')).map(i => parseFloat(i.value) || 0);
+    const sum = points.reduce((a,b) => a+b, 0);
+    const maxScoreInput = document.querySelector(`#${hwId} .hw-maxscore`);
+    const maxScore = maxScoreInput ? (parseFloat(maxScoreInput.value) || 0) : 0;
+    if (points.length === 0) { totalEl.textContent = ''; return; }
+    totalEl.textContent = `รวม ${sum} คะแนน`;
+    totalEl.style.color = (maxScore && sum !== maxScore) ? 'var(--warning)' : 'var(--text-dim)';
+    if (maxScore && sum !== maxScore) totalEl.textContent += ` (คะแนนเต็มการบ้านตั้งไว้ ${maxScore} — ไม่ตรงกัน ตรวจสอบอีกครั้ง)`;
+};
+
+window.generateRubricWithAI = async function(hwId) {
+    const item = document.getElementById(hwId);
+    const title = item.querySelector('.hw-title')?.value.trim();
+    const desc  = item.querySelector('.hw-desc')?.value.trim();
+    const maxScore = parseFloat(item.querySelector('.hw-maxscore')?.value) || 100;
+    const status = document.getElementById(`hw-rubric-status-${hwId}`);
+
+    if (!title && !desc) {
+        alert('กรุณากรอกชื่อการบ้านหรือคำอธิบาย/โจทย์ก่อน เพื่อให้ AI เข้าใจว่าจะสร้าง Rubric สำหรับอะไร');
+        return;
+    }
+
+    status.classList.add('show');
+    status.textContent = '🤖 AI กำลังคิด Rubric...';
+
+    const prompt = `คุณเป็นผู้ช่วยอาจารย์ออกแบบเกณฑ์การให้คะแนน (Rubric) สำหรับการบ้านนี้
+ชื่อการบ้าน: ${title || '(ไม่ระบุ)'}
+คำอธิบาย/โจทย์: ${desc || '(ไม่ระบุ)'}
+คะแนนเต็มทั้งหมด: ${maxScore} คะแนน
+
+กรุณาแบ่ง Rubric เป็น 3-5 หัวข้อที่เหมาะสมกับงานนี้ โดยคะแนนของทุกหัวข้อรวมกันต้องเท่ากับ ${maxScore} คะแนนพอดี
+ตอบเป็น JSON array เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
+[{"criterion":"ชื่อหัวข้อสั้นๆ","points":ตัวเลข}]`;
+
+    try {
+        const res = await fetch('/api/ai?fn=quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const clean = (data.text || '').replace(/```json|```/g, '').trim();
+        const items = JSON.parse(clean);
+        if (!Array.isArray(items) || items.length === 0) throw new Error('AI ไม่พบข้อเสนอ Rubric ที่เหมาะสม');
+
+        // ล้างของเดิมแล้วใส่ของใหม่ที่ AI เสนอ
+        document.getElementById(`hw-rubric-rows-${hwId}`).innerHTML = '';
+        items.forEach(it => addRubricRow(hwId, it.criterion || '', it.points || 0));
+        status.textContent = `✅ AI เสนอ Rubric ${items.length} หัวข้อให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ`;
+    } catch (e) {
+        console.error('generateRubricWithAI error:', e);
+        status.textContent = '❌ เกิดข้อผิดพลาด: ' + e.message;
+    }
+};
+
 window.addHomework = function() {
     hwCounter++;
     const hwId = 'hw-' + hwCounter;
@@ -2539,6 +2625,17 @@ window.addHomework = function() {
                 <textarea class="form-control hw-grading-criteria" rows="3" placeholder="เช่น เน้นความถูกต้องของโค้ดเป็นหลัก ไม่หักคะแนนเรื่อง style, ต้องมี comment อธิบายทุกฟังก์ชันถึงจะได้คะแนนเต็ม, ถ้าไม่มี error handling หักคะแนน 20%..."></textarea>
                 <small style="color:var(--text-dim);">เขียนได้อิสระเลยว่าอยากให้ AI เข้มงวด/หย่อนแค่ไหน เน้นอะไร — ระบบจะเอาไปประกอบเป็นคำสั่งให้ AI ใช้ตอนกดปุ่ม "ให้ AI ช่วยตรวจ" ในหน้าตรวจงาน</small>
             </div>
+            <div class="form-group">
+                <label>📊 Rubric — เกณฑ์การให้คะแนนแยกหัวข้อ (ไม่บังคับ — นักเรียนเห็นได้)</label>
+                <small style="color:var(--text-dim);display:block;margin-bottom:0.5rem;">ถ้าใส่ไว้ นักเรียนจะเห็นตารางนี้ก่อนทำ และตอนตรวจงานจะให้คะแนนแยกทีละหัวข้อแทนคะแนนรวมช่องเดียว</small>
+                <div id="hw-rubric-rows-${hwId}"></div>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;align-items:center;">
+                    <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addRubricRow('${hwId}')">+ เพิ่มหัวข้อ</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="generateRubricWithAI('${hwId}')">🤖 ให้ AI ช่วยสร้าง Rubric</button>
+                    <span id="hw-rubric-total-${hwId}" style="font-size:0.8rem;color:var(--text-dim);"></span>
+                </div>
+                <div id="hw-rubric-status-${hwId}" class="ai-loading-text"></div>
+            </div>
             ${quizImageUploadHtml(hwId, null)}
             <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
                 <div class="form-group">
@@ -2552,7 +2649,7 @@ window.addHomework = function() {
                 </div>
                 <div class="form-group">
                     <label>คะแนนเต็ม</label>
-                    <input type="number" class="form-control hw-maxscore" placeholder="เช่น 100" min="1">
+                    <input type="number" class="form-control hw-maxscore" placeholder="เช่น 100" min="1" oninput="updateRubricTotal('${hwId}')">
                 </div>
             </div>
             <div class="form-group">
@@ -2625,10 +2722,15 @@ function collectHomeworkData() {
         const isForm = hw.type === 'form';
         const lessonSelect = item.querySelector('.hw-lesson-select');
         const imageUrl = item.querySelector('.quiz-image-url')?.value.trim();
+        const rubric = Array.from(item.querySelectorAll('.rubric-row')).map(row => ({
+            criterion: row.querySelector('.rubric-criterion')?.value.trim() || '',
+            points: parseFloat(row.querySelector('.rubric-points')?.value) || 0
+        })).filter(r => r.criterion);
         result.push({
             title,
             description: item.querySelector('.hw-desc').value.trim(),
             gradingCriteria: item.querySelector('.hw-grading-criteria')?.value.trim() || '',
+            rubric,
             imageUrl: imageUrl || '',
             releaseAt: item.querySelector('.hw-release')?.value || null,
             deadline: item.querySelector('.hw-deadline').value || null,

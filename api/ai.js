@@ -227,7 +227,7 @@ async function handleThumbnail(req, res) {
 async function handleGrade(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { question, answerText, sampleAnswer, maxPoints, images } = req.body;
+    const { question, answerText, sampleAnswer, maxPoints, images, rubric } = req.body;
     if (!question) return res.status(400).json({ error: 'question required' });
 
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY_CHAT || process.env.GEMINI_API_KEY;
@@ -237,11 +237,33 @@ async function handleGrade(req, res) {
 
     const points = Number(maxPoints) || 1;
     const hasImages = Array.isArray(images) && images.length > 0;
-    const prompt = `คุณเป็นผู้ช่วยอาจารย์ตรวจข้อสอบ/การบ้านแบบอัตนัย (เขียนตอบ) ในแพลตฟอร์มเรียนออนไลน์ SkillNest
+    const hasRubric = Array.isArray(rubric) && rubric.length > 0;
+
+    const answerSection = `คำตอบของนักเรียน: ${hasImages ? '(ดูจากภาพที่แนบมา' + (answerText && answerText.trim() ? ' ร่วมกับข้อความนี้)' : ')') + (answerText && answerText.trim() ? ' ' + answerText : '') : (answerText && answerText.trim() ? answerText : '(นักเรียนไม่ได้ตอบ หรือส่งว่างเปล่า)')}`;
+
+    let prompt;
+    if (hasRubric) {
+        // โหมด rubric — ให้ AI ประเมินทีละหัวข้อแยกกัน ไม่ใช่คะแนนรวมเดียว
+        const rubricList = rubric.map((r, i) => `${i+1}. "${r.criterion}" (เต็ม ${r.points} คะแนน)`).join('\n');
+        prompt = `คุณเป็นผู้ช่วยอาจารย์ตรวจการบ้านตาม Rubric (เกณฑ์การให้คะแนนแยกหัวข้อ) ในแพลตฟอร์มเรียนออนไลน์ SkillNest
+โจทย์/คำถาม: ${question}
+${sampleAnswer ? `หมายเหตุเพิ่มเติมจากอาจารย์:\n${sampleAnswer}\n` : ''}
+Rubric ที่อาจารย์กำหนดไว้ (ต้องประเมินให้ครบทุกหัวข้อ ตามลำดับเป๊ะๆ):
+${rubricList}
+
+${answerSection}
+
+กรุณาประเมินคำตอบแยกทีละหัวข้อของ Rubric ให้คะแนนแต่ละหัวข้อพร้อมเหตุผลสั้นๆ 1-2 ประโยคต่อหัวข้อ
+ข้อควรระวัง: นี่เป็นเพียง "ข้อเสนอแนะ" อาจารย์เป็นผู้ตัดสินคะแนนสุดท้ายเองเสมอ ไม่ต้องสุภาพเกินจำเป็น ให้ตรงไปตรงมา
+
+ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ (ต้องมี criteriaScores ครบทุกหัวข้อตามลำดับข้างต้น):
+{"criteriaScores": [{"criterion": "ชื่อหัวข้อ", "score": ตัวเลข 0-คะแนนเต็มหัวข้อนั้น, "reasoning": "เหตุผลสั้นๆ"}], "overallReasoning": "สรุปภาพรวมสั้นๆ 1 ประโยค"}`;
+    } else {
+        prompt = `คุณเป็นผู้ช่วยอาจารย์ตรวจข้อสอบ/การบ้านแบบอัตนัย (เขียนตอบ) ในแพลตฟอร์มเรียนออนไลน์ SkillNest
 โจทย์/คำถาม: ${question}
 ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอบตัวอย่างที่อาจารย์กำหนดไว้:\n${sampleAnswer}` : '(อาจารย์ไม่ได้ระบุเกณฑ์การให้คะแนนไว้ ให้ประเมินจากความถูกต้อง ความครบถ้วน และความสมเหตุสมผลของคำตอบตามความรู้ทั่วไปในหัวข้อนี้)'}
 
-คำตอบของนักเรียน: ${hasImages ? '(ดูจากภาพที่แนบมา' + (answerText && answerText.trim() ? ' ร่วมกับข้อความนี้)' : ')') + (answerText && answerText.trim() ? ' ' + answerText : '') : (answerText && answerText.trim() ? answerText : '(นักเรียนไม่ได้ตอบ หรือส่งว่างเปล่า)')}
+${answerSection}
 
 คะแนนเต็มข้อนี้คือ ${points} คะแนน (ให้คะแนนเป็นทศนิยม .5 ได้ เช่น 2.5)
 
@@ -250,6 +272,7 @@ ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอ�
 
 ตอบเป็น JSON เท่านั้น ไม่มีคำอธิบายเพิ่มเติม รูปแบบ:
 {"suggestedScore": ตัวเลข 0-${points}, "reasoning": "เหตุผลสั้นๆ"}`;
+    }
 
     const parts = [{ text: prompt }];
     if (hasImages) {
@@ -268,7 +291,7 @@ ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอ�
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts }],
-                    generationConfig: { thinkingConfig: { thinkingLevel: 'LOW' }, maxOutputTokens: 600 }
+                    generationConfig: { thinkingConfig: { thinkingLevel: 'LOW' }, maxOutputTokens: hasRubric ? 1200 : 600 }
                 })
             }
         );
@@ -289,13 +312,26 @@ ${sampleAnswer ? `เกณฑ์การให้คะแนน/คำตอ�
             return res.status(500).json({ error: 'AI ตอบกลับมาเป็น JSON ที่ไม่ถูกต้อง ลองใหม่อีกครั้ง' });
         }
 
-        let score = Number(result.suggestedScore);
-        if (isNaN(score)) score = 0;
-        score = Math.max(0, Math.min(points, score));
-        // ปัดเป็นทวีคูณของ 0.5 กันเลขทศนิยมแปลกๆ
-        score = Math.round(score * 2) / 2;
-
-        res.json({ suggestedScore: score, reasoning: result.reasoning || '' });
+        if (hasRubric) {
+            // ตรวจสอบ+ตัดค่าคะแนนแต่ละหัวข้อให้อยู่ในช่วงที่กำหนดไว้จริง กัน AI ตอบเกินเพดานของหัวข้อนั้นๆ
+            const criteriaScores = rubric.map((r, i) => {
+                const found = Array.isArray(result.criteriaScores) ? result.criteriaScores[i] : null;
+                let s = Number(found?.score);
+                if (isNaN(s)) s = 0;
+                s = Math.max(0, Math.min(r.points, s));
+                s = Math.round(s * 2) / 2;
+                return { criterion: r.criterion, points: r.points, score: s, reasoning: found?.reasoning || '' };
+            });
+            const totalScore = criteriaScores.reduce((sum, c) => sum + c.score, 0);
+            res.json({ criteriaScores, totalScore, reasoning: result.overallReasoning || '' });
+        } else {
+            let score = Number(result.suggestedScore);
+            if (isNaN(score)) score = 0;
+            score = Math.max(0, Math.min(points, score));
+            // ปัดเป็นทวีคูณของ 0.5 กันเลขทศนิยมแปลกๆ
+            score = Math.round(score * 2) / 2;
+            res.json({ suggestedScore: score, reasoning: result.reasoning || '' });
+        }
 
     } catch (err) {
         console.error('grade-answer error:', err);
