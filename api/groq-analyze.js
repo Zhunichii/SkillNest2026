@@ -39,7 +39,9 @@ export default async function handler(req, res) {
                 'Authorization': `Bearer ${GROQ_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                // llama-3.3-70b-versatile ถูก Groq เลิกใช้งานแล้วตั้งแต่ 16 ส.ค. 2026 (decommissioned)
+                // ย้ายมาใช้ openai/gpt-oss-120b ตามที่ Groq แนะนำในประกาศ deprecation
+                model: 'openai/gpt-oss-120b',
                 messages: groqMessages,
                 temperature: 0.7,
                 max_tokens: 800
