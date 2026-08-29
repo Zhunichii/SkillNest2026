@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>การบ้าน - SkillNest</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
@@ -235,9 +235,16 @@
         <h3>✏️ ให้คะแนนการบ้าน</h3>
         <div id="gradeStudentInfo" style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1rem;"></div>
         <div class="submission-preview" id="gradeSubmissionPreview"></div>
-        <div class="form-group">
+        <div class="form-group" id="gradeScoreSingleWrap">
             <label>คะแนน (เต็ม <span id="gradeMaxScore">100</span>)</label>
             <input type="number" class="form-control" id="gradeScore" min="0" placeholder="ใส่คะแนน">
+        </div>
+        <div class="form-group" id="gradeRubricWrap" style="display:none;">
+            <label>ให้คะแนนแยกทีละหัวข้อ (Rubric)</label>
+            <div id="gradeRubricRows"></div>
+            <div style="text-align:right;font-weight:600;margin-top:0.5rem;font-size:0.9rem;">
+                รวม: <span id="gradeRubricTotal">0</span> / <span id="gradeRubricMax">0</span>
+            </div>
         </div>
         <div style="margin-bottom:1rem;">
             <button type="button" id="btnAiGradeHw" onclick="aiGradeCurrentSubmission()"
@@ -416,7 +423,7 @@ async function loadHomeworksByCourse(courseId) {
                     <td>${workHtml} ${fileHtml}</td>
                     <td>${statusBadge}</td>
                     <td>
-                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}','${sub.user_id}','${courseId}','${escapeHtml(hw.title||'')}','${escapeHtml(hw.description||'')}','${escapeHtml(hw.gradingCriteria||'')}')">
+                        <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}','${sub.user_id}','${courseId}','${escapeHtml(hw.title||'')}','${escapeHtml(hw.description||'')}','${escapeHtml(hw.gradingCriteria||'')}',${idx})">
                             ✏️ ${sub.status==='graded'?'แก้คะแนน':'ให้คะแนน'}
                         </button>
                     </td>
@@ -463,17 +470,47 @@ function escapeHtml(str) {
     return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
 }
 
-window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore, currentGrade, currentComment, studentUserId, courseId, hwTitle, hwDescription, hwGradingCriteria) {
-    pendingGrade = { subId, maxScore, studentUserId, courseId, hwTitle, hwDescription, hwGradingCriteria, content, fileUrl };
+window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore, currentGrade, currentComment, studentUserId, courseId, hwTitle, hwDescription, hwGradingCriteria, hwIdx) {
+    const course = myCourses.find(c => c.id === courseId);
+    const hw = course?.homework?.[hwIdx];
+    const rubric = Array.isArray(hw?.rubric) && hw.rubric.length > 0 ? hw.rubric : null;
+    // ดึงคะแนนแยกหัวข้อเดิม (ถ้าเคยตรวจแบบ rubric ไปแล้วมาก่อน) จากแคชที่โหลดไว้แล้ว กันไม่ต้อง query ซ้ำ
+    const sub = _lastLoadedSubmissions.find(s => s.id === subId);
+    const existingRubricScores = sub?.rubric_scores || null;
+
+    pendingGrade = { subId, maxScore, studentUserId, courseId, hwTitle, hwDescription, hwGradingCriteria, content, fileUrl, rubric };
+
     document.getElementById('gradeStudentInfo').textContent = `นักเรียน: ${studentName}`;
-    document.getElementById('gradeMaxScore').textContent = maxScore;
-    document.getElementById('gradeScore').max = maxScore;
-    document.getElementById('gradeScore').value = currentGrade || '';
-    document.getElementById('gradeComment').value = currentComment || '';
     document.getElementById('aiGradeNote').innerHTML = '';
     document.getElementById('gradeCriteriaHint').innerHTML = hwGradingCriteria
         ? `<div style="font-size:0.76rem;color:var(--text-dim);margin-top:6px;">📋 เกณฑ์ที่ตั้งไว้: "${hwGradingCriteria}"</div>`
         : '';
+
+    const singleWrap = document.getElementById('gradeScoreSingleWrap');
+    const rubricWrap = document.getElementById('gradeRubricWrap');
+
+    if (rubric) {
+        singleWrap.style.display = 'none';
+        rubricWrap.style.display = 'block';
+        document.getElementById('gradeRubricRows').innerHTML = rubric.map((r, i) => {
+            const existingScore = existingRubricScores?.[i]?.score;
+            return `<div class="grade-rubric-row" style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;padding:6px 0;border-bottom:1px solid var(--border-color);">
+                <span style="font-size:0.85rem;flex:1;">${r.criterion}</span>
+                <input type="number" class="grade-rubric-score" min="0" max="${r.points}" value="${existingScore ?? ''}" style="width:70px;padding:4px 6px;" oninput="updateGradeRubricTotal()">
+                <span style="font-size:0.78rem;color:var(--text-dim);white-space:nowrap;">/ ${r.points}</span>
+            </div>`;
+        }).join('');
+        document.getElementById('gradeRubricMax').textContent = maxScore;
+        updateGradeRubricTotal();
+    } else {
+        singleWrap.style.display = 'block';
+        rubricWrap.style.display = 'none';
+        document.getElementById('gradeMaxScore').textContent = maxScore;
+        document.getElementById('gradeScore').max = maxScore;
+        document.getElementById('gradeScore').value = currentGrade || '';
+    }
+
+    document.getElementById('gradeComment').value = currentComment || '';
 
     let previewHtml = '';
     if (content) previewHtml += `<div>📝 งานที่ส่ง:<br><br>${content}</div>`;
@@ -483,6 +520,13 @@ window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore,
     document.getElementById('gradeModalOverlay').classList.add('show');
 };
 
+window.updateGradeRubricTotal = function() {
+    const inputs = document.querySelectorAll('#gradeRubricRows .grade-rubric-score');
+    const total = Array.from(inputs).reduce((sum, inp) => sum + (parseFloat(inp.value) || 0), 0);
+    const totalEl = document.getElementById('gradeRubricTotal');
+    if (totalEl) totalEl.textContent = total;
+};
+
 window.closeGradeModal = function() {
     document.getElementById('gradeModalOverlay').classList.remove('show');
     pendingGrade = null;
@@ -490,22 +534,38 @@ window.closeGradeModal = function() {
 
 window.confirmGrade = async function() {
     if (!pendingGrade) return;
-    const score   = parseInt(document.getElementById('gradeScore').value);
     const comment = document.getElementById('gradeComment').value.trim();
+    let score, rubricScoresToSave = null;
 
-    if (isNaN(score) || score < 0 || score > pendingGrade.maxScore) {
-        alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingGrade.maxScore}`); return;
+    if (pendingGrade.rubric) {
+        const inputs = document.querySelectorAll('#gradeRubricRows .grade-rubric-score');
+        rubricScoresToSave = Array.from(inputs).map((inp, i) => {
+            const max = pendingGrade.rubric[i].points;
+            let s = parseFloat(inp.value);
+            if (isNaN(s)) s = 0;
+            s = Math.max(0, Math.min(max, s));
+            return { criterion: pendingGrade.rubric[i].criterion, points: max, score: s };
+        });
+        score = rubricScoresToSave.reduce((sum, r) => sum + r.score, 0);
+    } else {
+        score = parseInt(document.getElementById('gradeScore').value);
+        if (isNaN(score) || score < 0 || score > pendingGrade.maxScore) {
+            alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingGrade.maxScore}`); return;
+        }
     }
 
     try {
+        const updatePayload = {
+            grade: score,
+            comment,
+            status: 'graded',
+            graded_at: new Date().toISOString()
+        };
+        if (rubricScoresToSave) updatePayload.rubric_scores = rubricScoresToSave;
+
         const { error } = await supabase
             .from('submissions')
-            .update({
-                grade: score,
-                comment,
-                status: 'graded',
-                graded_at: new Date().toISOString()
-            })
+            .update(updatePayload)
             .eq('id', pendingGrade.subId);
 
         if (error) throw error;
@@ -623,16 +683,34 @@ window.aiGradeCurrentSubmission = async function() {
                 images,
                 sampleAnswer: pendingGrade.hwGradingCriteria || '',
                 maxPoints: pendingGrade.maxScore,
+                rubric: pendingGrade.rubric || undefined,
             })
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        document.getElementById('gradeScore').value = data.suggestedScore;
-        note.innerHTML = `<div class="ai-grade-note">
-            🤖 AI เสนอ ${data.suggestedScore}/${pendingGrade.maxScore} คะแนน — ${data.reasoning || ''}
-            <span style="display:block;color:var(--text-dim);font-size:0.74rem;margin-top:3px;">เป็นแค่ข้อเสนอแนะ ตรวจสอบและแก้คะแนนก่อนกด "บันทึกคะแนน" ได้ตามดุลยพินิจ</span>
-        </div>`;
+        if (pendingGrade.rubric && Array.isArray(data.criteriaScores)) {
+            // เติมคะแนนแยกทีละหัวข้อให้ อาจารย์ตรวจสอบ/แก้ก่อนบันทึกจริงได้เหมือนเดิม
+            const inputs = document.querySelectorAll('#gradeRubricRows .grade-rubric-score');
+            data.criteriaScores.forEach((cs, i) => {
+                if (inputs[i]) inputs[i].value = cs.score;
+            });
+            updateGradeRubricTotal();
+            const breakdown = data.criteriaScores
+                .map(cs => `${cs.criterion}: ${cs.score}/${cs.points}${cs.reasoning ? ' — ' + cs.reasoning : ''}`)
+                .join('<br>');
+            note.innerHTML = `<div class="ai-grade-note">
+                🤖 AI เสนอคะแนนแยกทีละหัวข้อแล้ว รวม ${data.totalScore}/${pendingGrade.maxScore}${data.reasoning ? ' — ' + data.reasoning : ''}
+                <span style="display:block;margin-top:4px;">${breakdown}</span>
+                <span style="display:block;color:var(--text-dim);font-size:0.74rem;margin-top:3px;">เป็นแค่ข้อเสนอแนะ ตรวจสอบและแก้คะแนนก่อนกด "บันทึกคะแนน" ได้ตามดุลยพินิจ</span>
+            </div>`;
+        } else {
+            document.getElementById('gradeScore').value = data.suggestedScore;
+            note.innerHTML = `<div class="ai-grade-note">
+                🤖 AI เสนอ ${data.suggestedScore}/${pendingGrade.maxScore} คะแนน — ${data.reasoning || ''}
+                <span style="display:block;color:var(--text-dim);font-size:0.74rem;margin-top:3px;">เป็นแค่ข้อเสนอแนะ ตรวจสอบและแก้คะแนนก่อนกด "บันทึกคะแนน" ได้ตามดุลยพินิจ</span>
+            </div>`;
+        }
     } catch (e) {
         note.innerHTML = `<div class="ai-grade-note" style="color:#f87171;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);">${e.message}</div>`;
     } finally {

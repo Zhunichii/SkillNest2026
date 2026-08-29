@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>กำลังโหลด... - SkillNest</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -4209,6 +4209,30 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
                 </div>`;
         }
 
+        // Rubric — ก่อนตรวจ: โชว์เกณฑ์ให้รู้ล่วงหน้า / หลังตรวจ: โชว์คะแนนจริงแยกทีละหัวข้อที่ได้รับ
+        let rubricHtml = '';
+        if (Array.isArray(hw.rubric) && hw.rubric.length > 0) {
+            if (isGraded && Array.isArray(sub.rubric_scores) && sub.rubric_scores.length > 0) {
+                rubricHtml = `<div class="hw-comment-display" style="margin-top:0.5rem;">
+                    <div style="font-weight:600;margin-bottom:6px;">📊 คะแนนแยกตามหัวข้อ</div>
+                    ${sub.rubric_scores.map(r => `
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.86rem;border-top:1px solid var(--border-color);">
+                            <span>${r.criterion}</span>
+                            <span style="font-weight:600;">${r.score}/${r.points}</span>
+                        </div>`).join('')}
+                </div>`;
+            } else if (!isGraded) {
+                rubricHtml = `<div class="hw-comment-display" style="margin-top:0.5rem;background:rgba(139,92,246,0.06);border-color:rgba(139,92,246,0.2);">
+                    <div style="font-weight:600;margin-bottom:6px;">📊 เกณฑ์การให้คะแนน</div>
+                    ${hw.rubric.map(r => `
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.86rem;border-top:1px solid rgba(139,92,246,0.15);">
+                            <span>${r.criterion}</span>
+                            <span style="color:var(--text-dim);">${r.points} คะแนน</span>
+                        </div>`).join('')}
+                </div>`;
+            }
+        }
+
         let submittedHtml = '';
         if (isSubmitted && sub.submission_kind === 'form' && Array.isArray(sub.form_answers)) {
             const autoAnswers = sub.form_answers.filter(a => a.type !== 'short_answer');
@@ -4304,6 +4328,7 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
             <div class="hw-deadline">${deadlineText} • คะแนนเต็ม ${hw.maxScore || 100} คะแนน</div>
             ${hw.description ? `<div class="hw-desc-text">${hw.description}</div>` : ''}
             ${hw.imageUrl ? `<img src="${hw.imageUrl}" style="max-width:100%;max-height:320px;border-radius:12px;display:block;margin:0.75rem 0;box-shadow:0 4px 20px rgba(0,0,0,0.3);">` : ''}
+            ${rubricHtml}
             ${scoreHtml}
             ${submittedHtml}
             ${submitFormHtml}
