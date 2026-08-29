@@ -775,8 +775,8 @@ function renderFilteredStats() {
             const statusText = pct >= 100 ? '✅ จบแล้ว'
                 : pct > 0 ? `📖 ${done}/${total} บท`
                 : '⏳ ยังไม่เริ่ม';
-            return `<div class="progress-item" onclick="goToCourseResults('${e.course_id}')" title="ดูรายละเอียดเจาะลึกของคอร์สนี้">
-                <div class="progress-row">
+            return `<div class="progress-item" style="cursor:default;">
+                <div class="progress-row" onclick="goToCourseResults('${e.course_id}')" style="cursor:pointer;" title="ดูรายละเอียดเจาะลึกของคอร์สนี้">
                     <span>${title}</span>
                     <span style="display:flex;gap:8px;align-items:center;">
                         <span style="font-size:0.75rem;color:var(--text-dim);">${statusText}</span>
@@ -784,7 +784,12 @@ function renderFilteredStats() {
                         <span style="color:var(--text-dim);">›</span>
                     </span>
                 </div>
-                <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+                <div class="progress-track" onclick="goToCourseResults('${e.course_id}')" style="cursor:pointer;"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+                <div style="margin-top:6px;">
+                    <button onclick="event.stopPropagation(); toggleCourseAIAnalysis('${e.course_id}', '${title.replace(/'/g,"\\'")}')"
+                        style="background:none;border:none;color:#8b5cf6;cursor:pointer;font-size:0.76rem;padding:2px 0;">🤖 วิเคราะห์คอร์สนี้แยก</button>
+                    <div id="course-ai-${e.course_id}" style="display:none;margin-top:6px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px 12px;"></div>
+                </div>
             </div>`;
         }).join('');
     }
@@ -914,7 +919,8 @@ async function runAIAnalysis(enrollments, quizScores, aiBox) {
 2. จุดที่ควรพัฒนา
 3. คำแนะนำสำหรับขั้นตอนถัดไป
 
-ตอบกระชับ ไม่เกิน 5-6 ประโยค ใช้ภาษาเป็นกันเอง สร้างแรงบันดาลใจ`;
+ตอบกระชับ ไม่เกิน 5-6 ประโยค ใช้ภาษาเป็นกันเอง สร้างแรงบันดาลใจ
+ห้ามใช้ markdown เด็ดขาด (ห้ามใส่ ** หรือ # หรือสัญลักษณ์จัดรูปแบบใดๆ) ให้เป็นข้อความธรรมดาล้วนๆ`;
 
     try {
         const res = await fetch('/api/groq-analyze', {
@@ -931,7 +937,8 @@ async function runAIAnalysis(enrollments, quizScores, aiBox) {
         const lines = text.split('\n').filter(l => l.trim());
         let html = '<div style="line-height:1.8;font-size:0.92rem;">';
         lines.forEach(line => {
-            const trimmed = line.trim();
+            // ตัด markdown ที่หลุดมา (**, #, __) เผื่อ AI ไม่ทำตามคำสั่งเป๊ะทุกครั้ง
+            const trimmed = line.trim().replace(/\*\*/g, '').replace(/^#+\s*/, '').replace(/__/g, '');
             if (trimmed.match(/^[1-9]\.|จุดแข็ง|จุดที่ควร|คำแนะนำ/)) {
                 html += `<div style="color:#8b5cf6;font-weight:600;margin-top:0.8rem;margin-bottom:0.3rem;">${trimmed}</div>`;
             } else if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
@@ -958,6 +965,65 @@ let _enrCache = [], _quizCache = [];
 window.rerunAIAnalysis = async function() {
     const aiBox = document.getElementById('aiAnalysis');
     await runAIAnalysis(_enrCache, _quizCache, aiBox);
+};
+
+// วิเคราะห์แยกเฉพาะคอร์สเดียว (เปิด/ปิดแบบ accordion ใต้แถวคอร์สนั้นในลิสต์ความคืบหน้า)
+window.toggleCourseAIAnalysis = async function(courseId, courseTitle) {
+    const box = document.getElementById(`course-ai-${courseId}`);
+    if (!box) return;
+
+    if (box.style.display === 'block') {
+        box.style.display = 'none';
+        return;
+    }
+    box.style.display = 'block';
+
+    // ถ้าเคยวิเคราะห์คอร์สนี้ไปแล้วในเซสชันนี้ ไม่ต้องยิง AI ซ้ำ แค่โชว์ผลเดิมที่ค้างไว้
+    if (box.dataset.loaded === 'true') return;
+
+    box.innerHTML = `<div style="display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:0.85rem;">
+        <div style="width:14px;height:14px;border:2px solid #8b5cf6;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        AI กำลังวิเคราะห์คอร์สนี้...</div>`;
+
+    const enr = _enrCache.find(e => e.course_id === courseId);
+    const quizForCourse = _quizCache.filter(q => q.course_id === courseId);
+    const pct = enr?.progress || 0;
+    const quizSummary = quizForCourse.length
+        ? quizForCourse.map(q => `${q.score}/${q.total} (${q.pct}%)`).join(', ')
+        : 'ยังไม่ได้ทำ Quiz ของคอร์สนี้เลย';
+
+    const prompt = `คุณเป็น AI ผู้ช่วยวิเคราะห์การเรียนรู้สำหรับแพลตฟอร์ม SkillNest
+วิเคราะห์เฉพาะคอร์สนี้เท่านั้น (ไม่ต้องพูดถึงคอร์สอื่น): "${courseTitle}"
+ความคืบหน้าของนักเรียนในคอร์สนี้: ${pct}%
+คะแนน Quiz ในคอร์สนี้: ${quizSummary}
+
+กรุณาวิเคราะห์เป็นภาษาไทย สั้นกระชับ รวมไม่เกิน 3-4 ประโยค ครอบคลุม:
+- จุดแข็ง/จุดที่ควรพัฒนาในคอร์สนี้โดยเฉพาะ
+- คำแนะนำสั้นๆ สำหรับก้าวต่อไปในคอร์สนี้
+
+ใช้ภาษาเป็นกันเอง สร้างแรงบันดาลใจ
+ห้ามใช้ markdown เด็ดขาด (ห้ามใส่ ** หรือ # หรือสัญลักษณ์จัดรูปแบบใดๆ) ให้เป็นข้อความธรรมดาล้วนๆ`;
+
+    try {
+        const res = await fetch('/api/groq-analyze', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        const text = data.text || '';
+        if (!text) throw new Error('AI ไม่ตอบกลับ');
+
+        const clean = text.split('\n').filter(l => l.trim())
+            .map(l => l.trim().replace(/\*\*/g, '').replace(/^#+\s*/, '').replace(/__/g, ''))
+            .map(l => `<div>${l}</div>`).join('');
+        box.innerHTML = `<div style="font-size:0.85rem;line-height:1.7;color:var(--text-main);">${clean}</div>`;
+        box.dataset.loaded = 'true';
+    } catch (e) {
+        console.error('toggleCourseAIAnalysis error:', e);
+        box.innerHTML = `<div style="color:var(--text-dim);font-size:0.85rem;">วิเคราะห์ไม่สำเร็จในขณะนี้
+            <button onclick="delete document.getElementById('course-ai-${courseId}').dataset.loaded; toggleCourseAIAnalysis('${courseId}', '${courseTitle.replace(/'/g,"\\'")}')"
+                style="background:none;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></div>`;
+    }
 };
 
 loadLearningData().then(() => {

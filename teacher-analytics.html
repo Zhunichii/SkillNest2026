@@ -268,7 +268,7 @@
         }
         .sd-modal-overlay.open { display:flex; }
         .sd-modal {
-            background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px;
+            background:var(--bg-elevated); border:1px solid var(--border-color); border-radius:20px;
             max-width:820px; width:100%; padding:0; overflow:hidden;
         }
         .sd-modal-header {
@@ -926,6 +926,17 @@ window.openStudentDetail = function(userId) {
         <div class="sd-summary-card"><div class="sd-summary-label">Progress เฉลี่ย</div><div class="sd-summary-value">${avgProgress}%</div></div>
         <div class="sd-summary-card"><div class="sd-summary-label">เวลาเรียนรวม</div><div class="sd-summary-value">${totalWatchMin >= 60 ? Math.round(totalWatchMin/60*10)/10+' ชม.' : totalWatchMin+' น.'}</div></div>
         <div class="sd-summary-card"><div class="sd-summary-label">รอตรวจ</div><div class="sd-summary-value" style="color:${totalPending>0?'var(--warning)':'inherit'};">${totalPending}</div></div>
+    </div>
+    <div style="margin-bottom:24px;">
+        <div style="font-weight:600;font-size:0.95rem;margin-bottom:8px;">🤖 AI วิเคราะห์นักเรียนคนนี้</div>
+        <div id="sdAiSummary" style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:14px 16px;">
+            <button onclick="analyzeStudentWithAI('${userId}')"
+                style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:#8b5cf6;
+                padding:0.5rem 1rem;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;">
+                🤖 ให้ AI วิเคราะห์นักเรียนคนนี้
+            </button>
+            <div style="font-size:0.76rem;color:var(--text-dim);margin-top:6px;">สรุปภาพรวม • เทียบกับเพื่อนร่วมคอร์ส • ประเมินความเสี่ยง • คำแนะนำสำหรับอาจารย์</div>
+        </div>
     </div>`;
 
     // รายละเอียดต่อคอร์ส
@@ -1015,6 +1026,88 @@ window.openStudentDetail = function(userId) {
 
     document.getElementById('sdBody').innerHTML = html;
     document.getElementById('sdModalOverlay').classList.add('open');
+};
+
+// AI วิเคราะห์นักเรียนรายบุคคล — สรุปภาพรวม + เทียบกับเพื่อนร่วมคอร์สเดียวกัน + ประเมินความเสี่ยง + คำแนะนำ
+window.analyzeStudentWithAI = async function(userId) {
+    const box = document.getElementById('sdAiSummary');
+    if (!box) return;
+    box.innerHTML = '<div class="ai-spinner"><div class="spinner-sm"></div><span>AI กำลังวิเคราะห์...</span></div>';
+
+    const myEnrolls = allEnrolls.filter(e => e.user_id === userId);
+    const myQuizAll = allQuiz.filter(q => q.user_id === userId);
+    const mySubsAll = allSubs.filter(s => s.user_id === userId);
+    const myCourseIds = myEnrolls.map(e => e.course_id);
+
+    // เพื่อนร่วมคอร์สเดียวกัน (ไม่รวมนักเรียนคนนี้เอง) — ใช้เทียบค่าเฉลี่ยแบบยุติธรรม (คอร์สเดียวกันเท่านั้น ไม่ใช่ค่าเฉลี่ยรวมทุกคอร์สในระบบ)
+    const peerEnrolls = allEnrolls.filter(e => myCourseIds.includes(e.course_id) && e.user_id !== userId);
+    const peerQuiz     = allQuiz.filter(q => myCourseIds.includes(q.course_id) && q.user_id !== userId);
+    const classAvgProgress = peerEnrolls.length ? Math.round(peerEnrolls.reduce((s,e)=>s+(e.progress||0),0)/peerEnrolls.length) : null;
+    const classAvgQuiz     = peerQuiz.length ? Math.round(peerQuiz.reduce((s,q)=>s+(q.pct||0),0)/peerQuiz.length) : null;
+
+    const myAvgProgress = myEnrolls.length ? Math.round(myEnrolls.reduce((s,e)=>s+(e.progress||0),0)/myEnrolls.length) : 0;
+    const myAvgQuiz      = myQuizAll.length ? Math.round(myQuizAll.reduce((s,q)=>s+(q.pct||0),0)/myQuizAll.length) : null;
+    const pendingCount   = mySubsAll.filter(s=>s.status==='submitted').length + myQuizAll.filter(q=>q.needs_review).length;
+
+    const courseDetails = myEnrolls.map(e => {
+        const c = allCourses.find(c => c.id === e.course_id);
+        return `- ${c?.title || e.course_id}: ความคืบหน้า ${e.progress||0}%`;
+    }).join('\n');
+
+    const prompt = `คุณเป็น AI ผู้ช่วยอาจารย์วิเคราะห์นักเรียนรายบุคคลบนแพลตฟอร์มเรียนออนไลน์ SkillNest
+
+ข้อมูลนักเรียนคนนี้:
+- ลงทะเบียน ${myEnrolls.length} คอร์ส
+${courseDetails || '(ไม่มีคอร์ส)'}
+- Progress เฉลี่ยของนักเรียนคนนี้: ${myAvgProgress}%
+- คะแนน Quiz เฉลี่ยของนักเรียนคนนี้: ${myAvgQuiz !== null ? myAvgQuiz+'%' : 'ยังไม่ได้ทำ Quiz เลย'}
+- งานที่ค้างรอตรวจ/รอครูตรวจ: ${pendingCount} รายการ
+
+ข้อมูลเปรียบเทียบกับเพื่อนร่วมคอร์สเดียวกัน (เฉพาะคอร์สที่นักเรียนคนนี้เรียนอยู่ ไม่รวมตัวนักเรียนเอง):
+- Progress เฉลี่ยของเพื่อนร่วมคอร์ส: ${classAvgProgress !== null ? classAvgProgress+'%' : 'ไม่มีข้อมูลเปรียบเทียบ (อาจเป็นคนแรกที่ลงคอร์สนี้)'}
+- คะแนน Quiz เฉลี่ยของเพื่อนร่วมคอร์ส: ${classAvgQuiz !== null ? classAvgQuiz+'%' : 'ไม่มีข้อมูลเปรียบเทียบ'}
+
+กรุณาวิเคราะห์เป็นภาษาไทย แบ่งเป็น 4 ส่วน:
+1. สรุปภาพรวม (นักเรียนคนนี้เรียนเป็นยังไง สม่ำเสมอไหม)
+2. เทียบกับเพื่อนร่วมคอร์ส (สูงกว่า/ต่ำกว่า/พอๆ กับค่าเฉลี่ย และต่างกันมากแค่ไหน)
+3. ระดับความเสี่ยง (มีความเสี่ยงเรียนไม่ทัน/ไม่ส่งงาน/หลุดจากคอร์สหรือไม่ พร้อมเหตุผลสั้นๆ)
+4. คำแนะนำสำหรับอาจารย์ (ควรทำอะไรกับนักเรียนคนนี้ต่อ เช่น ติดตาม/ให้กำลังใจ/ไม่ต้องทำอะไรเพิ่ม)
+
+กระชับ รวมไม่เกิน 8 ประโยค ใช้ภาษาเป็นกันเอง ตรงไปตรงมา ไม่ต้องชมเกินจริงถ้าข้อมูลไม่ได้ดี
+ห้ามใช้ markdown เด็ดขาด (ห้ามใส่ ** หรือ # หรือสัญลักษณ์จัดรูปแบบใดๆ) ให้เป็นข้อความธรรมดาล้วนๆ`;
+
+    try {
+        const res = await fetch('/api/groq-analyze', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        const text = data.text || '';
+        if (!text) throw new Error('AI ไม่ตอบกลับ');
+
+        const lines = text.split('\n').filter(l => l.trim());
+        let html = '<div style="line-height:1.8;font-size:0.87rem;">';
+        lines.forEach(line => {
+            const t = line.trim().replace(/\*\*/g, '').replace(/^#+\s*/, '').replace(/__/g, '');
+            if (t.match(/^[1-9]\.|สรุปภาพรวม|เทียบกับเพื่อน|ระดับความเสี่ยง|คำแนะนำ/)) {
+                html += `<div style="color:#8b5cf6;font-weight:600;margin-top:0.7rem;margin-bottom:0.2rem;">${t}</div>`;
+            } else if (t.startsWith('-') || t.startsWith('•')) {
+                html += `<div style="padding-left:1rem;">→ ${t.replace(/^[-•]\s*/, '')}</div>`;
+            } else if (t) {
+                html += `<div>${t}</div>`;
+            }
+        });
+        html += `<div style="margin-top:0.8rem;">
+            <button onclick="analyzeStudentWithAI('${userId}')"
+                style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:#8b5cf6;
+                padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.8rem;">🔄 วิเคราะห์ใหม่</button>
+        </div></div>`;
+        box.innerHTML = html;
+    } catch (e) {
+        console.error('analyzeStudentWithAI error:', e);
+        box.innerHTML = `<div style="color:var(--text-dim);">วิเคราะห์ไม่สำเร็จในขณะนี้
+            <button onclick="analyzeStudentWithAI('${userId}')" style="background:none;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></div>`;
+    }
 };
 
 window.closeStudentDetail = function() {
@@ -1285,7 +1378,8 @@ ${details || 'ไม่มีข้อมูล'}
 2. จุดที่ควรปรับปรุง
 3. คำแนะนำเชิงรุกสำหรับครั้งถัดไป
 
-กระชับ ไม่เกิน 6-7 ประโยค ใช้ภาษาเป็นกันเอง`;
+กระชับ ไม่เกิน 6-7 ประโยค ใช้ภาษาเป็นกันเอง
+ห้ามใช้ markdown เด็ดขาด (ห้ามใส่ ** หรือ # หรือสัญลักษณ์จัดรูปแบบใดๆ) ให้เป็นข้อความธรรมดาล้วนๆ`;
 
     try {
         const res = await fetch('/api/groq-analyze', {
@@ -1299,7 +1393,8 @@ ${details || 'ไม่มีข้อมูล'}
         const lines = text.split('\n').filter(l=>l.trim());
         let html = '';
         lines.forEach(line => {
-            const t = line.trim();
+            // ตัด markdown ที่หลุดมา (**, #, __) เผื่อ AI ไม่ทำตามคำสั่งเป๊ะทุกครั้ง
+            const t = line.trim().replace(/\*\*/g, '').replace(/^#+\s*/, '').replace(/__/g, '');
             if (t.match(/^[1-9]\.|จุดแข็ง|จุดที่ควร|คำแนะนำ/)) {
                 html += `<div class="ai-section-head">${t}</div>`;
             } else if (t.startsWith('-') || t.startsWith('•')) {
