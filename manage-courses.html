@@ -7,128 +7,179 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
+        h1, h2, .page-title { font-family: var(--font-display); letter-spacing: -0.01em; }
+
         body {
             color: var(--text-main);
             min-height: 100vh;
-            padding: 2rem;
+            padding: var(--space-8) var(--space-6);
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .container { max-width: 860px; margin: 0 auto; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center; gap: var(--space-4);
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-5);
             border-bottom: 1px solid var(--border-color);
         }
+        .page-title { font-size: var(--text-2xl, 1.6rem); font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+        .page-title .icon { width: 26px; height: 26px; color: var(--primary-blue); flex-shrink: 0; }
+        .page-sub { color: var(--text-dim); font-size: 0.9rem; margin-top: 0.3rem; }
 
         .btn-back {
-            color: var(--text-dim);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: 0.2s;
+            color: var(--text-dim); text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0.55rem 1rem; border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--card-bg); transition: 0.2s;
+            font-size: 0.9rem; white-space: nowrap;
         }
-        .btn-back:hover { color: var(--text-main); }
+        .btn-back:hover { color: var(--text-main); border-color: var(--primary-blue); }
+        .btn-back:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+        .btn-back svg { width: 16px; height: 16px; }
 
         .course-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: var(--space-4);
         }
 
         .manage-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: 0.3s;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            transition: 0.2s;
         }
-        .manage-card:hover { transform: translateY(-2px); border-color: var(--primary-blue); }
+        .manage-card:hover { border-color: var(--primary-blue); box-shadow: var(--shadow-md); }
 
-        .card-info h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
-        .card-info p { color: var(--text-dim); font-size: 0.9rem; }
+        .card-info { min-width: 0; flex: 1; }
+        .card-info h3 { font-size: 1.12rem; font-weight: 600; margin-bottom: 0.4rem; overflow-wrap: break-word; }
+        .card-info .meta-line { color: var(--text-dim); font-size: 0.86rem; margin-bottom: 0.2rem; }
+        .card-info .date-line { font-size: 0.78rem; color: var(--text-faint); margin-top: 0.35rem; }
+
+        .stats { display: flex; gap: 0.6rem; margin-top: 0.65rem; flex-wrap: wrap; }
+        .stat-badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.7rem;
+            border-radius: var(--radius-full);
+            font-size: 0.76rem;
+            color: var(--text-dim);
+        }
+        .stat-badge svg { width: 13px; height: 13px; }
+
+        .card-actions { display: flex; gap: 0.6rem; align-items: center; flex-shrink: 0; }
+
+        .btn {
+            padding: 0.6rem 1.1rem; border: none; border-radius: var(--radius-sm);
+            font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.88rem;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-family: var(--font-body);
+        }
+        .btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+        .btn svg { width: 15px; height: 15px; }
+
+        .btn-edit {
+            background: rgba(99,102,241,0.1);
+            color: var(--primary-blue);
+            border: 1px solid rgba(99,102,241,0.3);
+            text-decoration: none;
+        }
+        .btn-edit:hover { background: var(--primary-blue); color: white; }
 
         .btn-delete {
             background: rgba(239, 68, 68, 0.1);
             color: var(--danger);
             border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
         }
-        .btn-delete:hover {
-            background: var(--danger);
-            color: white;
-        }
+        .btn-delete:hover { background: var(--danger); color: white; }
+        .btn-delete:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-edit {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--primary-blue);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.9rem;
+        /* Loading skeleton */
+        .skeleton-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); padding: var(--space-6);
+            display: flex; flex-direction: column; gap: 0.6rem;
         }
-        .btn-edit:hover {
-            background: var(--primary-blue);
-            color: white;
+        .skeleton-line {
+            height: 14px; border-radius: 6px;
+            background: linear-gradient(90deg, var(--input-bg) 25%, var(--card-hover, rgba(255,255,255,0.06)) 37%, var(--input-bg) 63%);
+            background-size: 400% 100%;
+            animation: skeleton-shine 1.4s ease infinite;
         }
+        .skeleton-line.w-60 { width: 60%; height: 18px; }
+        .skeleton-line.w-40 { width: 40%; }
+        .skeleton-line.w-30 { width: 30%; }
+        @keyframes skeleton-shine { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .card-info .stats {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .stat-badge {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
+        .empty-state {
+            text-align: center; padding: 3.5rem 2rem;
             color: var(--text-dim);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+        .empty-state .empty-icon {
+            width: 44px; height: 44px; margin: 0 auto 1rem;
+            color: var(--text-faint);
+        }
+        .empty-state h3 { color: var(--text-main); margin-bottom: 0.5rem; font-size: 1.05rem; }
+        .empty-state p { font-size: 0.9rem; margin-bottom: 1.25rem; }
+        .empty-state a.btn-primary-cta {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--primary-blue); color: white; text-decoration: none;
+            padding: 0.65rem 1.4rem; border-radius: var(--radius-sm);
+            font-size: 0.9rem; font-weight: 600; transition: 0.2s;
+        }
+        .empty-state a.btn-primary-cta:hover { background: var(--primary-2); }
+
+        .error-banner {
+            text-align: center; color: var(--danger);
+            background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25);
+            border-radius: var(--radius-md); padding: 1rem; font-size: 0.9rem;
         }
 
-        .loading { text-align: center; color: var(--text-dim); margin-top: 2rem; }
-        .empty-state { text-align: center; padding: 3rem; color: var(--text-dim); border: 1px dashed var(--border-color); border-radius: 12px; }
+        @media (max-width: 640px) {
+            body { padding: var(--space-5) var(--space-4); }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+            .manage-card { flex-direction: column; align-items: stretch; }
+            .card-actions { justify-content: flex-end; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .skeleton-line { animation: none; }
+        }
     </style>
 <script type="module" src="auth-guard.js"></script>
 </head>
 <body>
 
     <div class="container">
-        <div class="header">
-            <h1>📂 จัดการคอร์สของคุณ</h1>
-            <a href="dashboard.html" class="btn-back">← กลับหน้าหลัก</a>
+        <div class="top-bar">
+            <div>
+                <h1 class="page-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9m9 5H9m9 5H9M5 7h.01M5 12h.01M5 17h.01"/></svg>
+                    จัดการคอร์สของคุณ
+                </h1>
+                <p class="page-sub">แก้ไขหรือลบคอร์สที่คุณสร้างไว้ทั้งหมด</p>
+            </div>
+            <a href="dashboard.html" class="btn-back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                กลับหน้าหลัก
+            </a>
         </div>
 
         <div id="courseList" class="course-list">
-            <div class="loading">กำลังโหลดข้อมูล...</div>
+            <div class="skeleton-card"><div class="skeleton-line w-60"></div><div class="skeleton-line w-40"></div><div class="skeleton-line w-30"></div></div>
+            <div class="skeleton-card"><div class="skeleton-line w-60"></div><div class="skeleton-line w-40"></div><div class="skeleton-line w-30"></div></div>
         </div>
     </div>
 
@@ -136,11 +187,13 @@
         import { supabase } from './supabase.js';
 
         const listContainer = document.getElementById('courseList');
+        let currentUser = null;
 
         // ตรวจสอบ Login
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { window.location.href = '../login-page/login.html'; }
         else {
+            currentUser = user;
             const { data: profile } = await supabase.from('users').select('user_type').eq('id', user.id).single();
             if (profile?.user_type !== 'teacher') {
                 alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้ เฉพาะครูเท่านั้นที่สามารถจัดการคอร์สได้');
@@ -149,6 +202,16 @@
                 loadMyCourses(user.id);
             }
         }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        const iconLessons = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+        const iconQuiz = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+        const iconHw = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>';
 
         // ฟังก์ชันดึงข้อมูล
         async function loadMyCourses(userId) {
@@ -161,15 +224,17 @@
             listContainer.innerHTML = '';
 
             if (error) {
-                listContainer.innerHTML = '<p style="color:red; text-align:center;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+                listContainer.innerHTML = '<div class="error-banner">เกิดข้อผิดพลาดในการโหลดข้อมูล ลองรีเฟรชหน้าอีกครั้ง</div>';
                 return;
             }
 
             if (!courses || courses.length === 0) {
                 listContainer.innerHTML = `
                     <div class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                         <h3>ยังไม่มีคอร์สที่คุณสร้าง</h3>
-                        <p>เริ่มสร้างคอร์สแรกของคุณได้ที่หน้า Dashboard</p>
+                        <p>เริ่มสร้างคอร์สแรกของคุณได้เลย</p>
+                        <a href="create-course.html" class="btn-primary-cta">+ สร้างคอร์สใหม่</a>
                     </div>`;
                 return;
             }
@@ -178,43 +243,54 @@
                 const card = document.createElement('div');
                 card.className = 'manage-card';
 
-                const dateStr = course.created_at ? new Date(course.created_at).toLocaleDateString('th-TH') : '-';
-                const updatedStr = course.updated_at ? ` · แก้ไขล่าสุด ${new Date(course.updated_at).toLocaleDateString('th-TH')}` : '';
+                const dateStr = course.created_at ? new Date(course.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                const updatedStr = course.updated_at ? ` · แก้ไขล่าสุด ${new Date(course.updated_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}` : '';
                 const lessonCount = course.lessons?.length || 0;
                 const quizCount = course.quiz?.length || 0;
                 const hwCount = course.homework?.length || 0;
 
                 card.innerHTML = `
                     <div class="card-info">
-                        <h3>${course.title}</h3>
-                        <p>หมวดหมู่: ${course.category} · ระดับ: ${course.level || 'ทั่วไป'}</p>
-                        <p style="font-size:0.8rem; color:var(--text-faint, #666);">สร้าง: ${dateStr}${updatedStr}</p>
+                        <h3>${escapeHtml(course.title)}</h3>
+                        <p class="meta-line">หมวดหมู่: ${escapeHtml(course.category || '-')} · ระดับ: ${escapeHtml(course.level || 'ทั่วไป')}</p>
+                        <p class="date-line">สร้าง: ${dateStr}${updatedStr}</p>
                         <div class="stats">
-                            <span class="stat-badge">📚 ${lessonCount} บทเรียน</span>
-                            ${quizCount > 0 ? `<span class="stat-badge">🧠 ${quizCount} quiz</span>` : ''}
-                            ${hwCount > 0 ? `<span class="stat-badge">📋 ${hwCount} การบ้าน</span>` : ''}
+                            <span class="stat-badge">${iconLessons} ${lessonCount} บทเรียน</span>
+                            ${quizCount > 0 ? `<span class="stat-badge">${iconQuiz} ${quizCount} quiz</span>` : ''}
+                            ${hwCount > 0 ? `<span class="stat-badge">${iconHw} ${hwCount} การบ้าน</span>` : ''}
                         </div>
                     </div>
                     <div class="card-actions">
-                        <a href="edit-course.html?id=${course.id}" class="btn-edit">✏️ แก้ไข</a>
-                        <button class="btn-delete" data-id="${course.id}" data-title="${course.title}">🗑️ ลบ</button>
+                        <a href="edit-course.html?id=${course.id}" class="btn btn-edit">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+                            แก้ไข
+                        </a>
+                        <button class="btn btn-delete" data-id="${course.id}" data-title="${escapeHtml(course.title)}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            ลบ
+                        </button>
                     </div>
                 `;
 
-                card.querySelector('.btn-delete').onclick = () => handleDelete(course.id, course.title);
+                card.querySelector('.btn-delete').onclick = (e) => handleDelete(course.id, course.title, e.currentTarget);
                 listContainer.appendChild(card);
             });
         }
 
         // ฟังก์ชันลบ
-        window.handleDelete = async (courseId, courseTitle) => {
+        window.handleDelete = async (courseId, courseTitle, btnEl) => {
             if (!confirm(`คุณต้องการลบคอร์ส "${courseTitle}" ใช่หรือไม่?\n(การกระทำนี้ไม่สามารถย้อนกลับได้)`)) return;
 
+            if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'กำลังลบ...'; }
+
             // เช็ค creator_id ซ้ำในคำสั่งลบเองด้วย (ไม่ใช่การป้องกันจริง แค่กันเรียกผิดพลาด — ตัวป้องกันจริงคือ RLS policy บนฐานข้อมูล)
-            const { error } = await supabase.from('courses').delete().eq('id', courseId).eq('creator_id', user.id);
-            if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
-            alert('ลบคอร์สเรียบร้อยแล้ว');
-            location.reload();
+            const { error } = await supabase.from('courses').delete().eq('id', courseId).eq('creator_id', currentUser.id);
+            if (error) {
+                alert('เกิดข้อผิดพลาด: ' + error.message);
+                if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'ลบ'; }
+                return;
+            }
+            loadMyCourses(currentUser.id);
         }
     </script>
     <script src="theme-switcher.js"></script>

@@ -249,25 +249,25 @@
                 <div class="name-row">
                     <div class="input-group">
                         <label class="input-label" for="firstName">ชื่อ</label>
-                        <input type="text" id="firstName" class="input-field" placeholder="ชื่อ" required>
+                        <input type="text" id="firstName" class="input-field" placeholder="ชื่อ" autocomplete="given-name" required>
                     </div>
                     <div class="input-group">
                         <label class="input-label" for="lastName">นามสกุล</label>
-                        <input type="text" id="lastName" class="input-field" placeholder="นามสกุล" required>
+                        <input type="text" id="lastName" class="input-field" placeholder="นามสกุล" autocomplete="family-name" required>
                     </div>
                 </div>
 
                 <div class="input-group">
                     <label class="input-label" for="email">อีเมล</label>
-                    <input type="email" id="email" class="input-field" placeholder="you@example.com" required>
+                    <input type="email" id="email" class="input-field" placeholder="you@example.com" autocomplete="email" required>
                 </div>
                 <div class="input-group">
                     <label class="input-label" for="password">รหัสผ่าน</label>
-                    <input type="password" id="password" class="input-field" placeholder="อย่างน้อย 6 ตัวอักษร" required minlength="6">
+                    <input type="password" id="password" class="input-field" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password" required minlength="6">
                 </div>
                 <div class="input-group">
                     <label class="input-label" for="confirmPassword">ยืนยันรหัสผ่าน</label>
-                    <input type="password" id="confirmPassword" class="input-field" placeholder="พิมพ์รหัสผ่านอีกครั้ง" required>
+                    <input type="password" id="confirmPassword" class="input-field" placeholder="พิมพ์รหัสผ่านอีกครั้ง" autocomplete="new-password" required>
                 </div>
 
                 <div class="input-group">
@@ -294,8 +294,8 @@
 
                 <button type="submit" class="btn-signup" id="signupBtn">สมัครสมาชิก</button>
 
-                <div class="error-message" id="errorMessage"></div>
-                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage" role="alert" aria-live="polite"></div>
+                <div class="success-message" id="successMessage" role="status" aria-live="polite"></div>
 
                 <p class="login-link">
                     มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a>

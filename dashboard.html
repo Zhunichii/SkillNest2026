@@ -786,6 +786,17 @@
             .notif-panel { right: -60px; width: 310px; }
         }
 
+        @media (max-width: 560px) {
+            .top-nav { padding: 0 14px; grid-template-columns: auto 1fr auto; gap: 10px; }
+            .logo-section span:not(.logo-icon) { display: none; }
+            .search-bar input { width: 100%; min-width: 0; }
+            .nav-right { gap: 12px; }
+            #userName { display: none; }
+            .profile-btn { padding: 8px; }
+            .main-content { padding: 16px; }
+            .notif-panel { right: -20px; width: calc(100vw - 32px); max-width: 340px; }
+        }
+
         /* === Enrollment Modal === */
         .enroll-modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
@@ -818,7 +829,7 @@
     <div class="app-container">
         <nav class="top-nav">
             <div class="logo-section">
-                <span class="logo-icon">W</span>
+                <span class="logo-icon">S</span>
                 <span>SkillNest</span>
             </div>
             <div class="search-bar" id="searchBarWrapper">

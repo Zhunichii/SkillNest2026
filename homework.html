@@ -85,7 +85,8 @@
         .hw-stat span { color:var(--text-main); font-weight:600; }
 
         /* Submissions table */
-        .submissions-table { width:100%; border-collapse:collapse; }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .submissions-table { width:100%; border-collapse:collapse; min-width: 640px; }
         .submissions-table th, .submissions-table td {
             padding:0.9rem 1.25rem; text-align:left; font-size:0.88rem;
         }
@@ -180,6 +181,12 @@
             .sidebar { width:70px; }
             .sidebar-item span { display:none; }
             .main-content { margin-left:70px; width:calc(100% - 70px); padding:20px; }
+        }
+        @media (max-width:560px) {
+            .hw-assignment-header { flex-direction:column; align-items:flex-start; }
+            .hw-stats { flex-wrap:wrap; }
+            .course-tabs { gap:0.4rem; }
+            .grade-modal { padding:1.5rem; }
         }
     </style>
 <script src="tour.js"></script>
@@ -455,13 +462,15 @@ async function loadHomeworksByCourse(courseId) {
                     ✏️ ให้คะแนนพร้อมกัน
                 </button>
             </div>
+            <div class="table-scroll">
             <table class="submissions-table">
                 <thead><tr>
                     <th style="width:36px;"><input type="checkbox" onchange="toggleSelectAll(${idx}, this.checked)" title="เลือกทั้งหมด"></th>
                     <th>นักเรียน</th><th>เวลาส่ง</th><th>งาน</th><th>สถานะ</th><th>ดำเนินการ</th>
                 </tr></thead>
                 <tbody>${rowsHtml}</tbody>
-            </table>`;
+            </table>
+            </div>`;
         contentEl.appendChild(card);
     });
 }

@@ -97,22 +97,23 @@
         .quiz-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
         }
 
         .quiz-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
         }
 
         .quiz-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(139,92,246,0.35);
         }
 
         .quiz-card-header {
@@ -128,7 +129,7 @@
             background: rgba(139, 92, 246, 0.2);
             color: #a78bfa;
             padding: 0.25rem 0.6rem;
-            border-radius: 20px;
+            border-radius: var(--radius-full);
             font-size: 0.8rem;
             font-weight: 600;
             white-space: nowrap;
@@ -235,10 +236,10 @@
 
     <nav class="top-nav">
         <a href="dashboard.html" class="logo-section">
-            <span class="logo-icon">W</span>
+            <span class="logo-icon">S</span>
             <span>SkillNest</span>
         </a>
-        <span class="nav-title">📝 แบบฝึกหัดของฉัน</span>
+        <span class="nav-title">แบบฝึกหัดของฉัน</span>
     </nav>
 
     <aside class="sidebar">

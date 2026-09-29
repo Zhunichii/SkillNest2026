@@ -540,6 +540,24 @@
             }
         }
 
+        /* Avatar AI chat: บนจอแคบ (มือถือ) avatar+panel แบบ row เดิมจะล้นจอ
+           เปลี่ยนเป็นย่อ avatar ให้เล็กลงและวางซ้อนไว้มุมล่าง ให้ panel กว้างเต็มพื้นที่ที่เหลือแทน */
+        @media (max-width: 700px) {
+            .avatar-row {
+                left: 8px; right: 8px;
+                top: auto; bottom: 84px; transform: none;
+                flex-direction: column-reverse;
+                align-items: flex-end;
+                gap: 6px;
+            }
+            .avatar-character { transform: scale(0.55); transform-origin: bottom right; margin-bottom: -60px; }
+            .avatar-chat-panel {
+                width: 100%; min-width: 0; max-width: 440px;
+                max-height: min(65vh, 520px);
+            }
+            .avatar-fab { right: 16px; bottom: 20px; }
+        }
+
         /* === Tabs === */
         .lesson-tabs {
             display: flex;

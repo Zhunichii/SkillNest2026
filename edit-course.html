@@ -170,6 +170,47 @@
         .ai-loading-text { display:none; color:var(--text-dim); font-size:0.9rem; margin-top:0.5rem; }
         .ai-loading-text.show { display:block; }
 
+        /* Help ("?") button + template modal for correctly-formatted attachments */
+        .hw-help-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 999px;
+            background: rgba(139,92,246,0.18); border: 1px solid rgba(139,92,246,0.4);
+            color: #a78bfa; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            flex-shrink: 0; line-height: 1; transition: 0.15s; margin-left: 0.5rem;
+        }
+        .hw-help-btn:hover { background: rgba(139,92,246,0.32); transform: translateY(-1px); }
+        .hw-help-overlay {
+            position: fixed; inset: 0; background: rgba(2,4,24,0.75);
+            backdrop-filter: blur(6px); z-index: 4000;
+            display: none; align-items: center; justify-content: center; padding: 1rem;
+        }
+        .hw-help-overlay.show { display: flex; }
+        .hw-help-modal {
+            background: var(--bg-elevated); border: 1px solid var(--border-color);
+            border-radius: 16px; width: 100%; max-width: 640px;
+            max-height: 88vh; overflow-y: auto; padding: 1.75rem;
+        }
+        .hw-help-modal h3 { font-size: 1.15rem; margin-bottom: 0.25rem; }
+        .hw-help-modal .hw-help-sub { color: var(--text-dim); font-size: 0.87rem; margin-bottom: 1.25rem; }
+        .hw-help-section { margin-bottom: 1.25rem; }
+        .hw-help-section h4 { font-size: 0.92rem; margin-bottom: 0.5rem; }
+        .hw-help-good h4 { color: #10b981; }
+        .hw-help-bad h4 { color: #f87171; }
+        .hw-help-section ul { margin: 0; padding-left: 1.2rem; color: var(--text-main); font-size: 0.88rem; line-height: 1.75; }
+        .hw-help-template {
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 1rem 1.1rem;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+            color: var(--text-main); white-space: pre-wrap; line-height: 1.7;
+        }
+        .hw-help-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.75rem; }
+        .hw-help-close {
+            position: sticky; top: 0; float: right; margin-top: -0.5rem;
+            background: none; border: none; color: var(--text-dim); font-size: 1.3rem;
+            cursor: pointer; line-height: 1;
+        }
+        .hw-help-close:hover { color: var(--text-main); }
+
         /* Homework */
         .hw-item {
             background:var(--input-bg); border:1px solid var(--border-color);
@@ -225,6 +266,16 @@
         }
 
         @media (max-width:640px) { .grid { grid-template-columns:1fr; } .ai-gen-row { grid-template-columns:1fr; } }
+        @media (max-width:640px) {
+            body { padding: 1rem; }
+            .top-bar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+            .edit-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+            .edit-tab { white-space: nowrap; }
+            .section { padding: 1.25rem; }
+            .quiz-choices { grid-template-columns: 1fr; }
+            .upload-method { grid-template-columns: 1fr; }
+            .lesson-item { padding: 1rem; }
+        }
     </style>
 <script type="module" src="auth-guard.js"></script>
 </head>
@@ -384,7 +435,9 @@
             <h2 class="section-title">📋 การบ้าน (Homework)</h2>
 
             <div class="ai-gen-area">
-                <div class="ai-gen-title">✨ ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ</div>
+                <div class="ai-gen-title">✨ ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ
+                    <button type="button" class="hw-help-btn" onclick="openHwHelpModal()" title="ตัวอย่างไฟล์ที่แนบได้ถูกต้อง" aria-label="ดูตัวอย่างการแนบไฟล์ที่ถูกต้อง">?</button>
+                </div>
                 <div class="form-group">
                     <label>อัปโหลดไฟล์ (PDF หรือรูปภาพโจทย์)</label>
                     <div class="file-upload-area" onclick="document.getElementById('hwSourceFileInput').click()">
@@ -424,6 +477,52 @@
         <div class="spinner"></div>
         <h3 id="loadingText" style="margin-bottom:0.5rem;">กำลังบันทึก...</h3>
         <p id="loadingSubText" style="color:var(--text-dim); font-size:0.9rem;"></p>
+    </div>
+</div>
+
+<!-- Homework attachment format help modal -->
+<div class="hw-help-overlay" id="hwHelpOverlay">
+    <div class="hw-help-modal">
+        <button type="button" class="hw-help-close" onclick="closeHwHelpModal()" aria-label="ปิด">&times;</button>
+        <h3>ตัวอย่างไฟล์ที่แนบได้ถูกต้อง</h3>
+        <p class="hw-help-sub">จัดไฟล์ตามแนวทางนี้ก่อนอัปโหลด เพื่อให้ AI แตกข้อและดึงเนื้อหาได้แม่นยำขึ้น</p>
+
+        <div class="hw-help-section hw-help-good">
+            <h4>✓ ควรทำ</h4>
+            <ul>
+                <li>ขึ้นต้นแต่ละข้อด้วยเลขข้อชัดเจน เช่น <b>"ข้อ 1."</b>, <b>"1)"</b> หรือ <b>"Question 1"</b></li>
+                <li>เว้นบรรทัดว่างคั่นระหว่างแต่ละข้อ เพื่อให้ AI แยกขอบเขตข้อได้ถูก</li>
+                <li>ระบุคะแนนกำกับไว้ใกล้ข้อคำถาม เช่น <b>"(10 คะแนน)"</b></li>
+                <li>ใช้ไฟล์ตัวอักษร (พิมพ์) แทนลายมือเขียนเมื่อทำได้</li>
+                <li>ถ้าเป็นไฟล์สแกน/ถ่ายรูป ให้ถ่ายตรง แสงเพียงพอ ตัวอักษรคมชัด ไม่เบลอ</li>
+                <li>จัดเนื้อหาเป็นแนวตั้งคอลัมน์เดียว อ่านจากบนลงล่าง</li>
+            </ul>
+        </div>
+
+        <div class="hw-help-section hw-help-bad">
+            <h4>✗ ควรเลี่ยง</h4>
+            <ul>
+                <li>เขียนหลายข้อติดกันเป็นย่อหน้าเดียวไม่มีเลขข้อคั่น</li>
+                <li>ไฟล์เอียง เบลอ หรือมีเงา/แสงสะท้อนทับตัวอักษร</li>
+                <li>จัดหน้าแบบหลายคอลัมน์ หรือมีตาราง/รูปแทรกกลางข้อความ (AI อาจอ่านสลับลำดับ)</li>
+                <li>ลายมือเขียนที่อ่านยาก หรือมีลายน้ำทับข้อความ</li>
+            </ul>
+        </div>
+
+        <div class="hw-help-section">
+            <h4>ตัวอย่าง Template ข้อความ</h4>
+            <div class="hw-help-template" id="hwHelpTemplateText">ข้อ 1. (10 คะแนน)
+จงอธิบายความแตกต่างระหว่าง Array และ Linked List พร้อมยกตัวอย่างการใช้งานจริง
+
+ข้อ 2. (10 คะแนน)
+เขียนโค้ด Python เพื่อคำนวณค่าเฉลี่ยของตัวเลขในลิสต์ที่กำหนด
+
+ข้อ 3. (15 คะแนน)
+จงวิเคราะห์ความซับซ้อนของเวลา (Time Complexity) ของอัลกอริทึม Bubble Sort</div>
+            <div class="hw-help-actions">
+                <button type="button" class="btn btn-outline" onclick="copyHwHelpTemplate()" id="btnCopyHwTemplate">คัดลอก Template</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1188,6 +1287,32 @@ window.removeFormQuestion = function(qId) {
 
 // ─── Homework AI Extraction (PDF / รูปภาพ / ข้อความ) ──────────────
 let hwSourceFile = null;
+
+// Help modal: ตัวอย่าง/template การแนบไฟล์ให้ถูกต้อง (ลดโอกาส AI แยกข้อผิดพลาด)
+window.openHwHelpModal = function() {
+    document.getElementById('hwHelpOverlay').classList.add('show');
+};
+window.closeHwHelpModal = function() {
+    document.getElementById('hwHelpOverlay').classList.remove('show');
+};
+window.copyHwHelpTemplate = async function() {
+    const text = document.getElementById('hwHelpTemplateText').textContent;
+    const btn = document.getElementById('btnCopyHwTemplate');
+    try {
+        await navigator.clipboard.writeText(text);
+        const original = btn.textContent;
+        btn.textContent = 'คัดลอกแล้ว ✓';
+        setTimeout(() => { btn.textContent = original; }, 1800);
+    } catch (e) {
+        alert('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วคัดลอกเอง');
+    }
+};
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeHwHelpModal();
+});
+document.getElementById('hwHelpOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeHwHelpModal();
+});
 
 document.getElementById('hwSourceFileInput').addEventListener('change', function(e) {
     const file = e.target.files[0];

@@ -398,6 +398,28 @@
         .quizlist-row:last-child { border-bottom: none; }
         .quizlist-row:hover { background: var(--card-hover); }
         .quizlist-pct { font-weight: 700; flex-shrink: 0; }
+
+        /* === Responsive === */
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .mid-grid { grid-template-columns: 1fr; }
+            .bottom-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; padding: 20px 10px; }
+            .sidebar-item span { display: none; }
+            .sidebar-item { justify-content: center; }
+            .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
+        }
+        @media (max-width: 560px) {
+            .top-nav { padding: 0 14px; }
+            .logo-section span:not(.logo-icon) { display: none; }
+            .back-btn span, .back-btn { font-size: 0.82rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .badges-grid { grid-template-columns: repeat(2, 1fr); }
+            .heatmap-grid { grid-template-columns: repeat(7, minmax(0,1fr)); gap: 4px; }
+        }
     </style>
 <script src="tour.js"></script>
 <script type="module" src="auth-guard.js"></script>
@@ -407,7 +429,7 @@
 <!-- Top Nav -->
 <nav class="top-nav">
     <a href="dashboard.html" class="logo-section">
-        <span class="logo-icon">W</span>
+        <span class="logo-icon">S</span>
         <span>SkillNest</span>
     </a>
     <div></div>
