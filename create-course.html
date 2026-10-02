@@ -148,7 +148,7 @@
         }
         textarea.form-control { resize: vertical; min-height: 100px; }
         select.form-control { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0ba' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
-        select.form-control option { background-color: #1a1a3e; color: #ffffff; }
+        select.form-control option { background-color: var(--bg-elevated); color: var(--text-main); }
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
@@ -628,7 +628,7 @@
                 <button class="btn btn-ai" id="btnGenCLO" onclick="generateCLOWithAI()">
                     สร้าง CLO ด้วย AI
                 </button>
-                <span id="cloStatus" style="font-size:0.85rem;color:#a0a0ba;"></span>
+                <span id="cloStatus" style="font-size:0.85rem;color:var(--text-dim);"></span>
             </div>
         </div>
         <!-- CLO Preview + Edit -->
@@ -698,7 +698,7 @@
                 <button class="btn btn-ai" id="btnGenOutline" onclick="generateOutlineWithAI()">
                     สร้างโครงสร้างคอร์สด้วย AI
                 </button>
-                <span id="aiOutlineStatus" style="font-size:0.85rem;color:#a0a0ba;"></span>
+                <span id="aiOutlineStatus" style="font-size:0.85rem;color:var(--text-dim);"></span>
             </div>
         </div>
         <!-- Preview ก่อน apply -->
@@ -1338,9 +1338,9 @@ function renderCLOPreview(result) {
             <div style="flex:1;">
                 <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${c.statement}${warn ? ` <span title="${warn.join(' / ')}" style="color:#f87171;font-size:0.8rem;cursor:help;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ตรวจสอบ</span>` : ''}</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">${c.level}</span>
-                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">${c.actionVerb}</span>
-                    <span style="font-size:0.72rem;background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:99px;color:#a0a0ba;">${c.assessment}</span>
+                    <span style="font-size:0.72rem;background:var(--card-bg);border:1px solid var(--line);padding:2px 8px;border-radius:99px;color:var(--text-dim);">${c.level}</span>
+                    <span style="font-size:0.72rem;background:var(--card-bg);border:1px solid var(--line);padding:2px 8px;border-radius:99px;color:var(--text-dim);">${c.actionVerb}</span>
+                    <span style="font-size:0.72rem;background:var(--card-bg);border:1px solid var(--line);padding:2px 8px;border-radius:99px;color:var(--text-dim);">${c.assessment}</span>
                 </div>
             </div>
         </div>`;
@@ -1386,7 +1386,7 @@ function refreshCLOList(check) {
             ${warn ? `<div style="color:#f87171;font-size:0.75rem;margin-top:4px;" title="${warn.join(' / ')}"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ${warn[0]}</div>` : ''}
         </div>
         <select onchange="cloItems[${i}].level = this.value"
-            style="background:#1a1a3e;border:1px solid rgba(255,255,255,0.15);color:white;padding:6px 8px;border-radius:8px;font-size:0.8rem;flex-shrink:0;">
+            style="background:var(--input-bg);border:1px solid var(--line-strong);color:var(--text-main);padding:6px 8px;border-radius:8px;font-size:0.8rem;flex-shrink:0;">
             ${BLOOM_LEVELS.map(l =>
                 `<option ${c.level===l?'selected':''}>${l}</option>`
             ).join('')}
@@ -1526,9 +1526,9 @@ function renderOutlinePreview(outline) {
         <div style="font-weight:600;color:#a78bfa;margin-bottom:16px;font-size:1rem;">ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
 
         <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;margin-bottom:12px;">
-            <div style="font-size:0.75rem;color:#a0a0ba;margin-bottom:4px;">ชื่อคอร์สที่แนะนำ</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;">ชื่อคอร์สที่แนะนำ</div>
             <div style="font-weight:600;">${outline.courseTitle || ''}</div>
-            <div style="font-size:0.85rem;color:#a0a0ba;margin-top:4px;">${outline.courseDescription || ''}</div>
+            <div style="font-size:0.85rem;color:var(--text-dim);margin-top:4px;">${outline.courseDescription || ''}</div>
         </div>
 
         <div style="font-size:0.82rem;color:#a78bfa;font-weight:600;margin-bottom:8px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> ${(outline.lessons||[]).length} บทเรียน</div>
@@ -1537,7 +1537,7 @@ function renderOutlinePreview(outline) {
                 <div style="background:#8b5cf6;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;">${i+1}</div>
                 <div>
                     <div style="font-weight:500;">${l.title}</div>
-                    <div style="font-size:0.8rem;color:#a0a0ba;">${l.description}</div>
+                    <div style="font-size:0.8rem;color:var(--text-dim);">${l.description}</div>
                 </div>
             </div>`).join('')}
 
@@ -1547,7 +1547,7 @@ function renderOutlinePreview(outline) {
             <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.82rem;">
                 ${i+1}. ${q.question}
             </div>`).join('')}
-        ${outline.quiz.length > 2 ? `<div style="font-size:0.78rem;color:#a0a0ba;padding-top:6px;">และอีก ${outline.quiz.length-2} ข้อ...</div>` : ''}` : ''}
+        ${outline.quiz.length > 2 ? `<div style="font-size:0.78rem;color:var(--text-dim);padding-top:6px;">และอีก ${outline.quiz.length-2} ข้อ...</div>` : ''}` : ''}
 
         ${(outline.homework||[]).length > 0 ? `
         <div style="font-size:0.82rem;color:#f59e0b;font-weight:600;margin:12px 0 8px;">${outline.homework.length} การบ้าน</div>

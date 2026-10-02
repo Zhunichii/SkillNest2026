@@ -353,7 +353,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #1e293b;
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--line);
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
@@ -373,44 +375,44 @@
         }
         .ce-modal-overlay.show { display: flex; }
         .ce-modal {
-            background: #14162b; border: 1px solid rgba(255,255,255,0.1);
+            background: var(--bg-elevated); color: var(--text-main); border: 1px solid var(--line);
             border-radius: 20px; width: 100%; max-width: 560px;
             max-height: 88vh; overflow-y: auto;
         }
         .ce-modal-header {
-            padding: 24px 28px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 24px 28px 16px; border-bottom: 1px solid var(--line);
             background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08));
         }
         .ce-modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
-        .ce-modal-sub { font-size: 0.85rem; color: #a0a0ba; line-height: 1.5; }
+        .ce-modal-sub { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; }
         .ce-modal-body { padding: 20px 28px; }
         .ce-section { margin-bottom: 22px; }
         .ce-section:last-child { margin-bottom: 0; }
         .ce-section-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 10px; }
         .ce-clo-item {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            background: var(--card-bg); border: 1px solid var(--line);
             border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
         }
         .ce-clo-statement { font-size: 0.85rem; margin-bottom: 8px; line-height: 1.5; }
         .ce-star-row { display: flex; gap: 4px; }
         .ce-star {
-            font-size: 1.5rem; cursor: pointer; color: rgba(255,255,255,0.15);
+            font-size: 1.5rem; cursor: pointer; color: var(--text-faint);
             transition: color 0.15s, transform 0.1s;
         }
         .ce-star:hover { transform: scale(1.15); }
         .ce-star.filled { color: #fbbf24; }
         .ce-textarea {
             width: 100%; min-height: 70px; margin-top: 8px; padding: 10px 12px;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px; color: #fff; font-size: 0.85rem; font-family: inherit; resize: vertical;
+            background: var(--input-bg); border: 1px solid var(--line);
+            border-radius: 8px; color: var(--text-main); font-size: 0.85rem; font-family: inherit; resize: vertical;
         }
         .ce-modal-footer {
             display: flex; justify-content: flex-end; gap: 10px;
-            padding: 16px 28px 22px; border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 16px 28px 22px; border-top: 1px solid var(--line);
         }
         .ce-btn-skip {
-            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
-            color: #a0a0ba; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 0.88rem;
+            background: var(--card-bg); border: 1px solid var(--line-strong);
+            color: var(--text-dim); padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 0.88rem;
         }
         .ce-btn-submit {
             background: linear-gradient(135deg,#8b5cf6,#3b82f6); border: none;
@@ -656,8 +658,9 @@
         .quiz-modal-overlay.show { display: flex; }
 
         .quiz-modal-box {
-            background: #0f1035;
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--line-strong);
             border-radius: 20px;
             width: 100%;
             max-width: 640px;
@@ -675,7 +678,7 @@
 
         .qm-progress-bar {
             height: 6px;
-            background: rgba(255,255,255,0.08);
+            background: var(--line);
             border-radius: 3px;
             margin-bottom: 1.75rem;
             overflow: hidden;
@@ -695,8 +698,8 @@
             align-items: center;
             gap: 1rem;
             padding: 0.9rem 1.1rem;
-            background: rgba(255,255,255,0.04);
-            border: 2px solid rgba(255,255,255,0.08);
+            background: var(--card-bg);
+            border: 2px solid var(--line);
             border-radius: 12px;
             margin-bottom: 0.65rem;
             cursor: pointer;
@@ -708,7 +711,8 @@
         .qm-choice.wrong { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
 
         .qm-letter {
-            background: rgba(255,255,255,0.1);
+            background: var(--line);
+            color: var(--text-main);
             border-radius: 8px;
             padding: 0.3rem 0.65rem;
             font-weight: 700;
@@ -737,14 +741,14 @@
         .qm-result-score { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.4rem; }
         .qm-result-sub { color: var(--text-dim); margin-bottom: 1.75rem; }
         .qm-result-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.75rem; margin-bottom: 1.75rem; }
-        .qm-result-stat { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 0.85rem; }
+        .qm-result-stat { background: var(--card-bg); border-radius: 10px; padding: 0.85rem; }
         .qm-result-num { font-size: 1.5rem; font-weight: 700; }
         .qm-result-label { font-size: 0.78rem; color: var(--text-dim); }
 
         .btn-close-qm {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
+            background: var(--card-bg);
+            border: 1px solid var(--line);
+            color: var(--text-main);
             padding: 0.85rem 2rem;
             border-radius: 12px;
             cursor: pointer;
@@ -1455,10 +1459,10 @@
             <!-- Progress bar -->
             <div id="progressSection" style="margin-top:1rem;display:none;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-                    <span style="font-size:0.85rem;color:#a0a0ba;">ความคืบหน้า</span>
+                    <span style="font-size:0.85rem;color:var(--text-dim);">ความคืบหน้า</span>
                     <span id="progressPct" style="font-size:0.85rem;color:#8b5cf6;font-weight:600;">0%</span>
                 </div>
-                <div style="background:rgba(255,255,255,0.08);border-radius:99px;height:6px;overflow:hidden;">
+                <div style="background:var(--line);border-radius:99px;height:6px;overflow:hidden;">
                     <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border-radius:99px;width:0%;transition:width 0.5s ease;"></div>
                 </div>
                 <button id="btnMarkDone" onclick="markCurrentLessonDone()" style="margin-top:0.8rem;padding:0.5rem 1.2rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
