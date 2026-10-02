@@ -6,6 +6,7 @@
     <title>จัดการคอร์สของฉัน - SkillNest</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
         h1, h2, .page-title { font-family: var(--font-display); letter-spacing: -0.01em; }
@@ -196,7 +197,7 @@
             currentUser = user;
             const { data: profile } = await supabase.from('users').select('user_type').eq('id', user.id).single();
             if (profile?.user_type !== 'teacher') {
-                alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้ เฉพาะครูเท่านั้นที่สามารถจัดการคอร์สได้');
+                toast('คุณไม่มีสิทธิ์เข้าถึงหน้านี้ เฉพาะครูเท่านั้นที่สามารถจัดการคอร์สได้', 'error');
                 window.location.href = 'dashboard.html';
             } else {
                 loadMyCourses(user.id);
@@ -279,17 +280,24 @@
 
         // ฟังก์ชันลบ
         window.handleDelete = async (courseId, courseTitle, btnEl) => {
-            if (!confirm(`คุณต้องการลบคอร์ส "${courseTitle}" ใช่หรือไม่?\n(การกระทำนี้ไม่สามารถย้อนกลับได้)`)) return;
+            const ok = await confirmDialog(`คุณต้องการลบคอร์ส "${courseTitle}" ใช่หรือไม่?\n(การกระทำนี้ไม่สามารถย้อนกลับได้)`, {
+                title: 'ยืนยันการลบคอร์ส',
+                confirmText: 'ลบคอร์ส',
+                cancelText: 'ยกเลิก',
+                danger: true
+            });
+            if (!ok) return;
 
             if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'กำลังลบ...'; }
 
             // เช็ค creator_id ซ้ำในคำสั่งลบเองด้วย (ไม่ใช่การป้องกันจริง แค่กันเรียกผิดพลาด — ตัวป้องกันจริงคือ RLS policy บนฐานข้อมูล)
             const { error } = await supabase.from('courses').delete().eq('id', courseId).eq('creator_id', currentUser.id);
             if (error) {
-                alert('เกิดข้อผิดพลาด: ' + error.message);
+                toast('เกิดข้อผิดพลาด: ' + error.message, 'error');
                 if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'ลบ'; }
                 return;
             }
+            toast('ลบคอร์สสำเร็จ', 'success');
             loadMyCourses(currentUser.id);
         }
     </script>

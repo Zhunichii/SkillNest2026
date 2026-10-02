@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         h1, h2, h3, .logo, .logo-mock, .course-title, .card-stat-value,
@@ -441,16 +442,16 @@
 <!-- Sidebar -->
 <aside class="sidebar">
     <div class="sidebar-item" onclick="window.location.href='dashboard.html'">
-        🔍 <span>ค้นหาคอร์สใหม่</span>
+        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> <span>ค้นหาคอร์สใหม่</span>
     </div>
     <div class="sidebar-item" onclick="window.location.href='dashboard.html'">
-        📚 <span>คอร์สของฉัน</span>
+        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> <span>คอร์สของฉัน</span>
     </div>
     <div class="sidebar-item" onclick="window.location.href='my-quizzes.html'">
-        📝 <span>แบบฝึกหัดของฉัน</span>
+        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> <span>แบบฝึกหัดของฉัน</span>
     </div>
     <div class="sidebar-item active">
-        📊 <span>ผลการเรียนรู้</span>
+        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> <span>ผลการเรียนรู้</span>
     </div>
 </aside>
 
@@ -512,11 +513,11 @@
     <!-- Follow-up: การบ้านที่ต้องติดตาม + คะแนน Quiz แต่ละคอร์ส -->
     <div class="mid-grid" style="margin-bottom:28px;">
         <div class="card">
-            <div class="card-title">📋 การบ้านที่ต้องติดตาม</div>
+            <div class="card-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้านที่ต้องติดตาม</div>
             <div id="homeworkFollowupList"><div style="color:var(--text-dim);font-size:0.9rem;">กำลังโหลด...</div></div>
         </div>
         <div class="card">
-            <div class="card-title">📝 คะแนน Quiz แต่ละคอร์ส</div>
+            <div class="card-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คะแนน Quiz แต่ละคอร์ส</div>
             <div id="quizListByCourse"><div style="color:var(--text-dim);font-size:0.9rem;">กำลังโหลด...</div></div>
         </div>
     </div>
@@ -617,10 +618,10 @@ function computeBadges(enrollments, quizScores) {
         : 0;
 
     return [
-        { icon: '⭐', name: 'เริ่มต้น',      color: '#f59e0b', earned: totalEnrolled >= 1, requirement: 'ลงทะเบียนคอร์สแรก' },
-        { icon: '🏆', name: 'จบคอร์ส',       color: '#10b981', earned: completed >= 1,     requirement: 'เรียนจบ 1 คอร์ส' },
-        { icon: '🎯', name: 'เซียน Quiz',    color: '#8b5cf6', earned: avgQuiz >= 80,      requirement: 'คะแนน Quiz เฉลี่ย 80% ขึ้นไป' },
-        { icon: '📚', name: 'นักเรียนตัวยง', color: '#3b82f6', earned: totalEnrolled >= 3, requirement: 'ลงทะเบียน 3 คอร์สขึ้นไป' },
+        { icon: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>', name: 'เริ่มต้น',      color: '#f59e0b', earned: totalEnrolled >= 1, requirement: 'ลงทะเบียนคอร์สแรก' },
+        { icon: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M17 5H7v5a5 5 0 0010 0V5z"/><path d="M7 5H4a2 2 0 002 4M17 5h3a2 2 0 01-2 4"/></svg></span>', name: 'จบคอร์ส',       color: '#10b981', earned: completed >= 1,     requirement: 'เรียนจบ 1 คอร์ส' },
+        { icon: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>', name: 'เซียน Quiz',    color: '#8b5cf6', earned: avgQuiz >= 80,      requirement: 'คะแนน Quiz เฉลี่ย 80% ขึ้นไป' },
+        { icon: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>', name: 'นักเรียนตัวยง', color: '#3b82f6', earned: totalEnrolled >= 3, requirement: 'ลงทะเบียน 3 คอร์สขึ้นไป' },
     ];
 }
 
@@ -714,7 +715,7 @@ async function loadLearningData() {
     const allBadges = computeBadges(_rawEnrollments, _rawQuizScores);
     badgesGrid.innerHTML = allBadges.map(b => `
         <div class="badge-item ${b.earned ? '' : 'locked'}" title="${b.earned ? 'ปลดล็อกแล้ว' : 'เงื่อนไข: ' + b.requirement}">
-            <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.earned ? b.icon : '🔒'}</div>
+            <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.earned ? b.icon : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>'}</div>
             <div class="badge-name" style="color:${b.earned ? b.color : 'var(--text-dim)'}">${b.name}</div>
         </div>`).join('');
 
@@ -794,8 +795,8 @@ function renderFilteredStats() {
                 ? Math.min(100, Math.round((done / total) * 100))
                 : (e.progress || 0);
             const color    = colors[i % colors.length];
-            const statusText = pct >= 100 ? '✅ จบแล้ว'
-                : pct > 0 ? `📖 ${done}/${total} บท`
+            const statusText = pct >= 100 ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> จบแล้ว'
+                : pct > 0 ? `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span> ${done}/${total} บท`
                 : '⏳ ยังไม่เริ่ม';
             return `<div class="progress-item" style="cursor:default;">
                 <div class="progress-row" onclick="goToCourseResults('${e.course_id}')" style="cursor:pointer;" title="ดูรายละเอียดเจาะลึกของคอร์สนี้">
@@ -809,7 +810,7 @@ function renderFilteredStats() {
                 <div class="progress-track" onclick="goToCourseResults('${e.course_id}')" style="cursor:pointer;"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
                 <div style="margin-top:6px;">
                     <button onclick="event.stopPropagation(); toggleCourseAIAnalysis('${e.course_id}', '${title.replace(/'/g,"\\'")}')"
-                        style="background:none;border:none;color:#8b5cf6;cursor:pointer;font-size:0.76rem;padding:2px 0;">🤖 วิเคราะห์คอร์สนี้แยก</button>
+                        style="background:none;border:none;color:#8b5cf6;cursor:pointer;font-size:0.76rem;padding:2px 0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> วิเคราะห์คอร์สนี้แยก</button>
                     <div id="course-ai-${e.course_id}" style="display:none;margin-top:6px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px 12px;"></div>
                 </div>
             </div>`;
@@ -853,7 +854,7 @@ function renderHomeworkFollowup() {
     });
 
     if (items.length === 0) {
-        el.innerHTML = '<div style="color:var(--text-dim);font-size:0.9rem;">ไม่มีงานค้าง ทำได้ครบทุกอย่างแล้ว 🎉</div>';
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:0.9rem;">ไม่มีงานค้าง ทำได้ครบทุกอย่างแล้ว <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span></div>';
         return;
     }
 
@@ -964,13 +965,13 @@ async function runAIAnalysis(enrollments, quizScores, aiBox) {
             if (trimmed.match(/^[1-9]\.|จุดแข็ง|จุดที่ควร|คำแนะนำ/)) {
                 html += `<div style="color:#8b5cf6;font-weight:600;margin-top:0.8rem;margin-bottom:0.3rem;">${trimmed}</div>`;
             } else if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-                html += `<div style="color:var(--text-main);padding-left:1rem;">👉 ${trimmed.replace(/^[-•]\s*/, '')}</div>`;
+                html += `<div style="color:var(--text-main);padding-left:1rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span> ${trimmed.replace(/^[-•]\s*/, '')}</div>`;
             } else if (trimmed) {
                 html += `<div style="color:var(--text-main);">${trimmed}</div>`;
             }
         });
         html += `<div style="margin-top:1rem;text-align:right;">
-            <button onclick="rerunAIAnalysis()" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:#8b5cf6;padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.82rem;">🔄 วิเคราะห์ใหม่</button>
+            <button onclick="rerunAIAnalysis()" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:#8b5cf6;padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.82rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></span> วิเคราะห์ใหม่</button>
         </div>`;
         html += '</div>';
         aiBox.innerHTML = html;
@@ -1050,7 +1051,7 @@ window.toggleCourseAIAnalysis = async function(courseId, courseTitle) {
 
 loadLearningData().then(() => {
     const tourSteps = [
-        { title: '👋 ยินดีต้อนรับสู่หน้าผลการเรียน', text: 'หน้านี้รวมภาพรวมการเรียนของคุณทุกคอร์สไว้ที่เดียว ไปดูกันทีละส่วนสั้นๆ' },
+        { title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ยินดีต้อนรับสู่หน้าผลการเรียน', text: 'หน้านี้รวมภาพรวมการเรียนของคุณทุกคอร์สไว้ที่เดียว ไปดูกันทีละส่วนสั้นๆ' },
         { target: '.stats-grid', title: 'สรุปภาพรวม', text: 'เวลาเรียนรวม, คอร์สที่เรียนจบ, คอร์สที่กำลังเรียน และคะแนน Quiz เฉลี่ย — ปรับช่วงเวลาดูได้ที่ปุ่มมุมขวาบน', placement: 'bottom' },
         { target: '#courseProgressList', title: 'ความคืบหน้าคอร์ส', text: 'คลิกที่คอร์สไหนก็ได้ในนี้ เพื่อดูรายละเอียดเจาะลึก (คะแนน Quiz รายข้อ, การบ้านทุกชิ้น) ของคอร์สนั้นทันที', placement: 'right' },
         { target: '#homeworkFollowupList', title: 'การบ้านที่ต้องติดตาม', text: 'รวมงานที่ยังไม่ส่งหรือรอครูตรวจจากทุกคอร์สไว้ที่เดียว ไม่ต้องเข้าไปเช็คทีละคอร์ส', placement: 'right' },

@@ -6,6 +6,7 @@
     <title>แบบฝึกหัดของฉัน - SkillNest</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
@@ -243,17 +244,17 @@
     </nav>
 
     <aside class="sidebar">
-        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=explore'">🔍 <span>ค้นหาคอร์สใหม่</span></div>
-        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=my-courses'">📚 <span>คอร์สของฉัน</span></div>
-        <div class="sidebar-item teacher-only" id="sidebarCreateCourse" onclick="window.location.href='create-course.html'" style="display:none;">💡 <span>เพิ่มคอร์ส</span></div>
-        <div class="sidebar-item teacher-only" id="sidebarHomework" onclick="window.location.href='homework.html'" style="display:none;">📋 <span>ตรวจการบ้าน</span></div>
-        <div class="sidebar-item active" id="sidebarMyQuizzes" onclick="window.location.href='my-quizzes.html'">📝 <span>แบบฝึกหัดของฉัน</span></div>
-        <div class="sidebar-item" onclick="window.location.href='learning.html'">📊 <span>ผลการเรียนรู้</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=explore'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> <span>ค้นหาคอร์สใหม่</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=my-courses'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> <span>คอร์สของฉัน</span></div>
+        <div class="sidebar-item teacher-only" id="sidebarCreateCourse" onclick="window.location.href='create-course.html'" style="display:none;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> <span>เพิ่มคอร์ส</span></div>
+        <div class="sidebar-item teacher-only" id="sidebarHomework" onclick="window.location.href='homework.html'" style="display:none;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> <span>ตรวจการบ้าน</span></div>
+        <div class="sidebar-item active" id="sidebarMyQuizzes" onclick="window.location.href='my-quizzes.html'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> <span>แบบฝึกหัดของฉัน</span></div>
+        <div class="sidebar-item" onclick="window.location.href='learning.html'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> <span>ผลการเรียนรู้</span></div>
     </aside>
 
     <main class="main-content">
         <div class="page-header">
-            <h1>📝 แบบฝึกหัดของฉัน</h1>
+            <h1><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แบบฝึกหัดของฉัน</h1>
             <p>ทำแบบทดสอบเพื่อทดสอบความเข้าใจจากคอร์สที่คุณลงทะเบียน</p>
         </div>
 
@@ -286,7 +287,7 @@ let allCourses = [];   // คอร์สที่ลงทะเบียน + 
     await loadQuizzes();
 })().then(() => {
     const tourSteps = [
-        { title: '👋 ยินดีต้อนรับสู่แบบฝึกหัดของฉัน', text: 'หน้านี้รวม Quiz และการบ้านจากทุกคอร์สที่คุณลงทะเบียนไว้ที่เดียว ไม่ต้องเข้าไปเช็คทีละคอร์ส' },
+        { title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ยินดีต้อนรับสู่แบบฝึกหัดของฉัน', text: 'หน้านี้รวม Quiz และการบ้านจากทุกคอร์สที่คุณลงทะเบียนไว้ที่เดียว ไม่ต้องเข้าไปเช็คทีละคอร์ส' },
         { target: '#quizGrid', title: 'การ์ดแต่ละคอร์ส', text: 'แต่ละการ์ดจะบอกจำนวน Quiz/การบ้าน คะแนนล่าสุด (ถ้าเคยทำ) กดปุ่มเพื่อไปทำหรือดูรายละเอียดต่อได้เลย', placement: 'bottom' },
     ];
     SkillNestTour.autoStart(tourSteps, 'my-quizzes');
@@ -302,7 +303,7 @@ async function loadQuizzes() {
         const enrolledIds = (enrollments || []).map(e => e.course_id);
 
         if (enrolledIds.length === 0) {
-            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่ได้สมัครเรียนคอร์สใด</h3><p>กลับไปที่ <a href="dashboard.html" style="color:var(--primary-blue);">หน้าหลัก</a> เพื่อสมัครเรียนคอร์สที่สนใจ</p></div>`;
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12v6a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><path d="M22 12l-10 5L2 12"/><path d="M2 12l5.45-6.32A2 2 0 018.96 5h6.08a2 2 0 011.51.68L22 12"/></svg></span></div><h3>ยังไม่ได้สมัครเรียนคอร์สใด</h3><p>กลับไปที่ <a href="dashboard.html" style="color:var(--primary-blue);">หน้าหลัก</a> เพื่อสมัครเรียนคอร์สที่สนใจ</p></div>`;
             return;
         }
 
@@ -329,7 +330,7 @@ async function loadQuizzes() {
         });
 
         if (allCourses.length === 0) {
-            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📭</div><h3>ยังไม่มีแบบฝึกหัด</h3><p>คอร์สที่คุณสมัครยังไม่มีแบบทดสอบหรือการบ้านในตอนนี้</p></div>`;
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12v6a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><path d="M22 12l-10 5L2 12"/><path d="M2 12l5.45-6.32A2 2 0 018.96 5h6.08a2 2 0 011.51.68L22 12"/></svg></span></div><h3>ยังไม่มีแบบฝึกหัด</h3><p>คอร์สที่คุณสมัครยังไม่มีแบบทดสอบหรือการบ้านในตอนนี้</p></div>`;
             return;
         }
 
@@ -352,12 +353,12 @@ async function loadQuizzes() {
             let quizSection = '';
             if (quizCount > 0) {
                 quizSection = `
-                    <div class="quiz-meta">📋 แบบทดสอบ ${quizCount} ข้อ</div>
+                    <div class="quiz-meta"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> แบบทดสอบ ${quizCount} ข้อ</div>
                     ${hasScore ? `
                         <div class="quiz-score-bar"><div class="quiz-score-fill" style="width:${pct}%"></div></div>
                         <div class="quiz-score-label"><span>คะแนนล่าสุดของคุณ</span><span>${scoreData.score}/${scoreData.total} (${pct}%)</span></div>
                         <div class="quiz-card-actions">
-                            <a href="course-content.html?id=${course.id}&tab=quiz" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">📋 ดูผล / ทำส่วนที่เหลือ</a>
+                            <a href="course-content.html?id=${course.id}&tab=quiz" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> ดูผล / ทำส่วนที่เหลือ</a>
                         </div>
                     ` : `
                         <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำแบบทดสอบ</p>
@@ -371,9 +372,9 @@ async function loadQuizzes() {
             let hwSection = '';
             if (hwArr.length > 0) {
                 hwSection = `
-                    <div class="quiz-meta" style="margin-top:${quizCount>0?'0.85rem':'0'};">📄 การบ้าน ${hwArr.length} ชิ้น — ส่งแล้ว ${hwDone}/${hwArr.length}</div>
+                    <div class="quiz-meta" style="margin-top:${quizCount>0?'0.85rem':'0'};"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> การบ้าน ${hwArr.length} ชิ้น — ส่งแล้ว ${hwDone}/${hwArr.length}</div>
                     <div class="quiz-card-actions">
-                        <a href="course-content.html?id=${course.id}&tab=homework" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:block;">📄 ไปทำการบ้าน</a>
+                        <a href="course-content.html?id=${course.id}&tab=homework" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:block;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> ไปทำการบ้าน</a>
                     </div>`;
             }
 
@@ -388,7 +389,7 @@ async function loadQuizzes() {
                 ${quizSection}
                 ${hwSection}
                 <div class="quiz-card-actions" style="margin-top:0.75rem;">
-                    <a href="course-content.html?id=${course.id}" class="btn-go-lesson" title="ดูบทเรียน" style="text-decoration:none;">📚 ไปที่บทเรียน</a>
+                    <a href="course-content.html?id=${course.id}" class="btn-go-lesson" title="ดูบทเรียน" style="text-decoration:none;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> ไปที่บทเรียน</a>
                 </div>`;
             grid.appendChild(card);
         });
@@ -396,7 +397,7 @@ async function loadQuizzes() {
 
     } catch(err) {
         console.error('loadQuizzes error:', err);
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3><p>${err.message}</p></div>`;
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div><h3>เกิดข้อผิดพลาด</h3><p>${err.message}</p></div>`;
     }
 }
 

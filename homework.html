@@ -6,6 +6,7 @@
     <title>การบ้าน - SkillNest</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
         body {
@@ -197,20 +198,20 @@
 
     <nav class="top-nav">
         <a href="dashboard.html" class="logo">Skill<span>Nest</span></a>
-        <span class="nav-title">/ 📋 การบ้าน</span>
+        <span class="nav-title">/ <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</span>
     </nav>
 
     <aside class="sidebar">
-        <div class="sidebar-item" onclick="window.location.href='dashboard.html'">🔍 <span>ค้นหาคอร์สใหม่</span></div>
-        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=my-courses'">📚 <span>คอร์สของฉัน</span></div>
-        <div class="sidebar-item" onclick="window.location.href='create-course.html'">💡 <span>เพิ่มคอร์ส</span></div>
-        <div class="sidebar-item active">📋 <span>ตรวจการบ้าน</span></div>
-        <div class="sidebar-item" onclick="window.location.href='teacher-analytics.html'">📊 <span>Analytics</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> <span>ค้นหาคอร์สใหม่</span></div>
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html?page=my-courses'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> <span>คอร์สของฉัน</span></div>
+        <div class="sidebar-item" onclick="window.location.href='create-course.html'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> <span>เพิ่มคอร์ส</span></div>
+        <div class="sidebar-item active"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> <span>ตรวจการบ้าน</span></div>
+        <div class="sidebar-item" onclick="window.location.href='teacher-analytics.html'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> <span>Analytics</span></div>
     </aside>
 
     <main class="main-content">
         <div class="page-header">
-            <h1>📋 การบ้าน</h1>
+            <h1><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</h1>
             <p>การบ้านที่อาจารย์สั่ง</p>
         </div>
 
@@ -223,13 +224,13 @@
                 style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);
                 color:#10b981;padding:8px 16px;border-radius:8px;cursor:pointer;
                 font-size:0.85rem;font-weight:600;display:none;align-items:center;gap:6px;">
-                📥 Export คะแนนเป็น CSV
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></span> Export คะแนนเป็น CSV
             </button>
         </div>
 
         <div id="hwContent">
             <div class="empty-state">
-                <div class="empty-icon">📂</div>
+                <div class="empty-icon"><span class="sn-icon sn-icon-lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span></div>
                 <h3>เลือกคอร์สเพื่อดูการบ้าน</h3>
             </div>
         </div>
@@ -239,7 +240,7 @@
 <!-- Grade Modal -->
 <div class="modal-overlay" id="gradeModalOverlay">
     <div class="grade-modal">
-        <h3>✏️ ให้คะแนนการบ้าน</h3>
+        <h3><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ให้คะแนนการบ้าน</h3>
         <div id="gradeStudentInfo" style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1rem;"></div>
         <div class="submission-preview" id="gradeSubmissionPreview"></div>
         <div class="form-group" id="gradeScoreSingleWrap">
@@ -257,7 +258,7 @@
             <button type="button" id="btnAiGradeHw" onclick="aiGradeCurrentSubmission()"
                 style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);border:none;color:white;
                 padding:8px 16px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;">
-                🤖 ให้ AI ช่วยตรวจ
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI ช่วยตรวจ
             </button>
             <div id="gradeCriteriaHint"></div>
             <div id="aiGradeNote"></div>
@@ -267,7 +268,7 @@
             <textarea class="form-control" id="gradeComment" placeholder="ให้ feedback กับนักเรียน..."></textarea>
         </div>
         <div class="modal-actions">
-            <button class="btn-confirm-grade" onclick="confirmGrade()">✅ บันทึกคะแนน</button>
+            <button class="btn-confirm-grade" onclick="confirmGrade()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึกคะแนน</button>
             <button class="btn-cancel-grade" onclick="closeGradeModal()">ยกเลิก</button>
         </div>
     </div>
@@ -276,7 +277,7 @@
 <!-- Bulk Grade Modal -->
 <div class="modal-overlay" id="bulkGradeModalOverlay">
     <div class="grade-modal">
-        <h3>✏️ ให้คะแนนพร้อมกันหลายคน</h3>
+        <h3><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ให้คะแนนพร้อมกันหลายคน</h3>
         <div id="bulkGradeInfo" style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1rem;"></div>
         <div id="bulkGradeStudentList" style="max-height:120px; overflow-y:auto; background:var(--card-hover);
             border-radius:8px; padding:10px 12px; margin-bottom:1rem; font-size:0.82rem; color:var(--text-dim);"></div>
@@ -289,10 +290,10 @@
             <textarea class="form-control" id="bulkGradeComment" placeholder="ให้ feedback กับนักเรียนทุกคนที่เลือก..."></textarea>
         </div>
         <div class="form-group">
-            <small style="color:var(--warning);">⚠️ เหมาะกับงานที่ตรวจแบบเดียวกันได้ เช่น ทุกคนทำถูกให้เต็ม — ถ้าคะแนนแต่ละคนต่างกัน ควรตรวจทีละคนแทน</small>
+            <small style="color:var(--warning);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> เหมาะกับงานที่ตรวจแบบเดียวกันได้ เช่น ทุกคนทำถูกให้เต็ม — ถ้าคะแนนแต่ละคนต่างกัน ควรตรวจทีละคนแทน</small>
         </div>
         <div class="modal-actions">
-            <button class="btn-confirm-grade" id="btnConfirmBulkGrade" onclick="confirmBulkGrade()">✅ บันทึกคะแนนทั้งหมด</button>
+            <button class="btn-confirm-grade" id="btnConfirmBulkGrade" onclick="confirmBulkGrade()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึกคะแนนทั้งหมด</button>
             <button class="btn-cancel-grade" onclick="closeBulkGradeModal()">ยกเลิก</button>
         </div>
     </div>
@@ -314,7 +315,7 @@ if (!user) { window.location.href = '../login-page/login.html'; }
 
 const { data: userDoc } = await supabase.from('users').select('*').eq('id', user.id).single();
 if (userDoc && userDoc.user_type !== 'teacher') {
-    alert('หน้านี้สำหรับครูเท่านั้น');
+    toast('หน้านี้สำหรับครูเท่านั้น', 'error');
     window.location.href = 'dashboard.html';
 }
 currentUser = user;
@@ -336,7 +337,7 @@ async function loadMyCourses() {
             tabsEl.innerHTML = '';
             document.getElementById('hwContent').innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">📭</div>
+                    <div class="empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12v6a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><path d="M22 12l-10 5L2 12"/><path d="M2 12l5.45-6.32A2 2 0 018.96 5h6.08a2 2 0 011.51.68L22 12"/></svg></span></div>
                     <h3>ยังไม่มีคอร์สที่มีการบ้าน</h3>
                     <p>ไปที่ "เพิ่มคอร์ส" เพื่อสร้างการบ้านในคอร์สของคุณ</p>
                 </div>`;
@@ -414,12 +415,12 @@ async function loadHomeworksByCourse(courseId) {
                     ? new Date(sub.submitted_at).toLocaleString('th-TH')
                     : 'ไม่ระบุ';
                 const statusBadge = sub.status === 'graded'
-                    ? `<span class="status-badge graded">✅ ตรวจแล้ว (${sub.grade}/${hw.maxScore||100})</span>`
-                    : `<span class="status-badge submitted">📤 รอตรวจ</span>`;
+                    ? `<span class="status-badge graded"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ตรวจแล้ว (${sub.grade}/${hw.maxScore||100})</span>`
+                    : `<span class="status-badge submitted"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span> รอตรวจ</span>`;
                 const workHtml = sub.content
-                    ? `<span title="${sub.content.substring(0,200)}" style="cursor:help;">📝 ดูงาน</span>` : '';
+                    ? `<span title="${sub.content.substring(0,200)}" style="cursor:help;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ดูงาน</span>` : '';
                 const fileHtml = sub.file_url
-                    ? `<a href="${sub.file_url}" target="_blank" class="view-link">📎 ไฟล์</a>` : '';
+                    ? `<a href="${sub.file_url}" target="_blank" class="view-link"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ไฟล์</a>` : '';
 
                 return `<tr>
                     <td><input type="checkbox" class="hw-row-check" data-hwidx="${idx}"
@@ -431,7 +432,7 @@ async function loadHomeworksByCourse(courseId) {
                     <td>${statusBadge}</td>
                     <td>
                         <button class="btn-grade" onclick="openGradeModal('${sub.id}','${escapeHtml(sub.content||'')}','${sub.file_url||''}','${escapeHtml(name)}',${hw.maxScore||100},${sub.grade||0},'${escapeHtml(sub.comment||'')}','${sub.user_id}','${courseId}','${escapeHtml(hw.title||'')}','${escapeHtml(hw.description||'')}','${escapeHtml(hw.gradingCriteria||'')}',${idx})">
-                            ✏️ ${sub.status==='graded'?'แก้คะแนน':'ให้คะแนน'}
+                            <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ${sub.status==='graded'?'แก้คะแนน':'ให้คะแนน'}
                         </button>
                     </td>
                 </tr>`;
@@ -444,7 +445,7 @@ async function loadHomeworksByCourse(courseId) {
             <div class="hw-assignment-header">
                 <div>
                     <div class="hw-assignment-title">${idx+1}. ${hw.title}</div>
-                    <div style="color:var(--text-dim);font-size:0.82rem;margin-top:0.25rem;">📅 ${deadlineText} • คะแนนเต็ม ${hw.maxScore||100}</div>
+                    <div style="color:var(--text-dim);font-size:0.82rem;margin-top:0.25rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> ${deadlineText} • คะแนนเต็ม ${hw.maxScore||100}</div>
                 </div>
                 <div class="hw-stats">
                     <div class="hw-stat">ส่งแล้ว <span>${hwSubs.length}</span></div>
@@ -459,7 +460,7 @@ async function loadHomeworksByCourse(courseId) {
                 <button onclick="openBulkGradeModal(${idx}, ${hw.maxScore||100}, '${escapeHtml(hw.title||'')}')"
                     style="background:var(--primary-blue);border:none;color:white;padding:6px 14px;
                     border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">
-                    ✏️ ให้คะแนนพร้อมกัน
+                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ให้คะแนนพร้อมกัน
                 </button>
             </div>
             <div class="table-scroll">
@@ -492,7 +493,7 @@ window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore,
     document.getElementById('gradeStudentInfo').textContent = `นักเรียน: ${studentName}`;
     document.getElementById('aiGradeNote').innerHTML = '';
     document.getElementById('gradeCriteriaHint').innerHTML = hwGradingCriteria
-        ? `<div style="font-size:0.76rem;color:var(--text-dim);margin-top:6px;">📋 เกณฑ์ที่ตั้งไว้: "${hwGradingCriteria}"</div>`
+        ? `<div style="font-size:0.76rem;color:var(--text-dim);margin-top:6px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> เกณฑ์ที่ตั้งไว้: "${hwGradingCriteria}"</div>`
         : '';
 
     const singleWrap = document.getElementById('gradeScoreSingleWrap');
@@ -522,8 +523,8 @@ window.openGradeModal = function(subId, content, fileUrl, studentName, maxScore,
     document.getElementById('gradeComment').value = currentComment || '';
 
     let previewHtml = '';
-    if (content) previewHtml += `<div>📝 งานที่ส่ง:<br><br>${content}</div>`;
-    if (fileUrl) previewHtml += `${content?'<br>':''}📎 ไฟล์แนบ: <a href="${fileUrl}" target="_blank" style="color:var(--primary-blue);">เปิดไฟล์</a>`;
+    if (content) previewHtml += `<div><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> งานที่ส่ง:<br><br>${content}</div>`;
+    if (fileUrl) previewHtml += `${content?'<br>':''}<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ไฟล์แนบ: <a href="${fileUrl}" target="_blank" style="color:var(--primary-blue);">เปิดไฟล์</a>`;
     if (!content && !fileUrl) previewHtml = '<em>ไม่มีเนื้อหางาน</em>';
     document.getElementById('gradeSubmissionPreview').innerHTML = previewHtml;
     document.getElementById('gradeModalOverlay').classList.add('show');
@@ -559,7 +560,7 @@ window.confirmGrade = async function() {
     } else {
         score = parseInt(document.getElementById('gradeScore').value);
         if (isNaN(score) || score < 0 || score > pendingGrade.maxScore) {
-            alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingGrade.maxScore}`); return;
+            toast(`กรุณาใส่คะแนนระหว่าง 0 - ${pendingGrade.maxScore}`, 'warning'); return;
         }
     }
 
@@ -598,7 +599,7 @@ window.confirmGrade = async function() {
         const activeTab = document.querySelector('.course-tab-btn.active');
         if (activeTab) activeTab.click();
     } catch(e) {
-        alert('❌ เกิดข้อผิดพลาด: ' + e.message);
+        toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
     }
 };
 
@@ -676,13 +677,13 @@ window.aiGradeCurrentSubmission = async function() {
     const note = document.getElementById('aiGradeNote');
 
     btn.disabled = true;
-    btn.textContent = '🤖 กำลังอ่านงาน...';
+    btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> กำลังอ่านงาน...';
     note.innerHTML = '';
 
     try {
         const { answerText, images } = await extractGradingContent(pendingGrade);
 
-        btn.textContent = '🤖 AI กำลังตรวจ...';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI กำลังตรวจ...';
         const res = await fetch('/api/ai?fn=grade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -709,14 +710,14 @@ window.aiGradeCurrentSubmission = async function() {
                 .map(cs => `${cs.criterion}: ${cs.score}/${cs.points}${cs.reasoning ? ' — ' + cs.reasoning : ''}`)
                 .join('<br>');
             note.innerHTML = `<div class="ai-grade-note">
-                🤖 AI เสนอคะแนนแยกทีละหัวข้อแล้ว รวม ${data.totalScore}/${pendingGrade.maxScore}${data.reasoning ? ' — ' + data.reasoning : ''}
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI เสนอคะแนนแยกทีละหัวข้อแล้ว รวม ${data.totalScore}/${pendingGrade.maxScore}${data.reasoning ? ' — ' + data.reasoning : ''}
                 <span style="display:block;margin-top:4px;">${breakdown}</span>
                 <span style="display:block;color:var(--text-dim);font-size:0.74rem;margin-top:3px;">เป็นแค่ข้อเสนอแนะ ตรวจสอบและแก้คะแนนก่อนกด "บันทึกคะแนน" ได้ตามดุลยพินิจ</span>
             </div>`;
         } else {
             document.getElementById('gradeScore').value = data.suggestedScore;
             note.innerHTML = `<div class="ai-grade-note">
-                🤖 AI เสนอ ${data.suggestedScore}/${pendingGrade.maxScore} คะแนน — ${data.reasoning || ''}
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI เสนอ ${data.suggestedScore}/${pendingGrade.maxScore} คะแนน — ${data.reasoning || ''}
                 <span style="display:block;color:var(--text-dim);font-size:0.74rem;margin-top:3px;">เป็นแค่ข้อเสนอแนะ ตรวจสอบและแก้คะแนนก่อนกด "บันทึกคะแนน" ได้ตามดุลยพินิจ</span>
             </div>`;
         }
@@ -724,7 +725,7 @@ window.aiGradeCurrentSubmission = async function() {
         note.innerHTML = `<div class="ai-grade-note" style="color:#f87171;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);">${e.message}</div>`;
     } finally {
         btn.disabled = false;
-        btn.textContent = '🤖 ให้ AI ช่วยตรวจ';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI ช่วยตรวจ';
     }
 };
 
@@ -779,7 +780,7 @@ window.confirmBulkGrade = async function() {
     const comment = document.getElementById('bulkGradeComment').value.trim();
 
     if (isNaN(score) || score < 0 || score > pendingBulkGrade.maxScore) {
-        alert(`❌ กรุณาใส่คะแนนระหว่าง 0 - ${pendingBulkGrade.maxScore}`); return;
+        toast(`กรุณาใส่คะแนนระหว่าง 0 - ${pendingBulkGrade.maxScore}`, 'warning'); return;
     }
 
     const btn = document.getElementById('btnConfirmBulkGrade');
@@ -823,10 +824,12 @@ window.confirmBulkGrade = async function() {
     }
 
     btn.disabled = false;
-    btn.textContent = '✅ บันทึกคะแนนทั้งหมด';
+    btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึกคะแนนทั้งหมด';
 
     if (failed > 0) {
-        alert(`บันทึกสำเร็จ ${done} คน ล้มเหลว ${failed} คน (เช็ค Console ดูรายละเอียด)`);
+        toast(`บันทึกสำเร็จ ${done} คน ล้มเหลว ${failed} คน (เช็ค Console ดูรายละเอียด)`, 'warning');
+    } else {
+        toast(`บันทึกคะแนนสำเร็จ ${done} คน`, 'success');
     }
 
     closeBulkGradeModal();
@@ -852,7 +855,7 @@ window.exportGradesCsv = function() {
     const submissions   = _lastLoadedSubmissions;
     const studentNames  = _lastLoadedStudentNames;
     const studentIds    = [...new Set(submissions.map(s => s.user_id))];
-    if (studentIds.length === 0) { alert('ยังไม่มีนักเรียนส่งงานในคอร์สนี้'); return; }
+    if (studentIds.length === 0) { toast('ยังไม่มีนักเรียนส่งงานในคอร์สนี้', 'warning'); return; }
 
     // หัวตาราง: ชื่อนักเรียน + การบ้านแต่ละชิ้น + รวม/เต็ม/เปอร์เซ็นต์
     const header = ['ชื่อนักเรียน', ...course.homework.map(hw => hw.title), 'คะแนนรวม', 'คะแนนเต็มรวม', 'เปอร์เซ็นต์'];
@@ -897,7 +900,7 @@ window.exportGradesCsv = function() {
 
 // ============ TUTORIAL TOUR ============
 const _homeworkTourSteps = [
-    { title: '👋 ยินดีต้อนรับสู่หน้าตรวจการบ้าน', text: 'หน้านี้รวมงานที่นักเรียนส่งมาจากทุกคอร์สของคุณ ไปดูวิธีใช้งานสั้นๆ กัน' },
+    { title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ยินดีต้อนรับสู่หน้าตรวจการบ้าน', text: 'หน้านี้รวมงานที่นักเรียนส่งมาจากทุกคอร์สของคุณ ไปดูวิธีใช้งานสั้นๆ กัน' },
     { target: '#courseTabs', title: 'เลือกคอร์สที่จะตรวจ', text: 'คลิกชื่อคอร์สเพื่อดูการบ้านทั้งหมดของคอร์สนั้น (แสดงเฉพาะคอร์สที่มีการบ้านจริง)', placement: 'bottom' },
     { target: '#hwContent', title: 'รายการงานที่ส่งมา', text: 'แต่ละการบ้านจะแยกเป็นการ์ด บอกจำนวนที่ส่งแล้ว/รอตรวจ/ตรวจแล้ว กดปุ่ม "ให้คะแนน" ที่แถวนักเรียนเพื่อเปิดหน้าต่างตรวจงาน', placement: 'top' },
 ];

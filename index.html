@@ -6,6 +6,7 @@
     <title>SkillNest — สร้างและเรียนคอร์สออนไลน์ด้วย AI</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
 
@@ -849,12 +850,12 @@
         document.getElementById('settingsItem').addEventListener('click', () => window.location.href = 'setting.html');
         document.getElementById('logoutItem').addEventListener('click', async () => {
             try { await supabase.auth.signOut(); window.location.reload(); }
-            catch (error) { console.error('Logout error:', error); alert('เกิดข้อผิดพลาดในการออกจากระบบ'); }
+            catch (error) { console.error('Logout error:', error); toast('เกิดข้อผิดพลาดในการออกจากระบบ', 'error'); }
         });
 
         document.getElementById('newsletterForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            alert('ขอบคุณที่สมัครรับข่าวสารครับ!');
+            toast('ขอบคุณที่สมัครรับข่าวสารครับ!', 'success');
             e.target.reset();
         });
 
@@ -983,7 +984,7 @@
             { who: 'user', text: 'OOP คืออะไรครับ อธิบายสั้นๆ' },
             { who: 'ai',   text: 'OOP คือการเขียนโปรแกรมแบบมองทุกอย่างเป็น "วัตถุ" ที่มีข้อมูลและความสามารถในตัวครับ เหมือนรถยนต์ที่มีทั้งสี (ข้อมูล) และการขับ (ความสามารถ)' },
             { who: 'user', text: 'ขอตัวอย่างเป็นภาพได้ไหม' },
-            { who: 'ai',   text: 'ได้เลยครับ! กำลังวาดแผนภาพ class กับ object ให้ดู 🎨' },
+            { who: 'ai',   text: 'ได้เลยครับ! กำลังวาดแผนภาพ class กับ object ให้ดู <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span>' },
         ];
 
         function makeMsg(who, text) {

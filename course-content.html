@@ -6,6 +6,7 @@
     <title>กำลังโหลด... - SkillNest</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         h1, h2, h3, .logo, .logo-mock, .course-title, .card-stat-value,
@@ -1433,7 +1434,7 @@
 
         <div class="lesson-subtopics-panel" id="lessonSubtopicsPanel" style="display:none;">
             <div class="subtopics-panel-header" onclick="toggleSubtopicsPanel()">
-                <span>📑 เนื้อหาในบทนี้</span>
+                <span><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span> เนื้อหาในบทนี้</span>
                 <span id="subtopicsToggleIcon">▾</span>
             </div>
             <ul class="subtopics-panel-list" id="subtopicsPanelList"></ul>
@@ -1443,8 +1444,8 @@
         <div class="course-info">
             <h1 id="courseTitle">กำลังโหลด...</h1>
             <div class="course-meta">
-                <span id="courseInstructor">👤 กำลังโหลด...</span>
-                <span id="courseCategory">📚 กำลังโหลด...</span>
+                <span id="courseInstructor"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> กำลังโหลด...</span>
+                <span id="courseCategory"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> กำลังโหลด...</span>
             </div>
             <!-- Progress bar -->
             <div id="progressSection" style="margin-top:1rem;display:none;">
@@ -1456,7 +1457,7 @@
                     <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border-radius:99px;width:0%;transition:width 0.5s ease;"></div>
                 </div>
                 <button id="btnMarkDone" onclick="markCurrentLessonDone()" style="margin-top:0.8rem;padding:0.5rem 1.2rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
-                    ✅ เรียนจบบทนี้แล้ว
+                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เรียนจบบทนี้แล้ว
                 </button>
             </div>
         </div>
@@ -1471,11 +1472,11 @@
 
             <!-- Tabs -->
             <div class="lesson-tabs">
-                <div class="lesson-tab active" onclick="switchTab('lessons', this)">📚 บทเรียน</div>
-                <div class="lesson-tab" id="quizTabBtn" onclick="switchTab('quiz', this)" style="display:none;">📝 แบบทดสอบ</div>
-                <div class="lesson-tab" id="hwTabBtn" onclick="switchTab('homework', this)" style="display:none;">📋 การบ้าน</div>
-                <div class="lesson-tab" id="resultsTabBtn" onclick="switchTab('results', this)">📊 ผลการเรียนของฉัน</div>
-                <div class="lesson-tab" id="notesTabBtn" onclick="switchTab('notes', this)">📝 โน้ตของฉัน</div>
+                <div class="lesson-tab active" onclick="switchTab('lessons', this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> บทเรียน</div>
+                <div class="lesson-tab" id="quizTabBtn" onclick="switchTab('quiz', this)" style="display:none;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แบบทดสอบ</div>
+                <div class="lesson-tab" id="hwTabBtn" onclick="switchTab('homework', this)" style="display:none;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</div>
+                <div class="lesson-tab" id="resultsTabBtn" onclick="switchTab('results', this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> ผลการเรียนของฉัน</div>
+                <div class="lesson-tab" id="notesTabBtn" onclick="switchTab('notes', this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> โน้ตของฉัน</div>
             </div>
 
             <!-- Lesson list panel -->
@@ -1491,7 +1492,7 @@
             <div id="tabQuiz" class="tab-panel">
                 <div class="quiz-panel">
                     <div class="quiz-panel-header">
-                        <h3>📝 แบบทดสอบ</h3>
+                        <h3><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แบบทดสอบ</h3>
                     </div>
                     <div id="quizPanelContent">
                         <p style="color:var(--text-dim); margin-bottom:1.25rem;">กำลังโหลด...</p>
@@ -1527,7 +1528,7 @@
                     color:var(--text-main,#fff);font-size:0.92rem;line-height:1.6;resize:vertical;
                     font-family:inherit;"
                     oninput="onNotesInput()"></textarea>
-                <p style="color:var(--text-dim);font-size:0.78rem;margin-top:0.5rem;">💾 โน้ตจะถูกบันทึกอัตโนมัติแยกไว้ทีละบท เปลี่ยนบทแล้วกลับมาดูโน้ตเดิมได้เสมอ</p>
+                <p style="color:var(--text-dim);font-size:0.78rem;margin-top:0.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></span> โน้ตจะถูกบันทึกอัตโนมัติแยกไว้ทีละบท เปลี่ยนบทแล้วกลับมาดูโน้ตเดิมได้เสมอ</p>
             </div>
         </div>
         </div><!-- end lesson-info-area -->
@@ -1538,26 +1539,26 @@
 <div class="ce-modal-overlay" id="ceModalOverlay">
     <div class="ce-modal">
         <div class="ce-modal-header">
-            <div class="ce-modal-title">🎉 ยินดีด้วย! คุณเรียนจบคอร์สนี้แล้ว</div>
+            <div class="ce-modal-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span> ยินดีด้วย! คุณเรียนจบคอร์สนี้แล้ว</div>
             <div class="ce-modal-sub">ช่วยสละเวลาสักครู่ประเมินคอร์สนี้ให้อาจารย์นำไปปรับปรุงด้วยนะครับ</div>
         </div>
         <div class="ce-modal-body" id="ceModalBody"></div>
         <div class="ce-modal-footer">
             <button class="ce-btn-skip" onclick="skipCourseEvaluation()">ข้ามไปก่อน</button>
-            <button class="ce-btn-submit" id="ceSubmitBtn" onclick="submitCourseEvaluation()">✅ ส่งแบบประเมิน</button>
+            <button class="ce-btn-submit" id="ceSubmitBtn" onclick="submitCourseEvaluation()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ส่งแบบประเมิน</button>
         </div>
     </div>
 </div>
 
 <div class="error-modal" id="errorModal">
-    <h3>⚠️ เกิดข้อผิดพลาด</h3>
+    <h3><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> เกิดข้อผิดพลาด</h3>
     <p id="errorMessage">ไม่พบข้อมูลที่ต้องการ กรุณาตรวจสอบ Course ID</p>
     <button onclick="window.location.href='dashboard.html'">กลับสู่ Dashboard</button>
 </div>
 
 <!-- Not Enrolled Gate -->
 <div class="not-enrolled-gate" id="notEnrolledGate">
-    <div style="font-size:4rem;">🔒</div>
+    <div style="font-size:4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span></div>
     <h2>คุณยังไม่ได้สมัครเรียนคอร์สนี้</h2>
     <p>กรุณาสมัครเข้าเรียนก่อน เพื่อเข้าถึงเนื้อหาบทเรียน</p>
     <button class="btn-go-enroll" onclick="window.location.href='dashboard.html'">← กลับไปสมัครเรียน</button>
@@ -1668,7 +1669,7 @@ function markCompletedLessonsInList() {
             if (!el.querySelector('.lesson-done-badge')) {
                 const badge = document.createElement('span');
                 badge.className = 'lesson-done-badge';
-                badge.textContent = '✓';
+                badge.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
                 badge.style.cssText = 'color:#10b981;font-weight:700;margin-left:auto;flex-shrink:0;';
                 el.appendChild(badge);
             }
@@ -1705,7 +1706,7 @@ window.markCurrentLessonDone = async function() {
     const lessonId = `lesson_${currentLessonIndex}`;
 
     if (completedLessons.has(lessonId)) {
-        btn.textContent = '✅ บทนี้เรียนจบแล้ว';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บทนี้เรียนจบแล้ว';
         btn.style.opacity = '0.5';
         btn.style.cursor = 'default';
         return;
@@ -1741,7 +1742,7 @@ window.markCurrentLessonDone = async function() {
 
         updateProgressUI();
         renderLessonList(currentCourse.lessons); // re-render เพื่อปลดล็อกบทถัดไป + ใส่ badge เรียนจบ
-        btn.textContent = '✅ บันทึกแล้ว!';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึกแล้ว!';
         btn.style.background = 'linear-gradient(135deg,#6b7280,#4b5563)';
 
         // ── Avatar แจ้งเตือนเมื่อจบบทหรือจบคอร์ส ──
@@ -1752,8 +1753,8 @@ window.markCurrentLessonDone = async function() {
 
             let msg = '';
             if (progress >= 100) {
-                msg = `🎉 ยอดเยี่ยมมากครับ! คุณเรียนจบคอร์สนี้แล้ว! อย่าลืมทำ Quiz เพื่อทดสอบความรู้ด้วยนะครับ`;
-                btn.textContent = '🎉 เรียนจบคอร์สแล้ว!';
+                msg = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span> ยอดเยี่ยมมากครับ! คุณเรียนจบคอร์สนี้แล้ว! อย่าลืมทำ Quiz เพื่อทดสอบความรู้ด้วยนะครับ`;
+                btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span> เรียนจบคอร์สแล้ว!';
                 // เรียนจบครบทุกบทแล้ว — เช็คว่าเคยประเมินคอร์สนี้ไปหรือยัง ถ้ายังให้เปิดแบบประเมิน (ดีเลย์ไว้กันชนกับ toast ของ Avatar)
                 setTimeout(() => checkAndShowCourseEvaluation(courseId), 2500);
             } else {
@@ -1772,7 +1773,7 @@ window.markCurrentLessonDone = async function() {
     } catch(e) {
         console.error('markDone error:', e);
         completedLessons.delete(lessonId);
-        btn.textContent = '✅ เรียนจบบทนี้แล้ว';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เรียนจบบทนี้แล้ว';
         btn.disabled = false;
     }
 };
@@ -1851,7 +1852,7 @@ function showAvatarToast(msg) {
         document.body.appendChild(toast);
     }
     toast.innerHTML = `
-        <span style="font-size:1.2rem;flex-shrink:0;">🎓</span>
+        <span style="font-size:1.2rem;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span></span>
         <div style="flex:1;">${msg}
             <div style="margin-top:8px;display:flex;gap:6px;">
                 <button onclick="openAvatarTeacher();this.closest('#avatarToast').remove()"
@@ -2143,14 +2144,14 @@ function buildVoiceSettingsPanel() {
 
     panel.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <div style="font-size:0.82rem;font-weight:600;color:#c4b5fd;">🔊 ตั้งค่าเสียงอาจารย์</div>
+            <div style="font-size:0.82rem;font-weight:600;color:#c4b5fd;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span> ตั้งค่าเสียงอาจารย์</div>
             <button onclick="document.getElementById('avatarVoiceSettingsPanel')?.remove()"
                 style="width:22px;height:22px;border-radius:50%;border:none;
                 background:rgba(255,255,255,0.08);color:#a0a0ba;cursor:pointer;
                 font-size:0.8rem;display:flex;align-items:center;justify-content:center;
                 transition:all 0.2s;"
                 onmouseover="this.style.background='rgba(239,68,68,0.25)';this.style.color='#f87171'"
-                onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='#a0a0ba'">✕</button>
+                onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='#a0a0ba'"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>
 
         <div style="font-size:0.72rem;color:#7a7a90;margin-bottom:12px;line-height:1.5;">
@@ -2177,7 +2178,7 @@ function buildVoiceSettingsPanel() {
             <button onclick="applyVoiceSettings()"
                 style="flex:1;background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;
                 color:white;padding:7px;border-radius:8px;cursor:pointer;font-size:0.78rem;">
-                ✅ บันทึก
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึก
             </button>
             <button onclick="previewVoice()"
                 style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
@@ -2282,12 +2283,12 @@ async function generateImage(prompt, caption) {
 
         card.innerHTML = `
             <img src="${blobUrl}" alt="${caption}" style="border-radius:8px 8px 0 0;width:100%;">
-            <div class="img-caption">🎨 ${caption}</div>`;
+            <div class="img-caption"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> ${caption}</div>`;
         h.scrollTop = h.scrollHeight;
 
     } catch(e) {
         console.error('generateImage error:', e);
-        card.innerHTML = `<div class="img-loading" style="color:#f87171;">❌ วาดภาพไม่สำเร็จ: ${e.message}</div>`;
+        card.innerHTML = `<div class="img-loading" style="color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> วาดภาพไม่สำเร็จ: ${e.message}</div>`;
     }
 }
 
@@ -2410,7 +2411,7 @@ ${extraContext || '\n(บทเรียนนี้เป็นวิดีโ�
             if (lastMsg && lastMsg.className === 'avatar-msg-ai') {
                 const btn = document.createElement('button');
                 btn.className = 'img-gen-btn';
-                btn.innerHTML = '🎨 วาดภาพประกอบ';
+                btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> วาดภาพประกอบ';
                 btn.onclick = async () => {
                     btn.remove();
                     if (status) status.textContent = 'กำลังวาดภาพ...';
@@ -2444,16 +2445,16 @@ function addAvatarMsg(role, text, isHTML = false) {
 window.toggleAvatarVoice = function() {
     const btn = document.getElementById('avatarVoiceBtn');
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('เบราว์เซอร์ไม่รองรับ กรุณาพิมพ์แทนครับ'); return;
+        toast('เบราว์เซอร์ไม่รองรับ กรุณาพิมพ์แทนครับ', 'warning'); return;
     }
     if (avatarRecognition) { avatarRecognition.stop(); avatarRecognition = null; if (btn) btn.classList.remove('recording'); return; }
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     avatarRecognition = new SR();
     avatarRecognition.lang = 'th-TH'; avatarRecognition.interimResults = false;
-    avatarRecognition.onstart  = () => { if (btn) { btn.classList.add('recording'); btn.textContent = '🔴'; } };
+    avatarRecognition.onstart  = () => { if (btn) { btn.classList.add('recording'); btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="8"/></svg></span>'; } };
     avatarRecognition.onresult = (e) => { const t = e.results[0][0].transcript; document.getElementById('avatarInput').value = t; avatarProcessQuestion(t); };
-    avatarRecognition.onend    = () => { avatarRecognition = null; if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; } };
-    avatarRecognition.onerror  = () => { avatarRecognition = null; if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; } };
+    avatarRecognition.onend    = () => { avatarRecognition = null; if (btn) { btn.classList.remove('recording'); btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></span>'; } };
+    avatarRecognition.onerror  = () => { avatarRecognition = null; if (btn) { btn.classList.remove('recording'); btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></span>'; } };
     avatarRecognition.start();
 };
 
@@ -2466,11 +2467,11 @@ supabase.auth.onAuthStateChange((event) => {
 });
 initCourseContent().then(() => {
     const tourSteps = [
-        { title: '👋 ยินดีต้อนรับสู่ SkillNest', text: 'ทัวร์สั้นๆ นี้จะพาไปรู้จักหน้าจอเรียนคอร์สภายใน 30 วินาที กดข้ามได้ตลอดถ้าไม่ต้องการดู' },
+        { title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ยินดีต้อนรับสู่ SkillNest', text: 'ทัวร์สั้นๆ นี้จะพาไปรู้จักหน้าจอเรียนคอร์สภายใน 30 วินาที กดข้ามได้ตลอดถ้าไม่ต้องการดู' },
         { target: '#lessonList', title: 'รายการบทเรียน', text: 'บทเรียนทั้งหมดของคอร์สอยู่ตรงนี้ เรียงตามลำดับ ต้องเรียนบทก่อนหน้าให้จบก่อน ถึงจะปลดล็อกบทถัดไปได้', placement: 'right' },
         { target: '#lessonPlayer', title: 'พื้นที่เรียน', text: 'เนื้อหาบทเรียน (วิดีโอ/PDF) จะแสดงตรงนี้ ระบบจะบันทึกความคืบหน้าให้อัตโนมัติระหว่างเรียน', placement: 'bottom' },
         { target: '.lesson-tabs', title: 'แท็บต่างๆ ของบทเรียน', text: 'สลับดู "แบบทดสอบ", "การบ้าน" และ "ผลการเรียนของฉัน" ได้จากแท็บเหล่านี้ (จะโชว์เฉพาะแท็บที่มีเนื้อหาจริง)', placement: 'bottom' },
-        { target: '#avatarFab', title: '🎓 อาจารย์ AI ผู้ช่วย', text: 'ติดขัดตรงไหนกดปุ่มนี้ได้เลย ถามได้ทั้งพิมพ์และพูด อาจารย์ AI จะช่วยอธิบายเนื้อหาที่กำลังเรียนอยู่ให้', placement: 'left' },
+        { target: '#avatarFab', title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> อาจารย์ AI ผู้ช่วย', text: 'ติดขัดตรงไหนกดปุ่มนี้ได้เลย ถามได้ทั้งพิมพ์และพูด อาจารย์ AI จะช่วยอธิบายเนื้อหาที่กำลังเรียนอยู่ให้', placement: 'left' },
     ];
     SkillNestTour.autoStart(tourSteps, 'course-content');
     SkillNestTour.mountHelpButton(tourSteps, 'course-content', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
@@ -2485,7 +2486,7 @@ async function loadAvatarConfig(creatorId) {
         if (!data?.avatar_config) return;
         const cfg = data.avatar_config;
 
-        const CHARS = { professor:'🧑‍🏫',scientist:'🧑‍🔬',programmer:'🧑‍💻',doctor:'🧑‍⚕️',artist:'🧑‍🎨',chef:'🧑‍🍳' };
+        const CHARS = { professor:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',scientist:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',programmer:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',doctor:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',artist:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',chef:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>' };
         const P_PROMPTS = {
             friendly:'ตอบแบบเป็นกันเอง อบอุ่น', strict:'ตอบแบบเป็นทางการ ชัดเจน',
             funny:'ตอบแบบสนุกสนาน อารมณ์ขัน', socratic:'ถามนำให้นักเรียนคิด',
@@ -2563,8 +2564,8 @@ async function loadCourseData() {
 
         document.getElementById("courseTitle").innerText = currentCourse.title || "ไม่มีชื่อคอร์ส";
         document.title = (currentCourse.title || "คอร์สเรียน") + " - SkillNest";
-        document.getElementById("courseInstructor").innerText = "👤 " + (currentCourse.instructor || currentCourse.creator_id || "ไม่ระบุผู้สอน");
-        document.getElementById("courseCategory").innerText = "📚 " + (currentCourse.category || "ทั่วไป");
+        document.getElementById("courseInstructor").innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ' + (currentCourse.instructor || currentCourse.creator_id || "ไม่ระบุผู้สอน");
+        document.getElementById("courseCategory").innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> ' + (currentCourse.category || "ทั่วไป");
 
         if (currentCourse.lessons && Array.isArray(currentCourse.lessons) && currentCourse.lessons.length > 0) {
             renderLessonList(currentCourse.lessons);
@@ -2643,7 +2644,7 @@ function renderLessonList(lessons) {
                     </span>
                     <span class="lesson-duration">${unlocked ? (lesson.duration || 'ไม่ระบุเวลา') : 'เรียนบทก่อนหน้าให้จบก่อน'}</span>
                 </div>
-                ${isDone ? `<span class="lesson-done-badge" style="color:#10b981;font-weight:700;margin-left:auto;flex-shrink:0;">✓</span>` : ''}
+                ${isDone ? `<span class="lesson-done-badge" style="color:#10b981;font-weight:700;margin-left:auto;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></span>` : ''}
             </div>
         `;
     }).join('');
@@ -2689,7 +2690,7 @@ window.toggleSubtopicsPanel = function() {
 
 window.playLesson = function(index) {
     if (!isLessonUnlocked(index)) {
-        alert('ต้องเรียนบทก่อนหน้าให้จบก่อน ถึงจะปลดล็อกบทนี้ได้ครับ');
+        toast('ต้องเรียนบทก่อนหน้าให้จบก่อน ถึงจะปลดล็อกบทนี้ได้ครับ', 'warning');
         return;
     }
     currentLessonIndex = index;
@@ -2734,7 +2735,7 @@ window.playLesson = function(index) {
         const newLesson = currentCourse?.lessons?.[newIndex];
         if (newLesson) {
             const bubble = document.getElementById('avatarSpeech');
-            if (bubble) bubble.textContent = `ตอนนี้เปลี่ยนไปบท "${newLesson.title}" แล้วนะครับ 📖`;
+            if (bubble) bubble.innerHTML = `ตอนนี้เปลี่ยนไปบท "${newLesson.title}" แล้วนะครับ <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>`;
         }
     }
 
@@ -2743,7 +2744,7 @@ window.playLesson = function(index) {
     const btn = document.getElementById('btnMarkDone');
     if (btn) {
         const isDone = completedLessons.has(lessonId);
-        btn.textContent = isDone ? '✅ บทนี้เรียนจบแล้ว' : '✅ เรียนจบบทนี้แล้ว';
+        btn.innerHTML = isDone ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บทนี้เรียนจบแล้ว' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เรียนจบบทนี้แล้ว';
         btn.style.background = isDone
             ? 'linear-gradient(135deg,#6b7280,#4b5563)'
             : 'linear-gradient(135deg,#10b981,#059669)';
@@ -2761,7 +2762,7 @@ window.playLesson = function(index) {
     const sources = getLessonSources(lesson);
     if (!sources.videoUrl && !sources.docUrl) {
         tabsBar.style.display = 'none';
-        container.innerHTML = '<div class="loading-screen"><div>❌ ไม่พบไฟล์บทเรียน</div></div>';
+        container.innerHTML = '<div class="loading-screen"><div><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ไม่พบไฟล์บทเรียน</div></div>';
         return;
     }
 
@@ -2771,8 +2772,8 @@ window.playLesson = function(index) {
         _lessonHasTabs = true;
         _lessonContentTab = _lessonContentTab || 'video';
         tabsBar.innerHTML = `
-            <div class="lesson-content-tab ${_lessonContentTab==='video'?'active':''}" onclick="switchLessonContentTab('video')">🎥 วิดีโอ</div>
-            <div class="lesson-content-tab ${_lessonContentTab==='doc'?'active':''}" onclick="switchLessonContentTab('doc')">📄 เอกสารประกอบ</div>
+            <div class="lesson-content-tab ${_lessonContentTab==='video'?'active':''}" onclick="switchLessonContentTab('video')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ</div>
+            <div class="lesson-content-tab ${_lessonContentTab==='doc'?'active':''}" onclick="switchLessonContentTab('doc')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ</div>
         `;
         renderLessonContentTab();
     } else {
@@ -2952,12 +2953,12 @@ async function renderYouTubePlayer(container, fileUrl, title) {
             ${hasResumablePosition ? `
             <div class="video-resume-overlay" id="videoResumeOverlay">
                 <div class="video-resume-box">
-                    <div class="vr-icon">📺</div>
+                    <div class="vr-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span></div>
                     <div class="vr-title">ดูวิดีโอนี้ค้างไว้ที่ ${formatVideoTime(saved.lastPosition)}</div>
                     <div class="vr-sub">เลือกได้ว่าจะเล่นต่อจากเดิม หรือเริ่มดูใหม่ตั้งแต่ต้น</div>
                     <div class="vr-btns">
                         <button class="btn-vr-resume" onclick="resumeYouTubeFrom(${saved.lastPosition})">▶️ เล่นต่อจากเดิม</button>
-                        <button class="btn-vr-restart" onclick="restartYouTubeFromZero()">🔄 เริ่มดูใหม่ตั้งแต่ต้น</button>
+                        <button class="btn-vr-restart" onclick="restartYouTubeFromZero()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></span> เริ่มดูใหม่ตั้งแต่ต้น</button>
                     </div>
                 </div>
             </div>` : ''}
@@ -3070,7 +3071,7 @@ function renderVideoPlayer(container, fileUrl) {
             <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
                 background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
                 border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
-                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">🎬 วิดีโอ • ต้องดูให้ครบ ข้ามไม่ได้</span>
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20l-3 5H5z"/><rect x="2" y="8" width="20" height="13"/></svg></span> วิดีโอ • ต้องดูให้ครบ ข้ามไม่ได้</span>
                 <a href="${fileUrl}" download style="margin-left:auto;
                     background:rgba(59,130,246,0.5);color:white;padding:4px 10px;
                     border-radius:6px;font-size:0.75rem;text-decoration:none;">โหลด</a>
@@ -3084,12 +3085,12 @@ function renderVideoPlayer(container, fileUrl) {
             ${hasResumablePosition ? `
             <div class="video-resume-overlay" id="videoResumeOverlay">
                 <div class="video-resume-box">
-                    <div class="vr-icon">📺</div>
+                    <div class="vr-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span></div>
                     <div class="vr-title">ดูวิดีโอนี้ค้างไว้ที่ ${formatVideoTime(saved.lastPosition)}</div>
                     <div class="vr-sub">เลือกได้ว่าจะเล่นต่อจากเดิม หรือเริ่มดูใหม่ตั้งแต่ต้น</div>
                     <div class="vr-btns">
                         <button class="btn-vr-resume" onclick="resumeVideoFrom(${saved.lastPosition})">▶️ เล่นต่อจากเดิม</button>
-                        <button class="btn-vr-restart" onclick="restartVideoFromZero()">🔄 เริ่มดูใหม่ตั้งแต่ต้น</button>
+                        <button class="btn-vr-restart" onclick="restartVideoFromZero()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></span> เริ่มดูใหม่ตั้งแต่ต้น</button>
                     </div>
                 </div>
             </div>` : ''}
@@ -3283,7 +3284,7 @@ function renderImageViewer(container, fileUrl, title) {
             <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;
                 background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);
                 border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
-                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);">🖼 รูปภาพ</span>
+                <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span> รูปภาพ</span>
                 <span style="font-size:0.82rem;color:rgba(255,255,255,0.5);">— ${title}</span>
                 <a href="${fileUrl}" target="_blank" style="margin-left:auto;
                     background:rgba(255,255,255,0.1);color:white;padding:4px 10px;
@@ -3296,7 +3297,7 @@ function renderImageViewer(container, fileUrl, title) {
                 <img src="${fileUrl}" alt="${title}"
                     style="max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;
                     box-shadow:0 4px 24px rgba(0,0,0,0.5);"
-                    onerror="this.parentElement.innerHTML='<div style=\'color:#ef4444;text-align:center;\'>❌ ไม่สามารถโหลดรูปภาพได้</div>';" />
+                    onerror="this.parentElement.innerHTML='<div style=\'color:#ef4444;text-align:center;\'>⊗ ไม่สามารถโหลดรูปภาพได้</div>';" />
             </div>
         </div>
     `;
@@ -3415,7 +3416,7 @@ async function renderPDFViewer(container, fileUrl, title) {
                         transition:background 0.2s;"
                         onmouseover="this.style.background='rgba(139,92,246,0.45)'"
                         onmouseout="this.style.background='rgba(139,92,246,0.25)'">
-                        🎓 อธิบายหน้านี้
+                        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> อธิบายหน้านี้
                     </button>
                     <a href="${fileUrl}" target="_blank"
                         style="background:rgba(255,255,255,0.1);border:none;color:white;
@@ -3444,7 +3445,7 @@ async function renderPDFViewer(container, fileUrl, title) {
                 justify-content:center;color:#a0a0ba;font-size:0.9rem;
                 background:#1a1a2e;border-radius:8px;z-index:10;">
                 <div style="text-align:center;">
-                    <div style="font-size:2rem;margin-bottom:8px;">📄</div>
+                    <div style="font-size:2rem;margin-bottom:8px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span></div>
                     กำลังโหลด PDF...
                 </div>
             </div>
@@ -3674,12 +3675,12 @@ document.addEventListener('keydown', (e) => {
 
 
 function renderDocumentViewer(container, fileUrl, title, fileType) {
-    const icons = { 'ppt': '📊', 'doc': '📝', 'excel': '📈' };
+    const icons = { 'ppt': '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>', 'doc': '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>', 'excel': '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>' };
     const typeNames = { 'ppt': 'PowerPoint', 'doc': 'Word Document', 'excel': 'Excel Spreadsheet' };
 
     container.innerHTML = `
         <div class="document-viewer">
-            <div class="document-icon">${icons[fileType] || '📄'}</div>
+            <div class="document-icon">${icons[fileType] || '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>'}</div>
             <div class="document-info">
                 <h3>${title}</h3>
                 <p>${typeNames[fileType] || 'Document'}</p>
@@ -3697,7 +3698,7 @@ function renderDocumentViewer(container, fileUrl, title, fileType) {
 function renderUnsupportedFile(container, fileUrl, title, fileType) {
     container.innerHTML = `
         <div class="document-viewer">
-            <div class="document-icon">📎</div>
+            <div class="document-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span></div>
             <div class="document-info">
                 <h3>${title}</h3>
                 <p>ไฟล์ประเภท: ${fileType}</p>
@@ -3760,7 +3761,7 @@ async function loadPdfContext(fileUrl) {
         const indicator = document.getElementById('pdfContextIndicator');
         if (indicator) {
             indicator.style.display = 'flex';
-            indicator.innerHTML = `<span style="font-size:11px;color:#10b981;">📄 AI อ่าน PDF แล้ว (${pdf.numPages} หน้า)</span>`;
+            indicator.innerHTML = `<span style="font-size:11px;color:#10b981;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> AI อ่าน PDF แล้ว (${pdf.numPages} หน้า)</span>`;
         }
         console.log('✅ PDF context loaded:', fullText.length, 'chars');
     } catch(e) {
@@ -3840,10 +3841,10 @@ async function saveNoteNow() {
             updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,course_id,lesson_index' });
         if (error) throw error;
-        status.textContent = '✅ บันทึกแล้ว';
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึกแล้ว';
     } catch (e) {
         console.warn('saveNoteNow error:', e);
-        status.textContent = '❌ บันทึกไม่สำเร็จ';
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> บันทึกไม่สำเร็จ';
     }
 }
 
@@ -3881,7 +3882,7 @@ function openCourseEvaluationModal() {
 
     if (clos.length > 0) {
         html += `<div class="ce-section">
-            <div class="ce-section-title">📋 ประเมินผลลัพธ์การเรียนรู้ (CLO) — คุณบรรลุแต่ละข้อนี้มากน้อยแค่ไหน</div>
+            <div class="ce-section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> ประเมินผลลัพธ์การเรียนรู้ (CLO) — คุณบรรลุแต่ละข้อนี้มากน้อยแค่ไหน</div>
             ${clos.map(c => `
                 <div class="ce-clo-item">
                     <div class="ce-clo-statement">${c.id ? `<strong>${c.id}:</strong> ` : ''}${c.statement || ''}</div>
@@ -3891,13 +3892,13 @@ function openCourseEvaluationModal() {
     }
 
     html += `<div class="ce-section">
-        <div class="ce-section-title">🧑‍🏫 ประเมิน ${teacherName}</div>
+        <div class="ce-section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ประเมิน ${teacherName}</div>
         ${ceStarRow('teacher')}
         <textarea class="ce-textarea" id="ceTeacherFeedback" placeholder="ความคิดเห็นเพิ่มเติมถึงอาจารย์ผู้สอน (ไม่บังคับ)"></textarea>
     </div>`;
 
     html += `<div class="ce-section">
-        <div class="ce-section-title">⭐ ให้คะแนนคอร์สนี้โดยรวม</div>
+        <div class="ce-section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span> ให้คะแนนคอร์สนี้โดยรวม</div>
         ${ceStarRow('course')}
         <textarea class="ce-textarea" id="ceCourseFeedback" placeholder="ความคิดเห็นเพิ่มเติมเกี่ยวกับคอร์สนี้ (ไม่บังคับ)"></textarea>
     </div>`;
@@ -3929,15 +3930,15 @@ window.submitCourseEvaluation = async function() {
 
     const clos = currentCourse?.clo || [];
     if (clos.length > 0 && Object.keys(_ceRatings.clo).length < clos.length) {
-        alert('กรุณาให้คะแนน CLO ให้ครบทุกข้อก่อนส่งแบบประเมินครับ');
+        toast('กรุณาให้คะแนน CLO ให้ครบทุกข้อก่อนส่งแบบประเมินครับ', 'warning');
         return;
     }
     if (!_ceRatings.teacher) {
-        alert('กรุณาให้คะแนนอาจารย์ผู้สอนก่อนส่งแบบประเมินครับ');
+        toast('กรุณาให้คะแนนอาจารย์ผู้สอนก่อนส่งแบบประเมินครับ', 'warning');
         return;
     }
     if (!_ceRatings.course) {
-        alert('กรุณาให้คะแนนคอร์สโดยรวมก่อนส่งแบบประเมินครับ');
+        toast('กรุณาให้คะแนนคอร์สโดยรวมก่อนส่งแบบประเมินครับ', 'warning');
         return;
     }
 
@@ -3959,13 +3960,13 @@ window.submitCourseEvaluation = async function() {
         if (error) throw error;
 
         document.getElementById('ceModalOverlay').classList.remove('show');
-        showAvatarToast('🙏 ขอบคุณที่สละเวลาประเมินคอร์สครับ!');
+        showAvatarToast('<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-4.5-9-9c-2-3.5 0-7 3-7 2 0 3.5 1.5 4 3 .5-1.5 2-3 4-3 3 0 5 3.5 3 7-3 4.5-9 9-9 9z"/></svg></span> ขอบคุณที่สละเวลาประเมินคอร์สครับ!');
     } catch (e) {
         console.error('submitCourseEvaluation error:', e);
-        alert('เกิดข้อผิดพลาด: ' + e.message);
+        toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
     } finally {
         btn.disabled = false;
-        btn.textContent = '✅ ส่งแบบประเมิน';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ส่งแบบประเมิน';
     }
 };
 
@@ -4024,7 +4025,7 @@ async function renderResultsTab() {
         });
         const entries = Object.entries(wrongByLesson).sort((a,b) => b[1]-a[1]);
         if (entries.length) {
-            reviewTip = `💡 ลองทบทวนเพิ่มเติม: <strong>${entries[0][0]}</strong> (ตอบผิด ${entries[0][1]} ข้อ)`;
+            reviewTip = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ลองทบทวนเพิ่มเติม: <strong>${entries[0][0]}</strong> (ตอบผิด ${entries[0][1]} ข้อ)`;
         }
     }
 
@@ -4056,13 +4057,13 @@ async function renderResultsTab() {
 
     // ความคืบหน้าตามบทเรียน
     html += `<div class="res-section">
-        <div class="res-section-title">📚 ความคืบหน้าตามบทเรียน</div>
+        <div class="res-section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> ความคืบหน้าตามบทเรียน</div>
         <div class="quiz-scope-block">`;
     lessons.forEach((lesson, i) => {
         const isDone   = completedLessons.has(`lesson_${i}`);
         const unlocked = isLessonUnlocked(i);
         const iconCls  = isDone ? 'done' : unlocked ? 'pending' : 'locked';
-        const iconTxt  = isDone ? '✓' : unlocked ? (i+1) : '🔒';
+        const iconTxt  = isDone ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : unlocked ? (i+1) : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>';
         const statusTxt = isDone ? 'เรียนจบแล้ว' : unlocked ? 'ยังไม่จบ' : 'ยังไม่ปลดล็อก';
         html += `<div class="res-lesson-row">
             <div class="res-lesson-icon ${iconCls}">${iconTxt}</div>
@@ -4075,7 +4076,7 @@ async function renderResultsTab() {
     // รายละเอียด Quiz แต่ละข้อ
     if (qz && Array.isArray(qz.answers) && qz.answers.length > 0) {
         html += `<div class="res-section">
-            <div class="res-section-title">📝 รายละเอียด Quiz</div>
+            <div class="res-section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> รายละเอียด Quiz</div>
             <div class="quiz-scope-block">`;
         qz.answers.forEach(a => {
             let resultLabel, resultCls;
@@ -4084,7 +4085,7 @@ async function renderResultsTab() {
             else                    { resultLabel = `ผิด (0/${a.maxPoints})`;             resultCls = 'wrong'; }
             const answerShown = a.answerText || a.selected || (a.selectedMultiple||[]).join(', ') || '(ไม่ได้ตอบ)';
             const explanationHtml = a.explanation
-                ? `<div class="res-qa-explanation">💡 ${a.explanation}</div>`
+                ? `<div class="res-qa-explanation"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ${a.explanation}</div>`
                 : '';
             const imageHtml = a.imageUrl
                 ? `<img src="${a.imageUrl}" style="max-width:280px;max-height:180px;border-radius:8px;display:block;margin:0.5rem 0;">`
@@ -4102,7 +4103,7 @@ async function renderResultsTab() {
     // รายละเอียดการบ้าน
     if (totalHwCount > 0) {
         html += `<div class="res-section">
-            <div class="res-section-title">📋 รายละเอียดการบ้าน</div>
+            <div class="res-section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> รายละเอียดการบ้าน</div>
             <div class="quiz-scope-block">`;
         (currentCourse.homework || []).forEach((hw, idx) => {
             const sub = cachedMySubmissions.find(s => s.homework_index === idx);
@@ -4111,7 +4112,7 @@ async function renderResultsTab() {
                 badge = `<span style="color:var(--text-dim);">ยังไม่ส่ง</span>`;
             } else if (sub.status === 'graded') {
                 badge = `<span style="color:#10b981;font-weight:600;">${sub.grade}/${hw.maxScore||100}</span>`;
-                if (sub.comment) comment = `<div class="res-hw-comment">💬 ${sub.comment}</div>`;
+                if (sub.comment) comment = `<div class="res-hw-comment"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span> ${sub.comment}</div>`;
             } else {
                 badge = `<span style="color:#f59e0b;">รอตรวจ</span>`;
             }
@@ -4166,14 +4167,14 @@ async function loadHomeworkPanel() {
         const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || `บทที่ ${currentLessonIndex+1}`;
         const header = document.createElement('div');
         header.className = 'hw-scope-header';
-        header.innerHTML = `📖 การบ้านบทนี้ — ${lessonTitle}`;
+        header.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span> การบ้านบทนี้ — ${lessonTitle}`;
         container.appendChild(header);
         lessonIdx.forEach(idx => container.appendChild(buildHwCard(currentCourse.homework[idx], idx, submissionsMap, courseId, now)));
     }
     if (globalIdx.length > 0) {
         const header = document.createElement('div');
         header.className = 'hw-scope-header';
-        header.innerHTML = `📌 การบ้านรวมทั้งคอร์ส`;
+        header.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> การบ้านรวมทั้งคอร์ส`;
         container.appendChild(header);
         globalIdx.forEach(idx => container.appendChild(buildHwCard(currentCourse.homework[idx], idx, submissionsMap, courseId, now)));
     }
@@ -4192,7 +4193,7 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
             card.innerHTML = `
                 <div class="hw-card-header">
                     <div class="hw-card-title">${idx + 1}. ${hw.title}</div>
-                    <span class="hw-status-badge pending">🔒 ยังไม่เปิด</span>
+                    <span class="hw-status-badge pending"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span> ยังไม่เปิด</span>
                 </div>
                 <div class="hw-deadline">จะเปิดให้ทำวันที่ ${new Date(hw.releaseAt).toLocaleString('th-TH')}</div>
             `;
@@ -4205,12 +4206,12 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
         const isOverdue = hw.deadline && new Date(hw.deadline) < now && !isSubmitted;
 
         let statusBadge = `<span class="hw-status-badge pending">⏳ ยังไม่ส่ง${isOverdue ? ' (เกินกำหนด)' : ''}</span>`;
-        if (isGraded) statusBadge = `<span class="hw-status-badge graded">✅ ตรวจแล้ว</span>`;
-        else if (isSubmitted) statusBadge = `<span class="hw-status-badge submitted">📤 ส่งแล้ว รอตรวจ</span>`;
+        if (isGraded) statusBadge = `<span class="hw-status-badge graded"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ตรวจแล้ว</span>`;
+        else if (isSubmitted) statusBadge = `<span class="hw-status-badge submitted"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span> ส่งแล้ว รอตรวจ</span>`;
 
         const deadlineText = hw.deadline
-            ? `📅 กำหนดส่ง: ${new Date(hw.deadline).toLocaleString('th-TH')}`
-            : '📅 ไม่มีกำหนดส่ง';
+            ? `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> กำหนดส่ง: ${new Date(hw.deadline).toLocaleString('th-TH')}`
+            : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> ไม่มีกำหนดส่ง';
 
         const canSubmit = hw.submissionType === 'text' || hw.submissionType === 'both';
         const canFile = hw.submissionType === 'file' || hw.submissionType === 'both';
@@ -4222,8 +4223,8 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
         if (isGraded) {
             scoreHtml = `
                 <div class="hw-score-display">
-                    🎯 คะแนนที่ได้: <strong>${sub.grade} / ${hw.maxScore || 100}</strong>
-                    ${sub.comment ? `<div class="hw-comment-display" style="margin-top:0.5rem;">💬 ความคิดเห็นครู: ${sub.comment}</div>` : ''}
+                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> คะแนนที่ได้: <strong>${sub.grade} / ${hw.maxScore || 100}</strong>
+                    ${sub.comment ? `<div class="hw-comment-display" style="margin-top:0.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span> ความคิดเห็นครู: ${sub.comment}</div>` : ''}
                 </div>`;
         }
 
@@ -4232,7 +4233,7 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
         if (Array.isArray(hw.rubric) && hw.rubric.length > 0) {
             if (isGraded && Array.isArray(sub.rubric_scores) && sub.rubric_scores.length > 0) {
                 rubricHtml = `<div class="hw-comment-display" style="margin-top:0.5rem;">
-                    <div style="font-weight:600;margin-bottom:6px;">📊 คะแนนแยกตามหัวข้อ</div>
+                    <div style="font-weight:600;margin-bottom:6px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> คะแนนแยกตามหัวข้อ</div>
                     ${sub.rubric_scores.map(r => `
                         <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.86rem;border-top:1px solid var(--border-color);">
                             <span>${r.criterion}</span>
@@ -4241,7 +4242,7 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
                 </div>`;
             } else if (!isGraded) {
                 rubricHtml = `<div class="hw-comment-display" style="margin-top:0.5rem;background:rgba(139,92,246,0.06);border-color:rgba(139,92,246,0.2);">
-                    <div style="font-weight:600;margin-bottom:6px;">📊 เกณฑ์การให้คะแนน</div>
+                    <div style="font-weight:600;margin-bottom:6px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> เกณฑ์การให้คะแนน</div>
                     ${hw.rubric.map(r => `
                         <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.86rem;border-top:1px solid rgba(139,92,246,0.15);">
                             <span>${r.criterion}</span>
@@ -4256,30 +4257,30 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
             const autoAnswers = sub.form_answers.filter(a => a.type !== 'short_answer');
             const correctCount = autoAnswers.filter(a => a.isCorrect).length;
             const reviewCount = sub.form_answers.filter(a => a.needsReview).length;
-            submittedHtml = `<div class="hw-comment-display">📋 ส่งแบบฟอร์มแล้ว — ตอบถูก ${correctCount}/${autoAnswers.length} ข้อที่ตรวจอัตโนมัติ${reviewCount ? ` • ${reviewCount} ข้อเรียงความรอครูตรวจ` : ''}</div>`;
+            submittedHtml = `<div class="hw-comment-display"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> ส่งแบบฟอร์มแล้ว — ตอบถูก ${correctCount}/${autoAnswers.length} ข้อที่ตรวจอัตโนมัติ${reviewCount ? ` • ${reviewCount} ข้อเรียงความรอครูตรวจ` : ''}</div>`;
         } else if (isSubmitted && sub.content) {
             if (sub.submission_kind === 'code') {
-                submittedHtml = `<div class="hw-comment-display">💻 โค้ดที่ส่ง (${sub.code_language || 'code'}):<pre style="background:#0D1117;color:#E6EDF3;padding:12px;border-radius:8px;overflow-x:auto;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.5;white-space:pre;">${escapeForTextarea(sub.content)}</pre></div>`;
+                submittedHtml = `<div class="hw-comment-display"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span> โค้ดที่ส่ง (${sub.code_language || 'code'}):<pre style="background:#0D1117;color:#E6EDF3;padding:12px;border-radius:8px;overflow-x:auto;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.5;white-space:pre;">${escapeForTextarea(sub.content)}</pre></div>`;
             } else {
-                submittedHtml = `<div class="hw-comment-display">📝 งานที่ส่ง: ${sub.content}</div>`;
+                submittedHtml = `<div class="hw-comment-display"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> งานที่ส่ง: ${sub.content}</div>`;
             }
         }
         if (isSubmitted && sub.file_url) {
-            submittedHtml += `<div class="hw-comment-display">📎 ไฟล์ที่ส่ง: <a href="${sub.file_url}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
+            submittedHtml += `<div class="hw-comment-display"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ไฟล์ที่ส่ง: <a href="${sub.file_url}" target="_blank" style="color:#60a5fa;">ดูไฟล์</a></div>`;
         }
 
         let submitFormHtml = '';
         if (isOverdue) {
             // เลยกำหนดส่งแล้วและยังไม่เคยส่ง — ปิดการส่งงานเลย (บังคับ deadline จริง ไม่ใช่แค่ติดป้ายเฉยๆ)
             submitFormHtml = `<div class="hw-comment-display" style="color:#f87171;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);border-radius:8px;padding:10px 12px;margin-top:0.5rem;">
-                ⛔ เกินกำหนดส่งแล้ว ไม่สามารถส่งงานชิ้นนี้ได้อีก — หากมีเหตุผลพิเศษ กรุณาติดต่ออาจารย์ผู้สอนโดยตรง
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg></span> เกินกำหนดส่งแล้ว ไม่สามารถส่งงานชิ้นนี้ได้อีก — หากมีเหตุผลพิเศษ กรุณาติดต่ออาจารย์ผู้สอนโดยตรง
             </div>`;
         } else if (!isSubmitted) {
             if (isForm) {
                 const qCount = (hw.formQuestions || []).length;
                 submitFormHtml = `
                 <div class="hw-submit-area" id="hw-form-${idx}">
-                    <div class="alert alert-info" style="margin-bottom:0.75rem;">📋 แบบฟอร์มนี้มี ${qCount} คำถาม ทำทีละข้อแล้วกดส่งได้เลย</div>
+                    <div class="alert alert-info" style="margin-bottom:0.75rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> แบบฟอร์มนี้มี ${qCount} คำถาม ทำทีละข้อแล้วกดส่งได้เลย</div>
                     <button class="btn-submit-hw" onclick="startHomeworkForm(${idx}, '${courseId}')">
                         ▶ เริ่มทำแบบฟอร์ม
                     </button>
@@ -4289,12 +4290,12 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
                 const pyLive = codeLang === 'python' && typeof window !== 'undefined' && !!window.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
                 const modeBadge = codeLang === 'python'
                     ? (pyLive
-                        ? `<span class="ide-mode-badge live">🟢 Terminal โต้ตอบสด</span>`
-                        : `<span class="ide-mode-badge fallback">🟡 โหมด Input ล่วงหน้า</span>`)
-                    : (codeLang === 'javascript' ? `<span class="ide-mode-badge live">🟢 prompt() โต้ตอบสด</span>` : '');
+                        ? `<span class="ide-mode-badge live"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/></svg></span> Terminal โต้ตอบสด</span>`
+                        : `<span class="ide-mode-badge fallback"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/></svg></span> โหมด Input ล่วงหน้า</span>`)
+                    : (codeLang === 'javascript' ? `<span class="ide-mode-badge live"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/></svg></span> prompt() โต้ตอบสด</span>` : '');
                 const stdinBoxHtml = (codeLang === 'python' && !pyLive) ? `
                         <div class="ide-stdin-wrap">
-                            <div class="ide-stdin-label">📥 ข้อมูล Input ล่วงหน้า (เบราว์เซอร์/หน้านี้ยังไม่รองรับ terminal โต้ตอบสด — ใส่ค่าที่โปรแกรมจะถาม คนละบรรทัดตามลำดับ)</div>
+                            <div class="ide-stdin-label"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></span> ข้อมูล Input ล่วงหน้า (เบราว์เซอร์/หน้านี้ยังไม่รองรับ terminal โต้ตอบสด — ใส่ค่าที่โปรแกรมจะถาม คนละบรรทัดตามลำดับ)</div>
                             <textarea class="ide-stdin" id="ide-stdin-${idx}" spellcheck="false" placeholder="เช่น&#10;Somchai&#10;25"></textarea>
                         </div>` : '';
                 submitFormHtml = `
@@ -4313,7 +4314,7 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
                         <iframe class="ide-preview-frame" id="ide-preview-${idx}" style="display:none;" sandbox="allow-scripts"></iframe>
                     </div>
                     <button class="btn-submit-hw" onclick="submitHomework(${idx}, '${courseId}')">
-                        📤 ส่งคำตอบ (โค้ด)
+                        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span> ส่งคำตอบ (โค้ด)
                     </button>
                 </div>`;
             } else {
@@ -4322,13 +4323,13 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
                     ${canSubmit ? `<textarea placeholder="พิมพ์คำตอบ / งานของคุณที่นี่..." id="hw-text-${idx}"></textarea>` : ''}
                     ${canFile ? `
                         <div class="hw-file-upload" onclick="document.getElementById('hw-file-input-${idx}').click()">
-                            📎 คลิกเพื่อแนบไฟล์ (PDF, Word, รูปภาพ)
+                            <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> คลิกเพื่อแนบไฟล์ (PDF, Word, รูปภาพ)
                         </div>
                         <input type="file" id="hw-file-input-${idx}" style="display:none;" onchange="previewHwFile(${idx}, this)">
                         <div id="hw-file-preview-${idx}" style="font-size:0.85rem; color:#60a5fa; margin-top:0.4rem;"></div>
                     ` : ''}
                     <button class="btn-submit-hw" onclick="submitHomework(${idx}, '${courseId}')">
-                        📤 ส่งการบ้าน
+                        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span> ส่งการบ้าน
                     </button>
                 </div>`;
             }
@@ -4357,7 +4358,7 @@ function buildHwCard(hw, idx, submissionsMap, courseId, now) {
 window.previewHwFile = function(idx, input) {
     const file = input.files[0];
     if (!file) return;
-    document.getElementById(`hw-file-preview-${idx}`).textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+    document.getElementById(`hw-file-preview-${idx}`).innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
 };
 
 // ── Code IDE Runtime ──
@@ -4690,7 +4691,7 @@ window.submitHomework = async function(hwIdx, courseId) {
     if (isCode) {
         const codeEl = document.getElementById(`hw-code-${hwIdx}`);
         const codeContent = codeEl ? codeEl.value.trim() : '';
-        if (!codeContent) { alert('❌ กรุณาเขียนโค้ดก่อนส่ง'); return; }
+        if (!codeContent) { toast('กรุณาเขียนโค้ดก่อนส่ง', 'warning'); return; }
 
         const btnC = document.querySelector(`#hw-form-${hwIdx} .btn-submit-hw`);
         if (btnC) { btnC.disabled = true; btnC.textContent = '⏳ กำลังส่ง...'; }
@@ -4712,12 +4713,12 @@ window.submitHomework = async function(hwIdx, courseId) {
                 comment: ''
             });
             if (error) throw error;
-            alert('✅ ส่งคำตอบ (โค้ด) สำเร็จ!');
+            toast('ส่งคำตอบ (โค้ด) สำเร็จ!', 'success');
             await loadHomeworkPanel();
         } catch(e) {
             console.error('Submit code error:', e);
-            alert('❌ เกิดข้อผิดพลาด: ' + e.message);
-            if (btnC) { btnC.disabled = false; btnC.textContent = '📤 ส่งคำตอบ (โค้ด)'; }
+            toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+            if (btnC) { btnC.disabled = false; btnC.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span> ส่งคำตอบ (โค้ด)'; }
         }
         return;
     }
@@ -4732,7 +4733,7 @@ window.submitHomework = async function(hwIdx, courseId) {
     const file = fileInput ? fileInput.files[0] : null;
 
     if (canSubmit && !textContent && !file) {
-        alert('❌ กรุณากรอกคำตอบหรือแนบไฟล์ก่อนส่ง');
+        toast('กรุณากรอกคำตอบหรือแนบไฟล์ก่อนส่ง', 'warning');
         return;
     }
 
@@ -4771,12 +4772,12 @@ window.submitHomework = async function(hwIdx, courseId) {
 
         if (error) throw error;
 
-        alert('✅ ส่งการบ้านสำเร็จ!');
+        toast('ส่งการบ้านสำเร็จ!', 'success');
         await loadHomeworkPanel(); // refresh
     } catch(e) {
         console.error('Submit homework error:', e);
-        alert('❌ เกิดข้อผิดพลาด: ' + e.message);
-        if (btn) { btn.disabled = false; btn.textContent = '📤 ส่งการบ้าน'; }
+        toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span> ส่งการบ้าน'; }
     }
 };
 
@@ -4786,7 +4787,7 @@ let hwfState = null;
 window.startHomeworkForm = function(hwIdx, courseId) {
     const hw = currentCourse.homework[hwIdx];
     if (!hw || !Array.isArray(hw.formQuestions) || hw.formQuestions.length === 0) {
-        alert('แบบฟอร์มนี้ยังไม่มีคำถาม');
+        toast('แบบฟอร์มนี้ยังไม่มีคำถาม', 'warning');
         return;
     }
     hwfState = {
@@ -4832,7 +4833,7 @@ function renderHwFormQuestion() {
         <textarea id="cqShortAnswer" class="form-control" rows="4"
             style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
             placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
-        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">📝 คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
         nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="hwfConfirmShortAnswer()">ยืนยันคำตอบ</button>`;
     } else {
         bodyHtml = `
@@ -4844,7 +4845,7 @@ function renderHwFormQuestion() {
                 </div>`).join('')}
         </div>`;
         nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" disabled onclick="hwfNextQuestion()">
-            ${index+1 < total ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม 🎯'}
+            ${index+1 < total ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>'}
         </button>`;
     }
 
@@ -4854,7 +4855,7 @@ function renderHwFormQuestion() {
                 <div style="font-weight:600; margin-bottom:0.2rem;">${hw.title}</div>
                 <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total} • ${q.points || 1} คะแนน</div>
             </div>
-            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeHwForm()">✕ ออก</button>
+            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeHwForm()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ออก</button>
         </div>
         <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
         <div class="qm-question">${index+1}. ${q.question}</div>
@@ -4921,7 +4922,7 @@ window.hwfConfirmCheckbox = function() {
     });
 
     const btn = document.getElementById('cqBtnNext');
-    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม 🎯';
+    btn.innerHTML = index+1 < questions.length ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>';
     btn.setAttribute('onclick', 'hwfNextQuestion()');
 };
 
@@ -4940,7 +4941,7 @@ window.hwfConfirmShortAnswer = function() {
     });
 
     const btn = document.getElementById('cqBtnNext');
-    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม 🎯';
+    btn.innerHTML = index+1 < questions.length ? 'ข้อถัดไป →' : 'ส่งแบบฟอร์ม <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>';
     btn.setAttribute('onclick', 'hwfNextQuestion()');
     btn.disabled = false;
 };
@@ -4959,7 +4960,7 @@ async function showHwFormResult() {
     const { hwIdx, courseId, hw, score, maxTotal, needsReview, answers } = hwfState;
     const pct = maxTotal > 0 ? Math.round((score/maxTotal)*100) : 0;
     const scaledGrade = maxTotal > 0 ? Math.round((score / maxTotal) * (hw.maxScore || 100)) : 0;
-    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+    const emoji = pct >= 80 ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span>' : pct >= 60 ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 011.92 2.56l-2.33 8A2 2 0 0117.5 22H4a2 2 0 01-2-2v-8a2 2 0 012-2h2.76a2 2 0 001.79-1.11L12 2a3.13 3.13 0 013 3.88z"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>';
     const wrongCount = answers.filter(a => a.isCorrect === false).length;
     const reviewCount = answers.filter(a => a.needsReview).length;
 
@@ -5055,10 +5056,10 @@ function renderQuizTab() {
     let html = '';
     if (lessonQ.length > 0) {
         const lessonTitle = currentCourse?.lessons?.[currentLessonIndex]?.title || `บทที่ ${currentLessonIndex+1}`;
-        html += renderQuizScopeBlock(currentLessonIndex, lessonQ, `📖 แบบทดสอบบทนี้ — ${lessonTitle}`);
+        html += renderQuizScopeBlock(currentLessonIndex, lessonQ, `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span> แบบทดสอบบทนี้ — ${lessonTitle}`);
     }
     if (globalQ.length > 0) {
-        html += renderQuizScopeBlock(null, globalQ, `📌 แบบทดสอบรวมทั้งคอร์ส`);
+        html += renderQuizScopeBlock(null, globalQ, `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> แบบทดสอบรวมทั้งคอร์ส`);
     }
     panel.innerHTML = html;
 }
@@ -5075,7 +5076,7 @@ function renderQuizScopeBlock(scopeLessonIndex, allQuestions, title) {
         return `
         <div class="quiz-scope-block" style="opacity:0.75;">
             <div class="quiz-scope-title">${title}</div>
-            <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:0.35rem;">🔒 ยังไม่เปิดให้ทำ</p>
+            <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:0.35rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span> ยังไม่เปิดให้ทำ</p>
             ${earliest ? `<p style="color:var(--text-dim);font-size:0.82rem;">จะเปิดให้ทำวันที่ ${earliest.toLocaleString('th-TH')}</p>` : ''}
         </div>`;
     }
@@ -5103,7 +5104,7 @@ function renderQuizScopeBlock(scopeLessonIndex, allQuestions, title) {
 
     const scopeArg = scopeLessonIndex === null ? 'null' : scopeLessonIndex;
     const btnHtml = done
-        ? `<button class="btn-start-quiz-inline" disabled style="opacity:0.55;cursor:not-allowed;">✅ ทำแบบทดสอบแล้ว</button>`
+        ? `<button class="btn-start-quiz-inline" disabled style="opacity:0.55;cursor:not-allowed;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ทำแบบทดสอบแล้ว</button>`
         : `<button class="btn-start-quiz-inline" onclick="startCourseQuiz(${scopeArg})">▶️ เริ่มทำแบบทดสอบ (${questions.length} ข้อ • ${totalPoints} คะแนน)</button>`;
 
     return `
@@ -5111,7 +5112,7 @@ function renderQuizScopeBlock(scopeLessonIndex, allQuestions, title) {
         <div class="quiz-scope-title">${title}</div>
         ${scoreSummaryHtml}
         ${btnHtml}
-        ${pending.length > 0 ? `<p style="color:var(--text-dim);font-size:0.78rem;margin-top:0.6rem;">🔒 มีอีก ${pending.length} ข้อที่ยังไม่เปิดให้ทำ</p>` : ''}
+        ${pending.length > 0 ? `<p style="color:var(--text-dim);font-size:0.78rem;margin-top:0.6rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span> มีอีก ${pending.length} ข้อที่ยังไม่เปิดให้ทำ</p>` : ''}
     </div>`;
 }
 
@@ -5120,7 +5121,7 @@ window.startCourseQuiz = function(scopeLessonIndex) {
     const questions = currentCourse.quiz.filter(q => (q.lessonIndex ?? null) === scopeLessonIndex && isReleased(q));
     if (questions.length === 0) return;
     if (hasTakenQuizScope(scopeLessonIndex)) {
-        alert('คุณทำแบบทดสอบส่วนนี้ไปแล้ว\nทำได้เพียงครั้งเดียวเท่านั้น');
+        toast('คุณทำแบบทดสอบส่วนนี้ไปแล้ว ทำได้เพียงครั้งเดียวเท่านั้น', 'warning');
         return;
     }
     cqState = {
@@ -5165,7 +5166,7 @@ function renderCourseQuestion() {
         <textarea id="cqShortAnswer" class="form-control" rows="4"
             style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
             placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
-        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">📝 คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
         nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="confirmCourseShortAnswer()">ยืนยันคำตอบ</button>`;
     } else {
         // multiple_choice / true_false
@@ -5178,7 +5179,7 @@ function renderCourseQuestion() {
                 </div>`).join('')}
         </div>`;
         nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" disabled onclick="nextCourseQuestion()">
-            ${index+1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯'}
+            ${index+1 < total ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>'}
         </button>`;
     }
 
@@ -5188,7 +5189,7 @@ function renderCourseQuestion() {
                 <div style="font-weight:600; margin-bottom:0.2rem;">${currentCourse.title}</div>
                 <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total} • ${q.points || 1} คะแนน</div>
             </div>
-            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()">✕ ออก</button>
+            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ออก</button>
         </div>
         <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
         <div class="qm-question">${index+1}. ${q.question}</div>
@@ -5262,7 +5263,7 @@ window.confirmCourseCheckbox = function() {
     });
 
     const btn = document.getElementById('cqBtnNext');
-    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯';
+    btn.innerHTML = index+1 < questions.length ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>';
     btn.setAttribute('onclick', 'nextCourseQuestion()');
 };
 
@@ -5282,7 +5283,7 @@ window.confirmCourseShortAnswer = function() {
     });
 
     const btn = document.getElementById('cqBtnNext');
-    btn.textContent = index+1 < questions.length ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ 🎯';
+    btn.innerHTML = index+1 < questions.length ? 'ข้อถัดไป →' : 'ดูผลลัพธ์ <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>';
     btn.setAttribute('onclick', 'nextCourseQuestion()');
     btn.disabled = false;
 };
@@ -5327,7 +5328,7 @@ async function persistLessonQuizResult(scopeLessonIndex, newAnswers) {
 async function showCourseQuizResult() {
     const { scopeLessonIndex, score, maxTotal, needsReview, answers } = cqState;
     const pct = maxTotal > 0 ? Math.round((score/maxTotal)*100) : 0;
-    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+    const emoji = pct >= 80 ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span>' : pct >= 60 ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 011.92 2.56l-2.33 8A2 2 0 0117.5 22H4a2 2 0 01-2-2v-8a2 2 0 012-2h2.76a2 2 0 001.79-1.11L12 2a3.13 3.13 0 013 3.88z"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>';
     const msg = pct >= 80 ? 'ยอดเยี่ยมมาก!' : pct >= 60 ? 'ทำได้ดี!' : 'ทบทวนบทเรียนเพิ่มเติมได้นะ';
     const wrongCount = answers.filter(a => a.isCorrect === false).length;
 
@@ -5351,7 +5352,7 @@ async function showCourseQuizResult() {
                 <div class="qm-result-stat"><div class="qm-result-num" style="color:#f59e0b;">${answers.filter(a=>a.needsReview).length}</div><div class="qm-result-label">รอครูตรวจ</div></div>
             </div>
             <button class="btn-close-qm" onclick="closeCourseQuiz()">ปิด</button>
-            <p style="margin-top:14px;font-size:0.82rem;color:#8B92AE;">📌 ส่วนนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว${needsReview ? ' — คะแนนจะอัปเดตอีกครั้งหลังครูตรวจข้อเรียงความ' : ''}</p>
+            <p style="margin-top:14px;font-size:0.82rem;color:#8B92AE;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> ส่วนนี้ทำได้ครั้งเดียว คะแนนถูกบันทึกแล้ว${needsReview ? ' — คะแนนจะอัปเดตอีกครั้งหลังครูตรวจข้อเรียงความ' : ''}</p>
         </div>
     `;
 }
@@ -5385,7 +5386,7 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
             <rect x="20" y="18" width="40" height="6" rx="3" fill="#4f46e5"/>
             <rect x="26" y="12" width="28" height="10" rx="5" fill="#4f46e5"/>
         </svg>
-        <div class="avatar-fab-tooltip">🎓 เรียกอาจารย์ AI</div>
+        <div class="avatar-fab-tooltip"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> เรียกอาจารย์ AI</div>
     </button>
 
     <!-- Avatar Scene (ไม่บล็อก pointer events) -->
@@ -5398,7 +5399,7 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
             <div class="avatar-chat-bar"></div>
             <div class="avatar-chat-header">
                 <div class="avatar-chat-header-title">
-                    <span>🎓</span>
+                    <span><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span></span>
                     <span id="avatarHeaderName">อ. AI</span>
                     <span id="avatarCourseTag"
                         style="font-size:0.65rem;background:rgba(59,130,246,0.2);color:#93c5fd;
@@ -5422,24 +5423,24 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
             <div id="pdfContextIndicator" style="display:none;padding:5px 12px;background:rgba(16,185,129,0.1);border-bottom:1px solid rgba(16,185,129,0.2);font-size:11px;color:#10b981;"></div>
 
             <div class="avatar-speech" id="avatarSpeech">
-                สวัสดีครับ! มีคำถามอะไรไหมครับ? 😊
+                สวัสดีครับ! มีคำถามอะไรไหมครับ? <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg></span>
             </div>
 
             <div class="avatar-chat-history" id="avatarChatHistory"></div>
 
             <div class="avatar-quick-prompts">
-                <button class="avatar-quick-btn" onclick="avatarAskQuick('สรุปเนื้อหาบทนี้')">📝 สรุป</button>
-                <button class="avatar-quick-btn" onclick="avatarAskQuick('อธิบายแนวคิดหลัก')">💡 แนวคิด</button>
-                <button class="avatar-quick-btn" onclick="avatarAskQuick('ออกตัวอย่างโจทย์ให้ฝึก')">📋 โจทย์</button>
-                <button class="avatar-quick-btn" onclick="avatarAskQuick('จุดที่ควรทบทวน')">🔍 ทบทวน</button>
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('สรุปเนื้อหาบทนี้')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> สรุป</button>
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('อธิบายแนวคิดหลัก')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> แนวคิด</button>
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('ออกตัวอย่างโจทย์ให้ฝึก')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> โจทย์</button>
+                <button class="avatar-quick-btn" onclick="avatarAskQuick('จุดที่ควรทบทวน')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ทบทวน</button>
             </div>
 
             <div class="avatar-input-row">
-                <button class="avatar-voice-btn" id="avatarVoiceBtn" onclick="toggleAvatarVoice()">🎤</button>
+                <button class="avatar-voice-btn" id="avatarVoiceBtn" onclick="toggleAvatarVoice()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></span></button>
                 <input class="avatar-input" id="avatarInput"
                     placeholder="ถามอาจารย์..."
                     onkeydown="if(event.key==='Enter')sendAvatarMessage()">
-                <button class="avatar-send-btn" id="avatarSendBtn" onclick="sendAvatarMessage()">➤</button>
+                <button class="avatar-send-btn" id="avatarSendBtn" onclick="sendAvatarMessage()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></button>
             </div>
         </div>
 

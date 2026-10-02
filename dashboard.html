@@ -6,6 +6,7 @@
     <title>SkillNest - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         h1, h2, h3, .logo, .logo-mock, .course-title, .card-stat-value,
@@ -96,7 +97,7 @@
         }
 
         .search-bar::before {
-            content: "🔍";
+            content: "<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span>";
             position: absolute;
             left: 12px;
             top: 50%;
@@ -129,7 +130,7 @@
         .search-clear-btn.show { display: flex; }
 
         /* =============================================
-           🔍 SEARCH DROPDOWN
+           <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> SEARCH DROPDOWN
         ============================================= */
         .search-dropdown {
             position: absolute;
@@ -311,7 +312,7 @@
         .fav-sub { font-size: 0.67rem; color: var(--text-dim); margin-top: 1px; }
 
         /* =============================================
-           🔔 NOTIFICATION BELL SYSTEM
+           <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> NOTIFICATION BELL SYSTEM
         ============================================= */
         .notification-wrapper {
             position: relative;
@@ -834,22 +835,22 @@
             </div>
             <div class="search-bar" id="searchBarWrapper">
                 <input type="text" id="searchInput" placeholder="ค้นหาคอร์สเรียน..." autocomplete="off">
-                <button class="search-clear-btn" id="searchClearBtn" title="ล้าง">✕</button>
+                <button class="search-clear-btn" id="searchClearBtn" title="ล้าง"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
 
-                <!-- 🔍 Search Dropdown -->
+                <!-- <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> Search Dropdown -->
                 <div class="search-dropdown" id="searchDropdown">
 
                     <!-- Filter chips -->
                     <div class="search-filter-bar" id="filterBar">
                         <div class="filter-chip active" data-filter="all">ทั้งหมด</div>
                         <div class="filter-chip" data-filter="programming">💻 การเขียนโปรแกรม</div>
-                        <div class="filter-chip" data-filter="design">🎨 ดีไซน์</div>
-                        <div class="filter-chip" data-filter="business">💼 ธุรกิจ</div>
-                        <div class="filter-chip" data-filter="marketing">📣 การตลาด</div>
-                        <div class="filter-chip" data-filter="data-science">📊 Data Science</div>
+                        <div class="filter-chip" data-filter="design"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> ดีไซน์</div>
+                        <div class="filter-chip" data-filter="business"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> ธุรกิจ</div>
+                        <div class="filter-chip" data-filter="marketing"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด</div>
+                        <div class="filter-chip" data-filter="data-science"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data Science</div>
                         <div class="filter-chip" data-filter="beginner">🌱 เริ่มต้น</div>
                         <div class="filter-chip" data-filter="intermediate">⚡ ปานกลาง</div>
-                        <div class="filter-chip" data-filter="advanced">🔥 ขั้นสูง</div>
+                        <div class="filter-chip" data-filter="advanced"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s4 4 4 9a4 4 0 01-8 0c0-1 .5-2 1-3 .5 1 1 1.5 1.5 1.5C10 7 12 4 12 2z"/><path d="M8 15a4 4 0 008 0c0-3-2-5-2-5s0 3-2 4c-1-1-1-2-1-2s-3 1-3 3z"/></svg></span> ขั้นสูง</div>
                     </div>
 
                     <!-- Trending (shown when input empty) -->
@@ -857,23 +858,23 @@
                         <!-- Recent searches (dynamic) -->
                         <div id="recentSearchesBlock" style="display:none;">
                             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px;">
-                                <span class="search-section-label" style="padding:0;">🕐 ค้นหาล่าสุด</span>
+                                <span class="search-section-label" style="padding:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> ค้นหาล่าสุด</span>
                                 <button id="clearRecentBtn" style="font-size:0.72rem;color:var(--primary-blue);background:none;border:none;cursor:pointer;padding:0;">ล้างทั้งหมด</button>
                             </div>
                             <div class="recent-searches-list" id="recentSearchesList"></div>
                             <div style="height:1px;background:var(--line);margin:6px 0;"></div>
                         </div>
 
-                        <div class="search-section-label">🔥 หมวดหมู่ยอดนิยม</div>
+                        <div class="search-section-label"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s4 4 4 9a4 4 0 01-8 0c0-1 .5-2 1-3 .5 1 1 1.5 1.5 1.5C10 7 12 4 12 2z"/><path d="M8 15a4 4 0 008 0c0-3-2-5-2-5s0 3-2 4c-1-1-1-2-1-2s-3 1-3 3z"/></svg></span> หมวดหมู่ยอดนิยม</div>
                         <div class="trending-tags" id="trendingTags">
                             <span class="trending-tag" data-search="python" data-category="programming">🐍 Python</span>
                             <span class="trending-tag" data-search="javascript" data-category="programming">🟨 JavaScript</span>
                             <span class="trending-tag" data-search="java" data-category="programming">☕ Java</span>
-                            <span class="trending-tag" data-search="css" data-category="design">🎨 CSS / Design</span>
-                            <span class="trending-tag" data-search="ai" data-category="ai-ml">🤖 AI & ML</span>
-                            <span class="trending-tag" data-search="data" data-category="data-science">📊 Data Science</span>
-                            <span class="trending-tag" data-search="marketing" data-category="marketing">📣 การตลาด</span>
-                            <span class="trending-tag" data-search="excel" data-category="business">📈 Excel</span>
+                            <span class="trending-tag" data-search="css" data-category="design"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> CSS / Design</span>
+                            <span class="trending-tag" data-search="ai" data-category="ai-ml"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI & ML</span>
+                            <span class="trending-tag" data-search="data" data-category="data-science"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data Science</span>
+                            <span class="trending-tag" data-search="marketing" data-category="marketing"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด</span>
+                            <span class="trending-tag" data-search="excel" data-category="business"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span> Excel</span>
                             <span class="trending-tag" data-search="web" data-category="programming">🌐 Web Dev</span>
                             <span class="trending-tag" data-search="sql" data-category="data-science">🗄️ SQL</span>
                         </div>
@@ -881,7 +882,7 @@
                         <!-- Learner favorites (top 4 from cache) -->
                         <div id="favoritesBlock">
                             <div style="height:1px;background:var(--line);margin:4px 0 0;"></div>
-                            <div class="search-section-label" style="margin-top:4px;">⭐ คอร์สแนะนำ</div>
+                            <div class="search-section-label" style="margin-top:4px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span> คอร์สแนะนำ</div>
                             <div class="favorites-grid" id="favoritesGrid"></div>
                         </div>
                     </div>
@@ -897,23 +898,23 @@
             </div>
             <div class="nav-right">
 
-                <!-- 🔔 NOTIFICATION BELL -->
+                <!-- <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> NOTIFICATION BELL -->
                 <div class="notification-wrapper" id="notifWrapper">
-                    <button class="notification-bell-btn" id="notifBellBtn" title="การแจ้งเตือน">🔔</button>
+                    <button class="notification-bell-btn" id="notifBellBtn" title="การแจ้งเตือน"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span></button>
                     <!-- badge จะถูก inject ด้วย JS -->
                     <div class="notif-panel" id="notifPanel">
                         <div class="notif-panel-header">
-                            <h4>🔔 การแจ้งเตือน</h4>
+                            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> การแจ้งเตือน</h4>
                             <button class="notif-mark-all" id="markAllReadBtn">อ่านทั้งหมด</button>
                         </div>
                         <div class="notif-tabs">
                             <button class="notif-tab active" data-tab="all">ทั้งหมด</button>
-                            <button class="notif-tab" data-tab="course">📚 คอร์สใหม่</button>
-                            <button class="notif-tab" data-tab="homework">📋 การบ้าน</button>
+                            <button class="notif-tab" data-tab="course"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> คอร์สใหม่</button>
+                            <button class="notif-tab" data-tab="homework"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</button>
                         </div>
                         <div class="notif-list" id="notifList">
                             <div class="notif-empty">
-                                <div class="notif-empty-icon">🔔</div>
+                                <div class="notif-empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span></div>
                                 <p>กำลังโหลด...</p>
                             </div>
                         </div>
@@ -933,7 +934,7 @@
                         <span id="userName">Loading...</span>
                     </button>
                     <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="setting.html" class="dropdown-item" id="settingsItem">⚙️ ตั้งค่า & โปรไฟล์</a>
+                        <a href="setting.html" class="dropdown-item" id="settingsItem"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span> ตั้งค่า & โปรไฟล์</a>
                         <a href="manage-courses.html" class="dropdown-item teacher-only" id="manageCourseItem" style="display: none;">จัดการคอร์สของฉัน</a>
                         <a class="dropdown-item" id="logoutItem">ออกจากระบบ</a>
                     </div>
@@ -955,38 +956,38 @@
 
         <aside class="sidebar">
             <div class="sidebar-item active" id="sidebarExplore" data-page="explore" onclick="switchPage('explore')">
-                🔍 <span>ค้นหาคอร์สใหม่</span>
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> <span>ค้นหาคอร์สใหม่</span>
             </div>
             <div class="sidebar-item" id="sidebarMyCourses" data-page="my-courses" onclick="switchPage('my-courses')">
-                📚 <span>คอร์สของฉัน</span>
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> <span>คอร์สของฉัน</span>
             </div>
             <div class="sidebar-item teacher-only" id="sidebarCreateCourse" data-page="create" onclick="window.location.href='create-course.html'" style="display: none;">
-                💡 <span>เพิ่มคอร์ส</span>
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> <span>เพิ่มคอร์ส</span>
             </div>
             <div class="sidebar-item teacher-only" id="sidebarHomework" onclick="window.location.href='homework.html'" style="display: none;">
-                📋 <span>ตรวจการบ้าน</span>
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> <span>ตรวจการบ้าน</span>
             </div>
             <div class="sidebar-item teacher-only" id="sidebarAnalytics" onclick="window.location.href='teacher-analytics.html'" style="display: none;">
-                📊 <span>Analytics</span>
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> <span>Analytics</span>
             </div>
             <div class="sidebar-item student-only" id="sidebarMyQuizzes" data-page="my-quizzes" onclick="window.location.href='my-quizzes.html'" style="display: none;">
-                📝 <span>แบบฝึกหัดของฉัน</span>
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> <span>แบบฝึกหัดของฉัน</span>
             </div>
             <div class="sidebar-item student-only" id="sidebarLearning" data-page="progress" onclick="window.location.href='learning.html'" style="display: none;">
-                📊 <span>ผลการเรียนรู้</span>
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> <span>ผลการเรียนรู้</span>
             </div>
         </aside>
 
         <main class="main-content">
             <div class="welcome-banner">
-                <h1 id="welcomeMessage">ยินดีต้อนรับกลับ, นักเรียนรู้ 🚀</h1>
+                <h1 id="welcomeMessage">ยินดีต้อนรับกลับ, นักเรียนรู้</h1>
                 <p>AI Tutor ของเราพร้อมช่วยเหลือคุณเรียนรู้สิ่งใหม่ๆแล้ว</p>
             </div>
 
             <div class="section-header">
-                <span id="sectionHeaderText">🔍 ค้นหาคอร์สใหม่</span>
+                <span id="sectionHeaderText"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ค้นหาคอร์สใหม่</span>
                 <button class="btn-create-course teacher-only" id="headerCreateCourseBtn" onclick="window.location.href='create-course.html'" style="display: none;">
-                    ➕ สร้างคอร์สใหม่
+                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span> สร้างคอร์สใหม่
                 </button>
             </div>
             <div id="courseGrid" class="course-grid">
@@ -1003,16 +1004,16 @@
     <!-- Enrollment Modal -->
     <div id="enrollModalOverlay" class="enroll-modal-overlay">
         <div class="enroll-modal">
-            <div id="enrollModalThumb" class="enroll-modal-thumb">📚</div>
+            <div id="enrollModalThumb" class="enroll-modal-thumb"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span></div>
             <div class="enroll-modal-body">
                 <h2 id="enrollModalTitle">ชื่อคอร์ส</h2>
                 <div class="enroll-modal-meta">
                     <span class="enroll-badge" id="enrollModalCategory">หมวดหมู่</span>
                     <span class="enroll-badge" id="enrollModalLevel">ระดับ</span>
-                    <span class="enroll-badge" id="enrollModalInstructor">👤 ผู้สอน</span>
+                    <span class="enroll-badge" id="enrollModalInstructor"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ผู้สอน</span>
                 </div>
                 <div class="enroll-modal-desc" id="enrollModalDesc"></div>
-                <div class="enroll-modal-lessons" id="enrollModalLessons">📖 0 บทเรียน</div>
+                <div class="enroll-modal-lessons" id="enrollModalLessons"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span> 0 บทเรียน</div>
                 <div class="enroll-modal-actions" id="enrollModalActions"></div>
             </div>
         </div>
@@ -1027,7 +1028,7 @@
         let activeTab = 'all';
 
         // =============================================
-        // 🎨 Utility maps
+        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> Utility maps
         // =============================================
         const courseColors = [
             'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
@@ -1045,7 +1046,7 @@
         const levelMap = { 'beginner': 'เริ่มต้น', 'intermediate': 'ปานกลาง', 'advanced': 'ขั้นสูง' };
 
         // =============================================
-        // 🔔 NOTIFICATION SYSTEM
+        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> NOTIFICATION SYSTEM
         // =============================================
 
         /**
@@ -1120,14 +1121,14 @@
             updateBadge(unreadCount);
 
             if (filtered.length === 0) {
-                list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon">🎉</div><p>ไม่มีการแจ้งเตือน</p></div>`;
+                list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span></div><p>ไม่มีการแจ้งเตือน</p></div>`;
                 return;
             }
 
             list.innerHTML = filtered.map(n => {
                 const isUnread = !(n.read_by || []).includes(userId);
                 const timeAgo = formatTimeAgo(n.created_at);
-                const icon = n.type === 'course' ? '📚' : n.type === 'homework' ? '📋' : '🔔';
+                const icon = n.type === 'course' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>' : n.type === 'homework' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>';
                 const iconClass = n.type === 'course' ? 'course' : n.type === 'homework' ? 'homework' : 'system';
                 return `
                     <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${n.id}" onclick="handleNotifClick('${n.id}', '${n.link || ''}')">
@@ -1191,7 +1192,8 @@
             if (!currentUser) return;
             const toDismiss = allNotifications.filter(n => !(n.dismissed_by || []).includes(currentUser.id));
             if (toDismiss.length === 0) return;
-            if (!confirm('ต้องการล้างการแจ้งเตือนทั้งหมดหรือไม่?')) return;
+            const ok = await confirmDialog('ต้องการล้างการแจ้งเตือนทั้งหมดหรือไม่?', { title: 'ล้างการแจ้งเตือน', confirmText: 'ล้างทั้งหมด' });
+            if (!ok) return;
             try {
                 // ล้างเฉพาะฝั่งเรา (ใช้ dismissed_by แยกจาก read_by เพราะ notification เป็นแถวที่ผู้ใช้หลายคนเห็นร่วมกัน
                 // ลบทิ้งจริงจะกระทบคนอื่นด้วย จึงซ่อนไว้เฉพาะฝั่งเราแทน)
@@ -1236,7 +1238,7 @@
         function showToast(notif) {
             const container = document.getElementById('toastContainer');
             if (!container) return;
-            const icon = notif.type === 'course' ? '📚' : notif.type === 'homework' ? '📋' : '🔔';
+            const icon = notif.type === 'course' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>' : notif.type === 'homework' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>';
             const toastEl = document.createElement('div');
             toastEl.className = `toast ${notif.type}`;
             toastEl.innerHTML = `
@@ -1257,7 +1259,7 @@
         }
 
         // =============================================
-        // 🕐 Time Formatter
+        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> Time Formatter
         // =============================================
         function formatTimeAgo(timestamp) {
             if (!timestamp) return '';
@@ -1277,7 +1279,7 @@
         }
 
         // =============================================
-        // 📚 COURSE LOADING
+        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> COURSE LOADING
         // =============================================
         async function loadCourses() {
             const courseGrid = document.getElementById('courseGrid');
@@ -1287,7 +1289,7 @@
                     .select('*')
                     .order('created_at', { ascending: false });
                 if (coursesErr || !querySnapshot || querySnapshot.length === 0) {
-                    courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📚</div><h3>ยังไม่มีคอร์สเรียน</h3><p>เริ่มต้นสร้างคอร์สแรกของคุณเลย!</p></div>`;
+                    courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span></div><h3>ยังไม่มีคอร์สเรียน</h3><p>เริ่มต้นสร้างคอร์สแรกของคุณเลย!</p></div>`;
                     return;
                 }
                 courseGrid.innerHTML = '';
@@ -1343,11 +1345,11 @@
                     renderFavoritesGrid();
                 }
                 if (visibleCount === 0) {
-                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">🎉</div><h3>คุณสมัครเรียนครบทุกคอร์สแล้ว!</h3><p>ไปที่ "คอร์สของฉัน" เพื่อเริ่มเรียน</p></div>`;
+                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span></div><h3>คุณสมัครเรียนครบทุกคอร์สแล้ว!</h3><p>ไปที่ "คอร์สของฉัน" เพื่อเริ่มเรียน</p></div>`;
                 }
             } catch(error) {
                 console.error('Error loading courses:', error);
-                courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3><p>ไม่สามารถโหลดคอร์สได้ กรุณาลองใหม่อีกครั้ง</p></div>`;
+                courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div><h3>เกิดข้อผิดพลาด</h3><p>ไม่สามารถโหลดคอร์สได้ กรุณาลองใหม่อีกครั้ง</p></div>`;
             }
         }
 
@@ -1373,7 +1375,7 @@
                     window._currentUserType = userType; // เก็บไว้ใช้ globally
                     const profileImageUrl = userData.profile_picture || null;
                     document.getElementById('userName').textContent = firstName;
-                    document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName} 🚀`;
+                    document.getElementById('welcomeMessage').textContent = `ยินดีต้อนรับกลับ, ${firstName}`;
                     const profileIconContainer = document.getElementById('profileIconContainer');
                     if (profileImageUrl && profileIconContainer) {
                         const img = document.createElement('img');
@@ -1423,7 +1425,7 @@
 
         initDashboard().then(() => {
             const commonSteps = [
-                { title: '👋 ยินดีต้อนรับสู่ SkillNest', text: 'ทัวร์สั้นๆ นี้จะพาไปรู้จักหน้า Dashboard ภายใน 30 วินาที กดข้ามได้ตลอดถ้าไม่ต้องการดู' },
+                { title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ยินดีต้อนรับสู่ SkillNest', text: 'ทัวร์สั้นๆ นี้จะพาไปรู้จักหน้า Dashboard ภายใน 30 วินาที กดข้ามได้ตลอดถ้าไม่ต้องการดู' },
                 { target: '#searchBarWrapper', title: 'ค้นหาคอร์ส', text: 'พิมพ์ค้นหาคอร์สที่สนใจได้ตรงนี้ มีแท็กยอดนิยมและประวัติการค้นหาล่าสุดให้เลือกด้วย', placement: 'bottom' },
                 { target: '.sidebar', title: 'เมนูหลัก', text: 'สลับไปมาระหว่างหน้าต่างๆ ได้จากเมนูด้านข้างนี้ เมนูจะปรับตามบทบาทของคุณ (อาจารย์/นักเรียน)', placement: 'right' },
                 { target: '#notifWrapper', title: 'การแจ้งเตือน', text: 'คอร์สใหม่ การบ้านใหม่ หรือผลตรวจงาน จะแจ้งเตือนที่นี่', placement: 'bottom' },
@@ -1447,7 +1449,7 @@
         document.getElementById('logoutItem').addEventListener('click', async () => {
             if (unsubscribeNotif) unsubscribeNotif();
             try { await supabase.auth.signOut(); window.location.href = '../login-page/login.html'; }
-            catch(e) { alert('เกิดข้อผิดพลาดในการออกจากระบบ'); }
+            catch(e) { toast('เกิดข้อผิดพลาดในการออกจากระบบ', 'error'); }
         });
 
         // =============================================
@@ -1461,7 +1463,7 @@
             const activeEl = document.getElementById(page === 'explore' ? 'sidebarExplore' : 'sidebarMyCourses');
             if (activeEl) activeEl.classList.add('active');
             const headerText = document.getElementById('sectionHeaderText');
-            if (headerText) headerText.textContent = page === 'explore' ? '🔍 ค้นหาคอร์สใหม่' : '📚 คอร์สของฉัน';
+            if (headerText) headerText.innerHTML = page === 'explore' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ค้นหาคอร์สใหม่' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> คอร์สของฉัน';
             const si = document.getElementById('searchInput');
             if (si) si.value = '';
             searchClearBtn.classList.remove('show');
@@ -1500,7 +1502,7 @@
                     const msg = isTeacher
                         ? '<h3>ยังไม่มีคอร์ส</h3><p>สร้างคอร์สแรกของคุณได้เลย!</p>'
                         : '<h3>ยังไม่มีคอร์สที่สมัคร</h3><p>ไปที่ "ค้นหาคอร์สใหม่" เพื่อสมัครเรียน</p>';
-                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div>${msg}</div>`;
+                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12v6a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><path d="M22 12l-10 5L2 12"/><path d="M2 12l5.45-6.32A2 2 0 018.96 5h6.08a2 2 0 011.51.68L22 12"/></svg></span></div>${msg}</div>`;
                     return;
                 }
 
@@ -1552,10 +1554,10 @@
                             <div style="display:flex;gap:6px;">
                                 ${enterBtn(course.id)}
                                 <button onclick="event.stopPropagation();window.location.href='edit-course.html?id=${course.id}'"
-                                    style="padding:0.6rem 0.8rem;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#c4b5fd;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;">✏️ แก้ไข</button>
+                                    style="padding:0.6rem 0.8rem;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#c4b5fd;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แก้ไข</button>
                             </div>`;
                         await buildCourseCard(course,
-                            `<div style="position:absolute;top:8px;left:8px;background:rgba(139,92,246,0.85);color:white;font-size:0.7rem;padding:2px 8px;border-radius:99px;font-weight:600;">👨‍🏫 คอร์สของฉัน</div>`,
+                            `<div style="position:absolute;top:8px;left:8px;background:rgba(139,92,246,0.85);color:white;font-size:0.7rem;padding:2px 8px;border-radius:99px;font-weight:600;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>‍<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span> คอร์สของฉัน</div>`,
                             manageBtn);
                     }
                 }
@@ -1573,7 +1575,7 @@
                             const { data: course } = await supabase.from('courses').select('*').eq('id', courseId).single();
                             if (!course) continue;
                             await buildCourseCard(course,
-                                `<div class="enrolled-tag">✅ สมัครแล้ว</div>`,
+                                `<div class="enrolled-tag"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สมัครแล้ว</div>`,
                                 enterBtn(courseId));
                         } catch(e) {}
                     }
@@ -1581,12 +1583,12 @@
 
             } catch(e) {
                 console.error(e);
-                courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>เกิดข้อผิดพลาด</h3></div>`;
+                courseGrid.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div><h3>เกิดข้อผิดพลาด</h3></div>`;
             }
         }
 
         // =============================================
-        // 🔍 ENHANCED SEARCH SYSTEM (Coursera-style)
+        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ENHANCED SEARCH SYSTEM (Coursera-style)
         // =============================================
         const searchInput    = document.getElementById('searchInput');
         const searchDropdown = document.getElementById('searchDropdown');
@@ -1635,9 +1637,9 @@
             block.style.display = 'block';
             list.innerHTML = recent.map(r => `
                 <div class="recent-item" onclick="triggerRecentSearch('${escapeHtml(r)}')">
-                    <span style="opacity:0.5;font-size:0.85rem;">🕐</span>
+                    <span style="opacity:0.5;font-size:0.85rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span></span>
                     <span>${escapeHtml(r)}</span>
-                    <span class="recent-item-remove" onclick="event.stopPropagation();removeRecentSearch_btn('${escapeHtml(r)}')">✕</span>
+                    <span class="recent-item-remove" onclick="event.stopPropagation();removeRecentSearch_btn('${escapeHtml(r)}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></span>
                 </div>`).join('');
         }
 
@@ -1670,8 +1672,8 @@
                 return;
             }
             const categoryMapLocal = {
-                'programming':'💻 โปรแกรม','design':'🎨 ดีไซน์','business':'💼 ธุรกิจ',
-                'marketing':'📣 การตลาด','data-science':'📊 Data','ai-ml':'🤖 AI','other':'📌 อื่นๆ'
+                'programming':'💻 โปรแกรม','design':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> ดีไซน์','business':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> ธุรกิจ',
+                'marketing':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด','data-science':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data','ai-ml':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI','other':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> อื่นๆ'
             };
             grid.innerHTML = top4.map(c => {
                 const thumbStyle = c.thumbnail ? `background-image:url('${c.thumbnail}');` : `background:${c.color};`;
@@ -1808,15 +1810,15 @@
                 : `ผลการค้นหา "${query}"`;
 
             const categoryMapLocal = {
-                'programming':'💻 การเขียนโปรแกรม','design':'🎨 ดีไซน์','business':'💼 ธุรกิจ',
-                'marketing':'📣 การตลาด','data-science':'📊 Data Science','ai-ml':'🤖 AI/ML','other':'📌 อื่นๆ'
+                'programming':'💻 การเขียนโปรแกรม','design':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> ดีไซน์','business':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> ธุรกิจ',
+                'marketing':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด','data-science':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data Science','ai-ml':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI/ML','other':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> อื่นๆ'
             };
-            const levelMapLocal = { 'beginner':'🌱 เริ่มต้น','intermediate':'⚡ ปานกลาง','advanced':'🔥 ขั้นสูง' };
+            const levelMapLocal = { 'beginner':'🌱 เริ่มต้น','intermediate':'⚡ ปานกลาง','advanced':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s4 4 4 9a4 4 0 01-8 0c0-1 .5-2 1-3 .5 1 1 1.5 1.5 1.5C10 7 12 4 12 2z"/><path d="M8 15a4 4 0 008 0c0-3-2-5-2-5s0 3-2 4c-1-1-1-2-1-2s-3 1-3 3z"/></svg></span> ขั้นสูง' };
 
             if (matches.length === 0) {
                 resultsList.innerHTML = `
                     <div class="search-no-result">
-                        🔍 ไม่พบคอร์สที่ตรงกับ "<strong>${escapeHtml(query)}</strong>"<br>
+                        <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ไม่พบคอร์สที่ตรงกับ "<strong>${escapeHtml(query)}</strong>"<br>
                         <span style="font-size:0.75rem;margin-top:4px;display:block;">ลองเปลี่ยนตัวกรองหรือคำค้นหา</span>
                     </div>`;
                 return;
@@ -1902,7 +1904,7 @@
                 const d = document.createElement('div');
                 d.id = 'no-result-message';
                 d.style.cssText = 'text-align:center;width:100%;padding:40px;grid-column:1/-1;color:var(--text-dim);';
-                d.innerHTML = `<div style="font-size:3rem;margin-bottom:10px;">🔍</div><h3>ไม่พบคอร์สที่ค้นหา</h3><p>ลองเปลี่ยนตัวกรองหรือคำค้นหาใหม่</p>`;
+                d.innerHTML = `<div style="font-size:3rem;margin-bottom:10px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span></div><h3>ไม่พบคอร์สที่ค้นหา</h3><p>ลองเปลี่ยนตัวกรองหรือคำค้นหาใหม่</p>`;
                 courseGrid.appendChild(d);
             }
         }
@@ -1930,7 +1932,7 @@
             if (img && !img.querySelector('.enrolled-tag')) {
                 const tag = document.createElement('div');
                 tag.className = 'enrolled-tag';
-                tag.textContent = '✅ สมัครแล้ว';
+                tag.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สมัครแล้ว';
                 img.appendChild(tag);
             }
         }
@@ -1950,15 +1952,15 @@
             document.getElementById('enrollModalTitle').textContent = course.title;
             document.getElementById('enrollModalCategory').textContent = categoryMap[course.category] || course.category || 'ทั่วไป';
             document.getElementById('enrollModalLevel').textContent = levelMap[course.level] || course.level || '';
-            document.getElementById('enrollModalInstructor').textContent = '👤 ' + (creatorName || 'ไม่ระบุ');
+            document.getElementById('enrollModalInstructor').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ' + (creatorName || 'ไม่ระบุ');
             document.getElementById('enrollModalDesc').textContent = course.description || '';
             const lessonCount = course.lessons ? course.lessons.length : 0;
-            document.getElementById('enrollModalLessons').innerHTML = `📖 ${lessonCount} บทเรียน${course.quiz?.length > 0 ? ` &nbsp;•&nbsp; 📝 ${course.quiz.length} แบบทดสอบ` : ''}`;
+            document.getElementById('enrollModalLessons').innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span> ${lessonCount} บทเรียน${course.quiz?.length > 0 ? ` &nbsp;•&nbsp; <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ${course.quiz.length} แบบทดสอบ` : ''}`;
             const actionsEl  = document.getElementById('enrollModalActions');
             const isOwner    = window._createdCourseIds?.has(courseId);
             actionsEl.innerHTML = (isEnrolled || isOwner)
                 ? `<button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน${isOwner && !isEnrolled ? ' (คอร์สของฉัน)' : ''}</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`
-                : `<button class="btn-enroll" onclick="enrollCourse('${courseId}')">🎓 สมัครเข้าเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
+                : `<button class="btn-enroll" onclick="enrollCourse('${courseId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> สมัครเข้าเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
             document.getElementById('enrollModalOverlay').classList.add('show');
         };
 
@@ -1968,7 +1970,7 @@
         };
 
         window.enrollCourse = async function(courseId) {
-            if (!currentUser) { alert('กรุณาล็อกอินก่อน'); return; }
+            if (!currentUser) { toast('กรุณาล็อกอินก่อน', 'warning'); return; }
 
             // ครูไม่สามารถสมัครคอร์สที่ตัวเองสร้างได้
             if (window._createdCourseIds?.has(courseId)) {
@@ -1985,8 +1987,8 @@
                 markCardAsEnrolled(courseId);
                 const actionsEl = document.getElementById('enrollModalActions');
                 actionsEl.innerHTML = `<button class="btn-go-course" onclick="goToCourse('${courseId}')">▶️ เข้าสู่บทเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
-                document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend', '<p style="color:var(--success);font-size:0.9rem;margin-top:0.3rem;">✅ สมัครเรียนสำเร็จแล้ว!</p>');
-            } catch(e) { alert('❌ เกิดข้อผิดพลาดในการสมัคร: ' + e.message); }
+                document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend', '<p style="color:var(--success);font-size:0.9rem;margin-top:0.3rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สมัครเรียนสำเร็จแล้ว!</p>');
+            } catch(e) { toast('เกิดข้อผิดพลาดในการสมัคร: ' + e.message, 'error'); }
         };
 
         window.goToCourse = function(courseId) { window.location.href = `course-content.html?id=${courseId}`; };

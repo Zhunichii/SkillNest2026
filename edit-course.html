@@ -6,6 +6,7 @@
     <title>แก้ไขคอร์ส - SkillNest</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
+    <script src="ui-feedback.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
         body {
@@ -283,22 +284,22 @@
 <div class="container">
 
     <div class="top-bar">
-        <div class="page-title">✏️ แก้ไขคอร์ส <span id="pageCourseTitle">...</span></div>
+        <div class="page-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แก้ไขคอร์ส <span id="pageCourseTitle">...</span></div>
         <a href="manage-courses.html" class="btn-back">← กลับ</a>
     </div>
 
     <!-- Tab nav -->
     <div class="edit-tabs">
-        <div class="edit-tab active" onclick="switchEditTab('info',this)">📝 ข้อมูลคอร์ส</div>
-        <div class="edit-tab" onclick="switchEditTab('lessons',this)">📚 บทเรียน</div>
-        <div class="edit-tab" onclick="switchEditTab('quiz',this)">🧠 แบบทดสอบ</div>
-        <div class="edit-tab" onclick="switchEditTab('homework',this)">📋 การบ้าน</div>
+        <div class="edit-tab active" onclick="switchEditTab('info',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ข้อมูลคอร์ส</div>
+        <div class="edit-tab" onclick="switchEditTab('lessons',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> บทเรียน</div>
+        <div class="edit-tab" onclick="switchEditTab('quiz',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 01-4.96.44A2.5 2.5 0 014 17.5v-1.26a2.5 2.5 0 01-1-4.44 2.5 2.5 0 011-4.44V6.5A2.5 2.5 0 017 4a2.5 2.5 0 012.5-2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44A2.5 2.5 0 0020 17.5v-1.26a2.5 2.5 0 001-4.44 2.5 2.5 0 00-1-4.44V6.5A2.5 2.5 0 0017 4a2.5 2.5 0 00-2.5-2z"/></svg></span> แบบทดสอบ</div>
+        <div class="edit-tab" onclick="switchEditTab('homework',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</div>
     </div>
 
     <!-- TAB 1: ข้อมูลคอร์ส -->
     <div id="editTabInfo" class="edit-tab-panel active">
         <div class="section">
-            <h2 class="section-title">📝 ข้อมูลพื้นฐาน</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ข้อมูลพื้นฐาน</h2>
             <div class="form-group">
                 <label>ชื่อคอร์ส <span class="required">*</span></label>
                 <input type="text" id="courseTitle" class="form-control" placeholder="ชื่อคอร์ส">
@@ -309,11 +310,11 @@
             </div>
 
             <div class="ai-gen-area">
-                <div class="ai-gen-title">✨ มีไฟล์คำอธิบายรายวิชาอยู่แล้ว? ให้ AI ดึงมาใส่ให้</div>
+                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> มีไฟล์คำอธิบายรายวิชาอยู่แล้ว? ให้ AI ดึงมาใส่ให้</div>
                 <div class="form-group" style="margin-bottom:0.75rem;">
                     <label>อัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ — ไม่บังคับ)</label>
                     <div class="file-upload-area" onclick="document.getElementById('courseDescFileInput').click()">
-                        <div class="file-upload-icon">📤</div>
+                        <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p>คลิกเพื่ออัปโหลดไฟล์คำอธิบายรายวิชา</p>
                         <small style="color:var(--text-dim);">รองรับ PDF และรูปภาพ (JPG, PNG)</small>
                     </div>
@@ -355,10 +356,10 @@
             </div>
         </div>
         <div class="section">
-            <h2 class="section-title">🖼️ รูปปกคอร์ส</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span> รูปปกคอร์ส</h2>
             <div id="currentThumbWrap"></div>
             <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
-                <div class="file-upload-icon">📷</div>
+                <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span></div>
                 <p id="thumbUploadLabel">คลิกเพื่อเปลี่ยนรูปปก</p>
                 <small style="color:var(--text-dim);">รองรับ JPG, PNG, WEBP</small>
             </div>
@@ -370,9 +371,9 @@
     <!-- TAB 2: บทเรียน -->
     <div id="editTabLessons" class="edit-tab-panel">
         <div class="section">
-            <h2 class="section-title">📚 บทเรียนทั้งหมด</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> บทเรียนทั้งหมด</h2>
             <div class="alert-info">
-                💡 บทเรียนที่มีอยู่แล้ว (สีน้ำเงิน) ไฟล์เดิมจะถูกเก็บไว้เว้นแต่คุณเลือกไฟล์ใหม่แทน
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> บทเรียนที่มีอยู่แล้ว (สีน้ำเงิน) ไฟล์เดิมจะถูกเก็บไว้เว้นแต่คุณเลือกไฟล์ใหม่แทน
             </div>
             <div id="lessonsList"></div>
             <button class="btn btn-outline" onclick="addLesson()" style="margin-top:0.5rem;">
@@ -384,9 +385,9 @@
     <!-- TAB 3: Quiz -->
     <div id="editTabQuiz" class="edit-tab-panel">
         <div class="section">
-            <h2 class="section-title">🧠 แบบทดสอบ (Quiz)</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 01-4.96.44A2.5 2.5 0 014 17.5v-1.26a2.5 2.5 0 01-1-4.44 2.5 2.5 0 011-4.44V6.5A2.5 2.5 0 017 4a2.5 2.5 0 012.5-2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44A2.5 2.5 0 0020 17.5v-1.26a2.5 2.5 0 001-4.44 2.5 2.5 0 00-1-4.44V6.5A2.5 2.5 0 0017 4a2.5 2.5 0 00-2.5-2z"/></svg></span> แบบทดสอบ (Quiz)</h2>
             <div class="ai-gen-area">
-                <div class="ai-gen-title">✨ สร้าง Quiz ด้วย AI</div>
+                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> สร้าง Quiz ด้วย AI</div>
                 <div class="ai-gen-row">
                     <div class="form-group">
                         <label>หัวข้อที่ต้องการสร้าง Quiz</label>
@@ -419,7 +420,7 @@
                     </div>
                 </div>
                 <div style="display:flex; gap:0.75rem; align-items:center; margin-top:0.75rem;">
-                    <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()">✨ สร้างด้วย AI</button>
+                    <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> สร้างด้วย AI</button>
                     <small style="color:var(--text-dim);">ใช้ Claude AI สร้างโจทย์อัตโนมัติ</small>
                 </div>
                 <div id="aiLoadingText" class="ai-loading-text">⏳ AI กำลังสร้างแบบทดสอบ...</div>
@@ -432,16 +433,16 @@
     <!-- TAB 4: Homework -->
     <div id="editTabHomework" class="edit-tab-panel">
         <div class="section">
-            <h2 class="section-title">📋 การบ้าน (Homework)</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน (Homework)</h2>
 
             <div class="ai-gen-area">
-                <div class="ai-gen-title">✨ ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ
+                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ
                     <button type="button" class="hw-help-btn" onclick="openHwHelpModal()" title="ตัวอย่างไฟล์ที่แนบได้ถูกต้อง" aria-label="ดูตัวอย่างการแนบไฟล์ที่ถูกต้อง">?</button>
                 </div>
                 <div class="form-group">
                     <label>อัปโหลดไฟล์ (PDF หรือรูปภาพโจทย์)</label>
                     <div class="file-upload-area" onclick="document.getElementById('hwSourceFileInput').click()">
-                        <div class="file-upload-icon">📤</div>
+                        <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p>คลิกเพื่ออัปโหลดไฟล์การบ้าน</p>
                         <small style="color:var(--text-dim);">รองรับ PDF, Word (.docx) และรูปภาพ (JPG, PNG)</small>
                     </div>
@@ -453,7 +454,7 @@
                     <textarea id="hwSourceText" class="form-control" rows="4" placeholder="วางข้อความการบ้าน/โจทย์ที่นี่ (ถ้าไม่มีไฟล์)"></textarea>
                 </div>
                 <div style="display:flex; gap:0.75rem; align-items:center;">
-                    <button class="btn btn-ai" id="btnExtractHomework" onclick="extractHomeworkWithAI()">🤖 ให้ AI แตกเป็นข้อๆ</button>
+                    <button class="btn btn-ai" id="btnExtractHomework" onclick="extractHomeworkWithAI()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI แตกเป็นข้อๆ</button>
                     <small style="color:var(--text-dim);">AI จะเติมลงฟอร์มการบ้านด้านล่างให้ แก้ไขต่อได้ตามต้องการ</small>
                 </div>
                 <div id="hwExtractStatus" class="ai-loading-text"></div>
@@ -466,7 +467,7 @@
 
     <!-- Save button (always visible) -->
     <div style="text-align:center; margin-top:1rem; margin-bottom:3rem;">
-        <button class="btn btn-save" onclick="saveCourse()">💾 บันทึกการแก้ไข</button>
+        <button class="btn btn-save" onclick="saveCourse()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></span> บันทึกการแก้ไข</button>
     </div>
 
 </div>
@@ -488,7 +489,7 @@
         <p class="hw-help-sub">จัดไฟล์ตามแนวทางนี้ก่อนอัปโหลด เพื่อให้ AI แตกข้อและดึงเนื้อหาได้แม่นยำขึ้น</p>
 
         <div class="hw-help-section hw-help-good">
-            <h4>✓ ควรทำ</h4>
+            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ควรทำ</h4>
             <ul>
                 <li>ขึ้นต้นแต่ละข้อด้วยเลขข้อชัดเจน เช่น <b>"ข้อ 1."</b>, <b>"1)"</b> หรือ <b>"Question 1"</b></li>
                 <li>เว้นบรรทัดว่างคั่นระหว่างแต่ละข้อ เพื่อให้ AI แยกขอบเขตข้อได้ถูก</li>
@@ -500,7 +501,7 @@
         </div>
 
         <div class="hw-help-section hw-help-bad">
-            <h4>✗ ควรเลี่ยง</h4>
+            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ควรเลี่ยง</h4>
             <ul>
                 <li>เขียนหลายข้อติดกันเป็นย่อหน้าเดียวไม่มีเลขข้อคั่น</li>
                 <li>ไฟล์เอียง เบลอ หรือมีเงา/แสงสะท้อนทับตัวอักษร</li>
@@ -551,11 +552,11 @@ let hwCounter = 0;
 async function loadCourseForEdit() {
     showLoading('กำลังโหลดข้อมูลคอร์ส...');
     const { data: snap, error } = await supabase.from('courses').select('*').eq('id', courseId).single();
-    if (error || !snap) { alert('ไม่พบคอร์สนี้'); window.location.href = 'manage-courses.html'; return; }
+    if (error || !snap) { toast('ไม่พบคอร์สนี้', 'error'); window.location.href = 'manage-courses.html'; return; }
     originalCourse = snap;
 
     if (originalCourse.creator_id !== currentUser.id) {
-        alert('คุณไม่มีสิทธิ์แก้ไขคอร์สนี้');
+        toast('คุณไม่มีสิทธิ์แก้ไขคอร์สนี้', 'error');
         window.location.href = 'manage-courses.html';
         return;
     }
@@ -618,9 +619,9 @@ document.getElementById('thumbnailInput').addEventListener('change', function(e)
             <div class="file-preview">
                 <img src="${ev.target.result}" alt="New thumbnail">
                 <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button class="btn btn-danger" onclick="removeThumbnail()">✕</button>
+                <button class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
-        document.getElementById('thumbUploadLabel').textContent = '✅ เลือกรูปปกใหม่แล้ว';
+        document.getElementById('thumbUploadLabel').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เลือกรูปปกใหม่แล้ว';
     };
     reader.readAsDataURL(file);
 });
@@ -648,7 +649,7 @@ function addExistingLesson(lesson, idx) {
     const src = getLessonSources(lesson);
     lessons.push({ id: lid, file: null, existingVideoUrl: src.videoUrl, existingDocUrl: src.docUrl, existingDocType: src.docType });
 
-    const docLabel = src.docUrl ? `📎 เอกสารเดิม: ${src.docUrl.split('/').pop().substring(0,40)}` : '📎 ยังไม่มีเอกสาร';
+    const docLabel = src.docUrl ? `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> เอกสารเดิม: ${src.docUrl.split('/').pop().substring(0,40)}` : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ยังไม่มีเอกสาร';
 
     const html = `
         <div class="lesson-item existing" id="${lid}">
@@ -665,29 +666,29 @@ function addExistingLesson(lesson, idx) {
                 <textarea class="form-control lesson-desc" rows="2">${lesson.description || ''}</textarea>
             </div>
             <div class="form-group">
-                <label>🎥 วิดีโอ YouTube (ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ)</label>
                 <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่" value="${escapeAttr(src.videoUrl)}">
             </div>
             <div class="form-group">
-                <label>📄 เอกสารประกอบ PDF (ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ)</label>
                 <div class="existing-file-badge">${docLabel}</div>
                 <div id="uploadArea-${lid}">
                     <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                        <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
+                        <div class="file-upload-icon" style="font-size:1.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF ใหม่ (แทนที่ไฟล์เดิม)</p>
                         <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น — ปล่อยว่างไว้ถ้าไม่ต้องการเปลี่ยน</small>
                     </div>
                     <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
                     <div id="lessonFilePreview-${lid}"></div>
                 </div>
-                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;">💡 ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
             </div>
 
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
-                <label>📑 หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span> หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')">✨ AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')">📄 แตกหัวข้อจากไฟล์ PDF</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> แตกหัวข้อจากไฟล์ PDF</button>
                 </div>
                 <div id="subtopicStatus-${lid}" class="ai-loading-text"></div>
                 <div id="subtopicsList-${lid}"></div>
@@ -707,7 +708,7 @@ window.addLesson = function() {
     const html = `
         <div class="lesson-item new-lesson" id="${lid}">
             <div class="lesson-header">
-                <span class="lesson-number new-badge">✨ บทเรียนใหม่</span>
+                <span class="lesson-number new-badge"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> บทเรียนใหม่</span>
                 <button class="btn btn-danger" onclick="removeLesson('${lid}')">ลบ</button>
             </div>
             <div class="form-group">
@@ -719,28 +720,28 @@ window.addLesson = function() {
                 <textarea class="form-control lesson-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
             </div>
             <div class="form-group">
-                <label>🎥 วิดีโอ YouTube (ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ)</label>
                 <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
             </div>
             <div class="form-group">
-                <label>📄 เอกสารประกอบ PDF (ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ)</label>
                 <div id="uploadArea-${lid}">
                     <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                        <div class="file-upload-icon" style="font-size:1.5rem;">📤</div>
+                        <div class="file-upload-icon" style="font-size:1.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF</p>
                         <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                     </div>
                     <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
                     <div id="lessonFilePreview-${lid}"></div>
                 </div>
-                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;">💡 ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
             </div>
 
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
-                <label>📑 หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span> หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')">✨ AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')">📄 แตกหัวข้อจากไฟล์ PDF ที่อัปโหลด</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> แตกหัวข้อจากไฟล์ PDF ที่อัปโหลด</button>
                 </div>
                 <div id="subtopicStatus-${lid}" class="ai-loading-text"></div>
                 <div id="subtopicsList-${lid}"></div>
@@ -758,7 +759,7 @@ function bindLessonFileInput(lid) {
         const file = e.target.files[0];
         if (!file) return;
         if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
-            alert('รองรับเฉพาะไฟล์ PDF เท่านั้นครับ กรุณาเลือกไฟล์ .pdf');
+            toast('รองรับเฉพาะไฟล์ PDF เท่านั้นครับ กรุณาเลือกไฟล์ .pdf', 'warning');
             e.target.value = '';
             return;
         }
@@ -768,7 +769,7 @@ function bindLessonFileInput(lid) {
             <div class="file-preview">
                 <div style="font-size:1.5rem;">${getFileIcon(file.name)}</div>
                 <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button class="btn btn-danger" onclick="removeLessonFile('${lid}')">✕</button>
+                <button class="btn btn-danger" onclick="removeLessonFile('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     });
 }
@@ -783,7 +784,7 @@ window.removeLessonFile = function(lid) {
 window.removeLesson = function(lid) {
     document.getElementById(lid).remove();
     lessons = lessons.filter(l => l.id !== lid);
-    // เรียงเลข "บทที่ N" ใหม่เฉพาะบทเรียนเดิม — บทใหม่ (✨ บทเรียนใหม่) ไม่มีเลข ไม่ต้องแตะ
+    // เรียงเลข "บทที่ N" ใหม่เฉพาะบทเรียนเดิม — บทใหม่ (<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> บทเรียนใหม่) ไม่มีเลข ไม่ต้องแตะ
     renumberBadges('lessonsList', '.lesson-number:not(.new-badge)', 'บทที่ ');
 };
 
@@ -807,7 +808,7 @@ window.addSubtopicRow = function(lessonId, data = null) {
                 value="${escapeAttr(data?.title || '')}" style="flex:2;">
             <input type="text" class="form-control subtopic-note" placeholder="หมายเหตุ เช่น นาที 0-5 / หน้า 1-3 (ไม่บังคับ)"
                 value="${escapeAttr(data?.note || '')}" style="flex:1;">
-            <button type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()">✕</button>
+            <button type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`);
 };
 
@@ -830,7 +831,7 @@ window.generateSubtopicsWithAI = async function(lessonId) {
     const title = lessonItem.querySelector('.lesson-title').value.trim();
     const desc = lessonItem.querySelector('.lesson-desc').value.trim();
     if (!title) {
-        alert('กรุณากรอกชื่อบทเรียนก่อนครับ');
+        toast('กรุณากรอกชื่อบทเรียนก่อนครับ', 'warning');
         lessonItem.querySelector('.lesson-title').focus();
         return;
     }
@@ -860,10 +861,10 @@ window.generateSubtopicsWithAI = async function(lessonId) {
 
         clearSubtopics(lessonId);
         items.forEach(it => addSubtopicRow(lessonId, it));
-        statusEl.textContent = `✅ AI แนะนำหัวข้อย่อยให้แล้ว ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI แนะนำหัวข้อย่อยให้แล้ว ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
     } catch (err) {
         console.error('generateSubtopicsWithAI error:', err);
-        statusEl.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     }
 };
 
@@ -883,7 +884,7 @@ window.extractSubtopicsFromPDF = async function(lessonId) {
             if (!resp.ok) throw new Error('ดึงไฟล์ PDF เดิมไม่สำเร็จ');
             pdfBlob = await resp.blob();
         } else {
-            alert('กรุณาอัปโหลดไฟล์ PDF ของบทเรียนนี้ก่อนครับ ถึงจะแตกหัวข้อจากเนื้อหาไฟล์ได้\n(ถ้ายังไม่มีไฟล์ ลองใช้ปุ่ม "AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย" แทน)');
+            toast('กรุณาอัปโหลดไฟล์ PDF ของบทเรียนนี้ก่อนครับ ถึงจะแตกหัวข้อจากเนื้อหาไฟล์ได้ (ถ้ายังไม่มีไฟล์ ลองใช้ปุ่ม "AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย" แทน)', 'warning');
             return;
         }
 
@@ -921,16 +922,16 @@ ${analyzed.text}`;
 
         clearSubtopics(lessonId);
         items.forEach(it => addSubtopicRow(lessonId, it));
-        statusEl.textContent = `✅ แตกหัวข้อจากไฟล์ PDF ได้ ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> แตกหัวข้อจากไฟล์ PDF ได้ ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
     } catch (err) {
         console.error('extractSubtopicsFromPDF error:', err);
-        statusEl.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     }
 };
 
 function getFileIcon(name) {
     const ext = name.split('.').pop().toLowerCase();
-    return {'pdf':'📄','ppt':'📊','pptx':'📊','doc':'📝','docx':'📝','xls':'📈','xlsx':'📈','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','mp4':'🎬','mov':'🎬'}[ext] || '📎';
+    return {'pdf':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>','ppt':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','pptx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','doc':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','docx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','xls':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','xlsx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','jpg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','jpeg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','png':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','mp4':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20l-3 5H5z"/><rect x="2" y="8" width="20" height="13"/></svg></span>','mov':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20l-3 5H5z"/><rect x="2" y="8" width="20" height="13"/></svg></span>'}[ext] || '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>';
 }
 function detectFileType(name) {
     const ext = name.split('.').pop().toLowerCase();
@@ -946,7 +947,7 @@ function escapeAttr(str) { return String(str).replace(/"/g,'&quot;').replace(/'/
 
 // สร้าง <option> รายชื่อบทเรียนปัจจุบัน ให้เลือกผูก Quiz/การบ้านกับบทใดบทหนึ่งได้ (หรือ "ทั้งคอร์ส")
 function buildLessonOptionsHtml(selectedValue) {
-    let html = `<option value="">📌 ทั้งคอร์ส (ไม่ระบุบท)</option>`;
+    let html = `<option value=""><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> ทั้งคอร์ส (ไม่ระบุบท)</option>`;
     lessons.forEach((l, i) => {
         const title = (l.title || `บทที่ ${i+1}`).slice(0, 40);
         const sel = String(selectedValue) === String(i) ? 'selected' : '';
@@ -1008,7 +1009,7 @@ function quizImageUploadHtml(qId, data) {
                     style="border:1.5px dashed var(--border-color);border-radius:8px;padding:0.6rem 1rem;
                     cursor:pointer;font-size:0.82rem;color:var(--text-dim);text-align:center;transition:border-color 0.15s;"
                     onmouseover="this.style.borderColor='var(--primary-blue)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                    📷 คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
+                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
                 </div>
                 <input type="file" id="${qId}-image-input" accept="image/*" style="display:none;">
                 <input type="hidden" class="quiz-image-url" value="${data?.imageUrl || ''}">
@@ -1017,14 +1018,14 @@ function quizImageUploadHtml(qId, data) {
                         <img src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
                         <button type="button" onclick="removeQuizQuestionImage('${qId}')"
                             style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
-                            background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;">✕</button>
+                            background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
                     </div>` : ''}</div>
             </div>`;
 }
 
 async function handleQuizImageUpload(qId, file) {
     if (!file) return;
-    if (!file.type.startsWith('image/')) { alert('กรุณาเลือกไฟล์รูปภาพเท่านั้นครับ'); return; }
+    if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพเท่านั้นครับ', 'warning'); return; }
     const preview = document.getElementById(`${qId}-image-preview`);
     preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-dim);">⏳ กำลังอัปโหลด...</div>`;
     try {
@@ -1035,10 +1036,10 @@ async function handleQuizImageUpload(qId, file) {
                 <img src="${url}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
                 <button type="button" onclick="removeQuizQuestionImage('${qId}')"
                     style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
-                    background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;">✕</button>
+                    background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     } catch (e) {
-        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;">❌ อัปโหลดไม่สำเร็จ: ${e.message}</div>`;
+        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${e.message}</div>`;
     }
 }
 
@@ -1098,7 +1099,7 @@ function renderQuizAnswerArea(qId, qType, data) {
             <label>คำตอบตัวอย่าง/เกณฑ์การให้คะแนน (สำหรับอาจารย์อ้างอิง ไม่บังคับ)</label>
             <textarea class="form-control quiz-sample-answer" rows="2">${data?.sampleAnswer || ''}</textarea>
         </div>
-        <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.82rem;">📝 คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
+        <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.82rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
     } else {
         area.innerHTML = `
         <div class="quiz-choices">
@@ -1134,8 +1135,8 @@ window.generateQuizWithAI = async function() {
     const count = document.getElementById('aiQuizCount').value;
     const selectedTypes = [...document.querySelectorAll('.ai-quiz-type-check:checked')].map(cb => cb.value);
 
-    if (!topic) { alert('กรุณาระบุหัวข้อก่อน'); return; }
-    if (selectedTypes.length === 0) { alert('กรุณาเลือกประเภทคำถามอย่างน้อย 1 แบบ'); return; }
+    if (!topic) { toast('กรุณาระบุหัวข้อก่อน', 'warning'); return; }
+    if (selectedTypes.length === 0) { toast('กรุณาเลือกประเภทคำถามอย่างน้อย 1 แบบ', 'warning'); return; }
 
     const btn = document.getElementById('btnGenQuiz');
     const loadingText = document.getElementById('aiLoadingText');
@@ -1189,7 +1190,7 @@ ${typeList}
         const questions = JSON.parse(clean);
         questions.forEach(q => addQuizQuestion(q));
     } catch(e) {
-        alert('❌ AI สร้างไม่สำเร็จ: ' + e.message);
+        toast('AI สร้างไม่สำเร็จ: ' + e.message, 'error');
     } finally {
         btn.disabled = false; loadingText.classList.remove('show');
     }
@@ -1301,10 +1302,10 @@ window.copyHwHelpTemplate = async function() {
     try {
         await navigator.clipboard.writeText(text);
         const original = btn.textContent;
-        btn.textContent = 'คัดลอกแล้ว ✓';
+        btn.innerHTML = 'คัดลอกแล้ว <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
         setTimeout(() => { btn.textContent = original; }, 1800);
     } catch (e) {
-        alert('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วคัดลอกเอง');
+        toast('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วคัดลอกเอง', 'error');
     }
 };
 document.addEventListener('keydown', function(e) {
@@ -1318,12 +1319,12 @@ document.getElementById('hwSourceFileInput').addEventListener('change', function
     const file = e.target.files[0];
     if (!file) return;
     hwSourceFile = file;
-    const icon = file.type.startsWith('image/') ? '🖼️' : '📄';
+    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
     document.getElementById('hwSourceFilePreview').innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button class="btn btn-danger" onclick="removeHwSourceFile()">✕</button>
+            <button class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -1421,12 +1422,12 @@ document.getElementById('courseDescFileInput').addEventListener('change', functi
     const file = e.target.files[0];
     if (!file) return;
     courseDescFile = file;
-    const icon = file.type.startsWith('image/') ? '🖼️' : '📄';
+    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
     document.getElementById('courseDescFilePreview').innerHTML = `
         <div class="file-preview" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--input-bg,rgba(255,255,255,0.05));border-radius:8px;margin-top:0.5rem;">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button type="button" class="btn btn-danger" onclick="removeCourseDescFile()">✕</button>
+            <button type="button" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -1455,7 +1456,7 @@ window.extractCourseDescriptionFromFile = async function() {
     const status = document.getElementById('courseDescStatus');
 
     if (!courseDescFile) {
-        alert('กรุณาอัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ) ก่อนครับ');
+        toast('กรุณาอัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ) ก่อนครับ', 'warning');
         return;
     }
 
@@ -1539,7 +1540,7 @@ window.extractHomeworkWithAI = async function() {
     const pastedText = document.getElementById('hwSourceText').value.trim();
 
     if (!hwSourceFile && !pastedText) {
-        alert('กรุณาอัปโหลดไฟล์ หรือวางข้อความโจทย์ก่อนครับ');
+        toast('กรุณาอัปโหลดไฟล์ หรือวางข้อความโจทย์ก่อนครับ', 'warning');
         return;
     }
 
@@ -1628,15 +1629,15 @@ window.extractHomeworkWithAI = async function() {
         });
 
         const imgCount = Object.keys(pageUrlMap).length;
-        status.textContent = `✅ เพิ่มการบ้านให้แล้ว ${items.length} ข้อ${imgCount > 0 ? ` (แนบรูปภาพให้ ${imgCount} หน้า)` : ''} — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เพิ่มการบ้านให้แล้ว ${items.length} ข้อ${imgCount > 0 ? ` (แนบรูปภาพให้ ${imgCount} หน้า)` : ''} — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
         document.getElementById('homeworkList').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (err) {
         console.error('extractHomeworkWithAI error:', err);
-        status.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     } finally {
         btn.disabled = false;
-        btn.textContent = '🤖 ให้ AI แตกเป็นข้อๆ';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI แตกเป็นข้อๆ';
     }
 };
 
@@ -1653,7 +1654,7 @@ function rubricRowHtml(hwId, criterion, points) {
             <input type="number" class="form-control rubric-points" placeholder="คะแนน" min="0" value="${points??''}" style="width:100px;" oninput="updateRubricTotal('${hwId}')">
             <button type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
                 style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
-                width:32px;height:32px;border-radius:6px;cursor:pointer;flex-shrink:0;">✕</button>
+                width:32px;height:32px;border-radius:6px;cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 }
 
@@ -1684,12 +1685,12 @@ window.generateRubricWithAI = async function(hwId) {
     const status = document.getElementById(`hw-rubric-status-${hwId}`);
 
     if (!title && !desc) {
-        alert('กรุณากรอกชื่อการบ้านหรือคำอธิบาย/โจทย์ก่อน เพื่อให้ AI เข้าใจว่าจะสร้าง Rubric สำหรับอะไร');
+        toast('กรุณากรอกชื่อการบ้านหรือคำอธิบาย/โจทย์ก่อน เพื่อให้ AI เข้าใจว่าจะสร้าง Rubric สำหรับอะไร', 'warning');
         return;
     }
 
     status.classList.add('show');
-    status.textContent = '🤖 AI กำลังคิด Rubric...';
+    status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI กำลังคิด Rubric...';
 
     const prompt = `คุณเป็นผู้ช่วยอาจารย์ออกแบบเกณฑ์การให้คะแนน (Rubric) สำหรับการบ้านนี้
 ชื่อการบ้าน: ${title || '(ไม่ระบุ)'}
@@ -1715,10 +1716,10 @@ window.generateRubricWithAI = async function(hwId) {
         // ล้างของเดิมแล้วใส่ของใหม่ที่ AI เสนอ
         document.getElementById(`hw-rubric-rows-${hwId}`).innerHTML = '';
         items.forEach(it => addRubricRow(hwId, it.criterion || '', it.points || 0));
-        status.textContent = `✅ AI เสนอ Rubric ${items.length} หัวข้อให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI เสนอ Rubric ${items.length} หัวข้อให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ`;
     } catch (e) {
         console.error('generateRubricWithAI error:', e);
-        status.textContent = '❌ เกิดข้อผิดพลาด: ' + e.message;
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + e.message;
     }
 };
 
@@ -1749,17 +1750,17 @@ window.addHomework = function(data = null) {
                 <textarea class="form-control hw-desc" rows="3">${data?.description||''}</textarea>
             </div>
             <div class="form-group">
-                <label>🤖 เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>
                 <textarea class="form-control hw-grading-criteria" rows="3" placeholder="เช่น เน้นความถูกต้องของโค้ดเป็นหลัก ไม่หักคะแนนเรื่อง style, ต้องมี comment อธิบายทุกฟังก์ชันถึงจะได้คะแนนเต็ม...">${data?.gradingCriteria||''}</textarea>
                 <small style="color:var(--text-dim);">เขียนได้อิสระเลยว่าอยากให้ AI เข้มงวด/หย่อนแค่ไหน เน้นอะไร — ระบบจะเอาไปประกอบเป็นคำสั่งให้ AI ใช้ตอนกดปุ่ม "ให้ AI ช่วยตรวจ" ในหน้าตรวจงาน</small>
             </div>
             <div class="form-group">
-                <label>📊 Rubric — เกณฑ์การให้คะแนนแยกหัวข้อ (ไม่บังคับ — นักเรียนเห็นได้)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Rubric — เกณฑ์การให้คะแนนแยกหัวข้อ (ไม่บังคับ — นักเรียนเห็นได้)</label>
                 <small style="color:var(--text-dim);display:block;margin-bottom:0.5rem;">ถ้าใส่ไว้ นักเรียนจะเห็นตารางนี้ก่อนทำ และตอนตรวจงานจะให้คะแนนแยกทีละหัวข้อแทนคะแนนรวมช่องเดียว</small>
                 <div id="hw-rubric-rows-${hwId}"></div>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;align-items:center;">
                     <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addRubricRow('${hwId}')">+ เพิ่มหัวข้อ</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="generateRubricWithAI('${hwId}')">🤖 ให้ AI ช่วยสร้าง Rubric</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="generateRubricWithAI('${hwId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI ช่วยสร้าง Rubric</button>
                     <span id="hw-rubric-total-${hwId}" style="font-size:0.8rem;color:var(--text-dim);"></span>
                 </div>
                 <div id="hw-rubric-status-${hwId}" class="ai-loading-text"></div>
@@ -1783,11 +1784,11 @@ window.addHomework = function(data = null) {
             <div class="form-group">
                 <label>ประเภทการส่งงาน</label>
                 <div class="hw-type-selector">
-                    <div class="hw-type-btn ${typeActive('text')}" onclick="setHwType('${hwId}','text',this)">✍️ พิมพ์ข้อความ</div>
-                    <div class="hw-type-btn ${typeActive('file')}" onclick="setHwType('${hwId}','file',this)">📎 อัปโหลดไฟล์</div>
-                    <div class="hw-type-btn ${typeActive('both')}" onclick="setHwType('${hwId}','both',this)">✍️📎 ทั้งสองแบบ</div>
-                    <div class="hw-type-btn ${typeActive('code')}" onclick="setHwType('${hwId}','code',this)">💻 เขียนโค้ด (IDE)</div>
-                    <div class="hw-type-btn ${typeActive('form')}" onclick="setHwType('${hwId}','form',this)">📋 แบบฟอร์มหลายคำถาม</div>
+                    <div class="hw-type-btn ${typeActive('text')}" onclick="setHwType('${hwId}','text',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> พิมพ์ข้อความ</div>
+                    <div class="hw-type-btn ${typeActive('file')}" onclick="setHwType('${hwId}','file',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> อัปโหลดไฟล์</div>
+                    <div class="hw-type-btn ${typeActive('both')}" onclick="setHwType('${hwId}','both',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ทั้งสองแบบ</div>
+                    <div class="hw-type-btn ${typeActive('code')}" onclick="setHwType('${hwId}','code',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span> เขียนโค้ด (IDE)</div>
+                    <div class="hw-type-btn ${typeActive('form')}" onclick="setHwType('${hwId}','form',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> แบบฟอร์มหลายคำถาม</div>
                 </div>
                 <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:${initType==='code'?'block':'none'};margin-top:0.75rem;">
                     <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
@@ -1800,7 +1801,7 @@ window.addHomework = function(data = null) {
                     </select>
                 </div>
                 <div class="hw-form-opts" id="hw-form-opts-${hwId}" style="display:${initType==='form'?'block':'none'};margin-top:0.75rem;">
-                    <div class="alert alert-info" style="margin-bottom:1rem;">💡 แบบฟอร์มหลายคำถาม — นักเรียนทำทีละข้อแบบ Google Forms ข้อปรนัย/เลือกหลายข้อ/ถูกผิด ระบบตรวจให้อัตโนมัติ ส่วนข้อตอบสั้น/เรียงความ อาจารย์ต้องตรวจเองทีหลัง</div>
+                    <div class="alert alert-info" style="margin-bottom:1rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> แบบฟอร์มหลายคำถาม — นักเรียนทำทีละข้อแบบ Google Forms ข้อปรนัย/เลือกหลายข้อ/ถูกผิด ระบบตรวจให้อัตโนมัติ ส่วนข้อตอบสั้น/เรียงความ อาจารย์ต้องตรวจเองทีหลัง</div>
                     <div id="hw-form-questions-${hwId}"></div>
                     <button type="button" class="btn btn-outline" onclick="addFormQuestion('${hwId}')">+ เพิ่มคำถามในฟอร์ม</button>
                 </div>
@@ -1913,7 +1914,7 @@ window.saveCourse = async function() {
     const instructor = document.getElementById('courseInstructor').value.trim();
 
     if (!title || !description || !category || !level) {
-        alert('❌ กรุณากรอกข้อมูลคอร์สให้ครบ (ชื่อ, คำอธิบาย, หมวดหมู่, ระดับ)');
+        toast('กรุณากรอกข้อมูลคอร์สให้ครบ (ชื่อ, คำอธิบาย, หมวดหมู่, ระดับ)', 'warning');
         switchEditTab('info', document.querySelector('.edit-tab'));
         return;
     }
@@ -1940,7 +1941,7 @@ window.saveCourse = async function() {
             const lessonTitle = item.querySelector('.lesson-title').value.trim();
 
             if (!lessonTitle) {
-                alert(`❌ กรุณากรอกชื่อบทเรียนที่ ${i + 1}`);
+                toast(`กรุณากรอกชื่อบทเรียนที่ ${i + 1}`, 'warning');
                 hideLoading();
                 switchEditTab('lessons', document.querySelectorAll('.edit-tab')[1]);
                 return;
@@ -1960,7 +1961,7 @@ window.saveCourse = async function() {
             }
 
             if (!videoUrl && !docUrl) {
-                alert(`❌ บทเรียนที่ ${i + 1} ต้องมีวิดีโอ YouTube หรือไฟล์ PDF อย่างน้อย 1 อย่าง`);
+                toast(`บทเรียนที่ ${i + 1} ต้องมีวิดีโอ YouTube หรือไฟล์ PDF อย่างน้อย 1 อย่าง`, 'warning');
                 hideLoading();
                 return;
             }
@@ -2057,13 +2058,13 @@ window.saveCourse = async function() {
         }
 
         hideLoading();
-        alert('✅ บันทึกการแก้ไขสำเร็จ!');
+        toast('บันทึกการแก้ไขสำเร็จ!', 'success');
         window.location.href = 'manage-courses.html';
 
     } catch(e) {
         hideLoading();
         console.error(e);
-        alert('❌ เกิดข้อผิดพลาด: ' + e.message);
+        toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
     }
 };
 
@@ -2086,7 +2087,7 @@ async function initEditCoursePage() {
 
     const { data: _ep } = await supabase.from('users').select('user_type').eq('id', _eu.id).single();
     if (_ep?.user_type !== 'teacher') {
-        alert('เฉพาะครูเท่านั้น');
+        toast('เฉพาะครูเท่านั้น', 'error');
         window.location.href = 'dashboard.html';
         return;
     }
@@ -2094,7 +2095,7 @@ async function initEditCoursePage() {
     currentUser = _eu;
     courseId = new URLSearchParams(window.location.search).get('id');
     if (!courseId) {
-        alert('ไม่พบ course ID');
+        toast('ไม่พบ course ID', 'error');
         window.location.href = 'manage-courses.html';
         return;
     }
