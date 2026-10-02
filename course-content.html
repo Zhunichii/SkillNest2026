@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>กำลังโหลด... - SkillNest</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
@@ -1481,11 +1486,7 @@
 
             <!-- Lesson list panel -->
             <div id="tabLessons" class="tab-panel active">
-                <div class="lesson-list" id="lessonList">
-                    <div class="loading-screen">
-                        <div>กำลังโหลดรายการบทเรียน...</div>
-                    </div>
-                </div>
+                <div class="lesson-list" id="lessonList" style="display:flex;flex-direction:column;gap:8px;padding:0.5rem;"><div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div><div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div><div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div></div>
             </div>
 
             <!-- Quiz panel -->
@@ -1495,7 +1496,7 @@
                         <h3><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แบบทดสอบ</h3>
                     </div>
                     <div id="quizPanelContent">
-                        <p style="color:var(--text-dim); margin-bottom:1.25rem;">กำลังโหลด...</p>
+                        <div class="sn-skeleton-card"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-40"></div><div class="sn-skeleton-line w-30"></div></div>
                     </div>
                 </div>
             </div>
@@ -1504,7 +1505,7 @@
             <div id="tabHomework" class="tab-panel">
                 <div style="padding:0.5rem 0;">
                     <div id="hwPanelList">
-                        <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
+                        <div class="sn-skeleton-card"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-40"></div><div class="sn-skeleton-line w-30"></div></div>
                     </div>
                 </div>
             </div>
@@ -1512,7 +1513,7 @@
             <!-- Results panel (ฝั่งนักเรียน: วิเคราะห์ผลการเรียนของตัวเอง) -->
             <div id="tabResults" class="tab-panel">
                 <div id="resultsPanelContent">
-                    <p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>
+                    <div class="sn-skeleton-card"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-40"></div><div class="sn-skeleton-line w-30"></div></div>
                 </div>
             </div>
 
@@ -3980,7 +3981,7 @@ let cachedMySubmissions = null; // แคชการส่งงานทั้
 async function renderResultsTab() {
     const container = document.getElementById('resultsPanelContent');
     if (!container || !currentCourse) return;
-    container.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding:2rem;">กำลังโหลด...</p>';
+    container.innerHTML = '<div class="sn-skeleton-card"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-40"></div><div class="sn-skeleton-line w-30"></div></div>';
 
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get('id');

@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>โปรไฟล์ & ตั้งค่า - SkillNest</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
@@ -437,7 +442,7 @@
                         <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarChange(this)">
                     </div>
                     <div class="avatar-info">
-                        <h3 id="profileDisplayName">กำลังโหลด...</h3>
+                        <h3 id="profileDisplayName"><span class="sn-skeleton-line w-40" style="display:inline-block;height:20px;"></span></h3>
                         <p id="profileEmail" style="color:var(--text-dim);font-size:0.85rem;"></p>
                         <span id="profileBadge" class="user-badge"></span>
                     </div>

@@ -222,6 +222,52 @@ select:focus-visible,
 }
 
 /* ════════════════════════════════════════════════════════════
+   Shared skeleton loading placeholders — ใช้แทนข้อความ "กำลังโหลด..." ล้วนๆ
+   เวลาที่ส่วนนั้นกำลังรอข้อมูลจาก Supabase ให้เห็นโครงหน้าตาคร่าวๆ ระหว่างรอ
+   ════════════════════════════════════════════════════════════ */
+.sn-skeleton-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.sn-skeleton-row {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+.sn-skeleton-line {
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--input-bg) 25%, var(--card-hover, rgba(255,255,255,0.06)) 37%, var(--input-bg) 63%);
+    background-size: 400% 100%;
+    animation: sn-skeleton-shine 1.4s ease infinite;
+}
+.sn-skeleton-line.w-100 { width: 100%; }
+.sn-skeleton-line.w-60  { width: 60%; height: 18px; }
+.sn-skeleton-line.w-40  { width: 40%; }
+.sn-skeleton-line.w-30  { width: 30%; }
+.sn-skeleton-avatar {
+    width: 38px; height: 38px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+    background: linear-gradient(90deg, var(--input-bg) 25%, var(--card-hover, rgba(255,255,255,0.06)) 37%, var(--input-bg) 63%);
+    background-size: 400% 100%;
+    animation: sn-skeleton-shine 1.4s ease infinite;
+}
+@keyframes sn-skeleton-shine { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) {
+    .sn-skeleton-line, .sn-skeleton-avatar { animation: none; }
+}
+
+/* ════════════════════════════════════════════════════════════
    Inline icon helper — ใช้แทน emoji ด้วย SVG line-icon ให้เข้าชุดกัน
    ครอบ <svg> ด้วย <span class="sn-icon"> เพื่อคุมขนาด/แนวตั้งให้เสมอกับตัวอักษร
    ════════════════════════════════════════════════════════════ */

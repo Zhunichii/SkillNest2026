@@ -139,7 +139,33 @@
         });
     }
 
+    /**
+     * skeletonRows(n) -> HTML string ของแถว skeleton n แถว (ใช้แทนรายการที่กำลังโหลด เช่น list บทเรียน/คอร์ส)
+     */
+    function skeletonRows(n) {
+        n = n || 3;
+        let html = '';
+        for (let i = 0; i < n; i++) {
+            html += '<div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div>';
+        }
+        return html;
+    }
+
+    /**
+     * skeletonCards(n) -> HTML string ของการ์ด skeleton n ใบ (ใช้แทน grid การ์ดที่กำลังโหลด เช่น รายการคอร์ส)
+     */
+    function skeletonCards(n) {
+        n = n || 3;
+        let html = '';
+        for (let i = 0; i < n; i++) {
+            html += '<div class="sn-skeleton-card"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-40"></div><div class="sn-skeleton-line w-30"></div></div>';
+        }
+        return html;
+    }
+
     window.toast = toast;
     window.confirmDialog = confirmDialog;
     window.snEscapeHtml = escapeHtml;
+    window.skeletonRows = skeletonRows;
+    window.skeletonCards = skeletonCards;
 })();

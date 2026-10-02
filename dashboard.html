@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillNest - Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
@@ -156,12 +161,18 @@
         .search-filter-bar {
             display: flex;
             gap: 8px;
-            padding: 12px 14px 10px;
+            padding: 12px 14px 14px;
             border-bottom: 1px solid var(--line);
             overflow-x: auto;
-            scrollbar-width: none;
+            cursor: grab;
+            scrollbar-width: thin;
+            scrollbar-color: var(--line-strong) transparent;
         }
-        .search-filter-bar::-webkit-scrollbar { display: none; }
+        .search-filter-bar:active { cursor: grabbing; }
+        .search-filter-bar::-webkit-scrollbar { height: 5px; }
+        .search-filter-bar::-webkit-scrollbar-track { background: transparent; }
+        .search-filter-bar::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 10px; }
+        .search-filter-bar::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 
         .filter-chip {
             display: flex;
@@ -913,10 +924,9 @@
                             <button class="notif-tab" data-tab="homework"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</button>
                         </div>
                         <div class="notif-list" id="notifList">
-                            <div class="notif-empty">
-                                <div class="notif-empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span></div>
-                                <p>กำลังโหลด...</p>
-                            </div>
+                            <div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div>
+                            <div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div>
+                            <div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div>
                         </div>
                         <div class="notif-panel-footer">
                             <a href="#" id="clearAllNotifsLink">ล้างการแจ้งเตือนทั้งหมด</a>
@@ -948,8 +958,9 @@
                     <h3>คอร์สที่คุณอัพโหลด</h3>
                     <span class="close-modal" id="closeManageModal">&times;</span>
                 </div>
-                <div id="myCourseList" class="modal-body">
-                    <p style="text-align:center; color: var(--text-dim);">กำลังโหลด...</p>
+                <div id="myCourseList" class="modal-body" style="display:flex;flex-direction:column;gap:10px;">
+                    <div class="sn-skeleton-card"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-40"></div><div class="sn-skeleton-line w-30"></div></div>
+                    <div class="sn-skeleton-card"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-40"></div><div class="sn-skeleton-line w-30"></div></div>
                 </div>
             </div>
         </div>
@@ -1730,11 +1741,41 @@
 
         // ── filter chips ───────────────────────────────────
         filterBar.addEventListener('click', (e) => {
+            // ลากเพื่อเลื่อน (drag-to-scroll) นับเป็นคลิกไม่ได้ ถ้าเมาส์ขยับเกิน threshold ระหว่างกดลง-ปล่อย
+            if (filterBarDragged) { filterBarDragged = false; return; }
             const chip = e.target.closest('.filter-chip');
             if (!chip) return;
             setActiveFilterChip(chip.dataset.filter);
             renderSearchDropdown(searchInput.value.trim());
             applyCardFilter(searchInput.value.trim(), activeFilter);
+        });
+
+        // แถบตัวกรองเลื่อนแนวนอนได้ (overflow-x:auto) แต่เมาส์ทั่วไปไม่มี scrollbar แนวนอนให้ลาก
+        // เพิ่มสองทางนี้ให้เลื่อนได้จริง: (1) หมุนล้อเมาส์แนวตั้งปกติ → แปลงเป็นเลื่อนแนวนอน (2) กดเมาส์ค้างแล้วลาก
+        filterBar.addEventListener('wheel', (e) => {
+            if (filterBar.scrollWidth <= filterBar.clientWidth) return;
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // ปล่อยให้ trackpad เลื่อนแนวนอนตามปกติ
+            e.preventDefault();
+            filterBar.scrollLeft += e.deltaY;
+        }, { passive: false });
+
+        let filterBarDragged = false;
+        let filterBarIsDown = false;
+        let filterBarStartX = 0;
+        let filterBarStartScroll = 0;
+        filterBar.addEventListener('mousedown', (e) => {
+            filterBarIsDown = true;
+            filterBarDragged = false;
+            filterBarStartX = e.pageX;
+            filterBarStartScroll = filterBar.scrollLeft;
+        });
+        window.addEventListener('mouseup', () => { filterBarIsDown = false; });
+        filterBar.addEventListener('mouseleave', () => { filterBarIsDown = false; });
+        filterBar.addEventListener('mousemove', (e) => {
+            if (!filterBarIsDown) return;
+            const delta = e.pageX - filterBarStartX;
+            if (Math.abs(delta) > 4) filterBarDragged = true;
+            filterBar.scrollLeft = filterBarStartScroll - delta;
         });
 
         // ── trending tag click ─────────────────────────────
