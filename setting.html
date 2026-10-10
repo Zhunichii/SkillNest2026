@@ -65,7 +65,7 @@
 
         /* 2-col layout สำหรับ tab ที่มีเนื้อหาเยอะ */
         .two-col { display:grid; grid-template-columns:1fr 320px; gap:24px; align-items:start; }
-        .two-col-main { display:flex; flex-direction:column; gap:24px; }
+        .two-col-main { min-width:0; display:flex; flex-direction:column; gap:24px; }
         .two-col-side { display:flex; flex-direction:column; gap:16px; }
 
         /* Stats card */
@@ -366,10 +366,13 @@
         }
 
         @media(max-width:768px) {
-            .page { grid-template-columns:1fr; }
-            .sidebar { display:none; }
+            .page { flex-direction:column; }
+            .sidebar { width:100%; height:auto; position:static; display:flex; flex-direction:row; gap:6px; padding:10px 12px; border-right:none; border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
+            .sidebar-section { display:flex; gap:6px; margin:0; }
+            .sidebar-label { display:none; }
+            .sidebar-item { white-space:nowrap; flex-shrink:0; margin:0; }
             .content { padding:24px 20px; }
-            .form-grid { grid-template-columns:1fr; }
+            .form-grid { grid-template-columns:1fr; } .page > * { min-width:0; } .section-card { min-width:0; overflow-x:auto; }
         }
     </style>
 <script type="module" src="auth-guard.js"></script>
@@ -386,7 +389,7 @@
 
 <div class="page">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar sidebar-tabs">
         <div class="sidebar-section">
             <div class="sidebar-label">บัญชี</div>
             <div class="sidebar-item active" data-tab="profile" onclick="switchTab('profile',this)">

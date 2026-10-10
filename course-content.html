@@ -41,7 +41,7 @@
             align-items: center;
             padding: 1rem 2rem;
             background: var(--nav-bg);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--line);
             backdrop-filter: blur(10px);
         }
 
@@ -58,8 +58,8 @@
             border-radius: 8px;
             font-size: 0.9rem;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--line);
         }
         .btn-back:hover {
             color: #ffffff;
@@ -96,8 +96,8 @@
         /* สารบัญหัวข้อย่อยของบทที่กำลังดูอยู่ */
         .lesson-subtopics-panel {
             margin: 1rem 2rem 0;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--card-bg);
+            border: 1px solid var(--line);
             border-radius: 12px;
             overflow: hidden;
             flex-shrink: 0;
@@ -113,8 +113,8 @@
             color: var(--text-main, #fff);
             user-select: none;
         }
-        .subtopics-panel-header:hover { background: rgba(255,255,255,0.03); }
-        #subtopicsToggleIcon { color: var(--text-dim, #a0a0ba); transition: transform 0.2s; font-size: 0.8rem; }
+        .subtopics-panel-header:hover { background: var(--card-bg); }
+        #subtopicsToggleIcon { color: var(--text-dim); transition: transform 0.2s; font-size: 0.8rem; }
         .lesson-subtopics-panel.collapsed #subtopicsToggleIcon { transform: rotate(-90deg); }
         .lesson-subtopics-panel.collapsed .subtopics-panel-list { display: none; }
         .subtopics-panel-list {
@@ -128,8 +128,8 @@
             gap: 0.6rem;
             padding: 0.45rem 0;
             font-size: 0.86rem;
-            color: var(--text-dim, #a0a0ba);
-            border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-dim);
+            border-top: 1px solid var(--line);
         }
         .subtopics-panel-list li:first-child { border-top: none; }
         .subtopics-panel-list .st-num { color: #8b5cf6; font-weight: 600; flex-shrink: 0; }
@@ -147,11 +147,11 @@
         .lesson-wrapper.no-tabs { margin-top: 1.2rem; }
         .lesson-content-tab {
             padding: 8px 18px; border-radius: 8px; cursor: pointer;
-            font-size: 0.86rem; font-weight: 600; color: var(--text-dim, #a0a0ba);
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.86rem; font-weight: 600; color: var(--text-dim);
+            background: var(--card-bg); border: 1px solid var(--line);
             transition: all 0.15s;
         }
-        .lesson-content-tab:hover { background: rgba(255,255,255,0.08); }
+        .lesson-content-tab:hover { background: var(--card-hover); }
         .lesson-content-tab.active {
             background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); color: #60a5fa;
         }
@@ -264,7 +264,7 @@
 
         .playlist-section {
             background: var(--nav-bg);
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--line);
             border-radius: 12px;
             padding: 1rem;
             margin-top: 1.5rem;
@@ -288,7 +288,7 @@
             align-items: center;
         }
 
-        .lesson-item:hover { background: rgba(255,255,255,0.03); }
+        .lesson-item:hover { background: var(--card-bg); }
 
         .lesson-item.active {
             background: var(--active-lesson);
@@ -771,12 +771,12 @@
             color: var(--text-dim);
             margin: 1.25rem 0 0.75rem;
             padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid var(--line);
         }
         .hw-scope-header:first-child { margin-top: 0; }
         .quiz-scope-block {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--card-bg);
+            border: 1px solid var(--line);
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 1rem;
@@ -786,7 +786,7 @@
         /* === Results Tab (ผลการเรียนของฉัน) === */
         .res-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem; }
         .res-stat-card {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            background: var(--card-bg); border: 1px solid var(--line);
             border-radius: 12px; padding: 1rem 1.1rem;
         }
         .res-stat-label { font-size: 0.76rem; color: var(--text-dim); margin-bottom: 0.35rem; }
@@ -796,20 +796,20 @@
         .res-section-title { font-weight: 600; font-size: var(--text-base); margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
         .res-lesson-row {
             display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.88rem;
+            border-bottom: 1px solid var(--line); font-size: 0.88rem;
         }
         .res-lesson-row:last-child { border-bottom: none; }
         .res-lesson-icon { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; }
         .res-lesson-icon.done { background: rgba(16,185,129,0.18); color: #10b981; }
-        .res-lesson-icon.pending { background: rgba(255,255,255,0.08); color: var(--text-dim); }
-        .res-lesson-icon.locked { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+        .res-lesson-icon.pending { background: var(--card-hover); color: var(--text-dim); }
+        .res-lesson-icon.locked { background: var(--card-bg); color: var(--text-dim); }
         .res-lesson-title { flex: 1; }
         .res-review-tip {
             background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
             border-left: 3px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1.1rem;
             font-size: 0.85rem; margin-bottom: 1.5rem; line-height: 1.6;
         }
-        .res-qa-item { padding: 0.7rem 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.85rem; }
+        .res-qa-item { padding: 0.7rem 0; border-top: 1px solid var(--line); font-size: 0.85rem; }
         .res-qa-item:first-child { border-top: none; }
         .res-qa-q { margin-bottom: 0.3rem; }
         .res-qa-answer { color: var(--text-dim); font-size: 0.8rem; }
@@ -825,13 +825,13 @@
         .res-qa-result.pending { color: #f59e0b; }
         .res-hw-row {
             display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;
-            padding: 0.7rem 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.86rem;
+            padding: 0.7rem 0; border-top: 1px solid var(--line); font-size: 0.86rem;
         }
         .res-hw-row:first-child { border-top: none; }
         .res-hw-comment { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.2rem; }
         .hw-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--card-bg);
+            border: 1px solid var(--line);
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 1rem;
@@ -865,7 +865,7 @@
             font-size: 0.9rem;
         }
         .hw-comment-display {
-            background: rgba(255,255,255,0.03);
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 0.6rem 1rem;
             margin-bottom: 1rem;
@@ -972,8 +972,8 @@
         .hw-submit-area textarea {
             width: 100%;
             padding: 0.75rem;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--line);
             border-radius: 8px;
             color: white;
             font-size: 0.9rem;
@@ -1332,11 +1332,11 @@
             width:100%; display:block; border-radius:2px 12px 8px 8px;
         }
         .avatar-msg-image .img-caption {
-            padding:6px 10px; font-size:var(--text-xs); color:#a0a0ba;
+            padding:6px 10px; font-size:var(--text-xs); color:var(--text-dim);
             background:rgba(139,92,246,0.08); line-height:1.4;
         }
         .avatar-msg-image .img-loading {
-            padding:16px; text-align:center; color:#a0a0ba;
+            padding:16px; text-align:center; color:var(--text-dim);
             font-size:0.78rem; background:rgba(139,92,246,0.06);
             display:flex; align-items:center; justify-content:center; gap:8px;
         }
@@ -1358,7 +1358,7 @@
         .avatar-quick-btn {
             background:rgba(255,255,255,0.05);
             border:1px solid rgba(255,255,255,0.1);
-            color:#a0a0ba; font-size:0.65rem; padding:3px 7px;
+            color:var(--text-dim); font-size:0.65rem; padding:3px 7px;
             border-radius:99px; cursor:pointer; transition:all 0.2s;
             white-space:nowrap;
         }
@@ -1393,7 +1393,7 @@
         .avatar-voice-btn {
             width:32px; height:32px; border-radius:50%;
             border:1px solid rgba(255,255,255,0.15);
-            background:rgba(255,255,255,0.07); color:#a0a0ba;
+            background:rgba(255,255,255,0.07); color:var(--text-dim);
             cursor:pointer; font-size:0.85rem;
             display:flex; align-items:center; justify-content:center;
             flex-shrink:0; transition:all 0.2s;
@@ -1410,7 +1410,7 @@
             margin-top:4px; display:inline-block;
         }
         .avatar-status {
-            font-size:0.65rem; color:#a0a0ba; margin-top:3px;
+            font-size:0.65rem; color:var(--text-dim); margin-top:3px;
             display:flex; align-items:center; justify-content:center; gap:4px;
         }
         .avatar-status-dot {
@@ -1866,8 +1866,8 @@ function showAvatarToast(msg) {
                     คุยกับอาจารย์
                 </button>
                 <button onclick="this.closest('#avatarToast').remove()"
-                    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
-                    color:#a0a0ba;padding:3px 10px;border-radius:99px;cursor:pointer;font-size:0.72rem;">
+                    style="background:var(--card-hover);border:1px solid var(--line);
+                    color:var(--text-dim);padding:3px 10px;border-radius:99px;cursor:pointer;font-size:0.72rem;">
                     ปิด
                 </button>
             </div>
@@ -2152,7 +2152,7 @@ function buildVoiceSettingsPanel() {
             <div style="font-size:0.82rem;font-weight:600;color:#c4b5fd;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span> ตั้งค่าเสียงอาจารย์</div>
             <button aria-label="ลบ" onclick="document.getElementById('avatarVoiceSettingsPanel')?.remove()"
                 style="width:22px;height:22px;border-radius:50%;border:none;
-                background:rgba(255,255,255,0.08);color:#a0a0ba;cursor:pointer;
+                background:rgba(255,255,255,0.08);color:var(--text-dim);cursor:pointer;
                 font-size:0.8rem;display:flex;align-items:center;justify-content:center;
                 transition:all 0.2s;"
                 onmouseover="this.style.background='rgba(239,68,68,0.25)';this.style.color='#f87171'"
@@ -2163,7 +2163,7 @@ function buildVoiceSettingsPanel() {
             ใช้เสียง Gemini TTS — เลือกเสียงที่ใช้พูดได้ที่หน้า <strong>ตั้งค่า & โปรไฟล์</strong> ที่นี่ปรับได้แค่ความเร็ว/ความดังของเสียงที่เล่นอยู่
         </div>
 
-        <label style="font-size:var(--text-xs);color:#a0a0ba;display:block;margin-bottom:4px;">
+        <label style="font-size:var(--text-xs);color:var(--text-dim);display:block;margin-bottom:4px;">
             ความเร็ว: <span id="rateVal">${saved.rate}</span>x
         </label>
         <input type="range" min="0.5" max="1.8" step="0.1" value="${saved.rate}"
@@ -2171,7 +2171,7 @@ function buildVoiceSettingsPanel() {
             oninput="document.getElementById('rateVal').textContent=this.value"
             id="rateSlider">
 
-        <label style="font-size:var(--text-xs);color:#a0a0ba;display:block;margin-bottom:4px;">
+        <label style="font-size:var(--text-xs);color:var(--text-dim);display:block;margin-bottom:4px;">
             ความดัง: <span id="volumeVal">${saved.volume}</span>
         </label>
         <input type="range" min="0" max="1" step="0.1" value="${saved.volume}"
@@ -2186,8 +2186,8 @@ function buildVoiceSettingsPanel() {
                 <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึก
             </button>
             <button onclick="previewVoice()"
-                style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
-                color:#a0a0ba;padding:7px;border-radius:8px;cursor:pointer;font-size:0.78rem;">
+                style="flex:1;background:var(--card-hover);border:1px solid var(--line);
+                color:var(--text-dim);padding:7px;border-radius:8px;cursor:pointer;font-size:0.78rem;">
                 ▶ ทดสอบ
             </button>
         </div>`;
@@ -3360,14 +3360,14 @@ async function renderPDFViewer(container, fileUrl, title) {
                 flex-shrink:0; flex-wrap:wrap;">
 
                 <button onclick="pdfPrevPage()" title="เลื่อนขึ้นหน้าก่อนหน้า"
-                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    style="background:var(--card-hover);border:none;color:white;
                     width:32px;height:32px;border-radius:6px;cursor:pointer;
                     font-size:var(--text-base);display:flex;align-items:center;justify-content:center;
                     transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#9650;</button>
 
                 <button onclick="pdfNextPage()" title="เลื่อนไปหน้าถัดไป"
-                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    style="background:var(--card-hover);border:none;color:white;
                     width:32px;height:32px;border-radius:6px;cursor:pointer;
                     font-size:var(--text-base);display:flex;align-items:center;justify-content:center;
                     transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
@@ -3375,7 +3375,7 @@ async function renderPDFViewer(container, fileUrl, title) {
 
                 <div style="display:flex;align-items:center;gap:6px;margin:0 4px;">
                     <input id="pdfPageInput" type="number" min="1" value="1"
-                        style="width:44px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+                        style="width:44px;background:var(--card-hover);border:1px solid rgba(255,255,255,0.2);
                         color:white;padding:4px 6px;border-radius:6px;font-size:0.82rem;text-align:center;"
                         onchange="pdfGoToPage(parseInt(this.value))">
                     <span id="pdfTotalPages" style="font-size:0.82rem;color:rgba(255,255,255,0.6);">/ —</span>
@@ -3384,7 +3384,7 @@ async function renderPDFViewer(container, fileUrl, title) {
                 <div style="width:1px;height:20px;background:rgba(255,255,255,0.15);margin:0 4px;"></div>
 
                 <button onclick="pdfZoomOut()" title="ซูมออก"
-                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    style="background:var(--card-hover);border:none;color:white;
                     width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.1rem;
                     display:flex;align-items:center;justify-content:center;
                     transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
@@ -3393,14 +3393,14 @@ async function renderPDFViewer(container, fileUrl, title) {
                 <span id="pdfZoomLabel" style="font-size:0.8rem;color:rgba(255,255,255,0.7);min-width:38px;text-align:center;">100%</span>
 
                 <button onclick="pdfZoomIn()" title="ซูมเข้า"
-                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    style="background:var(--card-hover);border:none;color:white;
                     width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.1rem;
                     display:flex;align-items:center;justify-content:center;
                     transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#43;</button>
 
                 <button onclick="pdfFitWidth()" title="พอดีความกว้าง"
-                    style="background:rgba(255,255,255,0.1);border:none;color:white;
+                    style="background:var(--card-hover);border:none;color:white;
                     padding:4px 10px;height:32px;border-radius:6px;cursor:pointer;font-size:var(--text-xs);
                     transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.1)'">Fit</button>
@@ -3422,7 +3422,7 @@ async function renderPDFViewer(container, fileUrl, title) {
                         <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> อธิบายหน้านี้
                     </button>
                     <a href="${fileUrl}" target="_blank"
-                        style="background:rgba(255,255,255,0.1);border:none;color:white;
+                        style="background:var(--card-hover);border:none;color:white;
                         padding:4px 10px;height:32px;border-radius:6px;cursor:pointer;font-size:var(--text-xs);
                         text-decoration:none;display:flex;align-items:center;">เปิดใหม่</a>
                     <a href="${fileUrl}" download
@@ -3445,7 +3445,7 @@ async function renderPDFViewer(container, fileUrl, title) {
             <!-- Loading overlay -->
             <div id="pdfLoadingMsg" style="
                 position:absolute;inset:0;display:flex;align-items:center;
-                justify-content:center;color:#a0a0ba;font-size:0.9rem;
+                justify-content:center;color:var(--text-dim);font-size:0.9rem;
                 background:#1a1a2e;border-radius:8px;z-index:10;">
                 <div style="text-align:center;">
                     <div style="font-size:2rem;margin-bottom:8px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span></div>
@@ -4833,7 +4833,7 @@ function renderHwFormQuestion() {
     } else if (qType === 'short_answer') {
         bodyHtml = `
         <textarea id="cqShortAnswer" class="form-control" rows="4"
-            style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
+            style="width:100%;background:var(--card-bg);border:1px solid var(--line);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
             placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
         <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
         nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="hwfConfirmShortAnswer()">ยืนยันคำตอบ</button>`;
@@ -4857,7 +4857,7 @@ function renderHwFormQuestion() {
                 <div style="font-weight:600; margin-bottom:0.2rem;">${snEscapeHtml(hw.title)}</div>
                 <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total} • ${q.points || 1} คะแนน</div>
             </div>
-            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeHwForm()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ออก</button>
+            <button style="background:var(--card-bg);border:1px solid var(--line);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeHwForm()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ออก</button>
         </div>
         <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
         <div class="qm-question">${index+1}. ${q.question}</div>
@@ -5166,7 +5166,7 @@ function renderCourseQuestion() {
     } else if (qType === 'short_answer') {
         bodyHtml = `
         <textarea id="cqShortAnswer" class="form-control" rows="4"
-            style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
+            style="width:100%;background:var(--card-bg);border:1px solid var(--line);border-radius:12px;color:white;padding:0.9rem;font-size:0.95rem;"
             placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
         <div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คำถามข้อนี้อาจารย์จะเป็นผู้ตรวจและให้คะแนนเอง</div>`;
         nextBtnHtml = `<button class="qm-btn-next" id="cqBtnNext" onclick="confirmCourseShortAnswer()">ยืนยันคำตอบ</button>`;
@@ -5191,7 +5191,7 @@ function renderCourseQuestion() {
                 <div style="font-weight:600; margin-bottom:0.2rem;">${snEscapeHtml(currentCourse.title)}</div>
                 <div style="font-size:0.85rem; color:var(--text-dim);">ข้อที่ ${index+1} / ${total} • ${q.points || 1} คะแนน</div>
             </div>
-            <button style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ออก</button>
+            <button style="background:var(--card-bg);border:1px solid var(--line);color:var(--text-dim);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;" onclick="closeCourseQuiz()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ออก</button>
         </div>
         <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${pct}%"></div></div>
         <div class="qm-question">${index+1}. ${q.question}</div>

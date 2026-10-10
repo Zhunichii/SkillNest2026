@@ -558,3 +558,88 @@ button:not(:disabled):active,
     }
     .sn-page-progress { transition: none; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   Mobile layout (≤768px) — sidebar ซ้ายกลายเป็นแถบเมนูล่างสุดของจอ
+   แทนแถบแคบ 70px ที่กินพื้นที่ ~20% ของจอมือถือ ใช้ร่วมทุกหน้าที่มี .sidebar
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .back-btn, .btn-back { white-space: nowrap; flex-shrink: 0; }
+
+    .sidebar:not(.sidebar-tabs) {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: row;
+        gap: 4px;
+        padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) !important;
+        border-right: none !important;
+        border-top: 1px solid var(--border-color, var(--line));
+        overflow-x: auto;
+        z-index: 900;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .sidebar:not(.sidebar-tabs)::-webkit-scrollbar { display: none; }
+    .sidebar:not(.sidebar-tabs) > * { flex-shrink: 0; }
+    .sidebar:not(.sidebar-tabs) .sidebar-item {
+        flex: 1 0 auto;
+        flex-direction: column !important;
+        justify-content: center;
+        gap: 2px !important;
+        margin: 0 !important;
+        padding: 6px 12px !important;
+        min-width: 60px;
+        font-size: 0.68rem;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .sidebar:not(.sidebar-tabs) .sidebar-item span { display: inline !important; }
+    .sidebar-item .sn-icon { font-size: 1.25rem; }
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-bottom: 90px !important;
+    }
+    .main-content, .main-content > * { min-width: 0; }
+    .card, .section-card { max-width: 100%; }
+}
+@media (max-width: 560px) {
+    .main-content { padding-left: 16px !important; padding-right: 16px !important; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Page entrance — เนื้อหาเลื่อนขึ้นเบาๆ ตอนเข้าหน้า และการ์ดในกริดทยอยขึ้นทีละใบ
+   ใช้ fill-mode backwards เพื่อไม่ค้าง transform หลังจบ (กัน modal position:fixed เพี้ยน)
+   ════════════════════════════════════════════════════════════ */
+@keyframes sn-fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+}
+.main-content, .page > .content {
+    animation: sn-fade-up 0.35s ease backwards;
+}
+.stats-grid > *, .badges-grid > *, .course-grid > *, .courses-grid > *,
+#courseGrid > *, .course-list > *, .manage-list > *, .quiz-grid > *, #quizGrid > * {
+    animation: sn-fade-up 0.4s ease backwards;
+}
+.stats-grid > *:nth-child(2), .badges-grid > *:nth-child(2), .course-grid > *:nth-child(2), .courses-grid > *:nth-child(2), #courseGrid > *:nth-child(2), .course-list > *, .manage-list > *:nth-child(2), .quiz-grid > *:nth-child(2), #quizGrid > *:nth-child(2) { animation-delay: 0.05s; }
+.stats-grid > *:nth-child(3), .badges-grid > *:nth-child(3), .course-grid > *:nth-child(3), .courses-grid > *:nth-child(3), #courseGrid > *:nth-child(3), .course-list > *, .manage-list > *:nth-child(3), .quiz-grid > *:nth-child(3), #quizGrid > *:nth-child(3) { animation-delay: 0.10s; }
+.stats-grid > *:nth-child(4), .badges-grid > *:nth-child(4), .course-grid > *:nth-child(4), .courses-grid > *:nth-child(4), #courseGrid > *:nth-child(4), .course-list > *, .manage-list > *:nth-child(4), .quiz-grid > *:nth-child(4), #quizGrid > *:nth-child(4) { animation-delay: 0.15s; }
+.stats-grid > *:nth-child(n+5), .badges-grid > *:nth-child(n+5), .course-grid > *:nth-child(n+5), .courses-grid > *:nth-child(n+5), #courseGrid > *:nth-child(n+5), .course-list > *, .manage-list > *:nth-child(n+5), .quiz-grid > *:nth-child(n+5), #quizGrid > *:nth-child(n+5) { animation-delay: 0.20s; }
+
+/* Scroll-reveal — ใส่ class sn-reveal ให้ element ที่อยากให้ขึ้นเมื่อเลื่อนมาถึง
+   (เปิดใช้ด้วย theme-switcher.js; ถ้า JS ไม่ทำงานจะแสดงปกติ) */
+.sn-reveal-ready .sn-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.sn-reveal-ready .sn-reveal.sn-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .main-content, .page > .content,
+    .stats-grid > *, .badges-grid > *, .course-grid > *, .courses-grid > *, #courseGrid > *,
+    .course-list > *, .manage-list > *, .quiz-grid > *, #quizGrid > * { animation: none !important; }
+    .sn-reveal-ready .sn-reveal { opacity: 1; transform: none; transition: none; }
+}

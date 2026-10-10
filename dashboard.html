@@ -686,6 +686,24 @@
             width: calc(100% - 250px);
         }
 
+
+        /* ── Onboarding checklist (นักเรียนใหม่) ── */
+        .onboard-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 28px; position: relative; display: none; }
+        .onboard-card.show { display: block; }
+        .onboard-card h3 { font-size: var(--text-lg); margin-bottom: 4px; }
+        .onboard-card > p { color: var(--text-dim); font-size: var(--text-sm); margin-bottom: 14px; }
+        .onboard-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 6px; border-radius: var(--radius-sm); }
+        .onboard-close:hover { background: var(--card-hover); color: var(--text-main); }
+        .onboard-bar { height: 6px; background: var(--input-bg); border-radius: var(--radius-full); overflow: hidden; margin-bottom: 14px; }
+        .onboard-bar > div { height: 100%; width: 0; background: var(--gradient-success); transition: width .5s ease; }
+        .onboard-step { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--text-main); text-decoration: none; cursor: pointer; font-size: var(--text-sm); }
+        .onboard-step:hover { background: var(--card-hover); }
+        .onboard-check { width: 22px; height: 22px; border-radius: var(--radius-full); border: 2px solid var(--line-strong, var(--border-color)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
+        .onboard-check svg { width: 13px; height: 13px; opacity: 0; }
+        .onboard-step.done { color: var(--text-dim); }
+        .onboard-step.done .onboard-check { background: var(--success); border-color: var(--success); }
+        .onboard-step.done .onboard-check svg { opacity: 1; }
+        .onboard-step.done .onboard-label { text-decoration: line-through; }
         .welcome-banner {
             background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%);
             border-radius: 16px;
@@ -786,7 +804,7 @@
         .empty-state-icon { font-size: 4rem; margin-bottom: 20px; }
         .empty-state h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-main); }
 
-        .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 60px; }
+        .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 60px 0; }
         .spinner { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -995,6 +1013,18 @@
                 <p>AI Tutor ของเราพร้อมช่วยเหลือคุณเรียนรู้สิ่งใหม่ๆแล้ว</p>
             </div>
 
+
+            <div class="onboard-card" id="onboardCard">
+                <button class="onboard-close" id="onboardClose" aria-label="ปิดคู่มือเริ่มต้น"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                <h3>เริ่มต้นใช้งาน SkillNest</h3>
+                <p id="onboardSub">ทำตามขั้นตอนเหล่านี้เพื่อเริ่มเรียนได้อย่างเต็มที่</p>
+                <div class="onboard-bar"><div id="onboardFill"></div></div>
+                <div class="onboard-step" id="obEnroll" onclick="document.getElementById('courseGrid').scrollIntoView({behavior:'smooth'})"><span class="onboard-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="onboard-label">สมัครเรียนคอร์สแรกของคุณ</span></div>
+                <div class="onboard-step" id="obLearn" onclick="window.location.href='learning.html'"><span class="onboard-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="onboard-label">เรียนบทแรกให้จบ</span></div>
+                <div class="onboard-step" id="obQuiz" onclick="window.location.href='my-quizzes.html'"><span class="onboard-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="onboard-label">ลองทำแบบทดสอบ</span></div>
+                <div class="onboard-step" id="obAvatar" onclick="try{localStorage.setItem('sn_ob_avatar','1')}catch(e){};window.location.href='setting.html'"><span class="onboard-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span class="onboard-label">ปรับสไตล์ Avatar AI ผู้ช่วยสอน (ไม่บังคับ)</span></div>
+            </div>
+
             <div class="section-header">
                 <span id="sectionHeaderText"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ค้นหาคอร์สใหม่</span>
                 <button class="btn-create-course teacher-only" id="headerCreateCourseBtn" onclick="window.location.href='create-course.html'" style="display: none;">
@@ -1032,6 +1062,38 @@
 
     <script type="module">
         import { supabase, sendNotification } from './supabase.js';
+
+
+        // ── Onboarding checklist: แสดงเฉพาะนักเรียนที่ยังทำขั้นแรกๆ ไม่ครบ ──
+        async function initOnboarding(userId) {
+            const card = document.getElementById('onboardCard');
+            if (!card) return;
+            try { if (localStorage.getItem('sn_ob_dismissed') === '1') return; } catch (e) {}
+            try {
+                const [enr, qz] = await Promise.all([
+                    supabase.from('enrollments').select('progress,completed_lessons').eq('user_id', userId),
+                    supabase.from('quiz_scores').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+                ]);
+                const rows = enr.data || [];
+                const enrolled = rows.length > 0;
+                const learned = rows.some(r => (r.completed_lessons || []).length > 0 || (r.progress || 0) > 0);
+                const quizzed = (qz.count || 0) > 0;
+                let avatar = false;
+                try { avatar = localStorage.getItem('sn_ob_avatar') === '1'; } catch (e) {}
+                const flags = { obEnroll: enrolled, obLearn: learned, obQuiz: quizzed, obAvatar: avatar };
+                Object.entries(flags).forEach(([id, ok]) => document.getElementById(id).classList.toggle('done', ok));
+                const core = enrolled && learned && quizzed;
+                if (core) return; // ทำครบสามขั้นหลักแล้ว ไม่ต้องแสดงอีก
+                const doneCount = Object.values(flags).filter(Boolean).length;
+                document.getElementById('onboardFill').style.width = (doneCount / 4 * 100) + '%';
+                document.getElementById('onboardSub').textContent = `ทำไปแล้ว ${doneCount} จาก 4 ขั้นตอน`;
+                card.classList.add('show');
+                document.getElementById('onboardClose').onclick = () => {
+                    card.classList.remove('show');
+                    try { localStorage.setItem('sn_ob_dismissed', '1'); } catch (e) {}
+                };
+            } catch (e) { /* ไม่แสดงการ์ดถ้าโหลดข้อมูลไม่ได้ */ }
+        }
 
         let currentUser = null;
         let unsubscribeNotif = null; // real-time listener unsubscribe handle
@@ -1402,6 +1464,7 @@
                         });
                     }
                     if (userType === 'student') {
+                        initOnboarding(user.id);
                         ['sidebarMyQuizzes', 'sidebarLearning'].forEach(id => {
                             const el = document.getElementById(id);
                             if (el) el.style.display = 'flex';

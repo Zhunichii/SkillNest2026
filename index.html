@@ -378,6 +378,26 @@
         .pricing-card.popular .btn-pricing:hover { background: var(--primary-2); }
 
         /* --- Scroll Reveal --- */
+
+        /* ── How it works + FAQ ── */
+        .how-section { padding: 20px 0 60px; text-align: center; }
+        .how-section h2, .faq-section h2 { font-size: clamp(1.9rem, 4vw, 2.4rem); margin-bottom: 14px; }
+        .how-section > p { color: var(--text-dim); margin-bottom: 40px; }
+        .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: left; }
+        .how-step { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px 24px; position: relative; transition: transform .25s ease, border-color .25s ease; }
+        .how-step:hover { transform: translateY(-4px); border-color: var(--primary-blue); }
+        .how-num { width: 38px; height: 38px; border-radius: var(--radius-full); background: var(--gradient-cta); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+        .how-step h3 { font-size: var(--text-lg); margin-bottom: 8px; }
+        .how-step p { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-normal); }
+        .faq-section { padding: 20px 0 70px; max-width: 760px; margin: 0 auto; text-align: center; }
+        .faq-list { text-align: left; margin-top: 36px; display: flex; flex-direction: column; gap: 12px; }
+        .faq-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        .faq-item summary { cursor: pointer; list-style: none; padding: 18px 22px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: "+"; font-size: 1.4rem; color: var(--primary-blue); transition: transform .25s ease; flex-shrink: 0; }
+        .faq-item[open] summary::after { transform: rotate(45deg); }
+        .faq-item p { padding: 0 22px 18px; color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); }
+        @media (max-width: 800px) { .how-steps { grid-template-columns: 1fr; } }
         .reveal { opacity: 0; transform: translateY(32px); transition: all 0.7s cubic-bezier(0.4,0,0.2,1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
         .delay-1 { transition-delay: 0.08s; }
@@ -525,7 +545,9 @@
         <ul class="nav-links">
             <li><a href="#hero">หน้าแรก</a></li>
             <li><a href="#features">ฟีเจอร์</a></li>
+            <li><a href="#how">วิธีใช้งาน</a></li>
             <li><a href="#pricing">แพ็กเกจ</a></li>
+            <li><a href="#faq">คำถามที่พบบ่อย</a></li>
         </ul>
 
         <div class="nav-auth">
@@ -700,6 +722,16 @@
             </div>
         </section>
 
+        <section class="how-section reveal" id="how">
+            <h2 class="reveal delay-1">เริ่มต้นง่ายใน <span class="highlight">3 ขั้นตอน</span></h2>
+            <p class="reveal delay-2">จากไอเดียสู่คอร์สที่นักเรียนเข้าเรียนได้จริง</p>
+            <div class="how-steps">
+                <div class="how-step reveal delay-1"><div class="how-num">1</div><h3>สร้างคอร์ส</h3><p>เพิ่มบทเรียน ไฟล์ PDF แบบทดสอบ และการบ้าน โดยให้ AI ช่วยร่างหัวข้อและข้อสอบจากเนื้อหาของคุณ</p></div>
+                <div class="how-step reveal delay-2"><div class="how-num">2</div><h3>เปิดให้นักเรียนสมัคร</h3><p>นักเรียนสมัครเรียน เข้าเรียนตามบท และถาม Avatar AI ได้ทันทีเมื่อมีข้อสงสัย</p></div>
+                <div class="how-step reveal delay-3"><div class="how-num">3</div><h3>ติดตามผล</h3><p>ดูความคืบหน้า คะแนน Quiz และการบ้านของนักเรียนรายคนในหน้า Analytics แล้วตรวจงานได้ในที่เดียว</p></div>
+            </div>
+        </section>
+
         <div class="section-divider reveal"></div>
 
         <section class="pricing-section reveal" id="pricing">
@@ -750,6 +782,16 @@
             </div>
         </section>
 
+        <section class="faq-section reveal" id="faq">
+            <h2 class="reveal delay-1">คำถามที่พบบ่อย</h2>
+            <div class="faq-list">
+                <details class="faq-item reveal"><summary>เริ่มใช้งานฟรีได้จริงไหม</summary><p>ได้ แพ็กเกจ Starter ไม่มีค่าใช้จ่าย สร้างคอร์สและเปิดให้นักเรียนเข้าเรียนได้ทันที และอัปเกรดเมื่อต้องการฟีเจอร์เพิ่มได้ภายหลัง</p></details>
+                <details class="faq-item reveal"><summary>Avatar AI ช่วยอะไรนักเรียนได้บ้าง</summary><p>อธิบายเนื้อหาของบทที่กำลังเรียน ตอบคำถาม และปรับสไตล์การสอนตามที่ตั้งค่าไว้ โดยตอบจากเนื้อหาของคอร์สนั้นเป็นหลัก</p></details>
+                <details class="faq-item reveal"><summary>การบ้านและแบบทดสอบตรวจอย่างไร</summary><p>แบบทดสอบแบบเลือกตอบตรวจให้อัตโนมัติ ส่วนการบ้านอาจให้ AI ช่วยเสนอคะแนนและคอมเมนต์ แต่ครูเป็นผู้ยืนยันคะแนนสุดท้ายเสมอ</p></details>
+                <details class="faq-item reveal"><summary>ใช้งานบนมือถือได้ไหม</summary><p>ได้ หน้าเว็บปรับตามขนาดหน้าจอ มีเมนูด้านล่างสำหรับมือถือ และรองรับทั้งธีมมืดและธีมสว่าง</p></details>
+            </div>
+        </section>
+
     </div>
 
     <footer class="footer reveal">
@@ -772,7 +814,9 @@
                 <ul>
                     <li><a href="#hero">หน้าแรก</a></li>
                     <li><a href="#features">ฟีเจอร์</a></li>
-                    <li><a href="#pricing">แพ็กเกจ</a></li>
+                    <li><a href="#how">วิธีใช้งาน</a></li>
+            <li><a href="#pricing">แพ็กเกจ</a></li>
+            <li><a href="#faq">คำถามที่พบบ่อย</a></li>
                 </ul>
             </div>
 
