@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
         body {
             background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
             color: var(--text-main); min-height:100vh; padding:2rem;
@@ -30,14 +30,14 @@
         .btn-back {
             color:var(--text-dim); text-decoration:none;
             display:flex; align-items:center; gap:6px;
-            padding:0.5rem 1rem; border-radius:8px;
+            padding:0.5rem 1rem; border-radius:var(--radius-sm);
             border:1px solid var(--border-color);
             background:rgba(255,255,255,0.03); transition:0.2s;
         }
         .btn-back:hover { color:white; border-color:var(--primary-blue); }
 
         .section {
-            background: var(--card-bg); border-radius:16px;
+            background: var(--card-bg); border-radius:var(--radius-lg);
             padding:2rem; margin-bottom:2rem;
             border:1px solid var(--border-color);
         }
@@ -53,7 +53,7 @@
         .form-control {
             width:100%; padding:0.75rem 1rem;
             background:var(--input-bg); border:1px solid var(--border-color);
-            border-radius:8px; color:var(--text-main); font-size:var(--text-base); transition:0.3s;
+            border-radius:var(--radius-sm); color:var(--text-main); font-size:var(--text-base); transition:0.3s;
         }
         .form-control:focus { outline:none; border-color:var(--primary-blue); background:rgba(59,130,246,0.05); }
         textarea.form-control { resize:vertical; min-height:100px; }
@@ -61,7 +61,7 @@
 
         /* Thumbnail */
         .file-upload-area {
-            border:2px dashed var(--border-color); border-radius:12px;
+            border:2px dashed var(--border-color); border-radius:var(--radius-lg);
             padding:2rem; text-align:center; background:var(--input-bg);
             cursor:pointer; transition:0.3s;
         }
@@ -69,18 +69,18 @@
         .file-upload-icon { font-size:3rem; margin-bottom:0.5rem; }
         .file-preview {
             display:flex; align-items:center; gap:0.75rem;
-            padding:0.75rem; background:var(--input-bg); border-radius:8px; margin-top:0.5rem;
+            padding:0.75rem; background:var(--input-bg); border-radius:var(--radius-sm); margin-top:0.5rem;
         }
-        .file-preview img { width:80px; height:80px; object-fit:cover; border-radius:6px; }
+        .file-preview img { width:80px; height:80px; object-fit:cover; border-radius:var(--radius-sm); }
         .current-thumb {
-            width:100%; border-radius:10px; max-height:200px; object-fit:cover;
+            width:100%; border-radius:var(--radius-md); max-height:200px; object-fit:cover;
             margin-bottom:1rem; border:1px solid var(--border-color);
         }
 
         /* Lessons */
         .lesson-item {
             background:var(--input-bg); border:1px solid var(--border-color);
-            border-radius:12px; padding:1.5rem; margin-bottom:1rem; position:relative;
+            border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem; position:relative;
         }
         .lesson-item.existing { border-left:3px solid var(--primary-blue); }
         .lesson-item.new-lesson { border-left:3px solid var(--success-green); }
@@ -90,13 +90,13 @@
         }
         .lesson-number {
             background:var(--primary-blue); color:white;
-            padding:0.25rem 0.75rem; border-radius:20px; font-size:0.85rem; font-weight:600;
+            padding:0.25rem 0.75rem; border-radius:var(--radius-xl); font-size:0.85rem; font-weight:600;
         }
         .lesson-number.new-badge { background:var(--success-green); }
         .existing-file-badge {
             display:inline-flex; align-items:center; gap:0.5rem;
             background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.25);
-            color:#60a5fa; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.82rem;
+            color:#60a5fa; padding:0.4rem 0.8rem; border-radius:var(--radius-sm); font-size:0.82rem;
             margin-bottom:0.75rem;
         }
         .upload-method {
@@ -104,7 +104,7 @@
             gap:0.75rem; margin-top:0.5rem;
         }
         .method-option {
-            border:1px solid var(--border-color); border-radius:8px;
+            border:1px solid var(--border-color); border-radius:var(--radius-sm);
             padding:0.75rem; text-align:center; cursor:pointer; transition:0.2s;
             background:var(--input-bg); color:var(--text-dim); font-size:0.9rem;
         }
@@ -114,7 +114,7 @@
 
         /* Buttons */
         .btn {
-            padding:0.75rem 1.5rem; border:none; border-radius:8px;
+            padding:0.75rem 1.5rem; border:none; border-radius:var(--radius-sm);
             font-weight:600; cursor:pointer; transition:0.3s; font-size:var(--text-base);
             display:inline-flex; align-items:center; gap:0.5rem;
         }
@@ -125,7 +125,7 @@
         .btn-danger {
             background:rgba(239,68,68,0.15); color:#ef4444;
             border:1px solid rgba(239,68,68,0.3); padding:0.4rem 0.8rem;
-            font-size:0.85rem; border-radius:6px; font-weight:500;
+            font-size:0.85rem; border-radius:var(--radius-sm); font-weight:500;
         }
         .btn-danger:hover { background:#ef4444; color:white; }
         .btn-outline {
@@ -143,7 +143,7 @@
         /* Quiz */
         .quiz-item {
             background:var(--input-bg); border:1px solid var(--border-color);
-            border-radius:12px; padding:1.5rem; margin-bottom:1rem;
+            border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem;
         }
         .quiz-question-header {
             display:flex; justify-content:space-between;
@@ -151,7 +151,7 @@
         }
         .quiz-question-number {
             background:#8b5cf6; color:white;
-            padding:0.25rem 0.75rem; border-radius:20px; font-size:0.85rem; font-weight:600;
+            padding:0.25rem 0.75rem; border-radius:var(--radius-xl); font-size:0.85rem; font-weight:600;
         }
         .quiz-choices {
             display:grid; grid-template-columns:1fr 1fr;
@@ -161,14 +161,14 @@
             display:flex; align-items:center; gap:0.5rem;
         }
         .choice-label {
-            background:rgba(255,255,255,0.1); border-radius:6px;
+            background:rgba(255,255,255,0.1); border-radius:var(--radius-sm);
             padding:0.3rem 0.6rem; font-weight:700; min-width:32px; text-align:center;
         }
 
         /* AI Quiz */
         .ai-gen-area {
             background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.2);
-            border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;
+            border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1.5rem;
         }
         .ai-gen-title { font-weight:700; color:#a78bfa; margin-bottom:1rem; font-size:var(--text-base); }
         .ai-gen-row { display:grid; grid-template-columns:1fr auto auto; gap:0.75rem; align-items:end; }
@@ -193,7 +193,7 @@
         .hw-help-overlay.show { display: flex; }
         .hw-help-modal {
             background: var(--bg-elevated); border: 1px solid var(--border-color);
-            border-radius: 16px; width: 100%; max-width: 640px;
+            border-radius: var(--radius-lg); width: 100%; max-width: 640px;
             max-height: 88vh; overflow-y: auto; padding: 1.75rem;
         }
         .hw-help-modal h3 { font-size: 1.15rem; margin-bottom: 0.25rem; }
@@ -205,7 +205,7 @@
         .hw-help-section ul { margin: 0; padding-left: 1.2rem; color: var(--text-main); font-size: 0.88rem; line-height: 1.75; }
         .hw-help-template {
             background: var(--input-bg); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 1rem 1.1rem;
+            border-radius: var(--radius-lg); padding: 1rem 1.1rem;
             font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
             color: var(--text-main); white-space: pre-wrap; line-height: 1.7;
         }
@@ -220,17 +220,17 @@
         /* Homework */
         .hw-item {
             background:var(--input-bg); border:1px solid var(--border-color);
-            border-radius:12px; padding:1.5rem; margin-bottom:1rem;
+            border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem;
         }
         .hw-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
         .hw-number-badge {
             background:var(--gradient-warning);
-            color:white; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.85rem; font-weight:600;
+            color:white; padding:0.25rem 0.75rem; border-radius:var(--radius-xl); font-size:0.85rem; font-weight:600;
         }
         .hw-type-selector { display:flex; gap:0.75rem; margin-top:0.75rem; }
         .hw-type-btn {
             flex:1; padding:0.6rem; border:1px solid var(--border-color);
-            border-radius:8px; background:var(--input-bg); color:var(--text-dim);
+            border-radius:var(--radius-sm); background:var(--input-bg); color:var(--text-dim);
             cursor:pointer; font-size:0.85rem; text-align:center; transition:0.2s;
         }
         .hw-type-btn.active { border-color:#f59e0b; background:rgba(245,158,11,0.15); color:white; }
@@ -264,11 +264,11 @@
 
         .alert-info {
             background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25);
-            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#93c5fd;
+            border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#93c5fd;
         }
         .alert-warning {
             background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
-            border-radius:10px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#fcd34d;
+            border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#fcd34d;
         }
 
         @media (max-width:640px) { .grid { grid-template-columns:1fr; } .ai-gen-row { grid-template-columns:1fr; } }
@@ -1011,7 +1011,7 @@ function quizImageUploadHtml(qId, data) {
             <div class="form-group">
                 <label>รูปภาพประกอบคำถาม (ไม่บังคับ)</label>
                 <div class="quiz-image-upload-area" onclick="document.getElementById('${qId}-image-input').click()"
-                    style="border:1.5px dashed var(--border-color);border-radius:8px;padding:0.6rem 1rem;
+                    style="border:1.5px dashed var(--border-color);border-radius:var(--radius-sm);padding:0.6rem 1rem;
                     cursor:pointer;font-size:0.82rem;color:var(--text-dim);text-align:center;transition:border-color 0.15s;"
                     onmouseover="this.style.borderColor='var(--primary-blue)'" onmouseout="this.style.borderColor='var(--border-color)'">
                     <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
@@ -1020,7 +1020,7 @@ function quizImageUploadHtml(qId, data) {
                 <input type="hidden" class="quiz-image-url" value="${data?.imageUrl || ''}">
                 <div id="${qId}-image-preview">${data?.imageUrl ? `
                     <div style="position:relative;display:inline-block;margin-top:0.6rem;">
-                        <img alt="รูปประกอบ" src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                        <img alt="รูปประกอบ" src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:var(--radius-sm);display:block;">
                         <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                             style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
                             background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
@@ -1038,7 +1038,7 @@ async function handleQuizImageUpload(qId, file) {
         document.querySelector(`#${qId} .quiz-image-url`).value = url;
         preview.innerHTML = `
             <div style="position:relative;display:inline-block;margin-top:0.6rem;">
-                <img alt="รูปประกอบ" src="${url}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                <img alt="รูปประกอบ" src="${url}" style="max-width:220px;max-height:140px;border-radius:var(--radius-sm);display:block;">
                 <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                     style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
                     background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
@@ -1429,7 +1429,7 @@ document.getElementById('courseDescFileInput').addEventListener('change', functi
     courseDescFile = file;
     const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
     document.getElementById('courseDescFilePreview').innerHTML = `
-        <div class="file-preview" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--input-bg,rgba(255,255,255,0.05));border-radius:8px;margin-top:0.5rem;">
+        <div class="file-preview" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--input-bg,rgba(255,255,255,0.05));border-radius:var(--radius-sm);margin-top:0.5rem;">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
             <button aria-label="ลบ" type="button" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
@@ -1659,7 +1659,7 @@ function rubricRowHtml(hwId, criterion, points) {
             <input type="number" class="form-control rubric-points" placeholder="คะแนน" min="0" value="${points??''}" style="width:100px;" oninput="updateRubricTotal('${hwId}')">
             <button aria-label="ลบ" type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
                 style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
-                width:32px;height:32px;border-radius:6px;cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                width:32px;height:32px;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 }
 
@@ -1798,7 +1798,7 @@ window.addHomework = function(data = null) {
                 <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:${initType==='code'?'block':'none'};margin-top:0.75rem;">
                     <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
                     <select class="hw-code-lang" id="hw-code-lang-${hwId}" onchange="setHwCodeLang('${hwId}', this.value)"
-                        style="width:100%;padding:0.6rem;border-radius:8px;background:var(--input-bg);color:var(--text-main);border:1px solid var(--border-color);margin-top:0.4rem;">
+                        style="width:100%;padding:0.6rem;border-radius:var(--radius-sm);background:var(--input-bg);color:var(--text-main);border:1px solid var(--border-color);margin-top:0.4rem;">
                         <option value="python" ${(data?.codeLanguage||'python')==='python'?'selected':''}>Python (รันในเบราว์เซอร์ได้)</option>
                         <option value="javascript" ${data?.codeLanguage==='javascript'?'selected':''}>JavaScript (รันในเบราว์เซอร์ได้)</option>
                         <option value="html" ${data?.codeLanguage==='html'?'selected':''}>HTML/CSS (แสดงผลในเบราว์เซอร์ได้)</option>

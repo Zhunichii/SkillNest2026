@@ -86,7 +86,7 @@
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 14px 24px; background: var(--nav-bg);
-            backdrop-filter: blur(15px); border-radius: 14px;
+            backdrop-filter: blur(15px); border-radius: var(--radius-lg);
             margin: 20px auto; width: 92%; max-width: 1100px;
             border: 1px solid var(--line);
             position: sticky; top: 20px; z-index: 1000;
@@ -100,7 +100,7 @@
 
         .logo { font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
         .logo span {
-            background: var(--primary-blue); padding: 4px 9px; border-radius: 7px;
+            background: var(--primary-blue); padding: 4px 9px; border-radius: var(--radius-sm);
             font-size: 0.85rem; color: white; display: inline-flex;
         }
 
@@ -112,7 +112,7 @@
 
         .btn-login {
             background: var(--primary-blue); color: white; border: none;
-            padding: 9px 22px; border-radius: 8px; cursor: pointer; font-weight: 500;
+            padding: 9px 22px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500;
             font-size: 0.88rem; transition: 0.2s; font-family: var(--font-body);
         }
         .btn-login:hover { background: var(--primary-2); }
@@ -123,7 +123,7 @@
 
         .profile-dropdown-btn {
             background: var(--bg-color); color: var(--text-main); border: 1px solid var(--line-strong);
-            padding: 7px 14px; border-radius: 8px; cursor: pointer; font-weight: 500;
+            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500;
             font-size: 0.85rem;
             display: flex; align-items: center; gap: 7px; transition: 0.2s;
         }
@@ -132,7 +132,7 @@
         .dropdown-menu {
             display: none; position: absolute; top: 50px; right: 0;
             background: var(--bg-elevated); backdrop-filter: blur(15px);
-            border: 1px solid var(--line); border-radius: 10px;
+            border: 1px solid var(--line); border-radius: var(--radius-md);
             min-width: 190px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);
             overflow: hidden;
         }
@@ -169,10 +169,10 @@
 
         .btn-cta {
             background: var(--primary-blue); color: white; border: none;
-            padding: 13px 28px; border-radius: 9px; cursor: pointer; font-size: 0.95rem;
+            padding: 13px 28px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.95rem;
             font-weight: 500; transition: transform 0.2s, box-shadow 0.3s; font-family: var(--font-body);
             position: relative; overflow: hidden;
-            box-shadow: 0 4px 16px rgba(99,102,241,0.25);
+            box-shadow: var(--shadow-sm);
         }
         .btn-cta::after {
             content: ''; position: absolute; top: 0; left: -120%;
@@ -180,13 +180,13 @@
             background: linear-gradient(100deg, transparent, rgba(255,255,255,0.28), transparent);
             transition: left 0.6s ease;
         }
-        .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(99,102,241,0.4); }
+        .btn-cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
         .btn-cta:hover::after { left: 130%; }
         .btn-cta:active { transform: translateY(0); }
 
         .btn-cta-ghost {
             background: transparent; color: var(--text-main); border: 1px solid var(--line-strong);
-            padding: 13px 28px; border-radius: 9px; cursor: pointer; font-size: 0.95rem;
+            padding: 13px 28px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.95rem;
             font-weight: 500; transition: 0.2s; font-family: var(--font-body);
         }
         .btn-cta-ghost:hover { border-color: var(--primary-blue); background: rgba(99,102,241,0.06); }
@@ -219,7 +219,7 @@
         .mockup-window {
             width: 100%; max-width: 540px; aspect-ratio: 16/10.5;
             background: #0D1024;
-            border: 1px solid var(--line-strong); border-radius: 12px;
+            border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
             box-shadow: 0 24px 60px -10px rgba(0,0,0,0.6);
             display: flex; flex-direction: column; overflow: hidden; position: relative;
             transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s;
@@ -229,7 +229,7 @@
             box-shadow: 0 32px 70px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.25);
         }
         .mockup-glow {
-            position: absolute; inset: 0; border-radius: 12px; pointer-events: none;
+            position: absolute; inset: 0; border-radius: var(--radius-lg); pointer-events: none;
             background: radial-gradient(circle at var(--mx,50%) var(--my,0%), rgba(99,102,241,0.14), transparent 55%);
             opacity: 0; transition: opacity 0.3s; z-index: 5;
         }
@@ -254,7 +254,7 @@
         }
         .mock-nav-item {
             display: flex; align-items: center; gap: 8px; padding: 7px 8px;
-            border-radius: 6px; font-size: 0.62rem; color: var(--text-faint);
+            border-radius: var(--radius-sm); font-size: 0.62rem; color: var(--text-faint);
         }
         .mock-nav-item.active { background: rgba(99,102,241,0.15); color: #A5B4FC; }
         .mock-nav-item .ico { width: 10px; height: 10px; border-radius: 3px; background: currentColor; opacity: 0.5; flex-shrink: 0; }
@@ -263,13 +263,13 @@
         .mock-stat-row { display: flex; gap: 8px; }
         .mock-stat {
             flex: 1; background: rgba(226,232,240,0.03); border: 1px solid var(--line);
-            border-radius: 6px; padding: 8px 10px;
+            border-radius: var(--radius-sm); padding: 8px 10px;
         }
         .mock-stat-label { font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-faint); text-transform: uppercase; margin-bottom: 4px; }
         .mock-stat-value { font-family: var(--font-display); font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
 
         .mock-course-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; }
-        .mock-course-card { background: rgba(226,232,240,0.03); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+        .mock-course-card { background: rgba(226,232,240,0.03); border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
         .mock-course-thumb { height: 36%; background: linear-gradient(135deg, var(--primary-2), var(--primary-blue)); }
         .mock-course-thumb.alt { background: linear-gradient(135deg, #0E7490, #164E63); }
         .mock-course-body { padding: 7px 9px; }
@@ -304,14 +304,14 @@
         }
         .mock-chat-bubble {
             background: rgba(226,232,240,0.04); border: 1px solid var(--line);
-            border-radius: 8px; padding: 8px 10px; width: 92%;
+            border-radius: var(--radius-sm); padding: 8px 10px; width: 92%;
         }
         .mock-chat-bubble .mock-line { background: rgba(226,232,240,0.14); }
 
         /* --- Stats strip --- */
         .stats-strip {
             display: grid; grid-template-columns: repeat(4,1fr); gap: 1px;
-            background: var(--line); border: 1px solid var(--line); border-radius: 12px;
+            background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg);
             overflow: hidden; margin: 0 0 70px;
         }
         .stat-block {
@@ -335,7 +335,7 @@
         .pricing-card {
             background: var(--card);
             border: 1px solid var(--line);
-            border-radius: 14px; padding: 36px 38px;
+            border-radius: var(--radius-lg); padding: 36px 38px;
             width: 100%; max-width: 480px;
             text-align: left;
             transition: all 0.3s ease;
@@ -368,7 +368,7 @@
         .features-list li svg { width: 15px; height: 15px; color: var(--success); flex-shrink: 0; margin-top: 1px; }
 
         .btn-pricing {
-            width: 100%; padding: 12px; border-radius: 8px; font-size: 0.92rem;
+            width: 100%; padding: 12px; border-radius: var(--radius-sm); font-size: 0.92rem;
             border: 1px solid var(--line-strong); background: transparent;
             color: var(--text-main); font-weight: 500; cursor: pointer; transition: all 0.2s ease;
             font-family: var(--font-body);
@@ -415,12 +415,12 @@
         .newsletter-form { display: flex; flex-direction: column; gap: 10px; max-width: 280px; }
         .newsletter-form input {
             background: var(--input-bg); border: 1px solid var(--line);
-            color: var(--text-main); padding: 11px 14px; border-radius: 8px; font-size: 0.86rem;
+            color: var(--text-main); padding: 11px 14px; border-radius: var(--radius-sm); font-size: 0.86rem;
         }
         .newsletter-form input:focus { outline: none; border-color: var(--primary-blue); }
         .newsletter-form button {
             background: var(--primary-blue); color: white; border: none; padding: 11px;
-            border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 0.86rem;
+            border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; font-size: 0.86rem;
         }
         .newsletter-form button:hover { background: var(--primary-2); }
 
@@ -462,7 +462,7 @@
         .demo-window {
             width: 100%; max-width: 460px;
             background: rgba(13,16,36,0.85); backdrop-filter: blur(12px);
-            border: 1px solid var(--line-strong); border-radius: 16px;
+            border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
             box-shadow: 0 24px 60px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.08);
             overflow: hidden; text-align: left; position: relative;
         }
@@ -483,7 +483,7 @@
         .demo-chat { padding: 16px; min-height: 184px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-end; }
         .demo-msg {
             max-width: 82%; padding: 9px 13px; font-size: 0.86rem; line-height: 1.5;
-            border-radius: 12px; opacity: 0; transform: translateY(8px);
+            border-radius: var(--radius-lg); opacity: 0; transform: translateY(8px);
             animation: msg-in 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
         }
         @keyframes msg-in { to { opacity: 1; transform: translateY(0); } }
@@ -497,7 +497,7 @@
 
         .pricing-card.popular { position: relative; }
         .pricing-card.popular::before {
-            content: ''; position: absolute; inset: -1px; border-radius: 14px; z-index: -1;
+            content: ''; position: absolute; inset: -1px; border-radius: var(--radius-lg); z-index: -1;
             background: linear-gradient(120deg, var(--primary-blue), var(--accent-cyan), var(--primary-blue));
             background-size: 200% 200%; animation: border-flow 4s linear infinite; opacity: 0.55;
         }

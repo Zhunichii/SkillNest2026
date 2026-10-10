@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สมัครสมาชิก — SkillNest</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+    <link rel="shortcut icon" href="../favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../theme.css">
     <style>
@@ -39,7 +39,7 @@
         .brand-top { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
         .brand-top span {
             background: var(--primary-blue); color: white;
-            padding: 5px 10px; border-radius: 8px; font-size: 0.9rem;
+            padding: 5px 10px; border-radius: var(--radius-sm); font-size: 0.9rem;
         }
 
         .brand-content { display: flex; flex-direction: column; gap: 48px; max-width: 460px; }
@@ -53,7 +53,7 @@
             letter-spacing: 0.1em; color: var(--accent-cyan); margin-bottom: 18px;
         }
         .brand-quote h2 { font-size: 1.9rem; line-height: 1.5; margin-bottom: 22px; font-weight: 600; }
-        .brand-quote p { color: var(--text-dim); font-size: 1rem; line-height: 1.75; }
+        .brand-quote p { color: var(--text-dim); font-size: var(--text-base); line-height: 1.75; }
 
         .brand-checklist { display: flex; flex-direction: column; gap: 16px; }
         .brand-checklist-item { display: flex; align-items: center; gap: 12px; font-size: 0.92rem; color: var(--text-dim); }
@@ -65,7 +65,7 @@
             font-size: 0.9rem; color: var(--text-dim); line-height: 1.6;
         }
         .brand-feature-icon {
-            flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px;
+            flex-shrink: 0; width: 34px; height: 34px; border-radius: var(--radius-md);
             background: rgba(99,102,241,0.14); color: var(--primary-blue);
             display: flex; align-items: center; justify-content: center;
         }
@@ -81,13 +81,13 @@
         .auth-card {
             background: var(--bg-elevated);
             border: 1px solid var(--line);
-            border-radius: 20px;
+            border-radius: var(--radius-xl);
             padding: 40px 40px 36px;
             box-shadow: 0 24px 60px rgba(0,0,0,0.35);
         }
 
         .form-header { margin-bottom: 26px; }
-        .form-header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+        .form-header h1 { font-size: var(--text-2xl); margin-bottom: 8px; }
         .form-header p { color: var(--text-dim); font-size: 0.9rem; }
 
         .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -100,7 +100,7 @@
             padding: 11px 15px;
             background-color: var(--input-bg);
             border: 1px solid var(--line-strong);
-            border-radius: 9px;
+            border-radius: var(--radius-sm);
             font-size: 0.92rem;
             color: var(--text-main);
             outline: none;
@@ -116,7 +116,7 @@
             background-color: var(--primary-blue);
             color: white;
             border: none;
-            border-radius: 9px;
+            border-radius: var(--radius-sm);
             font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
@@ -134,7 +134,7 @@
             font-size: 0.83rem;
             background: rgba(248,113,113,0.08);
             border: 1px solid rgba(248,113,113,0.25);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             padding: 9px 13px;
             margin-top: 10px;
             display: none;
@@ -144,7 +144,7 @@
             font-size: 0.83rem;
             background: rgba(52,211,153,0.08);
             border: 1px solid rgba(52,211,153,0.25);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             padding: 9px 13px;
             margin-top: 10px;
             display: none;
@@ -166,7 +166,7 @@
         .user-type-card {
             background: var(--card-bg);
             border: 1.5px solid var(--line-strong);
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             padding: 16px 12px;
             text-align: center;
             transition: all 0.2s ease;
@@ -196,7 +196,7 @@
             .form-panel { padding: 24px; }
         }
         @media (max-width: 480px) {
-            .auth-card { padding: 28px 20px; border-radius: 16px; }
+            .auth-card { padding: 28px 20px; border-radius: var(--radius-lg); }
         }
 
         /* ── Polish layer ── */
@@ -233,14 +233,14 @@
             box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
         }
 
-        .btn-signup { position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(99,102,241,0.2); }
+        .btn-signup { position: relative; overflow: hidden; box-shadow: var(--shadow-sm); }
         .btn-signup::after {
             content: ''; position: absolute; top: 0; left: -120%;
             width: 55%; height: 100%;
             background: linear-gradient(100deg, transparent, rgba(255,255,255,0.25), transparent);
             transition: left 0.6s ease;
         }
-        .btn-signup:hover { box-shadow: 0 8px 24px rgba(99,102,241,0.38); }
+        .btn-signup:hover { box-shadow: var(--shadow-md); }
         .btn-signup:hover::after { left: 140%; }
 
         @media (prefers-reduced-motion: reduce) {
