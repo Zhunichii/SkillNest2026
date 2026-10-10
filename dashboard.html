@@ -801,7 +801,21 @@
         .progress-fill { height: 100%; background: var(--primary-blue); border-radius: 3px; transition: width 0.3s; }
 
         .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); grid-column: 1 / -1; width: 100%; }
-        .empty-state-icon { font-size: 4rem; margin-bottom: 20px; }
+        .empty-state-icon {
+            width: 104px; height: 104px; margin: 0 auto 24px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.8rem; color: var(--primary-blue);
+            border-radius: var(--radius-full);
+            background: radial-gradient(circle at 30% 25%, rgba(139,92,246,0.22), rgba(59,130,246,0.10) 70%);
+            border: 1px solid rgba(139,92,246,0.28);
+            box-shadow: 0 0 0 10px rgba(139,92,246,0.05), 0 12px 32px rgba(59,130,246,0.12);
+        }
+        .empty-state .empty-cta {
+            margin-top: 20px; padding: 10px 22px; border: none; cursor: pointer;
+            border-radius: var(--radius-sm); color: #fff; font-weight: 600; font-family: inherit;
+            background: var(--gradient-cta);
+        }
+        .empty-state .empty-cta:hover { filter: brightness(1.1); }
         .empty-state h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-main); }
 
         .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 60px 0; }
@@ -1194,7 +1208,7 @@
             updateBadge(unreadCount);
 
             if (filtered.length === 0) {
-                list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span></div><p>ไม่มีการแจ้งเตือน</p></div>`;
+                list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span></div><p>ไม่มีการแจ้งเตือน</p></div>`;
                 return;
             }
 
@@ -1418,7 +1432,7 @@
                     renderFavoritesGrid();
                 }
                 if (visibleCount === 0) {
-                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M4 15h.01M4 10h.01M10 3h.01"/><path d="M14.5 4.5L18 2l1 3.5L22.5 7l-2.5 1.5L21 12l-3.5-2-1.5 3.5-2-3-4 1 1.5-4-3-2 4-.5z"/></svg></span></div><h3>คุณสมัครเรียนครบทุกคอร์สแล้ว!</h3><p>ไปที่ "คอร์สของฉัน" เพื่อเริ่มเรียน</p></div>`;
+                    courseGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 014 4v13a3 3 0 00-3-3H2z"/><path d="M22 4h-6a4 4 0 00-4 4v13a3 3 0 013-3h7z"/></svg></span></div><h3>ยังไม่มีคอร์สใหม่ให้สมัครตอนนี้</h3><p>คุณอาจสมัครครบทุกคอร์สแล้ว หรือยังไม่มีคอร์สเปิดใหม่ — ดูคอร์สที่เรียนอยู่ได้ที่ "คอร์สของฉัน"</p><button class="empty-cta" onclick="switchPage('my-courses')">ไปที่คอร์สของฉัน</button></div>`;
                 }
             } catch(error) {
                 console.error('Error loading courses:', error);
