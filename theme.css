@@ -161,6 +161,15 @@ html[data-theme="light"] {
     --leading-tight: 1.3;
     --leading-normal: 1.65;
     --leading-relaxed: 1.8;
+
+    /* ── Gradient tokens — สีไล่ระดับที่ใช้ซ้ำทั่วเว็บ รวมมาจากค่าที่กระจัดกระจายเดิม ── */
+    --gradient-ai: linear-gradient(135deg, #8b5cf6, #3b82f6);       /* ปุ่ม/ป้ายเกี่ยวกับ AI */
+    --gradient-ai-deep: linear-gradient(135deg, #7c3aed, #4f46e5);  /* AI โทนเข้ม (เช่น บันทึกค่าเสียง Avatar) */
+    --gradient-success: linear-gradient(135deg, #10b981, #059669);  /* สำเร็จ/เรียนจบ/ยืนยัน */
+    --gradient-cta: linear-gradient(135deg, #3b82f6, #6d28d9);      /* ปุ่มหลักขนาดใหญ่ (สมัครเรียน/บันทึกคอร์ส) */
+    --gradient-warning: linear-gradient(135deg, #f59e0b, #d97706);  /* คำเตือน/การบ้าน */
+    --gradient-danger: linear-gradient(135deg, #ef4444, #dc2626);   /* อันตราย/ลบ */
+    --gradient-neutral: linear-gradient(135deg, #6b7280, #4b5563);  /* ปิดใช้งาน/เป็นกลาง */
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -191,8 +200,11 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
-[tabindex]:focus-visible {
-    outline: none;
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+summary:focus-visible {
+    outline: 2px solid var(--primary-blue, #3b82f6);
+    outline-offset: 2px;
     box-shadow: var(--shadow-focus);
 }
 
@@ -265,6 +277,45 @@ select:focus-visible,
 @keyframes sn-skeleton-shine { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 @media (prefers-reduced-motion: reduce) {
     .sn-skeleton-line, .sn-skeleton-avatar { animation: none; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Empty state (inline) — ใช้แทนข้อความ "ไม่มีข้อมูล" เพลนๆ ในลิสต์/ตาราง
+   ให้ icon-title-description เข้าชุดกับ .empty-state แบบเต็มหน้า
+   สร้างด้วย window.emptyState(...) จาก ui-feedback.js
+   ════════════════════════════════════════════════════════════ */
+.sn-empty-inline {
+    text-align: center;
+    padding: 28px 16px;
+    color: var(--text-dim);
+}
+.sn-empty-inline .sn-empty-icon {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto 10px;
+    opacity: 0.55;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sn-empty-inline .sn-empty-icon svg { width: 100%; height: 100%; }
+.sn-empty-inline strong {
+    display: block;
+    color: var(--text-main);
+    font-size: 0.92rem;
+    margin-bottom: 4px;
+}
+.sn-empty-inline p {
+    font-size: 0.82rem;
+    margin: 0;
+    line-height: var(--leading-normal);
+}
+.sn-empty-inline a {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.82rem;
+    color: var(--primary-blue, #3b82f6);
+    font-weight: 600;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -455,4 +506,55 @@ select:focus-visible,
     .sn-confirm-overlay, .sn-confirm-modal {
         transition: none;
     }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Micro-interactions — ปุ่มกดแล้วมี feedback เบาๆ + แถบ loading
+   ตอนเปลี่ยนหน้า ครอบคลุมปุ่มทุกแบบในเว็บ (.btn, btn-*, *-btn) โดยไม่ไปแตะ
+   หน้าที่กำหนด :active ของตัวเองไว้แล้ว (ลำดับ cascade ให้ของหน้าชนะ)
+   ════════════════════════════════════════════════════════════ */
+button,
+.btn,
+[class^="btn-"],
+[class*=" btn-"],
+[class$="-btn"],
+[class*="-btn "] {
+    transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+button:not(:disabled):active,
+.btn:not(:disabled):active,
+[class^="btn-"]:not(:disabled):active,
+[class*=" btn-"]:not(:disabled):active,
+[class$="-btn"]:not(:disabled):active,
+[class*="-btn "]:not(:disabled):active {
+    transform: scale(0.96);
+}
+
+/* แถบ loading บนสุดของหน้า — ขึ้นทันทีที่คลิกลิงก์ไปหน้าอื่น ให้รู้สึกว่าระบบตอบสนองแล้ว
+   (เว็บนี้เป็น multi-page ไม่ใช่ SPA จึงใช้แถบจำลองความคืบหน้า ไม่ใช่ progress จริง) */
+.sn-page-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: var(--gradient-cta);
+    z-index: 9999;
+    opacity: 1;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+}
+.sn-page-progress.sn-page-progress-done {
+    width: 100%;
+    transition: width 0.2s ease, opacity 0.4s ease 0.15s;
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button, .btn, [class^="btn-"], [class*=" btn-"], [class$="-btn"], [class*="-btn "] {
+        transition: none;
+    }
+    button:active, .btn:active, [class^="btn-"]:active, [class*=" btn-"]:active, [class$="-btn"]:active, [class*="-btn "]:active {
+        transform: none;
+    }
+    .sn-page-progress { transition: none; }
 }

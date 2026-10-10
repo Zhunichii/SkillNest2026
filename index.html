@@ -328,7 +328,7 @@
         /* --- Pricing Section --- */
         .pricing-section { padding: 20px 0 60px; text-align: center; }
         .pricing-section h2 { font-size: clamp(1.9rem, 4vw, 2.4rem); margin-bottom: 14px; }
-        .pricing-section > p { color: var(--text-dim); margin-bottom: 50px; font-size: 1rem; }
+        .pricing-section > p { color: var(--text-dim); margin-bottom: 50px; font-size: var(--text-base); }
 
         .pricing-cards { display: flex; flex-direction: column; align-items: center; gap: 28px; }
 
@@ -532,7 +532,7 @@
             <button class="btn-login" id="loginBtn" style="display: block;">เข้าสู่ระบบ</button>
             <div class="user-profile" id="userProfile" style="display: none;">
                 <span class="user-name" id="displayName"></span>
-                <button class="profile-dropdown-btn" id="profileDropdownBtn">
+                <button aria-label="เมนูโปรไฟล์" class="profile-dropdown-btn" id="profileDropdownBtn">
                     <span id="userInitial"></span>
                 </button>
                 <div class="dropdown-menu" id="dropdownMenu">

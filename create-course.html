@@ -766,7 +766,7 @@
             <div style="margin-top: 0.75rem;">
                 <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()">สร้างด้วย AI</button>
             </div>
-            <div id="aiLoadingText" class="ai-loading-text">⏳ AI กำลังสร้างแบบทดสอบ กรุณารอสักครู่...</div>
+            <div id="aiLoadingText" class="ai-loading-text">AI กำลังสร้างแบบทดสอบ กรุณารอสักครู่...</div>
         </div>
         <div id="quizList"></div>
         <button class="btn btn-outline" onclick="addQuizQuestion()" style="display:flex;align-items:center;gap:0.5rem;">+ เพิ่มคำถามด้วยตนเอง</button>
@@ -994,8 +994,8 @@ function renderWizardReview() {
     const hwCount   = document.querySelectorAll('#homeworkList .hw-item').length;
 
     document.getElementById('wizardReviewGrid').innerHTML = `
-        <div class="wizard-review-card"><div class="rv-label">ชื่อคอร์ส</div><div class="rv-value" style="font-size:1rem;">${escapeHtmlWizard(title || 'ยังไม่ได้กรอก')}</div></div>
-        <div class="wizard-review-card"><div class="rv-label">หมวดหมู่ / ระดับ</div><div class="rv-value" style="font-size:1rem;">${escapeHtmlWizard(category)} · ${escapeHtmlWizard(level)}</div></div>
+        <div class="wizard-review-card"><div class="rv-label">ชื่อคอร์ส</div><div class="rv-value" style="font-size:var(--text-base);">${escapeHtmlWizard(title || 'ยังไม่ได้กรอก')}</div></div>
+        <div class="wizard-review-card"><div class="rv-label">หมวดหมู่ / ระดับ</div><div class="rv-value" style="font-size:var(--text-base);">${escapeHtmlWizard(category)} · ${escapeHtmlWizard(level)}</div></div>
         <div class="wizard-review-card"><div class="rv-label">รูปปก</div><div class="rv-value">${thumbnailFile ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> อัปโหลดแล้ว' : '— ไม่มี'}</div></div>
         <div class="wizard-review-card"><div class="rv-label">บทเรียน</div><div class="rv-value">${lessonCount} บท</div></div>
         <div class="wizard-review-card"><div class="rv-label">แบบทดสอบ</div><div class="rv-value">${quizCount} ข้อ</div></div>
@@ -1036,8 +1036,8 @@ function setThumbnailFromFile(file) {
         document.getElementById('thumbnailPreview').innerHTML = `
             <div class="file-preview">
                 <img src="${event.target.result}" alt="Thumbnail">
-                <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+                <button aria-label="ลบ" class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     };
     reader.readAsDataURL(file);
@@ -1081,7 +1081,7 @@ window.generateThumbnailWithAI = async function() {
     }
 
     btn.disabled = true;
-    btn.textContent = '⏳ AI กำลังวาดภาพ...';
+    btn.textContent = 'AI กำลังวาดภาพ...';
     if (regenBtn) regenBtn.disabled = true;
     status.classList.add('show');
     status.textContent = 'กำลังสร้างภาพปกคอร์ส อาจใช้เวลาสักครู่...';
@@ -1221,7 +1221,7 @@ window.generateCLOWithAI = async function() {
     const btn    = document.getElementById('btnGenCLO');
     const status = document.getElementById('cloStatus');
     btn.disabled = true;
-    btn.textContent = '⏳ กำลังสร้าง CLO...';
+    btn.textContent = 'กำลังสร้าง CLO...';
     status.textContent = 'Gemini กำลังวิเคราะห์...';
 
     // บัญชีคำกริยาต่อระดับ ฝังลง prompt ตรงๆ เพื่อให้ AI เลือกคำกริยาที่ตรงกับระดับที่ระบุจริง ไม่ใช่เดาเอง
@@ -1302,7 +1302,7 @@ ${verbBankText}
 
     } catch(e) {
         console.error('CLO error:', e);
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'}`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${snEscapeHtml(e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')}`;
         btn.disabled = false;
         btn.textContent = 'สร้าง CLO ด้วย AI';
     }
@@ -1334,9 +1334,9 @@ function renderCLOPreview(result) {
         const color = levelColor[c.level] || '#8b5cf6';
         const warn = flaggedMap[i];
         return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start;">
-            <div style="background:${color};color:white;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-top:2px;">${c.id}</div>
+            <div style="background:${color};color:white;padding:3px 10px;border-radius:99px;font-size:var(--text-xs);font-weight:600;flex-shrink:0;margin-top:2px;">${c.id}</div>
             <div style="flex:1;">
-                <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${c.statement}${warn ? ` <span title="${warn.join(' / ')}" style="color:#f87171;font-size:0.8rem;cursor:help;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ตรวจสอบ</span>` : ''}</div>
+                <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${snEscapeHtml(c.statement)}${warn ? ` <span title="${warn.join(' / ')}" style="color:#f87171;font-size:0.8rem;cursor:help;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ตรวจสอบ</span>` : ''}</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                     <span style="font-size:0.72rem;background:var(--card-bg);border:1px solid var(--line);padding:2px 8px;border-radius:99px;color:var(--text-dim);">${c.level}</span>
                     <span style="font-size:0.72rem;background:var(--card-bg);border:1px solid var(--line);padding:2px 8px;border-radius:99px;color:var(--text-dim);">${c.actionVerb}</span>
@@ -1378,12 +1378,12 @@ function refreshCLOList(check) {
         const warn = flaggedMap[i];
         return `
     <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;" id="cloRow_${i}">
-        <div style="background:#8b5cf6;color:white;padding:4px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-top:8px;">${c.id}</div>
+        <div style="background:#8b5cf6;color:white;padding:4px 10px;border-radius:99px;font-size:var(--text-xs);font-weight:600;flex-shrink:0;margin-top:8px;">${c.id}</div>
         <div style="flex:1;">
-            <input type="text" value="${c.statement}"
+            <input type="text" value="${snEscapeHtml(c.statement)}"
                 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 12px;color:white;font-size:0.85rem;box-sizing:border-box;"
                 onchange="cloItems[${i}].statement = this.value" placeholder="ข้อความ CLO">
-            ${warn ? `<div style="color:#f87171;font-size:0.75rem;margin-top:4px;" title="${warn.join(' / ')}"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ${warn[0]}</div>` : ''}
+            ${warn ? `<div style="color:#f87171;font-size:var(--text-xs);margin-top:4px;" title="${warn.join(' / ')}"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ${warn[0]}</div>` : ''}
         </div>
         <select onchange="cloItems[${i}].level = this.value"
             style="background:var(--input-bg);border:1px solid var(--line-strong);color:var(--text-main);padding:6px 8px;border-radius:8px;font-size:0.8rem;flex-shrink:0;">
@@ -1391,7 +1391,7 @@ function refreshCLOList(check) {
                 `<option ${c.level===l?'selected':''}>${l}</option>`
             ).join('')}
         </select>
-        <button onclick="removeCLO(${i})"
+        <button aria-label="ลบ" onclick="removeCLO(${i})"
             style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
     </div>`;
     }).join('');
@@ -1445,7 +1445,7 @@ window.generateOutlineWithAI = async function() {
     const btn = document.getElementById('btnGenOutline');
     const status = document.getElementById('aiOutlineStatus');
     btn.disabled = true;
-    btn.textContent = '⏳ กำลังสร้าง...';
+    btn.textContent = 'กำลังสร้าง...';
     status.textContent = 'Gemini กำลังคิด...';
 
     const levelTh = { beginner: 'ผู้เริ่มต้น', intermediate: 'ระดับกลาง', advanced: 'ขั้นสูง' }[level];
@@ -1511,7 +1511,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
 
     } catch(e) {
         console.error('AI Outline error:', e);
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'}`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${snEscapeHtml(e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')}`;
         btn.disabled = false;
         btn.textContent = 'สร้างโครงสร้างคอร์สด้วย AI';
     }
@@ -1523,10 +1523,10 @@ function renderOutlinePreview(outline) {
 
     let html = `
     <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:20px;margin-top:12px;">
-        <div style="font-weight:600;color:#a78bfa;margin-bottom:16px;font-size:1rem;">ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
+        <div style="font-weight:600;color:#a78bfa;margin-bottom:16px;font-size:var(--text-base);">ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
 
         <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;margin-bottom:12px;">
-            <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;">ชื่อคอร์สที่แนะนำ</div>
+            <div style="font-size:var(--text-xs);color:var(--text-dim);margin-bottom:4px;">ชื่อคอร์สที่แนะนำ</div>
             <div style="font-weight:600;">${outline.courseTitle || ''}</div>
             <div style="font-size:0.85rem;color:var(--text-dim);margin-top:4px;">${outline.courseDescription || ''}</div>
         </div>
@@ -1534,10 +1534,10 @@ function renderOutlinePreview(outline) {
         <div style="font-size:0.82rem;color:#a78bfa;font-weight:600;margin-bottom:8px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> ${(outline.lessons||[]).length} บทเรียน</div>
         ${(outline.lessons||[]).map((l,i) => `
             <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                <div style="background:#8b5cf6;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;">${i+1}</div>
+                <div style="background:#8b5cf6;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);flex-shrink:0;">${i+1}</div>
                 <div>
-                    <div style="font-weight:500;">${l.title}</div>
-                    <div style="font-size:0.8rem;color:var(--text-dim);">${l.description}</div>
+                    <div style="font-weight:500;">${snEscapeHtml(l.title)}</div>
+                    <div style="font-size:0.8rem;color:var(--text-dim);">${snEscapeHtml(l.description)}</div>
                 </div>
             </div>`).join('')}
 
@@ -1708,8 +1708,8 @@ function handleLessonFileUpload(lessonId, file) {
     document.getElementById(`lessonFilePreview-${lessonId}`).innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
-            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button class="btn btn-danger" onclick="removeLessonFile('${lessonId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeLessonFile('${lessonId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 }
 
@@ -1746,7 +1746,7 @@ window.addSubtopicRow = function(lessonId, data = null) {
                 value="${(data?.title || '').replace(/"/g,'&quot;')}" style="flex:2;">
             <input type="text" class="form-control subtopic-note" placeholder="หมายเหตุ เช่น นาที 0-5 / หน้า 1-3 (ไม่บังคับ)"
                 value="${(data?.note || '').replace(/"/g,'&quot;')}" style="flex:1;">
-            <button type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`);
 };
 
@@ -1776,7 +1776,7 @@ window.generateSubtopicsWithAI = async function(lessonId) {
     }
     const statusEl = document.getElementById(`subtopicStatus-${lessonId}`);
     statusEl.classList.add('show');
-    statusEl.textContent = '⏳ AI กำลังคิดโครงหัวข้อย่อย...';
+    statusEl.textContent = 'AI กำลังคิดโครงหัวข้อย่อย...';
 
     const prompt = `คุณเป็นผู้ช่วยออกแบบเนื้อหาการสอน ช่วยแตกโครงหัวข้อย่อย (สารบัญ) สำหรับบทเรียนต่อไปนี้ เรียงลำดับให้เข้าใจง่ายจากพื้นฐานไปซับซ้อน
 ชื่อบทเรียน: ${title}
@@ -1816,7 +1816,7 @@ window.extractSubtopicsFromPDF = async function(lessonId) {
     }
     const statusEl = document.getElementById(`subtopicStatus-${lessonId}`);
     statusEl.classList.add('show');
-    statusEl.textContent = '⏳ กำลังอ่านไฟล์ PDF...';
+    statusEl.textContent = 'กำลังอ่านไฟล์ PDF...';
 
     try {
         const analyzed = await analyzePdfFile(lessonData.file);
@@ -1885,7 +1885,7 @@ function buildLessonOptionsHtml(selectedValue) {
     lessons.forEach((l, i) => {
         const title = (l.title || `บทที่ ${i+1}`).slice(0, 40);
         const sel = String(selectedValue) === String(i) ? 'selected' : '';
-        html += `<option value="${i}" ${sel}>บทที่ ${i+1}: ${title}</option>`;
+        html += `<option value="${i}" ${sel}>บทที่ ${i+1}: ${snEscapeHtml(title)}</option>`;
     });
     return html;
 }
@@ -1910,7 +1910,7 @@ window.addQuizQuestion = function(data = null) {
                         <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
                     </select>
                     <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
-                    <button class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
+                    <button aria-label="ลบ" class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.9rem;font-size:0.82rem;color:var(--text-dim);flex-wrap:wrap;">
@@ -1947,8 +1947,8 @@ function quizImageUploadHtml(qId, data) {
                 <input type="hidden" class="quiz-image-url" value="${data?.imageUrl || ''}">
                 <div id="${qId}-image-preview">${data?.imageUrl ? `
                     <div style="position:relative;display:inline-block;margin-top:0.6rem;">
-                        <img src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
-                        <button type="button" onclick="removeQuizQuestionImage('${qId}')"
+                        <img alt="รูปประกอบ" src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                        <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                             style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
                             background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
                     </div>` : ''}</div>
@@ -1959,19 +1959,19 @@ async function handleQuizImageUpload(qId, file) {
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพเท่านั้นครับ', 'warning'); return; }
     const preview = document.getElementById(`${qId}-image-preview`);
-    preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-dim);">⏳ กำลังอัปโหลด...</div>`;
+    preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-dim);">กำลังอัปโหลด...</div>`;
     try {
         const url = await uploadToCloudinary(file, 'skillnest/quiz-images');
         document.querySelector(`#${qId} .quiz-image-url`).value = url;
         preview.innerHTML = `
             <div style="position:relative;display:inline-block;margin-top:0.6rem;">
-                <img src="${url}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
-                <button type="button" onclick="removeQuizQuestionImage('${qId}')"
+                <img alt="รูปประกอบ" src="${url}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                     style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
                     background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     } catch (e) {
-        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${e.message}</div>`;
+        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${snEscapeHtml(e.message)}</div>`;
     }
 }
 
@@ -2081,7 +2081,7 @@ window.addFormQuestion = function(hwId, data = null) {
                         <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
                     </select>
                     <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
-                    <button type="button" class="btn btn-danger" onclick="removeFormQuestion('${qId}')">ลบ</button>
+                    <button aria-label="ลบ" type="button" class="btn btn-danger" onclick="removeFormQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
             <div class="form-group">
@@ -2253,8 +2253,8 @@ document.getElementById('hwSourceFileInput').addEventListener('change', function
     document.getElementById('hwSourceFilePreview').innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
-            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -2333,8 +2333,8 @@ document.getElementById('courseDescFileInput').addEventListener('change', functi
     document.getElementById('courseDescFilePreview').innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
-            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -2513,7 +2513,7 @@ window.extractHomeworkWithAI = async function() {
     }
 
     btn.disabled = true;
-    btn.textContent = '⏳ AI กำลังประมวลผล...';
+    btn.textContent = 'AI กำลังประมวลผล...';
     status.classList.add('show');
     status.textContent = 'กำลังอ่านเนื้อหา...';
 
@@ -2611,8 +2611,8 @@ window.extractHomeworkWithAI = async function() {
                 if (preview) {
                     preview.innerHTML = `
                         <div style="position:relative;display:inline-block;margin-top:0.6rem;">
-                            <img src="${imgUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
-                            <button type="button" onclick="removeQuizQuestionImage('${hwId}')"
+                            <img alt="รูปประกอบ" src="${imgUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                            <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${hwId}')"
                                 style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
                                 background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
                         </div>`;
@@ -2647,7 +2647,7 @@ function rubricRowHtml(hwId, criterion, points) {
         <div class="rubric-row" id="${rowId}" style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
             <input type="text" class="form-control rubric-criterion" placeholder="เช่น ความถูกต้องของโค้ด" value="${escapeAttrCourse(criterion||'')}" style="flex:1;" oninput="updateRubricTotal('${hwId}')">
             <input type="number" class="form-control rubric-points" placeholder="คะแนน" min="0" value="${points??''}" style="width:100px;" oninput="updateRubricTotal('${hwId}')">
-            <button type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
+            <button aria-label="ลบ" type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
                 style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
                 width:32px;height:32px;border-radius:6px;cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
@@ -2735,7 +2735,7 @@ window.addHomework = function() {
                     <select class="form-control hw-lesson-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" title="ผูกกับบทเรียน">
                         ${buildLessonOptionsHtml('')}
                     </select>
-                    <button class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
+                    <button aria-label="ลบ" class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
                 </div>
             </div>
             <div class="form-group">
@@ -2886,7 +2886,7 @@ function updateProgress(items) {
     container.innerHTML = items.map(item => `
         <div class="progress-item">
             <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
-                <span>${item.name}</span><span>${item.status}</span>
+                <span>${snEscapeHtml(item.name)}</span><span>${item.status}</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" style="width:${item.progress}%"></div></div>
         </div>`).join('');

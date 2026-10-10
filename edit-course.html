@@ -53,7 +53,7 @@
         .form-control {
             width:100%; padding:0.75rem 1rem;
             background:var(--input-bg); border:1px solid var(--border-color);
-            border-radius:8px; color:var(--text-main); font-size:1rem; transition:0.3s;
+            border-radius:8px; color:var(--text-main); font-size:var(--text-base); transition:0.3s;
         }
         .form-control:focus { outline:none; border-color:var(--primary-blue); background:rgba(59,130,246,0.05); }
         textarea.form-control { resize:vertical; min-height:100px; }
@@ -110,12 +110,12 @@
         }
         .method-option:hover { border-color:var(--primary-blue); color:white; }
         .method-option.active { border-color:var(--primary-blue); background:rgba(59,130,246,0.1); color:white; }
-        .method-icon { font-size:1.5rem; margin-bottom:0.25rem; }
+        .method-icon { font-size:var(--text-2xl); margin-bottom:0.25rem; }
 
         /* Buttons */
         .btn {
             padding:0.75rem 1.5rem; border:none; border-radius:8px;
-            font-weight:600; cursor:pointer; transition:0.3s; font-size:1rem;
+            font-weight:600; cursor:pointer; transition:0.3s; font-size:var(--text-base);
             display:inline-flex; align-items:center; gap:0.5rem;
         }
         .btn-primary { background:var(--primary-blue); color:white; }
@@ -136,7 +136,7 @@
         .btn-warning { background:var(--warning); color:white; }
         .btn-warning:hover { background:#d97706; }
         .btn-save {
-            background:linear-gradient(135deg,#3b82f6,#6d28d9);
+            background:var(--gradient-cta);
             color:white; font-size:1.1rem; padding:1rem 3rem;
         }
 
@@ -170,9 +170,9 @@
             background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.2);
             border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;
         }
-        .ai-gen-title { font-weight:700; color:#a78bfa; margin-bottom:1rem; font-size:1rem; }
+        .ai-gen-title { font-weight:700; color:#a78bfa; margin-bottom:1rem; font-size:var(--text-base); }
         .ai-gen-row { display:grid; grid-template-columns:1fr auto auto; gap:0.75rem; align-items:end; }
-        .btn-ai { background:linear-gradient(135deg,#8b5cf6,#3b82f6); color:white; }
+        .btn-ai { background:var(--gradient-ai); color:white; }
         .ai-loading-text { display:none; color:var(--text-dim); font-size:0.9rem; margin-top:0.5rem; }
         .ai-loading-text.show { display:block; }
 
@@ -224,7 +224,7 @@
         }
         .hw-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
         .hw-number-badge {
-            background:linear-gradient(135deg,#f59e0b,#d97706);
+            background:var(--gradient-warning);
             color:white; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.85rem; font-weight:600;
         }
         .hw-type-selector { display:flex; gap:0.75rem; margin-top:0.75rem; }
@@ -428,7 +428,7 @@
                     <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> สร้างด้วย AI</button>
                     <small style="color:var(--text-dim);">ใช้ Claude AI สร้างโจทย์อัตโนมัติ</small>
                 </div>
-                <div id="aiLoadingText" class="ai-loading-text">⏳ AI กำลังสร้างแบบทดสอบ...</div>
+                <div id="aiLoadingText" class="ai-loading-text">AI กำลังสร้างแบบทดสอบ...</div>
             </div>
             <div id="quizList"></div>
             <button class="btn btn-outline" onclick="addQuizQuestion()">+ เพิ่มคำถามด้วยตนเอง</button>
@@ -623,8 +623,8 @@ document.getElementById('thumbnailInput').addEventListener('change', function(e)
         document.getElementById('thumbnailPreview').innerHTML = `
             <div class="file-preview">
                 <img src="${ev.target.result}" alt="New thumbnail">
-                <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+                <button aria-label="ลบ" class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
         document.getElementById('thumbUploadLabel').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เลือกรูปปกใหม่แล้ว';
     };
@@ -668,7 +668,7 @@ function addExistingLesson(lesson, idx) {
             </div>
             <div class="form-group">
                 <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
-                <textarea class="form-control lesson-desc" rows="2">${lesson.description || ''}</textarea>
+                <textarea class="form-control lesson-desc" rows="2">${snEscapeHtml(lesson.description || '')}</textarea>
             </div>
             <div class="form-group">
                 <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ)</label>
@@ -679,7 +679,7 @@ function addExistingLesson(lesson, idx) {
                 <div class="existing-file-badge">${docLabel}</div>
                 <div id="uploadArea-${lid}">
                     <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                        <div class="file-upload-icon" style="font-size:1.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
+                        <div class="file-upload-icon" style="font-size:var(--text-2xl);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF ใหม่ (แทนที่ไฟล์เดิม)</p>
                         <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น — ปล่อยว่างไว้ถ้าไม่ต้องการเปลี่ยน</small>
                     </div>
@@ -714,7 +714,7 @@ window.addLesson = function() {
         <div class="lesson-item new-lesson" id="${lid}">
             <div class="lesson-header">
                 <span class="lesson-number new-badge"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> บทเรียนใหม่</span>
-                <button class="btn btn-danger" onclick="removeLesson('${lid}')">ลบ</button>
+                <button aria-label="ลบ" class="btn btn-danger" onclick="removeLesson('${lid}')">ลบ</button>
             </div>
             <div class="form-group">
                 <label>ชื่อบทเรียน <span class="required">*</span></label>
@@ -732,7 +732,7 @@ window.addLesson = function() {
                 <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ)</label>
                 <div id="uploadArea-${lid}">
                     <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                        <div class="file-upload-icon" style="font-size:1.5rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
+                        <div class="file-upload-icon" style="font-size:var(--text-2xl);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF</p>
                         <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                     </div>
@@ -772,9 +772,9 @@ function bindLessonFileInput(lid) {
         if (ld) ld.file = file;
         document.getElementById(`lessonFilePreview-${lid}`).innerHTML = `
             <div class="file-preview">
-                <div style="font-size:1.5rem;">${getFileIcon(file.name)}</div>
-                <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button class="btn btn-danger" onclick="removeLessonFile('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                <div style="font-size:var(--text-2xl);">${getFileIcon(file.name)}</div>
+                <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+                <button aria-label="ลบ" class="btn btn-danger" onclick="removeLessonFile('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     });
 }
@@ -813,7 +813,7 @@ window.addSubtopicRow = function(lessonId, data = null) {
                 value="${escapeAttr(data?.title || '')}" style="flex:2;">
             <input type="text" class="form-control subtopic-note" placeholder="หมายเหตุ เช่น นาที 0-5 / หน้า 1-3 (ไม่บังคับ)"
                 value="${escapeAttr(data?.note || '')}" style="flex:1;">
-            <button type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`);
 };
 
@@ -842,7 +842,7 @@ window.generateSubtopicsWithAI = async function(lessonId) {
     }
     const statusEl = document.getElementById(`subtopicStatus-${lessonId}`);
     statusEl.classList.add('show');
-    statusEl.textContent = '⏳ AI กำลังคิดโครงหัวข้อย่อย...';
+    statusEl.textContent = 'AI กำลังคิดโครงหัวข้อย่อย...';
 
     const prompt = `คุณเป็นผู้ช่วยออกแบบเนื้อหาการสอน ช่วยแตกโครงหัวข้อย่อย (สารบัญ) สำหรับบทเรียนต่อไปนี้ เรียงลำดับให้เข้าใจง่ายจากพื้นฐานไปซับซ้อน
 ชื่อบทเรียน: ${title}
@@ -884,7 +884,7 @@ window.extractSubtopicsFromPDF = async function(lessonId) {
         if (lessonData?.file) {
             pdfBlob = lessonData.file;
         } else if (lessonData?.existingDocType === 'pdf' && lessonData?.existingDocUrl) {
-            statusEl.textContent = '⏳ กำลังดึงไฟล์ PDF เดิมมาอ่าน...';
+            statusEl.textContent = 'กำลังดึงไฟล์ PDF เดิมมาอ่าน...';
             const resp = await fetch(lessonData.existingDocUrl);
             if (!resp.ok) throw new Error('ดึงไฟล์ PDF เดิมไม่สำเร็จ');
             pdfBlob = await resp.blob();
@@ -893,7 +893,7 @@ window.extractSubtopicsFromPDF = async function(lessonId) {
             return;
         }
 
-        statusEl.textContent = '⏳ กำลังอ่านไฟล์ PDF...';
+        statusEl.textContent = 'กำลังอ่านไฟล์ PDF...';
         const analyzed = await analyzePdfFile(pdfBlob);
         if (!analyzed.text || !analyzed.text.trim()) {
             throw new Error('ไม่พบข้อความในไฟล์นี้ ลองใช้ปุ่มแนะนำจากชื่อ/คำอธิบายแทน');
@@ -956,7 +956,7 @@ function buildLessonOptionsHtml(selectedValue) {
     lessons.forEach((l, i) => {
         const title = (l.title || `บทที่ ${i+1}`).slice(0, 40);
         const sel = String(selectedValue) === String(i) ? 'selected' : '';
-        html += `<option value="${i}" ${sel}>บทที่ ${i+1}: ${title}</option>`;
+        html += `<option value="${i}" ${sel}>บทที่ ${i+1}: ${snEscapeHtml(title)}</option>`;
     });
     return html;
 }
@@ -983,7 +983,7 @@ window.addQuizQuestion = function(data = null) {
                         <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
                     </select>
                     <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
-                    <button class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
+                    <button aria-label="ลบ" class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.9rem;font-size:0.82rem;color:var(--text-dim);flex-wrap:wrap;">
@@ -1020,8 +1020,8 @@ function quizImageUploadHtml(qId, data) {
                 <input type="hidden" class="quiz-image-url" value="${data?.imageUrl || ''}">
                 <div id="${qId}-image-preview">${data?.imageUrl ? `
                     <div style="position:relative;display:inline-block;margin-top:0.6rem;">
-                        <img src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
-                        <button type="button" onclick="removeQuizQuestionImage('${qId}')"
+                        <img alt="รูปประกอบ" src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                        <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                             style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
                             background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
                     </div>` : ''}</div>
@@ -1032,19 +1032,19 @@ async function handleQuizImageUpload(qId, file) {
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพเท่านั้นครับ', 'warning'); return; }
     const preview = document.getElementById(`${qId}-image-preview`);
-    preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-dim);">⏳ กำลังอัปโหลด...</div>`;
+    preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-dim);">กำลังอัปโหลด...</div>`;
     try {
         const url = await uploadToCloudinary(file, 'skillnest/quiz-images');
         document.querySelector(`#${qId} .quiz-image-url`).value = url;
         preview.innerHTML = `
             <div style="position:relative;display:inline-block;margin-top:0.6rem;">
-                <img src="${url}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
-                <button type="button" onclick="removeQuizQuestionImage('${qId}')"
+                <img alt="รูปประกอบ" src="${url}" style="max-width:220px;max-height:140px;border-radius:8px;display:block;">
+                <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                     style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
                     background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     } catch (e) {
-        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${e.message}</div>`;
+        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${snEscapeHtml(e.message)}</div>`;
     }
 }
 
@@ -1266,7 +1266,7 @@ window.addFormQuestion = function(hwId, data = null) {
                         <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
                     </select>
                     <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
-                    <button type="button" class="btn btn-danger" onclick="removeFormQuestion('${qId}')">ลบ</button>
+                    <button aria-label="ลบ" type="button" class="btn btn-danger" onclick="removeFormQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
             <div class="form-group">
@@ -1328,8 +1328,8 @@ document.getElementById('hwSourceFileInput').addEventListener('change', function
     document.getElementById('hwSourceFilePreview').innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
-            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -1431,8 +1431,8 @@ document.getElementById('courseDescFileInput').addEventListener('change', functi
     document.getElementById('courseDescFilePreview').innerHTML = `
         <div class="file-preview" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--input-bg,rgba(255,255,255,0.05));border-radius:8px;margin-top:0.5rem;">
             <div style="font-size:2rem;">${icon}</div>
-            <div style="flex:1;"><strong>${file.name}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button type="button" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
+            <button aria-label="ลบ" type="button" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -1550,7 +1550,7 @@ window.extractHomeworkWithAI = async function() {
     }
 
     btn.disabled = true;
-    btn.textContent = '⏳ AI กำลังประมวลผล...';
+    btn.textContent = 'AI กำลังประมวลผล...';
     status.classList.add('show');
     status.textContent = 'กำลังอ่านเนื้อหา...';
 
@@ -1657,7 +1657,7 @@ function rubricRowHtml(hwId, criterion, points) {
         <div class="rubric-row" id="${rowId}" style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
             <input type="text" class="form-control rubric-criterion" placeholder="เช่น ความถูกต้องของโค้ด" value="${escapeAttr(criterion||'')}" style="flex:1;" oninput="updateRubricTotal('${hwId}')">
             <input type="number" class="form-control rubric-points" placeholder="คะแนน" min="0" value="${points??''}" style="width:100px;" oninput="updateRubricTotal('${hwId}')">
-            <button type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
+            <button aria-label="ลบ" type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
                 style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
                 width:32px;height:32px;border-radius:6px;cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
@@ -1743,7 +1743,7 @@ window.addHomework = function(data = null) {
                     <select class="form-control hw-lesson-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" title="ผูกกับบทเรียน">
                         ${buildLessonOptionsHtml(data?.lessonIndex)}
                     </select>
-                    <button class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
+                    <button aria-label="ลบ" class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
                 </div>
             </div>
             <div class="form-group">
@@ -1752,7 +1752,7 @@ window.addHomework = function(data = null) {
             </div>
             <div class="form-group">
                 <label>คำอธิบาย / โจทย์</label>
-                <textarea class="form-control hw-desc" rows="3">${data?.description||''}</textarea>
+                <textarea class="form-control hw-desc" rows="3">${snEscapeHtml(data?.description||'')}</textarea>
             </div>
             <div class="form-group">
                 <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>

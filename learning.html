@@ -154,7 +154,7 @@
 
         .page-title span {
             color: var(--text-dim);
-            font-size: 1rem;
+            font-size: var(--text-base);
             font-weight: 400;
             margin-left: 12px;
         }
@@ -250,7 +250,7 @@
         }
 
         .card-title {
-            font-size: 1rem;
+            font-size: var(--text-base);
             font-weight: 600;
             margin-bottom: 20px;
             color: var(--text-main);
@@ -298,7 +298,7 @@
         .skill-badge {
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: var(--text-xs);
             font-weight: 600;
         }
 
@@ -326,7 +326,7 @@
         .heatmap-legend {
             display: flex;
             gap: 16px;
-            font-size: 0.75rem;
+            font-size: var(--text-xs);
             color: var(--text-dim);
         }
 
@@ -378,7 +378,7 @@
         }
 
         .badge-name {
-            font-size: 0.75rem;
+            font-size: var(--text-xs);
             text-align: center;
         }
 
@@ -480,22 +480,22 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">เวลาเรียนรวม</div>
-            <div class="stat-value" id="statTotalHours">— <small style="font-size:1rem;color:var(--text-dim)">ชม.</small></div>
+            <div class="stat-value" id="statTotalHours">— <small style="font-size:var(--text-base);color:var(--text-dim)">ชม.</small></div>
             <div class="stat-sub up" id="statHoursSub"></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">คอร์สที่เรียนจบ</div>
-            <div class="stat-value" id="statCourseDone">— <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small></div>
+            <div class="stat-value" id="statCourseDone">— <small style="font-size:var(--text-base);color:var(--text-dim)">คอร์ส</small></div>
             <div class="stat-sub up" id="statCourseSub"></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">คอร์สที่กำลังเรียน</div>
-            <div class="stat-value" id="statCourseActive">— <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small></div>
+            <div class="stat-value" id="statCourseActive">— <small style="font-size:var(--text-base);color:var(--text-dim)">คอร์ส</small></div>
             <div class="stat-sub" id="statActiveSub"></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">คะแนน Quiz เฉลี่ย</div>
-            <div class="stat-value" id="statAvgQuiz">— <small style="font-size:1rem;color:var(--text-dim)">%</small></div>
+            <div class="stat-value" id="statAvgQuiz">— <small style="font-size:var(--text-base);color:var(--text-dim)">%</small></div>
             <div class="stat-sub up" id="statQuizSub"></div>
         </div>
     </div>
@@ -721,7 +721,7 @@ async function loadLearningData() {
     badgesGrid.innerHTML = allBadges.map(b => `
         <div class="badge-item ${b.earned ? '' : 'locked'}" title="${b.earned ? 'ปลดล็อกแล้ว' : 'เงื่อนไข: ' + b.requirement}">
             <div class="badge-icon" style="border-color:${b.color};color:${b.color}">${b.earned ? b.icon : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>'}</div>
-            <div class="badge-name" style="color:${b.earned ? b.color : 'var(--text-dim)'}">${b.name}</div>
+            <div class="badge-name" style="color:${b.earned ? b.color : 'var(--text-dim)'}">${snEscapeHtml(b.name)}</div>
         </div>`).join('');
 
     // ===== การบ้านที่ต้องติดตาม + คะแนน Quiz แต่ละคอร์ส (ไม่ผูกกับ filter เวลา — อยากเห็นทุกงานที่ค้างอยู่เสมอ) =====
@@ -766,12 +766,12 @@ function renderFilteredStats() {
         enrList.length > 0 ? `เฉลี่ย ${Math.round(totalWatchSec / enrList.length / 60)} นาที/คอร์ส` : '';
 
     document.getElementById('statCourseDone').innerHTML =
-        `${completed.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
+        `${completed.length} <small style="font-size:var(--text-base);color:var(--text-dim)">คอร์ส</small>`;
     document.getElementById('statCourseSub').textContent =
         enrList.length > 0 ? `จากทั้งหมด ${enrList.length} คอร์สที่ลงทะเบียน` : 'ยังไม่ได้ลงทะเบียนคอร์ส';
 
     document.getElementById('statCourseActive').innerHTML =
-        `${inProgress.length} <small style="font-size:1rem;color:var(--text-dim)">คอร์ส</small>`;
+        `${inProgress.length} <small style="font-size:var(--text-base);color:var(--text-dim)">คอร์ส</small>`;
     const avgActivePct = inProgress.length
         ? Math.round(inProgress.reduce((s,e) => s + calcCoursePct(e), 0) / inProgress.length)
         : 0;
@@ -779,15 +779,20 @@ function renderFilteredStats() {
         inProgress.length > 0 ? `เฉลี่ยคืบหน้า ${avgActivePct}% ในคอร์สที่กำลังเรียน` : '';
 
     document.getElementById('statAvgQuiz').innerHTML = quizList.length
-        ? `${avgQuiz} <small style="font-size:1rem;color:var(--text-dim)">%</small>`
-        : `— <small style="font-size:1rem;color:var(--text-dim)">%</small>`;
+        ? `${avgQuiz} <small style="font-size:var(--text-base);color:var(--text-dim)">%</small>`
+        : `— <small style="font-size:var(--text-base);color:var(--text-dim)">%</small>`;
     document.getElementById('statQuizSub').textContent =
         _filterDays ? `จาก Quiz ${quizList.length} ครั้งในช่วงนี้` : `จาก Quiz ทั้งหมด ${quizList.length} ครั้ง`;
 
     // ===== COURSE PROGRESS LIST (คลิกดูรายละเอียดเจาะลึกได้) =====
     const progressEl = document.getElementById('courseProgressList');
     if (enrList.length === 0) {
-        progressEl.innerHTML = '<div style="color:var(--text-dim);">ยังไม่ได้ลงทะเบียนคอร์สใดเลย</div>';
+        progressEl.innerHTML = emptyState({
+            title: 'ยังไม่ได้ลงทะเบียนคอร์สใดเลย',
+            text: 'เริ่มต้นสมัครเรียนคอร์สแรกของคุณได้เลย',
+            linkText: 'ค้นหาคอร์สเรียน →',
+            linkHref: 'dashboard.html'
+        });
     } else {
         const colors = ['#8b5cf6','#10b981','#f59e0b','#3b82f6','#ef4444','#06b6d4'];
         progressEl.innerHTML = enrList.map((e, i) => {
@@ -802,19 +807,19 @@ function renderFilteredStats() {
             const color    = colors[i % colors.length];
             const statusText = pct >= 100 ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> จบแล้ว'
                 : pct > 0 ? `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span> ${done}/${total} บท`
-                : '⏳ ยังไม่เริ่ม';
+                : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> ยังไม่เริ่ม';
             return `<div class="progress-item" style="cursor:default;">
                 <div class="progress-row" onclick="goToCourseResults('${e.course_id}')" style="cursor:pointer;" title="ดูรายละเอียดเจาะลึกของคอร์สนี้">
-                    <span>${title}</span>
+                    <span>${snEscapeHtml(title)}</span>
                     <span style="display:flex;gap:8px;align-items:center;">
-                        <span style="font-size:0.75rem;color:var(--text-dim);">${statusText}</span>
+                        <span style="font-size:var(--text-xs);color:var(--text-dim);">${statusText}</span>
                         <span>${pct}%</span>
                         <span style="color:var(--text-dim);">›</span>
                     </span>
                 </div>
                 <div class="progress-track" onclick="goToCourseResults('${e.course_id}')" style="cursor:pointer;"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
                 <div style="margin-top:6px;">
-                    <button onclick="event.stopPropagation(); toggleCourseAIAnalysis('${e.course_id}', '${title.replace(/'/g,"\\'")}')"
+                    <button onclick="event.stopPropagation(); toggleCourseAIAnalysis('${e.course_id}', '${snEscapeHtml(title.replace(/'/g,"\\'"))}')"
                         style="background:none;border:none;color:#8b5cf6;cursor:pointer;font-size:0.76rem;padding:2px 0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> วิเคราะห์คอร์สนี้แยก</button>
                     <div id="course-ai-${e.course_id}" style="display:none;margin-top:6px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px 12px;"></div>
                 </div>
@@ -873,8 +878,8 @@ function renderHomeworkFollowup() {
         const deadlineTxt = it.deadline ? ` • กำหนดส่ง ${new Date(it.deadline).toLocaleDateString('th-TH')}` : '';
         return `<div class="followup-row" onclick="goToCourseResults('${it.courseId}')">
             <div>
-                <div>${it.hwTitle}</div>
-                <div class="followup-course">${it.courseTitle}${deadlineTxt}</div>
+                <div>${snEscapeHtml(it.hwTitle)}</div>
+                <div class="followup-course">${snEscapeHtml(it.courseTitle)}${deadlineTxt}</div>
             </div>
             ${badge}
         </div>`;
@@ -887,7 +892,11 @@ function renderQuizListByCourse() {
     if (!el) return;
 
     if (_rawQuizScores.length === 0) {
-        el.innerHTML = '<div style="color:var(--text-dim);font-size:0.9rem;">ยังไม่ได้ทำ Quiz คอร์สไหนเลย</div>';
+        el.innerHTML = emptyState({
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 115.83 1c0 2-3 2.5-3 4.5"/><path d="M12 17h.01"/></svg>',
+            title: 'ยังไม่ได้ทำ Quiz คอร์สไหนเลย',
+            text: 'คะแนน Quiz ของแต่ละคอร์สจะมาแสดงที่นี่หลังทำแบบทดสอบครั้งแรก'
+        });
         return;
     }
 
@@ -897,7 +906,7 @@ function renderQuizListByCourse() {
         const lvl = getLevel(q.pct || 0);
         return `<div class="quizlist-row" onclick="goToCourseResults('${q.course_id}')">
             <div>
-                <div>${title}</div>
+                <div>${snEscapeHtml(title)}</div>
                 <div class="followup-course">${q.score}/${q.total} คะแนน${q.needs_review ? ' • รอตรวจบางข้อ' : ''}</div>
             </div>
             <span class="quizlist-pct skill-badge ${lvl.cls}">${q.pct}%</span>
@@ -1049,7 +1058,7 @@ window.toggleCourseAIAnalysis = async function(courseId, courseTitle) {
     } catch (e) {
         console.error('toggleCourseAIAnalysis error:', e);
         box.innerHTML = `<div style="color:var(--text-dim);font-size:0.85rem;">วิเคราะห์ไม่สำเร็จในขณะนี้
-            <button onclick="delete document.getElementById('course-ai-${courseId}').dataset.loaded; toggleCourseAIAnalysis('${courseId}', '${courseTitle.replace(/'/g,"\\'")}')"
+            <button onclick="delete document.getElementById('course-ai-${courseId}').dataset.loaded; toggleCourseAIAnalysis('${courseId}', '${snEscapeHtml(courseTitle.replace(/'/g,"\\'"))}')"
                 style="background:none;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></div>`;
     }
 };

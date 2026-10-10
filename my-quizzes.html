@@ -54,7 +54,7 @@
 
         .nav-title {
             flex: 1;
-            font-size: 1rem;
+            font-size: var(--text-base);
             color: var(--text-dim);
         }
 
@@ -129,7 +129,7 @@
             margin-bottom: 1rem;
         }
 
-        .quiz-course-name { font-size: 1rem; font-weight: 600; flex: 1; }
+        .quiz-course-name { font-size: var(--text-base); font-weight: 600; flex: 1; }
 
         .quiz-count-badge {
             background: rgba(139, 92, 246, 0.2);
@@ -178,7 +178,7 @@
             /* ไม่กำหนด height แบบ fixed → ยืดตาม container */
             padding: 0 0.75rem;
             min-height: 48px;       /* ← ความสูงขั้นต่ำ แทน height คงที่ */
-            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            background: var(--gradient-ai);
             color: white;
             border: none;
             border-radius: 10px;
@@ -368,7 +368,7 @@ async function loadQuizzes() {
                     ` : `
                         <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">ยังไม่เคยทำแบบทดสอบ</p>
                         <div class="quiz-card-actions">
-                            <a href="course-content.html?id=${course.id}&tab=quiz" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">▶️ เริ่มทำแบบทดสอบ</a>
+                            <a href="course-content.html?id=${course.id}&tab=quiz" class="btn-start-quiz" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span> เริ่มทำแบบทดสอบ</a>
                         </div>
                     `}`;
             }
@@ -402,7 +402,7 @@ async function loadQuizzes() {
 
     } catch(err) {
         console.error('loadQuizzes error:', err);
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div><h3>เกิดข้อผิดพลาด</h3><p>${err.message}</p></div>`;
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div><h3>เกิดข้อผิดพลาด</h3><p>${snEscapeHtml(err.message)}</p></div>`;
     }
 }
 
