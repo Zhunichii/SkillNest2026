@@ -34,9 +34,7 @@
                 position: fixed; z-index: 99999;
                 border-radius: 12px;
                 box-shadow: 0 0 0 9999px rgba(6,8,20,0.72), 0 0 0 3px #3b82f6, 0 0 26px 4px rgba(59,130,246,0.55);
-                transition: top 0.35s cubic-bezier(0.22,1,0.36,1), left 0.35s cubic-bezier(0.22,1,0.36,1),
-                            width 0.35s cubic-bezier(0.22,1,0.36,1), height 0.35s cubic-bezier(0.22,1,0.36,1),
-                            opacity 0.2s ease;
+                transition: opacity 0.2s ease;
                 pointer-events: none;
                 opacity: 0;
             }
@@ -180,39 +178,52 @@
             target.scrollIntoView({ block: 'center', behavior: 'smooth' });
         }
 
-        // รอ scroll นิ่งก่อนค่อยวางตำแหน่ง spotlight/card (กันตำแหน่งเพี้ยนตอนกำลังเลื่อน)
-        setTimeout(() => {
-            if (target) {
-                const r = target.getBoundingClientRect();
-                els.spotlight.classList.remove('sntour-nospot');
-                els.spotlight.style.top    = (r.top - 8) + 'px';
-                els.spotlight.style.left   = (r.left - 8) + 'px';
-                els.spotlight.style.width  = (r.width + 16) + 'px';
-                els.spotlight.style.height = (r.height + 16) + 'px';
-            } else {
-                els.spotlight.classList.add('sntour-nospot');
-                els.spotlight.style.top = '50%'; els.spotlight.style.left = '50%';
-                els.spotlight.style.width = '0px'; els.spotlight.style.height = '0px';
-            }
-            els.spotlight.classList.add('show');
+        stopTrack();
+        // ตั้งข้อความก่อน แล้วให้ track() วางตำแหน่ง spotlight/card ตามเป้าหมายทุกเฟรม
+        // (เดิมวัดตำแหน่งครั้งเดียวตอน 260ms ขณะ smooth-scroll ยังไม่หยุด กรอบจึงเยื้องจากเป้าหมาย)
+        els.count.textContent = `ขั้นตอนที่ ${index + 1} จาก ${steps.length}`;
+        els.title.innerHTML = step.title || '';
+        els.text.innerHTML    = step.text || '';
+        els.dots.innerHTML = steps.map((_, i) => `<span class="sntour-dot ${i === index ? 'active' : ''}"></span>`).join('');
+        els.prev.style.visibility = index === 0 ? 'hidden' : 'visible';
+        els.next.textContent = index === steps.length - 1 ? 'เริ่มใช้งานเลย' : 'ถัดไป';
 
-            els.count.textContent = `ขั้นตอนที่ ${index + 1} จาก ${steps.length}`;
-            els.title.innerHTML = step.title || '';
-            els.text.innerHTML    = step.text || '';
-            els.dots.innerHTML = steps.map((_, i) => `<span class="sntour-dot ${i === index ? 'active' : ''}"></span>`).join('');
-            els.prev.style.visibility = index === 0 ? 'hidden' : 'visible';
-            els.next.textContent = index === steps.length - 1 ? 'เริ่มใช้งานเลย' : 'ถัดไป';
+        if (!target) {
+            els.spotlight.classList.add('sntour-nospot');
+            els.spotlight.style.top = '50%'; els.spotlight.style.left = '50%';
+            els.spotlight.style.width = '0px'; els.spotlight.style.height = '0px';
+        } else {
+            els.spotlight.classList.remove('sntour-nospot');
+        }
+        els.spotlight.classList.add('show');
+        els.card.classList.add('show');
+        track(target, step);
+    }
 
+    let rafId = 0;
+    function stopTrack() { if (rafId) cancelAnimationFrame(rafId); rafId = 0; }
+    function track(target, step) {
+        const tick = () => {
             const cardW = Math.min(320, window.innerWidth - 32);
             const cardH = els.card.offsetHeight || 180;
+            if (target) {
+                const r = target.getBoundingClientRect();
+                const st = els.spotlight.style;
+                st.top = (r.top - 8) + 'px';
+                st.left = (r.left - 8) + 'px';
+                st.width = (r.width + 16) + 'px';
+                st.height = (r.height + 16) + 'px';
+            }
             const pos = positionFor(target, cardW, cardH, step.placement);
-            els.card.style.top  = pos.top + 'px';
+            els.card.style.top = pos.top + 'px';
             els.card.style.left = pos.left + 'px';
-            els.card.classList.add('show');
-        }, target ? 260 : 0);
+            rafId = requestAnimationFrame(tick);
+        };
+        tick();
     }
 
     function finish() {
+        stopTrack();
         els.overlay.classList.remove('show');
         els.spotlight.classList.remove('show');
         els.card.classList.remove('show');
