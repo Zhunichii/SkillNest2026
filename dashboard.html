@@ -102,7 +102,11 @@
         }
 
         .search-bar::before {
-            content: "<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span>";
+            content: "";
+            width: 16px; height: 16px;
+            background-color: var(--text-dim);
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;
             position: absolute;
             left: 12px;
             top: 50%;
@@ -880,7 +884,7 @@
                 <input type="text" id="searchInput" placeholder="ค้นหาคอร์สเรียน..." autocomplete="off">
                 <button aria-label="ล้าง" class="search-clear-btn" id="searchClearBtn" title="ล้าง"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
 
-                <!-- <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> Search Dropdown -->
+                <!-- Search Dropdown -->
                 <div class="search-dropdown" id="searchDropdown">
 
                     <!-- Filter chips -->
@@ -941,7 +945,7 @@
             </div>
             <div class="nav-right">
 
-                <!-- <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> NOTIFICATION BELL -->
+                <!-- NOTIFICATION BELL -->
                 <div class="notification-wrapper" id="notifWrapper">
                     <button aria-label="การแจ้งเตือน" class="notification-bell-btn" id="notifBellBtn" title="การแจ้งเตือน"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span></button>
                     <!-- badge จะถูก inject ด้วย JS -->
@@ -1115,7 +1119,7 @@
         let activeTab = 'all';
 
         // =============================================
-        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> Utility maps
+        // Utility maps
         // =============================================
         const courseColors = [
             'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
@@ -1133,7 +1137,7 @@
         const levelMap = { 'beginner': 'เริ่มต้น', 'intermediate': 'ปานกลาง', 'advanced': 'ขั้นสูง' };
 
         // =============================================
-        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> NOTIFICATION SYSTEM
+        // NOTIFICATION SYSTEM
         // =============================================
 
         /**
@@ -1346,7 +1350,7 @@
         }
 
         // =============================================
-        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> Time Formatter
+        // Time Formatter
         // =============================================
         function formatTimeAgo(timestamp) {
             if (!timestamp) return '';
@@ -1366,7 +1370,7 @@
         }
 
         // =============================================
-        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> COURSE LOADING
+        // COURSE LOADING
         // =============================================
         async function loadCourses() {
             const courseGrid = document.getElementById('courseGrid');
@@ -1676,7 +1680,7 @@
         }
 
         // =============================================
-        // <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ENHANCED SEARCH SYSTEM (Coursera-style)
+        // ENHANCED SEARCH SYSTEM (Coursera-style)
         // =============================================
         const searchInput    = document.getElementById('searchInput');
         const searchDropdown = document.getElementById('searchDropdown');

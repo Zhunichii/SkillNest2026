@@ -643,3 +643,6 @@ button:not(:disabled):active,
     .course-list > *, .manage-list > *, .quiz-grid > *, #quizGrid > * { animation: none !important; }
     .sn-reveal-ready .sn-reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* ปุ่มกลับไม่ให้ตัวอักษรตกบรรทัด (เกิดเมื่อชื่อผู้ใช้ยาวดันพื้นที่ใน nav) */
+.back-btn, .btn-back { white-space: nowrap; flex-shrink: 0; }

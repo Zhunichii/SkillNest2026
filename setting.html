@@ -896,7 +896,7 @@ async function loadProfile(user) {
     const sideType   = document.getElementById('sideUserType');
     const sideEmail2 = document.getElementById('sideEmail');
     const sideJoined = document.getElementById('sideJoined');
-    if (sideType)   sideType.textContent   = data.user_type === 'teacher' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>‍<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span> อาจารย์' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> นักเรียน';
+    if (sideType)   sideType.innerHTML   = data.user_type === 'teacher' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span> อาจารย์' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> นักเรียน';
     if (sideEmail2) sideEmail2.textContent = data.email || user.email || '—';
     if (sideJoined) {
         const d = new Date(data.created_at || user.created_at);
@@ -915,7 +915,7 @@ async function loadProfile(user) {
     // Badge
     const badge = document.getElementById('profileBadge');
     if (data.user_type === 'teacher') {
-        badge.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>‍<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span> อาจารย์';
+        badge.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span> อาจารย์';
         badge.className = 'user-badge badge-teacher';
     } else {
         badge.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> นักเรียน';
@@ -1095,9 +1095,9 @@ function updatePreview() {
     const pEl    = document.getElementById('avatarPreviewPersonality');
     const greetEl= document.getElementById('avatarPreviewGreeting');
 
-    if (iconEl)  iconEl.textContent  = char.icon;
+    if (iconEl)  iconEl.innerHTML  = char.icon;
     if (nameEl)  { nameEl.textContent = name; nameEl.style.background = color + '33'; nameEl.style.color = color; nameEl.style.borderColor = color + '66'; }
-    if (pEl)     pEl.textContent     = pLabel;
+    if (pEl)     pEl.innerHTML     = pLabel;
     if (greetEl) greetEl.textContent = greet;
 }
 

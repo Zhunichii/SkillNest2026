@@ -789,7 +789,7 @@ window.removeLessonFile = function(lid) {
 window.removeLesson = function(lid) {
     document.getElementById(lid).remove();
     lessons = lessons.filter(l => l.id !== lid);
-    // เรียงเลข "บทที่ N" ใหม่เฉพาะบทเรียนเดิม — บทใหม่ (<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> บทเรียนใหม่) ไม่มีเลข ไม่ต้องแตะ
+    // เรียงเลข "บทที่ N" ใหม่เฉพาะบทเรียนเดิม — บทใหม่ (บทเรียนใหม่) ไม่มีเลข ไม่ต้องแตะ
     renumberBadges('lessonsList', '.lesson-number:not(.new-badge)', 'บทที่ ');
 };
 
@@ -952,7 +952,7 @@ function escapeAttr(str) { return String(str).replace(/"/g,'&quot;').replace(/'/
 
 // สร้าง <option> รายชื่อบทเรียนปัจจุบัน ให้เลือกผูก Quiz/การบ้านกับบทใดบทหนึ่งได้ (หรือ "ทั้งคอร์ส")
 function buildLessonOptionsHtml(selectedValue) {
-    let html = `<option value=""><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> ทั้งคอร์ส (ไม่ระบุบท)</option>`;
+    let html = `<option value="">ทั้งคอร์ส (ไม่ระบุบท)</option>`;
     lessons.forEach((l, i) => {
         const title = (l.title || `บทที่ ${i+1}`).slice(0, 40);
         const sel = String(selectedValue) === String(i) ? 'selected' : '';
@@ -993,7 +993,7 @@ window.addQuizQuestion = function(data = null) {
             </div>
             <div class="form-group">
                 <label>คำถาม <span class="required">*</span></label>
-                <textarea class="form-control quiz-question-text" rows="2">${data?.question || ''}</textarea>
+                <textarea class="form-control quiz-question-text" rows="2">${snEscapeHtml(data?.question || '')}</textarea>
             </div>
             ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>
@@ -1062,7 +1062,7 @@ function renderQuizAnswerArea(qId, qType, data) {
     const explanationHtml = `
         <div class="form-group" style="margin-top:0.75rem;">
             <label>คำอธิบายเฉลย (ไม่บังคับ — โชว์ให้นักเรียนดูหลังทำ Quiz เสร็จ)</label>
-            <textarea class="form-control quiz-explanation" rows="2">${data?.explanation || ''}</textarea>
+            <textarea class="form-control quiz-explanation" rows="2">${snEscapeHtml(data?.explanation || '')}</textarea>
         </div>`;
 
     if (qType === 'true_false') {
@@ -1271,7 +1271,7 @@ window.addFormQuestion = function(hwId, data = null) {
             </div>
             <div class="form-group">
                 <label>คำถาม <span class="required">*</span></label>
-                <textarea class="form-control quiz-question-text" rows="2">${data?.question || ''}</textarea>
+                <textarea class="form-control quiz-question-text" rows="2">${snEscapeHtml(data?.question || '')}</textarea>
             </div>
             ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>

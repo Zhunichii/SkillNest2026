@@ -197,7 +197,7 @@
             els.spotlight.classList.add('show');
 
             els.count.textContent = `ขั้นตอนที่ ${index + 1} จาก ${steps.length}`;
-            els.title.textContent = step.title || '';
+            els.title.innerHTML = step.title || '';
             els.text.innerHTML    = step.text || '';
             els.dots.innerHTML = steps.map((_, i) => `<span class="sntour-dot ${i === index ? 'active' : ''}"></span>`).join('');
             els.prev.style.visibility = index === 0 ? 'hidden' : 'visible';
