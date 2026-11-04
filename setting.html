@@ -214,7 +214,7 @@
         }
         .char-option:hover { border-color: rgba(139,92,246,0.5); background: rgba(139,92,246,0.08); }
         .char-option.selected { border-color: var(--primary); background: rgba(139,92,246,0.15); color: var(--text); }
-        .char-option .char-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+        .char-option .char-icon { display:block; margin:0 auto 6px; width:64px; height:64px; } .char-option .char-icon svg{width:100%;height:100%}
         .personality-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
         .p-option {
             padding: 10px 8px; border-radius: var(--radius-md); border: 1px solid var(--border);
@@ -668,22 +668,22 @@
                     <div class="section-desc">เลือกรูปร่างหน้าตาของ Avatar AI ที่จะแสดงในคอร์สของคุณ</div>
                     <div class="char-grid" id="charGrid">
                         <div class="char-option selected" data-char="professor" onclick="selectChar('professor',this)">
-                            <span class="char-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span></span>อาจารย์
+                            <span class="char-icon" data-char-svg="professor"></span>อาจารย์
                         </div>
                         <div class="char-option" data-char="scientist" onclick="selectChar('scientist',this)">
-                            <span class="char-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span></span>นักวิทยาศาสตร์
+                            <span class="char-icon" data-char-svg="scientist"></span>นักวิทยาศาสตร์
                         </div>
                         <div class="char-option" data-char="programmer" onclick="selectChar('programmer',this)">
-                            <span class="char-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span></span>โปรแกรมเมอร์
+                            <span class="char-icon" data-char-svg="programmer"></span>โปรแกรมเมอร์
                         </div>
                         <div class="char-option" data-char="doctor" onclick="selectChar('doctor',this)">
-                            <span class="char-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span></span>หมอ/พยาบาล
+                            <span class="char-icon" data-char-svg="doctor"></span>หมอ/พยาบาล
                         </div>
                         <div class="char-option" data-char="artist" onclick="selectChar('artist',this)">
-                            <span class="char-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span></span>ศิลปิน
+                            <span class="char-icon" data-char-svg="artist"></span>ศิลปิน
                         </div>
                         <div class="char-option" data-char="chef" onclick="selectChar('chef',this)">
-                            <span class="char-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span></span>เชฟ
+                            <span class="char-icon" data-char-svg="chef"></span>เชฟ
                         </div>
                     </div>
                 </div>
@@ -828,6 +828,7 @@
     </main>
 </div>
 
+<script src="avatar-chars.js"></script>
 <script type="module">
 import { supabase } from './supabase.js';
 
@@ -1042,13 +1043,14 @@ const PERSONALITIES = {
     simple:    { label:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> เรียบง่าย',  prompt:'ตอบกระชับ เรียบง่าย ไม่ซับซ้อน' },
 };
 
+document.querySelectorAll('[data-char-svg]').forEach(el => { el.innerHTML = SN_CHARS.svg(el.dataset.charSvg, 64); });
 const CHARS = {
-    professor:  { icon:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>', label:'อาจารย์' },
-    scientist:  { icon:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>', label:'นักวิทย์' },
-    programmer: { icon:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>', label:'โปรแกรมเมอร์' },
-    doctor:     { icon:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>', label:'หมอ' },
-    artist:     { icon:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>', label:'ศิลปิน' },
-    chef:       { icon:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>', label:'เชฟ' },
+    professor: { icon: SN_CHARS.svg('professor', 84), label:'อาจารย์' },
+    scientist: { icon: SN_CHARS.svg('scientist', 84), label:'นักวิทย์' },
+    programmer: { icon: SN_CHARS.svg('programmer', 84), label:'โปรแกรมเมอร์' },
+    doctor: { icon: SN_CHARS.svg('doctor', 84), label:'หมอ' },
+    artist: { icon: SN_CHARS.svg('artist', 84), label:'ศิลปิน' },
+    chef: { icon: SN_CHARS.svg('chef', 84), label:'เชฟ' },
 };
 
 let avatarConfig = {

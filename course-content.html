@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
+    <script src="avatar-chars.js"></script>
     <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
         h1, h2, h3, .logo, .logo-mock, .course-title, .card-stat-value,
@@ -1085,7 +1086,7 @@
         /* ── FAB ── */
         .avatar-fab {
             position: fixed; bottom: 104px; right: 28px;
-            z-index: 1200; width: 58px; height: 58px;
+            z-index: 1200; width: 64px; height: 64px;
             border-radius: 50%; border: none; cursor: pointer;
             background: var(--gradient-ai-deep);
             box-shadow: 0 4px 20px rgba(124,58,237,0.5);
@@ -1095,6 +1096,8 @@
             transition: transform 0.2s;
         }
         .avatar-fab:hover { transform: scale(1.08); }
+        .avatar-fab-face { position:relative; width:100%; height:100%; border-radius:50%; overflow:hidden; display:block; border:3px solid rgba(255,255,255,.85); background:rgba(255,255,255,.14); }
+        .avatar-fab-face svg { width:100%; height:100%; display:block; transform:translateY(8%) scale(1.15); }
         .avatar-fab-ripple {
             position: absolute; inset: 0; border-radius: 50%;
             background: rgba(139,92,246,0.35);
@@ -2491,7 +2494,7 @@ async function loadAvatarConfig(creatorId) {
         if (!data?.avatar_config) return;
         const cfg = data.avatar_config;
 
-        const CHARS = { professor:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',scientist:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',programmer:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',doctor:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',artist:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>',chef:'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>' };
+        const CHARS = Object.fromEntries(SN_CHARS.keys.map(k => [k, SN_CHARS.svg(k, 160)]));
         const P_PROMPTS = {
             friendly:'ตอบแบบเป็นกันเอง อบอุ่น', strict:'ตอบแบบเป็นทางการ ชัดเจน',
             funny:'ตอบแบบสนุกสนาน อารมณ์ขัน', socratic:'ถามนำให้นักเรียนคิด',
@@ -2518,14 +2521,16 @@ async function loadAvatarConfig(creatorId) {
         }
 
         // Character icon
+        { const ff = document.getElementById('avatarFabFace'); if (ff) ff.innerHTML = SN_CHARS.svg(CHARS[cfg.char] ? cfg.char : 'professor', 64); }
         if (cfg.char && CHARS[cfg.char] && cfg.char !== 'professor') {
             const svgWrap = document.getElementById('avatarSvgWrap');
             if (svgWrap) {
                 const oldSvg = svgWrap.querySelector('svg');
                 if (oldSvg) {
                     const div = document.createElement('div');
-                    div.style.cssText = 'font-size:8rem;line-height:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.5));text-align:center;';
-                    div.innerHTML = CHARS[cfg.char];
+                    div.style.cssText = 'width:200px;height:200px;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.5));display:flex;align-items:flex-end;justify-content:center;';
+                    div.dataset.char = cfg.char;
+                    div.innerHTML = CHARS[cfg.char].replace(/width="160" height="160"/, 'width="200" height="200"');
                     oldSvg.replaceWith(div);
                 }
             }
@@ -5375,19 +5380,9 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
 <!-- ════ AI AVATAR TEACHER ════ -->
 
     <!-- FAB -->
-    <button class="avatar-fab" id="avatarFab" onclick="openAvatarTeacher()">
+    <button class="avatar-fab" id="avatarFab" onclick="openAvatarTeacher()" aria-label="เปิดอาจารย์ AI">
         <div class="avatar-fab-ripple"></div>
-        <svg width="30" height="30" viewBox="0 0 80 80" fill="none">
-            <circle cx="40" cy="38" r="22" fill="#7c3aed"/>
-            <circle cx="40" cy="38" r="20" fill="#9333ea"/>
-            <ellipse cx="33" cy="34" rx="3.5" ry="4" fill="white"/>
-            <ellipse cx="47" cy="34" rx="3.5" ry="4" fill="white"/>
-            <circle cx="34" cy="35" r="2" fill="#1a1a3e"/>
-            <circle cx="48" cy="35" r="2" fill="#1a1a3e"/>
-            <path d="M33 43 Q40 49 47 43" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <rect x="20" y="18" width="40" height="6" rx="3" fill="#4f46e5"/>
-            <rect x="26" y="12" width="28" height="10" rx="5" fill="#4f46e5"/>
-        </svg>
+        <span class="avatar-fab-face" id="avatarFabFace"></span>
         <div class="avatar-fab-tooltip"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span> เรียกอาจารย์ AI</div>
     </button>
 
@@ -5517,6 +5512,7 @@ document.getElementById('quizModalOverlay').addEventListener('click', function(e
 
         </div><!-- end avatar-row -->
     </div>
+<script>(function(){var f=document.getElementById('avatarFabFace');if(f&&!f.innerHTML)f.innerHTML=SN_CHARS.svg('professor',64);})();</script>
 <script src="theme-switcher.js"></script>
 <script type="module" src="app-nav.js"></script>
 </body>
