@@ -404,7 +404,6 @@ async function init() {
     if (!profile || profile.user_type !== 'teacher') { window.location.href = 'dashboard.html'; return; }
 
     currentUser = user;
-    document.getElementById('navUser').innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ${snEscapeHtml(profile.first_name || 'ครู')}`;
 
     await fetchAll();
     document.getElementById('pageLoading').style.display = 'none';
@@ -1415,9 +1414,10 @@ ${details || 'ไม่มีข้อมูล'}
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ prompt })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
         const text = data.text || '';
-        if (!text) throw new Error('no response');
+        if (!text) throw new Error('AI ตอบกลับว่างเปล่า');
 
         const lines = text.split('\n').filter(l=>l.trim());
         let html = '';
@@ -1434,7 +1434,8 @@ ${details || 'ไม่มีข้อมูล'}
         });
         el.innerHTML = html;
     } catch(e) {
-        el.innerHTML = `<span style="color:var(--text-dim);">วิเคราะห์ไม่ได้ในขณะนี้ <button onclick="runAI()" style="background:none;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></span>`;
+        console.error('AI analyze failed:', e);
+        el.innerHTML = `<span style="color:var(--text-dim);">วิเคราะห์ไม่ได้ในขณะนี้ <span style="font-size:var(--text-xs);opacity:.8;">(${snEscapeHtml(e.message)})</span> <button onclick="runAI()" style="background:none;border:none;color:#8b5cf6;cursor:pointer;text-decoration:underline;">ลองใหม่</button></span>`;
     }
 };
 
@@ -1455,5 +1456,6 @@ init().then(() => {
 });
 </script>
 <script src="theme-switcher.js"></script>
+<script type="module" src="app-nav.js"></script>
 </body>
 </html>
