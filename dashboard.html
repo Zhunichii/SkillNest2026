@@ -9,26 +9,35 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="shortcut icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Anuphan:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
     <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
-        h1, h2, h3, .logo, .logo-mock, .course-title, .card-stat-value,
-        .page-title, .nav-logo, .section-title, .avatar-header-title,
-        .modal-title, .stat-value, .quiz-title {
+        .logo, .logo-mock, .nav-logo {
             font-family: var(--font-display, 'Space Grotesk', sans-serif);
             font-weight: 600;
             letter-spacing: -0.01em;
         }
-        
+        h1, h2, h3, .course-title, .card-stat-value,
+        .page-title, .section-title, .avatar-header-title,
+        .modal-title, .stat-value, .quiz-title {
+            font-family: var(--font-display, 'Space Grotesk', sans-serif);
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+
+        /* Page-local: one easing curve, one icon stroke (navbar shell excluded) */
+        :root { --dash-ease: cubic-bezier(0.22, 1, 0.36, 1); }
+        .sidebar .sn-icon svg, .main-content .sn-icon svg, .search-dropdown .sn-icon svg,
+        .notif-panel .sn-icon svg, .toast .sn-icon svg, .enroll-modal .sn-icon svg { stroke-width: 1.5; }
+        .main-content :focus-visible, .search-dropdown :focus-visible,
+        .notif-panel :focus-visible, .enroll-modal :focus-visible { outline: 2px solid var(--primary-blue); outline-offset: 2px; }
+
         body {
             background-color: var(--bg-color);
+            background-image: none;
             color: var(--text-main);
-            background-image:
-                var(--bg-grad),
-                radial-gradient(circle at 1px 1px, var(--dot-grid) 1px, transparent 0);
-            background-size: var(--bg-grad-size, 100% 100%), 26px 26px;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -139,7 +148,7 @@
         .search-clear-btn.show { display: flex; }
 
         /* =============================================
-           <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> SEARCH DROPDOWN
+           SEARCH DROPDOWN
         ============================================= */
         .search-dropdown {
             position: absolute;
@@ -149,14 +158,14 @@
             background: var(--bg-elevated);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            box-shadow: var(--shadow-lg);
             z-index: 1500;
             overflow: hidden;
             display: none;
-            animation: dropdownSlide 0.18s ease;
+            animation: dropdownSlide 180ms var(--dash-ease);
         }
         @keyframes dropdownSlide {
-            from { opacity: 0; transform: translateY(-6px); }
+            from { opacity: 0; transform: translateY(-4px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         .search-dropdown.show { display: block; }
@@ -165,7 +174,7 @@
         .search-filter-bar {
             display: flex;
             gap: 8px;
-            padding: 12px 14px 14px;
+            padding: 12px;
             border-bottom: 1px solid var(--line);
             overflow-x: auto;
             cursor: grab;
@@ -173,57 +182,45 @@
             scrollbar-color: var(--line-strong) transparent;
         }
         .search-filter-bar:active { cursor: grabbing; }
-        .search-filter-bar::-webkit-scrollbar { height: 5px; }
+        .search-filter-bar::-webkit-scrollbar { height: 4px; }
         .search-filter-bar::-webkit-scrollbar-track { background: transparent; }
         .search-filter-bar::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: var(--radius-md); }
         .search-filter-bar::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 
-        .filter-chip {
-            display: flex;
+        .filter-chip, .trending-tag {
+            display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 12px;
-            border-radius: var(--radius-xl);
-            font-size: var(--text-xs);
+            height: 28px;
+            padding: 0 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
             white-space: nowrap;
             cursor: pointer;
             border: 1px solid var(--border-color);
-            background: var(--card-bg);
+            background: transparent;
             color: var(--text-dim);
-            transition: all 0.15s;
             user-select: none;
+            transition: background-color 160ms var(--dash-ease), border-color 160ms var(--dash-ease), color 160ms var(--dash-ease);
         }
-        .filter-chip:hover { border-color: var(--primary-blue); color: var(--text-main); background: rgba(59,130,246,0.1); }
-        .filter-chip.active { border-color: var(--primary-blue); background: rgba(59,130,246,0.18); color: var(--text-main); }
+        .filter-chip:hover, .trending-tag:hover { border-color: var(--line-strong); color: var(--text-main); background: var(--card-hover); }
+        .filter-chip.active { border-color: var(--primary-blue); background: var(--active-lesson); color: var(--text-main); }
 
-        /* Trending section */
+        /* Section labels: sentence case, no tracking */
         .search-section-label {
-            font-size: 0.72rem;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
             color: var(--text-dim);
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            padding: 10px 14px 6px;
+            padding: 12px 12px 8px;
         }
 
         .trending-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 7px;
-            padding: 0 14px 12px;
+            gap: 8px;
+            padding: 0 12px 12px;
         }
-
-        .trending-tag {
-            padding: 5px 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            font-size: 0.78rem;
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .trending-tag:hover { background: rgba(59,130,246,0.12); border-color: var(--primary-blue); color: var(--text-main); }
 
         /* Suggestion results */
         .search-results-list {
@@ -236,10 +233,10 @@
         .search-result-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
+            gap: 12px;
+            padding: 8px 12px;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: background-color 120ms var(--dash-ease);
             border-bottom: 1px solid var(--line);
         }
         .search-result-item:hover { background: var(--card-hover); }
@@ -255,76 +252,75 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: var(--text-xs);
-            font-weight: 700;
-            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dim);
             overflow: hidden;
         }
 
         .search-result-info { flex: 1; min-width: 0; }
-        .search-result-title { font-size: 0.83rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .search-result-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 1px; }
+        .search-result-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-result-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
         .search-result-badge {
-            font-size: 0.68rem;
-            padding: 2px 8px;
-            border-radius: var(--radius-md);
-            background: rgba(59,130,246,0.15);
-            color: var(--primary-blue);
+            font-size: 12px;
+            color: var(--text-dim);
             white-space: nowrap;
+            font-variant-numeric: tabular-nums;
         }
 
         .search-no-result {
-            padding: 28px 14px;
+            padding: 32px 12px;
             text-align: center;
             color: var(--text-dim);
-            font-size: 0.84rem;
+            font-size: 14px;
         }
 
         .search-footer {
-            padding: 8px 14px;
+            padding: 8px 12px;
             border-top: 1px solid var(--line);
-            font-size: 0.73rem;
+            font-size: 12px;
             color: var(--text-dim);
             text-align: center;
         }
 
         /* Recent searches */
-        .recent-searches-list { padding: 0 14px 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .recent-searches-list { padding: 0 12px 8px; display: flex; flex-wrap: wrap; gap: 8px; }
         .recent-item {
             display: flex; align-items: center; gap: 6px;
-            padding: 5px 10px; background: var(--card-bg);
-            border: 1px solid var(--border-color); border-radius: var(--radius-xl);
-            font-size: 0.78rem; color: var(--text-dim); cursor: pointer; transition: 0.15s;
+            height: 28px; padding: 0 10px; background: transparent;
+            border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            font-size: 13px; color: var(--text-dim); cursor: pointer;
+            transition: background-color 160ms var(--dash-ease), border-color 160ms var(--dash-ease), color 160ms var(--dash-ease);
         }
-        .recent-item:hover { border-color: var(--primary-blue); color: var(--text-main); background: rgba(59,130,246,0.1); }
+        .recent-item:hover { border-color: var(--line-strong); color: var(--text-main); background: var(--card-hover); }
         .recent-item-remove {
-            font-size: 0.65rem; opacity: 0.5; margin-left: 2px;
+            display: inline-flex; font-size: 11px; opacity: 0.6; margin-left: 2px;
             cursor: pointer; padding: 0 2px;
         }
         .recent-item-remove:hover { opacity: 1; color: var(--danger-red); }
 
         /* Favorites grid */
         .favorites-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr);
-            gap: 8px; padding: 6px 14px 12px;
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px; padding: 0 12px 12px;
         }
         .fav-card {
             display: flex; align-items: center; gap: 8px;
-            padding: 8px 10px; background: var(--card-bg);
+            padding: 8px; background: transparent;
             border: 1px solid var(--border-color); border-radius: var(--radius-md);
-            cursor: pointer; transition: 0.15s;
+            cursor: pointer; transition: background-color 160ms var(--dash-ease), border-color 160ms var(--dash-ease);
         }
-        .fav-card:hover { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.3); }
+        .fav-card:hover { background: var(--card-hover); border-color: var(--line-strong); }
         .fav-thumb {
             width: 36px; height: 28px; border-radius: var(--radius-sm); flex-shrink: 0;
             background-size: cover; background-position: center;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.8);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            font-size: 11px; font-weight: 500; color: var(--text-dim);
         }
         .fav-info { min-width: 0; }
-        .fav-title { font-size: var(--text-xs); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .fav-sub { font-size: 0.67rem; color: var(--text-dim); margin-top: 1px; }
+        .fav-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fav-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* =============================================
            <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> NOTIFICATION BELL SYSTEM
@@ -388,15 +384,15 @@
             background: var(--bg-elevated);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(59,130,246,0.1);
+            box-shadow: var(--shadow-lg);
             z-index: 2000;
             overflow: hidden;
             display: none;
-            animation: panelSlide 0.2s ease;
+            animation: panelSlide 180ms var(--dash-ease);
         }
 
         @keyframes panelSlide {
-            from { opacity: 0; transform: translateY(-8px); }
+            from { opacity: 0; transform: translateY(-4px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
@@ -406,17 +402,17 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 18px 12px;
+            padding: 16px 16px 12px;
             border-bottom: 1px solid var(--line);
         }
 
         .notif-panel-header h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 500;
         }
 
         .notif-mark-all {
-            font-size: var(--text-xs);
+            font-size: 13px;
             color: var(--primary-blue);
             cursor: pointer;
             background: none;
@@ -433,16 +429,18 @@
 
         .notif-tab {
             flex: 1;
-            padding: 9px;
-            font-size: 0.78rem;
+            height: 40px;
+            font-size: 13px;
             color: var(--text-dim);
             text-align: center;
             cursor: pointer;
             border: none;
             background: none;
             border-bottom: 2px solid transparent;
-            transition: 0.2s;
+            transition: color 160ms var(--dash-ease), border-color 160ms var(--dash-ease);
         }
+
+        .notif-tab:hover { color: var(--text-main); }
 
         .notif-tab.active {
             color: var(--text-main);
@@ -459,54 +457,55 @@
         .notif-item {
             display: flex;
             gap: 12px;
-            padding: 13px 18px;
+            padding: 12px 16px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background-color 120ms var(--dash-ease);
             position: relative;
             border-bottom: 1px solid var(--line);
         }
 
         .notif-item:hover { background: var(--card-hover); }
 
-        .notif-item.unread { background: rgba(59,130,246,0.06); }
-        .notif-item.unread:hover { background: rgba(59,130,246,0.1); }
+        .notif-item.unread { background: var(--card-hover); }
+        .notif-item.unread:hover { background: var(--active-lesson); }
 
         .notif-unread-dot {
             position: absolute;
-            top: 16px;
-            right: 14px;
-            width: 7px;
-            height: 7px;
+            top: 18px;
+            right: 16px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: var(--primary-blue);
         }
 
+        /* One neutral icon box; the icon itself tells the type apart */
         .notif-icon {
-            width: 38px;
-            height: 38px;
+            width: 32px;
+            height: 32px;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 16px;
             flex-shrink: 0;
+            background: var(--card-hover);
+            border: 1px solid var(--line);
+            color: var(--text-dim);
         }
 
-        .notif-icon.course  { background: rgba(59,130,246,0.2); }
-        .notif-icon.homework { background: rgba(245,158,11,0.2); }
-        .notif-icon.system  { background: rgba(139,92,246,0.2); }
-
-        .notif-content { flex: 1; min-width: 0; }
+        .notif-content { flex: 1; min-width: 0; padding-right: 12px; }
 
         .notif-content p {
-            font-size: 0.82rem;
-            line-height: 1.45;
+            font-size: 13px;
+            line-height: 20px;
             color: var(--text-main);
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
+        .notif-content p strong { font-weight: 500; }
 
         .notif-content span {
-            font-size: 0.72rem;
+            font-size: 12px;
             color: var(--text-dim);
         }
 
@@ -514,22 +513,24 @@
             padding: 40px 20px;
             text-align: center;
             color: var(--text-dim);
-            font-size: 0.85rem;
+            font-size: 14px;
         }
 
-        .notif-empty .notif-empty-icon { font-size: 2.2rem; margin-bottom: 8px; }
+        .notif-empty .notif-empty-icon { font-size: 28px; margin-bottom: 8px; color: var(--text-faint); }
 
         .notif-panel-footer {
-            padding: 10px 18px;
+            padding: 12px 16px;
             border-top: 1px solid var(--line);
             text-align: center;
         }
 
         .notif-panel-footer a {
-            font-size: 0.78rem;
-            color: var(--primary-blue);
+            font-size: 13px;
+            color: var(--text-dim);
             text-decoration: none;
+            transition: color 160ms var(--dash-ease);
         }
+        .notif-panel-footer a:hover { color: var(--text-main); }
 
         /* =============================================
            Toast Notification
@@ -541,52 +542,48 @@
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             pointer-events: none;
         }
 
         .toast {
             background: var(--bg-elevated);
-            border: 1px solid var(--border-color);
-            border-left: 3px solid var(--primary-blue);
+            border: 1px solid var(--line-strong);
             border-radius: var(--radius-lg);
-            padding: 14px 16px;
+            padding: 12px 16px;
             max-width: 320px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow-lg);
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: flex-start;
             pointer-events: all;
-            animation: toastIn 0.35s cubic-bezier(.175,.885,.32,1.275);
+            animation: toastIn 220ms var(--dash-ease);
         }
 
-        .toast.homework { border-left-color: var(--warning); }
-        .toast.system   { border-left-color: #8b5cf6; }
-
         @keyframes toastIn {
-            from { opacity: 0; transform: translateX(30px) scale(0.95); }
-            to   { opacity: 1; transform: translateX(0) scale(1); }
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes toastOut {
-            from { opacity: 1; transform: translateX(0); }
-            to   { opacity: 0; transform: translateX(30px); }
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(-6px); }
         }
 
-        .toast-icon { font-size: 1.1rem; margin-top: 1px; }
+        .toast-icon { font-size: 16px; margin-top: 2px; color: var(--text-dim); }
 
         .toast-body { flex: 1; }
 
         .toast-title {
-            font-size: 0.82rem;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 500;
             margin-bottom: 2px;
         }
 
         .toast-msg {
-            font-size: 0.76rem;
+            font-size: 13px;
             color: var(--text-dim);
-            line-height: 1.4;
+            line-height: 20px;
         }
 
         /* =============================================
@@ -657,173 +654,203 @@
             position: fixed;
             left: 0;
             top: 70px;
-            width: 250px;
+            width: 248px;
             height: calc(100vh - 70px);
-            background: var(--nav-bg);
-            backdrop-filter: blur(15px);
+            background: var(--bg-color);
             border-right: 1px solid var(--border-color);
-            padding: 30px 20px;
+            padding: 24px 12px;
         }
 
         .sidebar-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
+            gap: 10px;
+            min-height: 36px;
+            padding: 0 12px;
             color: var(--text-dim);
             text-decoration: none;
-            border-radius: var(--radius-sm);
-            margin-bottom: 8px;
-            transition: 0.3s;
+            border-radius: var(--radius-md);
+            margin-bottom: 2px;
+            font-size: 14px;
             cursor: pointer;
+            transition: background-color 160ms var(--dash-ease), color 160ms var(--dash-ease);
         }
 
         .sidebar-item:hover, .sidebar-item.active {
-            background: rgba(59, 130, 246, 0.1);
+            background: var(--card-hover);
             color: var(--text-main);
+        }
+        @media (min-width: 769px) {
+            .sidebar-item .sn-icon { font-size: 16px; }
         }
 
         .main-content {
-            margin-left: 250px;
+            margin-left: 248px;
             margin-top: 70px;
-            padding: 40px;
-            width: calc(100% - 250px);
+            padding: 32px;
+            width: calc(100% - 248px);
         }
 
 
         /* ── Onboarding checklist (นักเรียนใหม่) ── */
-        .onboard-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 28px; position: relative; display: none; }
+        .onboard-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; margin-bottom: 32px; position: relative; display: none; }
         .onboard-card.show { display: block; }
-        .onboard-card h3 { font-size: var(--text-lg); margin-bottom: 4px; }
-        .onboard-card > p { color: var(--text-dim); font-size: var(--text-sm); margin-bottom: 14px; }
-        .onboard-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 6px; border-radius: var(--radius-sm); }
+        .onboard-card h3 { font-size: 18px; margin-bottom: 4px; }
+        .onboard-card > p { color: var(--text-dim); font-size: 14px; margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+        .onboard-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text-dim); cursor: pointer; border-radius: var(--radius-md); transition: background-color 160ms var(--dash-ease), color 160ms var(--dash-ease); }
         .onboard-close:hover { background: var(--card-hover); color: var(--text-main); }
-        .onboard-bar { height: 6px; background: var(--input-bg); border-radius: var(--radius-full); overflow: hidden; margin-bottom: 14px; }
-        .onboard-bar > div { height: 100%; width: 0; background: var(--gradient-success); transition: width .5s ease; }
-        .onboard-step { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--text-main); text-decoration: none; cursor: pointer; font-size: var(--text-sm); }
+        .onboard-bar { height: 4px; background: var(--card-hover); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+        .onboard-bar > div { height: 100%; width: 0; background: var(--primary-blue); border-radius: 2px; }
+        .onboard-step { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 8px 12px; margin: 0 -12px; border-radius: var(--radius-md); color: var(--text-main); text-decoration: none; cursor: pointer; font-size: 14px; transition: background-color 120ms var(--dash-ease); }
         .onboard-step:hover { background: var(--card-hover); }
-        .onboard-check { width: 22px; height: 22px; border-radius: var(--radius-full); border: 2px solid var(--line-strong, var(--border-color)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
-        .onboard-check svg { width: 13px; height: 13px; opacity: 0; }
+        .onboard-check { width: 20px; height: 20px; border-radius: var(--radius-full); border: 1.5px solid var(--line-strong, var(--border-color)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
+        .onboard-check svg { width: 12px; height: 12px; opacity: 0; }
         .onboard-step.done { color: var(--text-dim); }
         .onboard-step.done .onboard-check { background: var(--success); border-color: var(--success); }
         .onboard-step.done .onboard-check svg { opacity: 1; }
         .onboard-step.done .onboard-label { text-decoration: line-through; }
-        .welcome-banner {
-            background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%);
-            border-radius: var(--radius-lg);
-            padding: 30px;
-            margin-bottom: 40px;
-        }
 
-        .welcome-banner h1 { font-size: 1.8rem; margin-bottom: 10px; }
-        .welcome-banner p { color: rgba(255, 255, 255, 0.9); font-size: var(--text-base); }
+        /* Page heading (was a gradient banner; text and ids unchanged) */
+        .welcome-banner { margin-bottom: 32px; }
+        .welcome-banner h1 { font-size: 28px; line-height: 1.3; margin-bottom: 4px; color: var(--text-main); }
+        .welcome-banner p { color: var(--text-dim); font-size: 15px; line-height: 24px; }
 
         .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 25px;
-            font-size: 1.1rem;
+            gap: 12px;
+            min-height: 36px;
+            margin-bottom: 20px;
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 500;
         }
 
         .btn-create-course {
             background: var(--primary-blue);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: var(--radius-sm);
+            height: 36px;
+            padding: 0 16px;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s;
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 160ms var(--dash-ease), transform 120ms var(--dash-ease);
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
-        .btn-create-course:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
+        .btn-create-course:hover { background: var(--primary-2); }
+        .btn-create-course:active { transform: scale(0.98); }
 
         .course-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+            gap: 24px;
         }
 
         .course-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-xl);
             overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 160ms var(--dash-ease), background-color 160ms var(--dash-ease);
             cursor: pointer;
         }
 
         .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-md); border-color: var(--line-strong);
+            border-color: var(--line-strong);
+            background: var(--card-hover);
         }
 
         .course-image {
             width: 100%;
-            height: 180px;
+            aspect-ratio: 16 / 9;
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: white;
+            color: var(--text-main);
             position: relative;
+            flex-shrink: 0;
+        }
+
+        /* No thumbnail: a plain indigo notebook cover with a spine line; title bottom-left,
+           clear of the status tag (top-left) and the lesson count (bottom-right) */
+        .course-image[style*="--active-lesson"] {
+            align-items: flex-end;
+            justify-content: flex-start;
+            padding: 20px 96px 16px 40px;
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1.35;
+        }
+        .course-image[style*="--active-lesson"]::before {
+            content: '';
+            position: absolute;
+            left: 24px; top: 0; bottom: 0;
+            width: 1px;
+            background: var(--line-strong);
         }
 
         .course-duration {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 4px 10px;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(10, 14, 39, 0.72);
+            color: #E2E8F0;
+            padding: 2px 8px;
             border-radius: var(--radius-sm);
-            font-size: 0.8rem;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 20px;
+            font-variant-numeric: tabular-nums;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
 
-        .course-info { padding: 20px; }
-        .course-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
-        .course-subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 5px; }
-        .course-author { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 15px; }
+        .course-info { padding: 16px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+        .course-title { font-size: 17px; line-height: 1.4; margin-bottom: 8px; }
+        .course-subtitle { color: var(--text-dim); font-size: 13px; line-height: 20px; }
+        .course-author { color: var(--text-dim); font-size: 13px; line-height: 20px; margin-bottom: 16px; }
 
-        .progress-section { margin-top: 15px; }
-        .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; }
-        .progress-bar { width: 100%; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary-blue); border-radius: 3px; transition: width 0.3s; }
+        .progress-section { margin-top: auto; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-dim); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+        .progress-bar { width: 100%; height: 4px; background: var(--card-hover); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary-blue); border-radius: 2px; }
 
-        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); grid-column: 1 / -1; width: 100%; }
+        .empty-state { text-align: center; padding: 64px 20px; color: var(--text-dim); grid-column: 1 / -1; width: 100%; font-size: 14px; }
         .empty-state-icon {
-            width: 104px; height: 104px; margin: 0 auto 24px;
+            width: 56px; height: 56px; margin: 0 auto 16px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.8rem; color: var(--primary-blue);
-            border-radius: var(--radius-full);
-            background: radial-gradient(circle at 30% 25%, rgba(139,92,246,0.22), rgba(59,130,246,0.10) 70%);
-            border: 1px solid rgba(139,92,246,0.28);
-            box-shadow: var(--shadow-sm);
+            font-size: 24px; color: var(--text-dim);
+            border-radius: var(--radius-lg);
+            background: var(--card-hover);
+            border: 1px solid var(--border-color);
         }
         .empty-state .empty-cta {
-            margin-top: 20px; padding: 10px 22px; border: none; cursor: pointer;
-            border-radius: var(--radius-sm); color: #fff; font-weight: 600; font-family: inherit;
-            background: var(--gradient-cta);
+            margin-top: 20px; height: 40px; padding: 0 20px; border: none; cursor: pointer;
+            border-radius: var(--radius-md); color: #fff; font-weight: 500; font-size: 14px; font-family: inherit;
+            background: var(--primary-blue);
+            transition: background-color 160ms var(--dash-ease);
         }
-        .empty-state .empty-cta:hover { filter: brightness(1.1); }
-        .empty-state h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-main); }
+        .empty-state .empty-cta:hover { background: var(--primary-2); }
+        .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text-main); }
+        .empty-state p { max-width: 28rem; margin: 0 auto; line-height: 22px; }
 
-        .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 60px 0; }
-        .spinner { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 64px 0; grid-column: 1 / -1; }
+        .spinner { width: 28px; height: 28px; border: 2px solid var(--border-color); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 768px) {
@@ -847,28 +874,29 @@
 
         /* === Enrollment Modal === */
         .enroll-modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px); z-index: 3000; display: none;
-            align-items: center; justify-content: center; padding: 1rem;
+            position: fixed; inset: 0; background: rgba(5, 8, 22, 0.72);
+            z-index: 3000; display: none;
+            align-items: center; justify-content: center; padding: 16px;
         }
         .enroll-modal-overlay.show { display: flex; }
 
-        .enroll-modal { background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-xl); width: 100%; max-width: 520px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
-        .enroll-modal-thumb { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700; color: rgba(255,255,255,0.5); }
-        .enroll-modal-body { padding: 1.75rem; }
-        .enroll-modal-body h2 { font-size: 1.35rem; margin-bottom: 0.5rem; }
-        .enroll-modal-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
-        .enroll-badge { background: rgba(59,130,246,0.15); color: var(--primary-blue); padding: 0.25rem 0.7rem; border-radius: var(--radius-xl); font-size: 0.8rem; }
-        .enroll-modal-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; max-height: 80px; overflow: hidden; text-overflow: ellipsis; }
-        .enroll-modal-lessons { display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.5rem; }
-        .enroll-modal-actions { display: flex; gap: 0.75rem; }
-        .btn-enroll { flex: 1; padding: 0.9rem; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-lg); font-weight: 700; font-size: var(--text-base); cursor: pointer; transition: 0.2s; }
-        .btn-enroll:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-go-course { flex: 1; padding: 0.9rem; background: var(--gradient-success); color: white; border: none; border-radius: var(--radius-lg); font-weight: 700; font-size: var(--text-base); cursor: pointer; transition: 0.2s; }
-        .btn-go-course:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-cancel-enroll { padding: 0.9rem 1.25rem; background: var(--card-hover); border: 1px solid var(--border-color); color: var(--text-dim); border-radius: var(--radius-lg); cursor: pointer; transition: 0.2s; }
-        .btn-cancel-enroll:hover { color: var(--text-main); }
-        .enrolled-tag { position: absolute; top: 10px; left: 10px; background: rgba(16,185,129,0.85); color: white; padding: 3px 10px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 600; }
+        .enroll-modal { background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-xl); width: 100%; max-width: 520px; overflow: hidden; box-shadow: var(--shadow-lg); animation: modalIn 220ms var(--dash-ease); }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .enroll-modal-thumb { width: 100%; height: 200px; object-fit: cover; background: var(--active-lesson); display: flex; align-items: center; justify-content: center; padding: 0 24px; text-align: center; font-family: var(--font-display); font-size: 24px; font-weight: 500; color: var(--text-main); }
+        .enroll-modal-body { padding: 24px; }
+        .enroll-modal-body h2 { font-size: 22px; line-height: 1.35; margin-bottom: 12px; }
+        .enroll-modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .enroll-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--card-hover); border: 1px solid var(--line); color: var(--text-dim); padding: 2px 8px; border-radius: var(--radius-sm); font-size: 13px; line-height: 20px; }
+        .enroll-modal-desc { color: var(--text-dim); font-size: 14px; line-height: 22px; margin-bottom: 20px; max-height: 88px; overflow: hidden; text-overflow: ellipsis; }
+        .enroll-modal-lessons { display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-size: 14px; margin-bottom: 24px; font-variant-numeric: tabular-nums; }
+        .enroll-modal-actions { display: flex; gap: 8px; }
+        .btn-enroll, .btn-go-course { flex: 1; height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary-blue); color: white; border: none; border-radius: var(--radius-md); font-family: inherit; font-weight: 500; font-size: 15px; cursor: pointer; transition: background-color 160ms var(--dash-ease), transform 120ms var(--dash-ease); }
+        .btn-enroll:hover, .btn-go-course:hover { background: var(--primary-2); }
+        .btn-enroll:active, .btn-go-course:active { transform: scale(0.98); }
+        .btn-cancel-enroll { height: 44px; padding: 0 20px; background: var(--card-hover); border: 1px solid var(--border-color); color: var(--text-main); border-radius: var(--radius-md); cursor: pointer; font-family: inherit; font-size: 15px; transition: border-color 160ms var(--dash-ease); }
+        .btn-cancel-enroll:hover { border-color: var(--line-strong); }
+        .enrolled-tag { position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 4px; background: rgba(10, 14, 39, 0.72); color: #E2E8F0; padding: 2px 8px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; line-height: 20px; }
+        .enrolled-tag .sn-icon { color: #34D399; }
     </style>
 <script src="tour.js"></script>
 <script type="module" src="auth-guard.js"></script>
@@ -890,46 +918,46 @@
                     <!-- Filter chips -->
                     <div class="search-filter-bar" id="filterBar">
                         <div class="filter-chip active" data-filter="all">ทั้งหมด</div>
-                        <div class="filter-chip" data-filter="programming">💻 การเขียนโปรแกรม</div>
-                        <div class="filter-chip" data-filter="design"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> ดีไซน์</div>
-                        <div class="filter-chip" data-filter="business"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> ธุรกิจ</div>
-                        <div class="filter-chip" data-filter="marketing"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด</div>
-                        <div class="filter-chip" data-filter="data-science"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data Science</div>
-                        <div class="filter-chip" data-filter="beginner">🌱 เริ่มต้น</div>
-                        <div class="filter-chip" data-filter="intermediate">⚡ ปานกลาง</div>
-                        <div class="filter-chip" data-filter="advanced"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s4 4 4 9a4 4 0 01-8 0c0-1 .5-2 1-3 .5 1 1 1.5 1.5 1.5C10 7 12 4 12 2z"/><path d="M8 15a4 4 0 008 0c0-3-2-5-2-5s0 3-2 4c-1-1-1-2-1-2s-3 1-3 3z"/></svg></span> ขั้นสูง</div>
+                        <div class="filter-chip" data-filter="programming">การเขียนโปรแกรม</div>
+                        <div class="filter-chip" data-filter="design">ดีไซน์</div>
+                        <div class="filter-chip" data-filter="business">ธุรกิจ</div>
+                        <div class="filter-chip" data-filter="marketing">การตลาด</div>
+                        <div class="filter-chip" data-filter="data-science">Data Science</div>
+                        <div class="filter-chip" data-filter="beginner">เริ่มต้น</div>
+                        <div class="filter-chip" data-filter="intermediate">ปานกลาง</div>
+                        <div class="filter-chip" data-filter="advanced">ขั้นสูง</div>
                     </div>
 
                     <!-- Trending (shown when input empty) -->
                     <div id="searchTrendingSection">
                         <!-- Recent searches (dynamic) -->
                         <div id="recentSearchesBlock" style="display:none;">
-                            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px;">
-                                <span class="search-section-label" style="padding:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> ค้นหาล่าสุด</span>
-                                <button id="clearRecentBtn" style="font-size:0.72rem;color:var(--primary-blue);background:none;border:none;cursor:pointer;padding:0;">ล้างทั้งหมด</button>
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 0;">
+                                <span class="search-section-label" style="padding:0;">ค้นหาล่าสุด</span>
+                                <button id="clearRecentBtn" style="font-size:12px;color:var(--primary-blue);background:none;border:none;cursor:pointer;padding:0;">ล้างทั้งหมด</button>
                             </div>
                             <div class="recent-searches-list" id="recentSearchesList"></div>
-                            <div style="height:1px;background:var(--line);margin:6px 0;"></div>
+                            <div style="height:1px;background:var(--line);margin:4px 0;"></div>
                         </div>
 
-                        <div class="search-section-label"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s4 4 4 9a4 4 0 01-8 0c0-1 .5-2 1-3 .5 1 1 1.5 1.5 1.5C10 7 12 4 12 2z"/><path d="M8 15a4 4 0 008 0c0-3-2-5-2-5s0 3-2 4c-1-1-1-2-1-2s-3 1-3 3z"/></svg></span> หมวดหมู่ยอดนิยม</div>
+                        <div class="search-section-label">หมวดหมู่ยอดนิยม</div>
                         <div class="trending-tags" id="trendingTags">
-                            <span class="trending-tag" data-search="python" data-category="programming">🐍 Python</span>
-                            <span class="trending-tag" data-search="javascript" data-category="programming">🟨 JavaScript</span>
-                            <span class="trending-tag" data-search="java" data-category="programming">☕ Java</span>
-                            <span class="trending-tag" data-search="css" data-category="design"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> CSS / Design</span>
-                            <span class="trending-tag" data-search="ai" data-category="ai-ml"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI & ML</span>
-                            <span class="trending-tag" data-search="data" data-category="data-science"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data Science</span>
-                            <span class="trending-tag" data-search="marketing" data-category="marketing"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด</span>
-                            <span class="trending-tag" data-search="excel" data-category="business"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span> Excel</span>
-                            <span class="trending-tag" data-search="web" data-category="programming">🌐 Web Dev</span>
-                            <span class="trending-tag" data-search="sql" data-category="data-science">🗄️ SQL</span>
+                            <span class="trending-tag" data-search="python" data-category="programming">Python</span>
+                            <span class="trending-tag" data-search="javascript" data-category="programming">JavaScript</span>
+                            <span class="trending-tag" data-search="java" data-category="programming">Java</span>
+                            <span class="trending-tag" data-search="css" data-category="design">CSS / Design</span>
+                            <span class="trending-tag" data-search="ai" data-category="ai-ml">AI & ML</span>
+                            <span class="trending-tag" data-search="data" data-category="data-science">Data Science</span>
+                            <span class="trending-tag" data-search="marketing" data-category="marketing">การตลาด</span>
+                            <span class="trending-tag" data-search="excel" data-category="business">Excel</span>
+                            <span class="trending-tag" data-search="web" data-category="programming">Web Dev</span>
+                            <span class="trending-tag" data-search="sql" data-category="data-science">SQL</span>
                         </div>
 
                         <!-- Learner favorites (top 4 from cache) -->
                         <div id="favoritesBlock">
                             <div style="height:1px;background:var(--line);margin:4px 0 0;"></div>
-                            <div class="search-section-label" style="margin-top:4px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span> คอร์สแนะนำ</div>
+                            <div class="search-section-label" style="margin-top:4px;">คอร์สแนะนำ</div>
                             <div class="favorites-grid" id="favoritesGrid"></div>
                         </div>
                     </div>
@@ -951,13 +979,13 @@
                     <!-- badge จะถูก inject ด้วย JS -->
                     <div class="notif-panel" id="notifPanel">
                         <div class="notif-panel-header">
-                            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> การแจ้งเตือน</h4>
+                            <h4>การแจ้งเตือน</h4>
                             <button class="notif-mark-all" id="markAllReadBtn">อ่านทั้งหมด</button>
                         </div>
                         <div class="notif-tabs">
                             <button class="notif-tab active" data-tab="all">ทั้งหมด</button>
-                            <button class="notif-tab" data-tab="course"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> คอร์สใหม่</button>
-                            <button class="notif-tab" data-tab="homework"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</button>
+                            <button class="notif-tab" data-tab="course">คอร์สใหม่</button>
+                            <button class="notif-tab" data-tab="homework">การบ้าน</button>
                         </div>
                         <div class="notif-list" id="notifList">
                             <div class="sn-skeleton-row"><div class="sn-skeleton-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="sn-skeleton-line w-60"></div><div class="sn-skeleton-line w-30"></div></div></div>
@@ -1044,7 +1072,7 @@
             </div>
 
             <div class="section-header">
-                <span id="sectionHeaderText"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ค้นหาคอร์สใหม่</span>
+                <span id="sectionHeaderText">ค้นหาคอร์สใหม่</span>
                 <button class="btn-create-course teacher-only" id="headerCreateCourseBtn" onclick="window.location.href='create-course.html'" style="display: none;">
                     <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span> สร้างคอร์สใหม่
                 </button>
@@ -1122,12 +1150,12 @@
         // Utility maps
         // =============================================
         const courseColors = [
-            'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-            'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-            'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-            'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'
+            'var(--active-lesson)',
+            'var(--active-lesson)',
+            'var(--active-lesson)',
+            'var(--active-lesson)',
+            'var(--active-lesson)',
+            'var(--active-lesson)'
         ];
 
         const categoryMap = {
@@ -1555,7 +1583,7 @@
             const activeEl = document.getElementById(page === 'explore' ? 'sidebarExplore' : 'sidebarMyCourses');
             if (activeEl) activeEl.classList.add('active');
             const headerText = document.getElementById('sectionHeaderText');
-            if (headerText) headerText.innerHTML = page === 'explore' ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span> ค้นหาคอร์สใหม่' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> คอร์สของฉัน';
+            if (headerText) headerText.innerHTML = page === 'explore' ? 'ค้นหาคอร์สใหม่' : 'คอร์สของฉัน';
             const si = document.getElementById('searchInput');
             if (si) si.value = '';
             searchClearBtn.classList.remove('show');
@@ -1625,31 +1653,31 @@
                             <div class="course-title">${snEscapeHtml(course.title)}</div>
                             <div class="course-subtitle">${categoryMap[course.category]||course.category} • ${levelMap[course.level]||course.level}</div>
                             <div class="course-author">${snEscapeHtml(creatorName)}</div>
-                            <div style="margin-top:0.75rem;">${btnHtml}</div>
+                            <div style="margin-top:auto;">${btnHtml}</div>
                         </div>`;
                     card.addEventListener('click', () => window.location.href = `course-content.html?id=${course.id}`);
                     courseGrid.appendChild(card);
                 }
 
                 const enterBtn = (id) => `<button onclick="event.stopPropagation();window.location.href='course-content.html?id=${id}'"
-                    style="width:100%;padding:0.6rem;background:var(--gradient-success);color:white;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span> เข้าสู่บทเรียน</button>`;
+                    style="width:100%;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--primary-blue);color:#fff;border:none;border-radius:var(--radius-md);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span> เข้าสู่บทเรียน</button>`;
 
                 // ── ส่วน 1: คอร์สที่ครูสร้าง ──
                 if (createdCourses.length > 0) {
                     const section = document.createElement('div');
-                    section.style.cssText = 'grid-column:1/-1;color:#c4b5fd;font-weight:600;font-size:0.9rem;margin-bottom:4px;display:flex;align-items:center;gap:8px;';
-                    section.innerHTML = '<span style="width:3px;height:18px;background:#8b5cf6;border-radius:99px;display:inline-block;"></span>คอร์สที่ฉันสร้าง';
+                    section.style.cssText = 'grid-column:1/-1;color:var(--text-dim);font-weight:500;font-size:14px;margin-bottom:-8px;display:flex;align-items:center;gap:8px;';
+                    section.innerHTML = '<span style="display:none;"></span>คอร์สที่ฉันสร้าง';
                     courseGrid.appendChild(section);
 
                     for (const course of createdCourses) {
                         const manageBtn = `
-                            <div style="display:flex;gap:6px;">
+                            <div style="display:flex;gap:8px;">
                                 ${enterBtn(course.id)}
                                 <button onclick="event.stopPropagation();window.location.href='edit-course.html?id=${course.id}'"
-                                    style="padding:0.6rem 0.8rem;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#c4b5fd;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;white-space:nowrap;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แก้ไข</button>
+                                    style="height:36px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;background:var(--card-hover);border:1px solid var(--line-strong);color:var(--text-main);border-radius:var(--radius-md);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แก้ไข</button>
                             </div>`;
                         await buildCourseCard(course,
-                            `<div style="position:absolute;top:8px;left:8px;background:rgba(139,92,246,0.85);color:white;font-size:0.7rem;padding:2px 8px;border-radius:99px;font-weight:600;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span>‍<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span> คอร์สของฉัน</div>`,
+                            `<div style="position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:4px;background:rgba(10,14,39,0.72);color:#E2E8F0;font-size:12px;line-height:20px;padding:2px 8px;border-radius:var(--radius-sm);font-weight:500;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> คอร์สของฉัน</div>`,
                             manageBtn);
                     }
                 }
@@ -1658,8 +1686,8 @@
                 const filteredEnrolled = enrolledIds.filter(id => !window._createdCourseIds?.has(id));
                 if (filteredEnrolled.length > 0) {
                     const section2 = document.createElement('div');
-                    section2.style.cssText = 'grid-column:1/-1;color:#6ee7b7;font-weight:600;font-size:0.9rem;margin-top:8px;margin-bottom:4px;display:flex;align-items:center;gap:8px;';
-                    section2.innerHTML = '<span style="width:3px;height:18px;background:#10b981;border-radius:99px;display:inline-block;"></span>คอร์สที่ฉันสมัคร';
+                    section2.style.cssText = 'grid-column:1/-1;color:var(--text-dim);font-weight:500;font-size:14px;margin-top:16px;margin-bottom:-8px;display:flex;align-items:center;gap:8px;';
+                    section2.innerHTML = '<span style="display:none;"></span>คอร์สที่ฉันสมัคร';
                     courseGrid.appendChild(section2);
 
                     for (const courseId of filteredEnrolled) {
@@ -1764,8 +1792,8 @@
                 return;
             }
             const categoryMapLocal = {
-                'programming':'💻 โปรแกรม','design':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> ดีไซน์','business':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> ธุรกิจ',
-                'marketing':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด','data-science':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data','ai-ml':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI','other':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> อื่นๆ'
+                'programming':'โปรแกรม','design':'ดีไซน์','business':'ธุรกิจ',
+                'marketing':'การตลาด','data-science':'Data','ai-ml':'AI','other':'อื่นๆ'
             };
             grid.innerHTML = top4.map(c => {
                 const thumbStyle = c.thumbnail ? `background-image:url('${c.thumbnail}');` : `background:${c.color};`;
@@ -1932,10 +1960,10 @@
                 : `ผลการค้นหา "${query}"`;
 
             const categoryMapLocal = {
-                'programming':'💻 การเขียนโปรแกรม','design':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2a10 10 0 100 20 1.5 1.5 0 001-2.5 1.5 1.5 0 011-2.5H16a4 4 0 004-4A10 10 0 0012 2z"/></svg></span> ดีไซน์','business':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> ธุรกิจ',
-                'marketing':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 001 1h3l4 5V5L7 10H4a1 1 0 00-1 1z"/><path d="M15 8a3 3 0 010 8"/></svg></span> การตลาด','data-science':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Data Science','ai-ml':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI/ML','other':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 00-6 6c0 4 6 12 6 12s6-8 6-12a6 6 0 00-6-6z"/><circle cx="12" cy="8" r="2"/></svg></span> อื่นๆ'
+                'programming':'การเขียนโปรแกรม','design':'ดีไซน์','business':'ธุรกิจ',
+                'marketing':'การตลาด','data-science':'Data Science','ai-ml':'AI/ML','other':'อื่นๆ'
             };
-            const levelMapLocal = { 'beginner':'🌱 เริ่มต้น','intermediate':'⚡ ปานกลาง','advanced':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s4 4 4 9a4 4 0 01-8 0c0-1 .5-2 1-3 .5 1 1 1.5 1.5 1.5C10 7 12 4 12 2z"/><path d="M8 15a4 4 0 008 0c0-3-2-5-2-5s0 3-2 4c-1-1-1-2-1-2s-3 1-3 3z"/></svg></span> ขั้นสูง' };
+            const levelMapLocal = { 'beginner':'เริ่มต้น','intermediate':'ปานกลาง','advanced':'ขั้นสูง' };
 
             if (matches.length === 0) {
                 resultsList.innerHTML = `
@@ -1969,7 +1997,7 @@
             const idx = text.toLowerCase().indexOf(query.toLowerCase());
             if (idx === -1) return escapeHtml(text);
             return escapeHtml(text.substring(0, idx))
-                + `<mark style="background:rgba(59,130,246,0.35);color:white;border-radius:2px;padding:0 2px;">${escapeHtml(text.substring(idx, idx+query.length))}</mark>`
+                + `<mark style="background:var(--active-lesson);color:inherit;border-radius:2px;padding:0 2px;">${escapeHtml(text.substring(idx, idx+query.length))}</mark>`
                 + escapeHtml(text.substring(idx+query.length));
         }
 
@@ -2026,7 +2054,7 @@
                 const d = document.createElement('div');
                 d.id = 'no-result-message';
                 d.style.cssText = 'text-align:center;width:100%;padding:40px;grid-column:1/-1;color:var(--text-dim);';
-                d.innerHTML = `<div style="font-size:3rem;margin-bottom:10px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span></div><h3>ไม่พบคอร์สที่ค้นหา</h3><p>ลองเปลี่ยนตัวกรองหรือคำค้นหาใหม่</p>`;
+                d.innerHTML = `<div style="font-size:2rem;margin-bottom:8px;color:var(--text-faint);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span></div><h3>ไม่พบคอร์สที่ค้นหา</h3><p>ลองเปลี่ยนตัวกรองหรือคำค้นหาใหม่</p>`;
                 courseGrid.appendChild(d);
             }
         }
@@ -2109,7 +2137,7 @@
                 markCardAsEnrolled(courseId);
                 const actionsEl = document.getElementById('enrollModalActions');
                 actionsEl.innerHTML = `<button class="btn-go-course" onclick="goToCourse('${courseId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span> เข้าสู่บทเรียน</button><button class="btn-cancel-enroll" onclick="closeEnrollModal()">ปิด</button>`;
-                document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend', '<p style="color:var(--success);font-size:0.9rem;margin-top:0.3rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สมัครเรียนสำเร็จแล้ว!</p>');
+                document.getElementById('enrollModalTitle').insertAdjacentHTML('afterend', '<p style="color:var(--success);font-size:14px;margin-top:-4px;margin-bottom:12px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สมัครเรียนสำเร็จแล้ว!</p>');
             } catch(e) { toast('เกิดข้อผิดพลาดในการสมัคร: ' + e.message, 'error'); }
         };
 
