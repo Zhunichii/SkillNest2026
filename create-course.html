@@ -9,162 +9,142 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="shortcut icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Anuphan:wght@500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
     <style>
+        /* Page tokens. Everything else comes from theme.css (dark + light). */
         :root {
-            --radius-sm: 8px;
-            --radius-md: 14px;
-            --radius-lg: 20px;
-            --space-1: 0.5rem;
-            --space-2: 0.75rem;
-            --space-3: 1.25rem;
-            --space-4: 2rem;
-            --shadow-card: 0 1px 0 rgba(255,255,255,0.035) inset, 0 28px 56px -32px rgba(0,0,0,0.65);
-            --shadow-soft: 0 10px 26px -16px rgba(0,0,0,0.5);
-            --ai-1: #8b5cf6;
-            --ai-2: #3b82f6;
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
+            --cc-accent-text: color-mix(in srgb, var(--primary-blue) 72%, var(--text-main));
+            --cc-accent-line: color-mix(in srgb, var(--primary-blue) 35%, transparent);
+            --cc-glow: color-mix(in srgb, var(--primary-blue) 20%, transparent);
         }
+        [data-theme="light"] { --cc-glow: color-mix(in srgb, var(--primary-blue) 10%, transparent); }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-body); }
 
-        h1, h2, h3, .logo, .logo-mock, .course-title, .card-stat-value,
-        .page-title, .nav-logo, .section-title, .avatar-header-title,
-        .modal-title, .stat-value, .quiz-title {
-            font-family: var(--font-display, 'Space Grotesk'), 'Anuphan', sans-serif;
+        h1, h2, h3, .logo, .section-title, .quiz-title {
+            font-family: var(--font-display);
             font-weight: 600;
             letter-spacing: -0.01em;
         }
 
-        html { scrollbar-color: rgba(255,255,255,0.18) transparent; }
+        html { scrollbar-color: var(--line-strong) transparent; }
         ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 99px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+        ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
 
+        /* Flat theme background + ONE static indigo glow behind the header. No dot grid, no motion. */
         body {
-            background: radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%);
-            background-image:
-                radial-gradient(circle at 50% 0%, #161B3A 0%, #0A0E27 60%),
-                radial-gradient(circle at 1px 1px, rgba(226,232,240,0.025) 1px, transparent 0);
-            background-size: 100% 100%, 26px 26px;
-            background-attachment: fixed;
+            background: var(--bg-color);
+            background-image: radial-gradient(ellipse 720px 420px at 50% 0, var(--cc-glow), transparent 70%);
+            background-repeat: no-repeat;
             color: var(--text-main);
             min-height: 100vh;
             padding: 2.5rem 2rem 5rem;
             line-height: 1.5;
         }
 
-        ::selection { background: rgba(139,92,246,0.35); color: #fff; }
-
-        :focus-visible { outline: 2px solid var(--primary-blue); outline-offset: 2px; border-radius: 4px; }
+        ::selection { background: color-mix(in srgb, var(--primary-blue) 30%, transparent); }
 
         .container { max-width: 980px; margin: 0 auto; }
 
-        .header { text-align: center; margin-bottom: 2.75rem; }
-        .header h1 { font-size: 2.35rem; margin-bottom: 0.5rem; }
-        .logo { font-weight: 700; }
-        .logo span {
-            background: linear-gradient(135deg, var(--ai-2), var(--ai-1));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .header > p { color: var(--text-dim); font-size: 0.95rem; }
+        /* Header: text wordmark, "Skill" text-main + "Nest" indigo, no gradient */
+        .header { text-align: center; margin-bottom: 2.5rem; }
+        .header h1 { font-size: 2.25rem; margin-bottom: 0.5rem; }
+        .logo { color: var(--text-main); }
+        .logo span { color: var(--primary-blue); }
+        .logo .sn-icon { color: var(--primary-blue); width: 0.8em; height: 0.8em; vertical-align: -0.05em; }
+        .header > p { color: var(--text-dim); font-size: 1rem; }
 
         /* ============ Card ============ */
         .section {
             position: relative;
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 1.85rem 2rem 2.1rem;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
             margin-bottom: 1.5rem;
             border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-card);
-            overflow: hidden;
-        }
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(139,92,246,0.55), rgba(59,130,246,0.55), transparent);
-            opacity: 0.8;
+            box-shadow: var(--shadow-lg);
         }
 
         .section-title {
-            font-size: 1.18rem;
+            font-size: 1.25rem;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            letter-spacing: -0.005em;
         }
         .section-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             border-radius: var(--radius-md);
-            background: rgba(59,130,246,0.12);
+            background: var(--active-lesson);
             color: var(--primary-blue);
             flex-shrink: 0;
         }
-        .section-icon svg { width: 18px; height: 18px; }
-        .section-icon.icon-ai { background: rgba(139,92,246,0.14); color: var(--ai-1); }
-        .section-icon.icon-success { background: rgba(16,185,129,0.14); color: var(--success-green); }
+        .section-icon svg { width: 20px; height: 20px; }
+        .section-icon.icon-ai { background: var(--active-lesson); color: var(--primary-blue); }
+        .section-icon.icon-success { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
 
-        .form-group { margin-bottom: 1.4rem; }
+        .form-group { margin-bottom: 1.25rem; }
         .form-group label {
             display: block;
-            margin-bottom: 0.45rem;
+            margin-bottom: 0.4rem;
             font-weight: 500;
             font-size: 0.9rem;
             color: var(--text-main);
-            letter-spacing: 0.005em;
         }
-        .required { color: var(--danger-red); }
-        .form-group small { display: block; color: var(--text-dim); font-size: 0.82rem; margin-top: 0.35rem; line-height: 1.4; }
+        .required { color: var(--danger); }
+        .form-group small { display: block; color: var(--text-dim); font-size: 0.85rem; margin-top: 0.35rem; line-height: 1.45; }
 
         .form-control {
             width: 100%;
-            padding: 0.7rem 0.95rem;
+            min-height: 48px;
+            padding: 12px 14px;
             background: var(--input-bg);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--line-strong);
             border-radius: var(--radius-sm);
             color: var(--text-main);
-            font-size: 0.95rem;
-            transition: border-color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
+            font-size: 16px;
+            line-height: 22px;
+            transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
         }
-        .form-control::placeholder { color: var(--text-dim); opacity: 0.7; }
-        .form-control:hover { border-color: rgba(255,255,255,0.22); }
+        .form-control::placeholder { color: var(--text-faint); }
+        .form-control:hover { border-color: var(--text-faint); }
         .form-control:focus {
             outline: none;
             border-color: var(--primary-blue);
-            background: rgba(59,130,246,0.06);
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+            box-shadow: 0 0 0 1px var(--primary-blue), 0 0 0 4px var(--active-lesson);
         }
-        textarea.form-control { resize: vertical; min-height: 100px; }
-        select.form-control { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0ba' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+        textarea.form-control { resize: vertical; min-height: 104px; }
+        select.form-control {
+            appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px;
+            background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+            background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+        }
         select.form-control option { background-color: var(--bg-elevated); color: var(--text-main); }
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
         .file-upload-area {
-            border: 1.5px dashed var(--border-color);
-            border-radius: var(--radius-md);
+            border: 1.5px dashed var(--line-strong);
+            border-radius: var(--radius-lg);
             padding: 2rem;
             text-align: center;
             background: var(--input-bg);
             cursor: pointer;
-            transition: border-color 0.25s var(--ease), background 0.25s var(--ease), transform 0.25s var(--ease);
+            transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
         }
-        .file-upload-area:hover { border-color: var(--primary-blue); background: rgba(59,130,246,0.05); transform: translateY(-1px); }
-        .file-upload-icon { margin-bottom: 0.6rem; opacity: 0.75; display: flex; justify-content: center; }
-        .file-upload-icon svg { width: 34px; height: 34px; }
-        .method-icon { margin-bottom: 0.5rem; display: flex; justify-content: center; opacity: 0.85; }
+        .file-upload-area:hover { border-color: var(--primary-blue); background: var(--active-lesson); }
+        .file-upload-icon { margin-bottom: 0.6rem; color: var(--text-dim); display: flex; justify-content: center; }
+        .file-upload-icon svg { width: 32px; height: 32px; }
+        .method-icon { margin-bottom: 0.5rem; display: flex; justify-content: center; color: var(--text-dim); }
         .method-icon svg { width: 22px; height: 22px; }
 
         .file-preview {
@@ -179,252 +159,278 @@
         }
         .file-preview img { width: 76px; height: 76px; object-fit: cover; border-radius: var(--radius-sm); }
 
-        .lesson-item {
-            background: var(--input-bg);
+        .lesson-item, .quiz-item, .hw-item {
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
             margin-bottom: 1rem;
-            transition: border-color 0.2s var(--ease);
+            position: relative;
         }
-        .lesson-item:hover { border-color: rgba(255,255,255,0.18); }
-        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem; }
-        .lesson-number {
-            background: rgba(59,130,246,0.12);
-            border: 1px solid rgba(59,130,246,0.28);
-            color: #7db4fb;
-            padding: 0.3rem 0.85rem;
+        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem; gap: 0.5rem; flex-wrap: wrap; }
+
+        /* One neutral tag for lesson / quiz / homework numbers (indigo is reserved for actions + AI) */
+        .lesson-number, .quiz-question-number, .hw-number-badge {
+            background: var(--card-hover);
+            border: 1px solid var(--line-strong);
+            color: var(--text-main);
+            padding: 0.3rem 0.8rem;
             border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.01em;
+            font-size: 0.82rem;
+            font-weight: 500;
         }
 
         /* ============ Buttons ============ */
         .btn {
-            padding: 0.72rem 1.5rem;
-            border: none;
+            min-height: 44px;
+            padding: 0.7rem 1.4rem;
+            border: 1px solid transparent;
             border-radius: var(--radius-sm);
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), opacity 0.2s var(--ease), background 0.2s var(--ease);
+            transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease), color 0.15s var(--ease);
             font-size: 0.95rem;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
+            color: var(--text-main);
+            background: transparent;
         }
-        .btn-primary { background: var(--primary-blue); color: white; box-shadow: var(--shadow-sm); }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
-        .btn-success { background: var(--success-green); color: white; box-shadow: 0 8px 20px -10px rgba(16,185,129,0.5); }
-        .btn-success:hover { transform: translateY(-1px); }
-        .btn-danger { background: var(--danger-red); color: white; padding: 0.5rem 1rem; font-size: 0.88rem; }
-        .btn-danger:hover { opacity: 0.88; }
-        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-dim); padding: 0.5rem 1rem; font-size: 0.88rem; }
-        .btn-outline:hover { border-color: var(--primary-blue); color: white; background: rgba(59,130,246,0.06); }
+        .btn-primary { background: var(--primary-blue); color: #fff; }
+        .btn-primary:hover { background: var(--primary-2); }
+        /* theme bg colour on green reads in both themes (white on the dark theme's light green does not) */
+        .btn-success { background: var(--success-green); color: var(--bg-color); }
+        .btn-success:hover { background: color-mix(in srgb, var(--success-green) 88%, var(--text-main)); }
+        .btn-danger { background: transparent; border-color: color-mix(in srgb, var(--danger) 45%, transparent); color: var(--danger); padding: 0.5rem 1rem; font-size: 0.88rem; min-height: 40px; }
+        .btn-danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-outline { background: transparent; border-color: var(--line-strong); color: var(--text-main); padding: 0.5rem 1rem; font-size: 0.9rem; min-height: 40px; }
+        .btn-outline:hover { border-color: var(--primary-blue); color: var(--cc-accent-text); background: var(--active-lesson); }
 
-        .alert { padding: 0.95rem 1.3rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.5; }
-        .alert-info { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); color: #7db4fb; }
+        .alert { padding: 0.9rem 1.2rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.55; }
+        .alert-info { background: var(--active-lesson); border: 1px solid var(--cc-accent-line); color: var(--text-main); }
 
         .upload-method { display: flex; gap: 0.85rem; margin-bottom: 1rem; }
         .method-option {
             flex: 1;
             padding: 1rem;
             background: var(--input-bg);
-            border: 1.5px solid var(--border-color);
+            border: 1px solid var(--line-strong);
             border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
+            transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
             text-align: center;
         }
-        .method-option:hover { border-color: var(--primary-blue); transform: translateY(-1px); }
-        .method-option.active { border-color: var(--primary-blue); background: rgba(59,130,246,0.1); }
+        .method-option:hover { border-color: var(--primary-blue); }
+        .method-option.active { border-color: var(--primary-blue); box-shadow: inset 0 0 0 1px var(--primary-blue); background: var(--active-lesson); }
 
-        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(6,8,20,0.88); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        /* Loading: theme-aware scrim so the text reads in both themes */
+        .loading-overlay { position: fixed; inset: 0; background: color-mix(in srgb, var(--bg-color) 90%, transparent); display: none; align-items: center; justify-content: center; z-index: 9999; }
         .loading-overlay.show { display: flex; }
-        .loading-content { text-align: center; padding: 2rem; }
-        .spinner { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--primary-blue); border-radius: 50%; width: 46px; height: 46px; animation: spin 0.9s linear infinite; margin: 0 auto 1.1rem; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-content { text-align: center; padding: 2rem; color: var(--text-main); width: min(420px, 100%); }
+        .spinner { border: 3px solid var(--line-strong); border-top-color: var(--primary-blue); border-radius: 50%; width: 44px; height: 44px; animation: spin 0.9s linear infinite; margin: 0 auto 1.1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .progress-container { margin-top: 1.5rem; display: none; }
-        .progress-item { background: var(--input-bg); padding: 0.75rem 0.9rem; border-radius: var(--radius-sm); margin-bottom: 0.5rem; border: 1px solid var(--border-color); }
-        .progress-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-top: 0.5rem; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--ai-2), var(--primary-blue)); transition: width 0.3s var(--ease); }
+        .progress-container { margin-top: 1.5rem; display: none; text-align: left; }
+        .progress-item { background: var(--bg-elevated); padding: 0.75rem 0.9rem; border-radius: var(--radius-sm); margin-bottom: 0.5rem; border: 1px solid var(--border-color); }
+        .progress-bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 0.5rem; }
+        .progress-fill { height: 100%; background: var(--primary-blue); transition: width 0.3s var(--ease); }
 
-        .btn-back { color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.9rem; transition: color 0.2s var(--ease), gap 0.2s var(--ease); }
-        .btn-back:hover { color: white; gap: 0.7rem; }
+        .btn-back { color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; margin-bottom: 1rem; font-size: 0.9rem; transition: color 0.15s var(--ease); }
+        .btn-back:hover { color: var(--text-main); }
 
         /* Quiz */
-        .quiz-item { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem; position: relative; }
         .quiz-question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
-        .quiz-question-number { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); color: #b39ef9; padding: 0.3rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; }
         .quiz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.75rem; }
         .quiz-choice-item { display: flex; align-items: center; gap: 0.5rem; }
         .quiz-choice-item input[type="text"] { flex: 1; }
-        .quiz-choice-item .choice-label { background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); padding: 0.32rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; min-width: 26px; text-align: center; }
+        .quiz-choice-item .choice-label { background: var(--card-hover); border: 1px solid var(--line-strong); padding: 0.32rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; min-width: 28px; text-align: center; }
         .correct-answer-select { width: 100%; margin-top: 0.75rem; }
 
+        /* AI box: the one "special" surface. Indigo tint + thick indigo edge, no gradient. */
         .ai-gen-area {
             position: relative;
-            background: rgba(139,92,246,0.055);
-            border: 1px solid rgba(139,92,246,0.22);
-            border-left: 3px solid var(--ai-1);
-            border-radius: var(--radius-md);
-            padding: 1.4rem 1.6rem;
+            background: var(--active-lesson);
+            border: 1px solid var(--cc-accent-line);
+            border-left: 3px solid var(--primary-blue);
+            border-radius: var(--radius-lg);
+            padding: 1.4rem 1.5rem;
             margin-bottom: 1.5rem;
         }
-        .ai-gen-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 1rem; color: #b39ef9; font-size: 0.98rem; }
+        .ai-gen-area .file-upload-area { background: var(--bg-elevated); }
+        .ai-gen-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 1rem; color: var(--cc-accent-text); font-size: 1rem; }
         .ai-gen-row { display: flex; gap: 0.75rem; align-items: flex-end; }
         .ai-gen-row .form-group { flex: 1; margin-bottom: 0; }
-        .btn-ai { background: linear-gradient(135deg, var(--ai-1), var(--ai-2)); color: white; white-space: nowrap; box-shadow: 0 8px 20px -10px rgba(139,92,246,0.55); }
-        .btn-ai:hover { opacity: 0.94; transform: translateY(-1px); }
+        .btn-ai { background: var(--primary-blue); color: #fff; white-space: nowrap; }
+        .btn-ai:hover { background: var(--primary-2); }
+        .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ai-loading-text { display: none; text-align: center; color: var(--cc-accent-text); padding: 0.6rem 0 0; font-size: 0.9rem; }
+        .ai-loading-text.show { display: block; }
 
-        /* Help ("?") button + template modal for correctly-formatted attachments */
+        /* Help ("?") button + template modal */
         .hw-help-btn {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 22px; height: 22px; border-radius: var(--radius-full);
-            background: rgba(139,92,246,0.18); border: 1px solid rgba(139,92,246,0.4);
-            color: #b39ef9; font-size: 0.78rem; font-weight: 700; cursor: pointer;
-            flex-shrink: 0; line-height: 1; transition: 0.15s;
+            width: 24px; height: 24px; border-radius: var(--radius-full);
+            background: var(--bg-elevated); border: 1px solid var(--cc-accent-line);
+            color: var(--cc-accent-text); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+            flex-shrink: 0; line-height: 1;
         }
-        .hw-help-btn:hover { background: rgba(139,92,246,0.32); transform: translateY(-1px); }
-        .hw-help-btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+        .hw-help-btn:hover { background: var(--active-lesson); }
         .hw-help-overlay {
-            position: fixed; inset: 0; background: rgba(2,4,24,0.75);
-            backdrop-filter: blur(6px); z-index: 4000;
+            position: fixed; inset: 0; background: color-mix(in srgb, var(--bg-color) 80%, transparent);
+            z-index: 4000;
             display: none; align-items: center; justify-content: center; padding: 1rem;
         }
         .hw-help-overlay.show { display: flex; }
         .hw-help-modal {
             background: var(--bg-elevated); border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg); width: 100%; max-width: 640px;
+            border-radius: var(--radius-xl); width: 100%; max-width: 640px;
             max-height: 88vh; overflow-y: auto; padding: 1.75rem;
             box-shadow: var(--shadow-lg);
         }
         .hw-help-modal h3 { font-size: 1.15rem; margin-bottom: 0.25rem; display:flex; align-items:center; gap:0.5rem; }
-        .hw-help-modal .hw-help-sub { color: var(--text-dim); font-size: 0.87rem; margin-bottom: 1.25rem; }
+        .hw-help-modal .hw-help-sub { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.25rem; }
         .hw-help-section { margin-bottom: 1.25rem; }
-        .hw-help-section h4 { font-size: 0.92rem; margin-bottom: 0.5rem; display:flex; align-items:center; gap:0.4rem; }
-        .hw-help-good h4 { color: var(--success, #10b981); }
-        .hw-help-bad h4 { color: #f87171; }
-        .hw-help-section ul { margin: 0; padding-left: 1.2rem; color: var(--text-main); font-size: 0.88rem; line-height: 1.75; }
+        .hw-help-section h4 { font-size: 0.95rem; margin-bottom: 0.5rem; display:flex; align-items:center; gap:0.4rem; }
+        .hw-help-good h4 { color: var(--success); }
+        .hw-help-bad h4 { color: var(--danger); }
+        .hw-help-section ul { margin: 0; padding-left: 1.2rem; color: var(--text-main); font-size: 0.9rem; line-height: 1.75; }
         .hw-help-template {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: var(--radius-md); padding: 1rem 1.1rem;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+            font-family: var(--font-mono); font-size: 0.82rem;
             color: var(--text-main); white-space: pre-wrap; line-height: 1.7;
         }
         .hw-help-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.75rem; }
         .hw-help-close {
             position: sticky; top: 0; float: right; margin-top: -0.5rem;
-            background: none; border: none; color: var(--text-dim); font-size: 1.3rem;
+            width: 40px; height: 40px;
+            background: none; border: none; color: var(--text-dim); font-size: 1.4rem;
             cursor: pointer; line-height: 1;
         }
         .hw-help-close:hover { color: var(--text-main); }
-        .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .ai-loading-text { display: none; text-align: center; color: #b39ef9; padding: 0.6rem 0 0; font-size: 0.88rem; }
-        .ai-loading-text.show { display: block; }
 
-        /* Homework */
-        .hw-item { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem; }
+        /* Homework type picker: neutral → indigo when active */
+        .hw-type-selector { display: flex; gap: 0.6rem; margin-top: 0.75rem; flex-wrap: wrap; }
+        .hw-type-btn { flex: 1; min-width: 110px; min-height: 44px; display: flex; align-items: center; justify-content: center; padding: 0.6rem; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--input-bg); color: var(--text-dim); cursor: pointer; font-size: 0.88rem; text-align: center; transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease); }
         .hw-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
-        .hw-number-badge { background: rgba(245,158,11,0.13); border: 1px solid rgba(245,158,11,0.32); color: #f5b449; padding: 0.3rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; }
-        .hw-type-selector { display: flex; gap: 0.7rem; margin-top: 0.75rem; flex-wrap: wrap; }
-        .hw-type-btn { flex: 1; min-width: 110px; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--input-bg); color: var(--text-dim); cursor: pointer; font-size: 0.84rem; text-align: center; transition: all 0.2s var(--ease); }
-        .hw-type-btn:hover { border-color: rgba(245,158,11,0.5); }
-        .hw-type-btn.active { border-color: #f59e0b; background: rgba(245,158,11,0.14); color: white; }
+        .hw-type-btn:hover { border-color: var(--primary-blue); }
+        .hw-type-btn.active { border-color: var(--primary-blue); box-shadow: inset 0 0 0 1px var(--primary-blue); background: var(--active-lesson); color: var(--text-main); font-weight: 500; }
 
-        /* ============ Wizard ============ */
+        /* ============ Wizard stepper ============ */
         .wizard-progress {
+            position: relative;
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 2.75rem;
+            margin-bottom: 2.5rem;
             gap: 2px;
         }
+        /* each step is a native <button>; reset its chrome */
         .wizard-progress-item {
+            appearance: none; -webkit-appearance: none;
+            background: none; border: 0; padding: 0; margin: 0;
+            font: inherit; color: inherit; text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
             flex: 1;
+            min-width: 0;
             position: relative;
             cursor: default;
             user-select: none;
         }
         .wizard-progress-item.clickable { cursor: pointer; }
+        .wizard-progress-item:focus-visible { outline: none; box-shadow: none; }
+        .wizard-progress-item:focus-visible .wizard-dot { outline: 2px solid var(--primary-blue); outline-offset: 3px; }
+
         .wizard-progress-line {
             position: absolute;
-            top: 18px;
+            top: 19px;
             left: -50%;
             width: 100%;
             height: 2px;
-            background: var(--border-color);
+            background: var(--line-strong);
             z-index: 0;
-            transition: background 0.3s var(--ease);
         }
         .wizard-progress-item:first-child .wizard-progress-line { display: none; }
-        .wizard-progress-item.done .wizard-progress-line { background: var(--success-green); }
-        .wizard-progress-item.active .wizard-progress-line { background: linear-gradient(90deg, var(--success-green), var(--primary-blue)); }
+        .wizard-progress-item.done .wizard-progress-line,
+        .wizard-progress-item.active .wizard-progress-line { background: var(--success-green); }
 
+        /* 32px dots; the current step grows to 40px + solid fill + bold underlined label */
         .wizard-dot {
-            width: 36px; height: 36px; border-radius: 50%;
+            width: 32px; height: 32px; margin: 4px 0;
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.85rem; font-weight: 700;
-            background: var(--input-bg);
-            border: 2px solid var(--border-color);
+            font-size: 0.85rem; font-weight: 600;
+            background: var(--bg-elevated);
+            border: 2px solid var(--line-strong);
             color: var(--text-dim);
             position: relative; z-index: 1;
-            transition: all 0.3s var(--ease);
         }
+        .wizard-dot .sn-icon { width: 16px; height: 16px; }
+        .wizard-progress-item.clickable:hover .wizard-dot { border-color: var(--primary-blue); }
         .wizard-progress-item.active .wizard-dot {
-            border-color: transparent;
-            background: linear-gradient(135deg, var(--ai-2), var(--primary-blue));
+            width: 40px; height: 40px; margin: 0;
+            border-color: var(--primary-blue);
+            background: var(--primary-blue);
             color: #fff;
-            box-shadow: 0 0 0 5px rgba(59,130,246,0.16), 0 8px 18px -8px rgba(59,130,246,0.6);
-            transform: scale(1.06);
+            font-size: 1rem;
         }
         .wizard-progress-item.done .wizard-dot {
-            border-color: transparent;
+            border-color: var(--success-green);
             background: var(--success-green);
-            color: #fff;
-            box-shadow: 0 8px 18px -10px rgba(16,185,129,0.55);
+            color: var(--bg-elevated);
+        }
+        /* AI-assisted (optional) steps: a 14px sparkle on the circle's corner, shape-distinct from any dot */
+        .wizard-progress-item.optional .wizard-dot::before,
+        .wizard-progress-item.optional .wizard-dot::after {
+            content: ''; position: absolute; top: -7px; right: -8px;
+        }
+        .wizard-progress-item.optional .wizard-dot::before {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--bg-color);
+            margin: -2px -2px 0 0;
         }
         .wizard-progress-item.optional .wizard-dot::after {
-            content: '';
-            position: absolute;
-            top: -2px; right: -2px;
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: var(--ai-1);
-            border: 2px solid #0A0E27;
+            width: 14px; height: 14px;
+            background: var(--primary-blue);
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l2.6 7.9 7.9 2.6-7.9 2.6L12 22.5l-2.6-7.9L1.5 12l7.9-2.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+                    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l2.6 7.9 7.9 2.6-7.9 2.6L12 22.5l-2.6-7.9L1.5 12l7.9-2.6z'/%3E%3C/svg%3E") center / contain no-repeat;
         }
+        .wizard-progress-item.optional.active .wizard-dot::before { top: -5px; right: -6px; }
+        .wizard-progress-item.optional.active .wizard-dot::after { top: -5px; right: -6px; }
+
         .wizard-label {
-            margin-top: 0.55rem;
-            font-size: 0.76rem;
+            display: block;
+            margin-top: 0.5rem;
+            padding-bottom: 3px;
+            font-size: 0.8rem;
             color: var(--text-dim);
-            text-align: center;
             line-height: 1.3;
-            max-width: 92px;
-            transition: color 0.2s var(--ease);
+            max-width: 96px;
+            border-bottom: 2px solid transparent;
         }
-        .wizard-progress-item.active .wizard-label { color: var(--text-main); font-weight: 600; }
-        .wizard-progress-item.done .wizard-label { color: #10b981; }
+        .wizard-progress-item.active .wizard-label { color: var(--text-main); font-weight: 600; border-bottom-color: var(--primary-blue); }
+        .wizard-progress-item.done .wizard-label { color: var(--text-main); }
 
         .wizard-panel { display: none; }
-        .wizard-panel.active { display: block; animation: wizardFadeIn 0.4s var(--ease); }
-        @keyframes wizardFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (prefers-reduced-motion: reduce) { .wizard-panel.active, .file-upload-area, .method-option, .btn { animation: none !important; transition: none !important; } }
+        .wizard-panel.active { display: block; animation: wizardFadeIn 0.2s var(--ease); }
+        @keyframes wizardFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .wizard-step-intro { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.55; }
+        .wizard-step-intro { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1.25rem; line-height: 1.6; }
 
         .wizard-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 0.75rem;
             margin-top: 1rem;
             margin-bottom: 3rem;
         }
         .wizard-nav .spacer { flex: 1; }
+        .wizard-nav .btn { min-height: 48px; }
 
         .wizard-review-grid {
             display: grid;
@@ -433,23 +439,47 @@
             margin-bottom: 1.5rem;
         }
         .wizard-review-card {
-            background: var(--input-bg);
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-lg);
             padding: 1rem 1.25rem;
-            transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
         }
-        .wizard-review-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
-        .wizard-review-card .rv-label { font-size: 0.76rem; color: var(--text-dim); margin-bottom: 0.35rem; letter-spacing: 0.01em; }
-        .wizard-review-card .rv-value { font-size: 1.12rem; font-weight: 700; }
-        .wizard-review-note { font-size: 0.84rem; color: var(--text-dim); margin-top: -0.5rem; margin-bottom: 1.5rem; }
+        .wizard-review-card .rv-label { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.35rem; }
+        .wizard-review-card .rv-value { font-size: 1.12rem; font-weight: 600; }
+        .wizard-review-note { font-size: 0.88rem; color: var(--text-dim); margin-top: -0.5rem; margin-bottom: 1.5rem; }
 
         @media (max-width: 640px) {
-            body { padding: 1.5rem 1rem 4rem; }
-            .section { padding: 1.5rem 1.25rem 1.75rem; }
+            body { padding: 1rem 1rem 4rem; }
+            .header h1 { font-size: 1.85rem; }
+            .section { padding: 1.5rem 1.15rem; }
+            .ai-gen-area { padding: 1.15rem 1rem; }
             .grid { grid-template-columns: 1fr !important; }
+            .ai-gen-row { flex-direction: column; align-items: stretch; }
+            .ai-gen-row .form-group { max-width: none !important; }
+            .quiz-choices { grid-template-columns: 1fr; }
+            .btn-ai { white-space: normal; text-align: center; }
+
+            /* Stepper: one track behind the dots; only the current label shows, centred under the whole row */
+            .wizard-progress { padding-bottom: 2rem; margin-bottom: 1.75rem; }
+            .wizard-progress::before { content: ''; position: absolute; left: 8%; right: 8%; top: 19px; height: 2px; background: var(--line-strong); }
+            .wizard-progress-item { position: static; }
+            .wizard-progress-line { display: none; }
             .wizard-label { display: none; }
-            .wizard-progress-item.active .wizard-label { display: block; position: absolute; top: 42px; white-space: nowrap; max-width: none; }
+            .wizard-progress-item.active .wizard-label {
+                display: block; position: absolute; left: 0; right: 0; top: 48px;
+                max-width: none; margin: 0 auto; width: max-content; font-size: 0.9rem;
+            }
+            .wizard-progress-item.optional .wizard-dot::before { top: -6px; right: -6px; }
+            .wizard-progress-item.optional .wizard-dot::after { top: -6px; right: -6px; }
+
+            /* Back / next: two equal, full-height tap targets */
+            .wizard-nav .spacer { display: none; }
+            .wizard-nav .btn { flex: 1; padding-left: 0.75rem; padding-right: 0.75rem; }
+            .wizard-nav .btn-success { padding: 0.75rem 1rem !important; font-size: 1rem !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .wizard-panel.active { animation: none; }
+            * { transition: none !important; }
         }
     </style>
 <script src="tour.js"></script>
@@ -462,7 +492,7 @@
 
         <div style="display:flex;justify-content:flex-end;"><a href="dashboard.html" class="btn-back">← กลับหน้าหลัก</a></div>
     <div class="header">
-        <h1 class="logo">Skill<span>Nest</span> <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span></h1>
+        <h1 class="logo">Skill<span>Nest</span> <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span></h1>
         <p style="color: var(--text-dim);">สร้างคอร์สของคุณทีละขั้นตอน</p>
     </div>
 
@@ -471,13 +501,13 @@
     <!-- STEP 1: ข้อมูลคอร์ส -->
     <div class="wizard-panel active" id="wizardStep1" data-step="1">
     <div class="section">
-        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></span>ข้อมูลคอร์ส</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></span>ข้อมูลคอร์ส</h2>
         <div class="form-group">
-            <label>ชื่อคอร์ส <span class="required">*</span></label>
+            <label for="courseTitle">ชื่อคอร์ส <span class="required">*</span></label>
             <input type="text" id="courseTitle" class="form-control" placeholder="เช่น Python สำหรับผู้เริ่มต้น">
         </div>
         <div class="form-group">
-            <label>คำอธิบายคอร์ส <span class="required">*</span></label>
+            <label for="courseDescription">คำอธิบายคอร์ส <span class="required">*</span></label>
             <textarea id="courseDescription" class="form-control" placeholder="อธิบายสิ่งที่ผู้เรียนจะได้เรียนรู้..."></textarea>
         </div>
 
@@ -486,7 +516,7 @@
             <div class="form-group" style="margin-bottom:0.75rem;">
                 <label>อัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ — ไม่บังคับ)</label>
                 <div class="file-upload-area" onclick="document.getElementById('courseDescFileInput').click()">
-                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
+                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
                     <p>คลิกเพื่ออัปโหลดไฟล์คำอธิบายรายวิชา</p>
                     <small style="color:var(--text-dim);">รองรับ PDF และรูปภาพ (JPG, PNG)</small>
                 </div>
@@ -501,7 +531,7 @@
         </div>
         <div class="grid">
             <div class="form-group">
-                <label>หมวดหมู่ <span class="required">*</span></label>
+                <label for="courseCategory">หมวดหมู่ <span class="required">*</span></label>
                 <select id="courseCategory" class="form-control">
                     <option value="">-- เลือกหมวดหมู่ --</option>
                     <option value="programming">การเขียนโปรแกรม</option>
@@ -513,7 +543,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>ระดับความยาก <span class="required">*</span></label>
+                <label for="courseLevel">ระดับความยาก <span class="required">*</span></label>
                 <select id="courseLevel" class="form-control">
                     <option value="">-- เลือกระดับ --</option>
                     <option value="beginner">เริ่มต้น</option>
@@ -523,7 +553,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label>ชื่อผู้สอน</label>
+            <label for="courseInstructor">ชื่อผู้สอน</label>
             <input type="text" id="courseInstructor" class="form-control" placeholder="ชื่อของคุณ (ถ้ามี)">
         </div>
     </div>
@@ -536,17 +566,17 @@
     <!-- STEP 2: รูปปกคอร์ส -->
     <div class="wizard-panel" id="wizardStep2" data-step="2">
     <div class="section">
-        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span>รูปปกคอร์ส</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span>รูปปกคอร์ส</h2>
 
         <div class="ai-gen-area">
             <div class="ai-gen-title">ให้ AI สร้างรูปปกให้</div>
             <div class="form-group">
-                <label>อธิบายรูปปกที่ต้องการ</label>
+                <label for="thumbPromptInput">อธิบายรูปปกที่ต้องการ</label>
                 <textarea id="thumbPromptInput" class="form-control" rows="2" placeholder="เช่น ภาพประกอบเกี่ยวกับการเขียนโปรแกรม Python สไตล์การ์ตูนแบนสีสันสดใส"></textarea>
                 <small>เว้นว่างไว้ได้ — AI จะใช้ชื่อคอร์สและหมวดหมู่จาก Step 1 แทน</small>
             </div>
             <div class="form-group" style="max-width:260px;">
-                <label>สไตล์ภาพ</label>
+                <label for="thumbStyleSelect">สไตล์ภาพ</label>
                 <select id="thumbStyleSelect" class="form-control">
                     <option value="flat illustration สีสันสดใส ทันสมัย">Flat Illustration</option>
                     <option value="ภาพวาดสไตล์ 3D render น่ารัก">3D Render น่ารัก</option>
@@ -572,7 +602,7 @@
             <label style="font-weight:600;">หรืออัปโหลดรูปเอง</label>
         </div>
         <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
-            <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
+            <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
             <p>คลิกเพื่ออัพโหลดรูปปก</p>
             <small style="color: var(--text-dim);">รองรับ JPG, PNG, WEBP (แนะนำ 16:9)</small>
         </div>
@@ -591,17 +621,17 @@
     <p class="wizard-step-intro">ขั้นตอนนี้ไม่บังคับ — ใช้ AI ช่วยร่างผลลัพธ์การเรียนรู้ (CLO) และโครงสร้างบทเรียน/Quiz/การบ้านให้อัตโนมัติ หรือข้ามไปสร้างบทเรียนเองในขั้นถัดไปก็ได้</p>
     <!-- CLO Generator -->
     <div class="section">
-        <h2 class="section-title"><span class="section-icon icon-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span>สร้าง CLO ด้วย AI</h2>
+        <h2 class="section-title"><span class="section-icon icon-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span>สร้าง CLO ด้วย AI</h2>
         <div class="ai-gen-area">
             <div class="ai-gen-title">AI จะช่วยสร้าง Course Learning Outcomes (CLO) ตามมาตรฐาน Bloom's Taxonomy</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
                 <div class="form-group" style="flex:2;min-width:220px;">
-                    <label>ชื่อรายวิชา / หัวข้อคอร์ส <span class="required">*</span></label>
+                    <label for="cloTopic">ชื่อรายวิชา / หัวข้อคอร์ส <span class="required">*</span></label>
                     <input type="text" id="cloTopic" class="form-control"
                         placeholder="เช่น การเขียนโปรแกรม Python, Marketing Management, ฟิสิกส์ ม.4">
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
-                    <label>ระดับผู้เรียน</label>
+                    <label for="cloLevel">ระดับผู้เรียน</label>
                     <select id="cloLevel" class="form-control">
                         <option value="ระดับมัธยมปลาย">มัธยมปลาย</option>
                         <option value="ระดับปริญญาตรี" selected>ปริญญาตรี</option>
@@ -611,12 +641,12 @@
                     </select>
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
-                    <label>จำนวน CLO</label>
+                    <label for="cloCount">จำนวน CLO</label>
                     <input type="number" id="cloCount" class="form-control" min="1" max="20" value="5" placeholder="เช่น 5">
                     <small style="color:var(--text-dim);">แนะนำ 3-10 ข้อ</small>
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
-                    <label>เน้น Domain</label>
+                    <label for="cloDomain">เน้น Domain</label>
                     <select id="cloDomain" class="form-control">
                         <option value="ผสม" selected>ผสม (แนะนำ)</option>
                         <option value="Cognitive (ความรู้ความเข้าใจ)">Cognitive</option>
@@ -639,8 +669,8 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
                 <label style="font-weight:600;font-size:0.9rem;">CLO ที่สร้างแล้ว (แก้ไขได้)</label>
                 <div style="display:flex;gap:8px;">
-                    <button onclick="recheckCLOs()" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.35);color:#60a5fa;padding:4px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.82rem;">ตรวจสอบ Bloom's Taxonomy</button>
-                    <button onclick="addCLORow()" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#a78bfa;padding:4px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.82rem;">+ เพิ่ม CLO</button>
+                    <button onclick="recheckCLOs()" style="background:transparent;border:1px solid var(--cc-accent-line);color:var(--cc-accent-text);min-height:36px;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;">ตรวจสอบ Bloom's Taxonomy</button>
+                    <button onclick="addCLORow()" style="background:transparent;border:1px solid var(--cc-accent-line);color:var(--cc-accent-text);min-height:36px;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;">+ เพิ่ม CLO</button>
                 </div>
             </div>
             <div id="cloValidationSummary" style="margin-bottom:10px;"></div>
@@ -650,17 +680,17 @@
 
     <!-- AI Outline Generator -->
     <div class="section">
-        <h2 class="section-title"><span class="section-icon icon-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>สร้างโครงสร้างคอร์สด้วย AI</h2>
+        <h2 class="section-title"><span class="section-icon icon-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>สร้างโครงสร้างคอร์สด้วย AI</h2>
         <div class="ai-gen-area">
             <div class="ai-gen-title">Gemini จะช่วยสร้าง บทเรียน + Quiz + การบ้าน ให้อัตโนมัติ</div>
             <div class="form-group">
-                <label>หัวข้อหลักของคอร์ส <span class="required">*</span></label>
+                <label for="aiOutlineTopic">หัวข้อหลักของคอร์ส <span class="required">*</span></label>
                 <input type="text" id="aiOutlineTopic" class="form-control"
                     placeholder="เช่น Python สำหรับผู้เริ่มต้น, การตลาดออนไลน์, ฟิสิกส์ ม.4">
             </div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
                 <div class="form-group" style="flex:1;min-width:140px;">
-                    <label>จำนวนบทเรียน</label>
+                    <label for="aiOutlineLessons">จำนวนบทเรียน</label>
                     <select id="aiOutlineLessons" class="form-control">
                         <option value="3">3 บท</option>
                         <option value="5" selected>5 บท</option>
@@ -669,7 +699,7 @@
                     </select>
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
-                    <label>ระดับผู้เรียน</label>
+                    <label for="aiOutlineLevel">ระดับผู้เรียน</label>
                     <select id="aiOutlineLevel" class="form-control">
                         <option value="beginner">ผู้เริ่มต้น</option>
                         <option value="intermediate" selected>ระดับกลาง</option>
@@ -677,7 +707,7 @@
                     </select>
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
-                    <label>สร้าง Quiz ด้วย</label>
+                    <label for="aiOutlineQuiz">สร้าง Quiz ด้วย</label>
                     <select id="aiOutlineQuiz" class="form-control">
                         <option value="0">ไม่สร้าง</option>
                         <option value="3">3 ข้อ</option>
@@ -686,7 +716,7 @@
                     </select>
                 </div>
                 <div class="form-group" style="flex:1;min-width:140px;">
-                    <label>สร้างการบ้านด้วย</label>
+                    <label for="aiOutlineHw">สร้างการบ้านด้วย</label>
                     <select id="aiOutlineHw" class="form-control">
                         <option value="0">ไม่สร้าง</option>
                         <option value="1">1 งาน</option>
@@ -715,7 +745,7 @@
     <!-- STEP 4: บทเรียน -->
     <div class="wizard-panel" id="wizardStep4" data-step="4">
     <div class="section">
-        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span>บทเรียน</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span>บทเรียน</h2>
         <div id="lessonsList"></div>
         <button class="btn btn-primary" onclick="addLesson()">+ เพิ่มบทเรียน</button>
     </div>
@@ -730,16 +760,16 @@
     <div class="wizard-panel" id="wizardStep5" data-step="5">
     <p class="wizard-step-intro">ขั้นตอนนี้ไม่บังคับ — เพิ่ม Quiz ให้นักเรียนทำหลังเรียนจบ หรือข้ามไปได้เลย</p>
     <div class="section">
-        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span>แบบทดสอบ (Quiz)</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span>แบบทดสอบ (Quiz)</h2>
         <div class="ai-gen-area">
             <div class="ai-gen-title">สร้าง Quiz ด้วย AI</div>
             <div class="ai-gen-row">
                 <div class="form-group">
-                    <label>หัวข้อหรือเนื้อหาที่ต้องการสร้าง Quiz</label>
+                    <label for="aiQuizTopic">หัวข้อหรือเนื้อหาที่ต้องการสร้าง Quiz</label>
                     <input type="text" id="aiQuizTopic" class="form-control" placeholder="เช่น Python loops, การตลาดออนไลน์, ฟิสิกส์เบื้องต้น">
                 </div>
                 <div class="form-group" style="max-width: 120px;">
-                    <label>จำนวนข้อ</label>
+                    <label for="aiQuizCount">จำนวนข้อ</label>
                     <select id="aiQuizCount" class="form-control">
                         <option value="3">3 ข้อ</option>
                         <option value="5" selected>5 ข้อ</option>
@@ -783,7 +813,7 @@
     <div class="wizard-panel" id="wizardStep6" data-step="6">
     <p class="wizard-step-intro">ขั้นตอนนี้ไม่บังคับ — เพิ่มการบ้านให้นักเรียนส่งหลังเรียนจบ หรือข้ามไปได้เลย</p>
     <div class="section">
-        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>การบ้าน (Homework)</h2>
+        <h2 class="section-title"><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>การบ้าน (Homework)</h2>
         <div class="alert alert-info" style="margin-bottom:1.5rem;">รับการบ้านเป็นข้อความหรือไฟล์แนบก็ได้ ตั้งค่าได้ในแต่ละข้อด้านล่าง</div>
 
         <div class="ai-gen-area">
@@ -793,7 +823,7 @@
             <div class="form-group">
                 <label>อัปโหลดไฟล์ (PDF หรือรูปภาพโจทย์)</label>
                 <div class="file-upload-area" onclick="document.getElementById('hwSourceFileInput').click()">
-                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
+                    <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
                     <p>คลิกเพื่ออัปโหลดไฟล์การบ้าน</p>
                     <small style="color:var(--text-dim);">รองรับ PDF, Word (.docx) และรูปภาพ (JPG, PNG)</small>
                 </div>
@@ -801,7 +831,7 @@
                 <div id="hwSourceFilePreview"></div>
             </div>
             <div class="form-group">
-                <label>หรือวางข้อความโจทย์ตรงนี้แทน</label>
+                <label for="hwSourceText">หรือวางข้อความโจทย์ตรงนี้แทน</label>
                 <textarea id="hwSourceText" class="form-control" rows="4" placeholder="วางข้อความการบ้าน/โจทย์ที่นี่ (ถ้าไม่มีไฟล์)"></textarea>
             </div>
             <div style="display:flex; gap:0.75rem; align-items:center;">
@@ -824,7 +854,7 @@
     <!-- STEP 7: ตรวจสอบและสร้างคอร์ส -->
     <div class="wizard-panel" id="wizardStep7" data-step="7">
     <div class="section">
-        <h2 class="section-title"><span class="section-icon icon-success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg></span>ตรวจสอบก่อนสร้างคอร์ส</h2>
+        <h2 class="section-title"><span class="section-icon icon-success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg></span>ตรวจสอบก่อนสร้างคอร์ส</h2>
         <div class="wizard-review-grid" id="wizardReviewGrid"></div>
         <p class="wizard-review-note">ถ้าต้องการแก้ไขส่วนไหน คลิกขั้นตอนนั้นด้านบน หรือกดย้อนกลับได้เลย</p>
     </div>
@@ -852,7 +882,7 @@
         <p class="hw-help-sub">จัดไฟล์ตามแนวทางนี้ก่อนอัปโหลด เพื่อให้ AI แตกข้อและดึงเนื้อหาได้แม่นยำขึ้น</p>
 
         <div class="hw-help-section hw-help-good">
-            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ควรทำ</h4>
+            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ควรทำ</h4>
             <ul>
                 <li>ขึ้นต้นแต่ละข้อด้วยเลขข้อชัดเจน เช่น <b>"ข้อ 1."</b>, <b>"1)"</b> หรือ <b>"Question 1"</b></li>
                 <li>เว้นบรรทัดว่างคั่นระหว่างแต่ละข้อ เพื่อให้ AI แยกขอบเขตข้อได้ถูก</li>
@@ -864,7 +894,7 @@
         </div>
 
         <div class="hw-help-section hw-help-bad">
-            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ควรเลี่ยง</h4>
+            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ควรเลี่ยง</h4>
             <ul>
                 <li>เขียนหลายข้อติดกันเป็นย่อหน้าเดียวไม่มีเลขข้อคั่น</li>
                 <li>ไฟล์เอียง เบลอ หรือมีเงา/แสงสะท้อนทับตัวอักษร</li>
@@ -928,11 +958,11 @@ function renderWizardProgress() {
         else if (n === wizardCurrentStep) cls += ' active';
         if (s.optional) cls += ' optional';
         if (n <= wizardMaxReached) cls += ' clickable';
-        return `<div class="${cls}" onclick="wizardGoToStep(${n})" title="${s.optional ? 'ขั้นตอนนี้ไม่บังคับ' : ''}">
-            <div class="wizard-progress-line"></div>
-            <div class="wizard-dot">${n < wizardCurrentStep ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : n}</div>
-            <div class="wizard-label">${s.label}</div>
-        </div>`;
+        return `<button type="button" class="${cls}" onclick="wizardGoToStep(${n})" title="${s.optional ? 'ขั้นตอนนี้ไม่บังคับ' : ''}" ${n === wizardCurrentStep ? 'aria-current="step"' : ''} ${n > wizardMaxReached ? 'aria-disabled="true"' : ''}>
+            <span class="wizard-progress-line" aria-hidden="true"></span>
+            <span class="wizard-dot">${n < wizardCurrentStep ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : n}</span>
+            <span class="wizard-label">${s.label}</span>
+        </button>`;
     }).join('');
 }
 
@@ -997,7 +1027,7 @@ function renderWizardReview() {
     document.getElementById('wizardReviewGrid').innerHTML = `
         <div class="wizard-review-card"><div class="rv-label">ชื่อคอร์ส</div><div class="rv-value" style="font-size:var(--text-base);">${escapeHtmlWizard(title || 'ยังไม่ได้กรอก')}</div></div>
         <div class="wizard-review-card"><div class="rv-label">หมวดหมู่ / ระดับ</div><div class="rv-value" style="font-size:var(--text-base);">${escapeHtmlWizard(category)} · ${escapeHtmlWizard(level)}</div></div>
-        <div class="wizard-review-card"><div class="rv-label">รูปปก</div><div class="rv-value">${thumbnailFile ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> อัปโหลดแล้ว' : '— ไม่มี'}</div></div>
+        <div class="wizard-review-card"><div class="rv-label">รูปปก</div><div class="rv-value">${thumbnailFile ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> อัปโหลดแล้ว' : '— ไม่มี'}</div></div>
         <div class="wizard-review-card"><div class="rv-label">บทเรียน</div><div class="rv-value">${lessonCount} บท</div></div>
         <div class="wizard-review-card"><div class="rv-label">แบบทดสอบ</div><div class="rv-value">${quizCount} ข้อ</div></div>
         <div class="wizard-review-card"><div class="rv-label">การบ้าน</div><div class="rv-value">${hwCount} งาน</div></div>
@@ -1038,7 +1068,7 @@ function setThumbnailFromFile(file) {
             <div class="file-preview">
                 <img src="${event.target.result}" alt="Thumbnail">
                 <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button aria-label="ลบ" class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                <button aria-label="ลบ" class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     };
     reader.readAsDataURL(file);
@@ -1102,11 +1132,11 @@ window.generateThumbnailWithAI = async function() {
         window._aiThumbnailMime   = data.mimeType || 'image/png';
         document.getElementById('thumbGenPreviewImg').src = `data:${window._aiThumbnailMime};base64,${data.image}`;
         document.getElementById('thumbGenPreviewWrap').style.display = 'block';
-        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สร้างเสร็จแล้ว ถูกใจกด "ใช้รูปนี้" หรือกด "สร้างใหม่อีกครั้ง" เพื่อลองแบบอื่น';
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สร้างเสร็จแล้ว ถูกใจกด "ใช้รูปนี้" หรือกด "สร้างใหม่อีกครั้ง" เพื่อลองแบบอื่น';
 
     } catch (err) {
         console.error('generateThumbnailWithAI error:', err);
-        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     } finally {
         btn.disabled = false;
         btn.textContent = 'สร้างรูปปกด้วย AI';
@@ -1120,7 +1150,7 @@ window.useAIThumbnail = function() {
     const file = base64ToFile(window._aiThumbnailBase64, window._aiThumbnailMime, `ai-thumbnail.${ext}`);
     setThumbnailFromFile(file);
     document.getElementById('thumbGenPreviewWrap').style.display = 'none';
-    document.getElementById('thumbGenStatus').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ใช้รูปนี้เป็นปกคอร์สแล้ว เลื่อนลงไปดูตัวอย่างด้านล่างได้';
+    document.getElementById('thumbGenStatus').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ใช้รูปนี้เป็นปกคอร์สแล้ว เลื่อนลงไปดูตัวอย่างด้านล่างได้';
     document.getElementById('thumbnailPreview').scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
@@ -1176,18 +1206,18 @@ function renderCLOValidationSummary(check, total) {
     if (!el) return;
     const coveredCount = check.coveredLevels.length;
     const allGood = check.missingLevels.length === 0 && check.flagged.length === 0;
-    const color = allGood ? '#10b981' : (coveredCount >= 4 && check.flagged.length === 0 ? '#f59e0b' : '#ef4444');
-    const bg = allGood ? 'rgba(16,185,129,0.1)' : (coveredCount >= 4 && check.flagged.length === 0 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)');
+    const color = allGood ? 'var(--success)' : (coveredCount >= 4 && check.flagged.length === 0 ? 'var(--warning)' : 'var(--danger)');
+    const bg = allGood ? 'color-mix(in srgb, var(--success) 10%, transparent)' : (coveredCount >= 4 && check.flagged.length === 0 ? 'color-mix(in srgb, var(--warning) 10%, transparent)' : 'color-mix(in srgb, var(--danger) 10%, transparent)');
 
-    let html = `<div style="background:${bg};border:1px solid ${color}55;border-radius:var(--radius-md);padding:12px 14px;font-size:0.85rem;">
+    let html = `<div style="background:${bg};border:1px solid color-mix(in srgb, ${color} 35%, transparent);border-radius:var(--radius-md);padding:12px 14px;font-size:0.85rem;">
         <div style="font-weight:600;color:${color};margin-bottom:4px;">
-            ${allGood ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>'} ครอบคลุม ${coveredCount}/6 ระดับ Bloom's Taxonomy จาก ${total} ข้อ
+            ${allGood ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>'} ครอบคลุม ${coveredCount}/6 ระดับ Bloom's Taxonomy จาก ${total} ข้อ
         </div>`;
     if (check.missingLevels.length > 0) {
         html += `<div style="color:var(--text-dim);">ยังไม่มีระดับ: ${check.missingLevels.join(', ')}</div>`;
     }
     if (check.flagged.length > 0) {
-        html += `<div style="color:#f87171;margin-top:4px;">พบ ${check.flagged.length} ข้อที่อาจไม่สอดคล้องกัน: ${check.flagged.map(f => f.id).join(', ')} — ดูรายละเอียดที่ป้ายเตือนข้างข้อนั้นๆ ด้านล่าง</div>`;
+        html += `<div style="color:var(--danger);margin-top:4px;">พบ ${check.flagged.length} ข้อที่อาจไม่สอดคล้องกัน: ${check.flagged.map(f => f.id).join(', ')} — ดูรายละเอียดที่ป้ายเตือนข้างข้อนั้นๆ ด้านล่าง</div>`;
     }
     html += `</div>`;
     el.innerHTML = html;
@@ -1294,7 +1324,7 @@ ${verbBankText}
         }
 
         cloItems = result.clos || [];
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สร้าง ${cloItems.length} CLO เสร็จแล้ว`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สร้าง ${cloItems.length} CLO เสร็จแล้ว`;
         btn.disabled = false;
         btn.textContent = 'สร้าง CLO ด้วย AI';
 
@@ -1303,7 +1333,7 @@ ${verbBankText}
 
     } catch(e) {
         console.error('CLO error:', e);
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${snEscapeHtml(e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')}`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${snEscapeHtml(e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')}`;
         btn.disabled = false;
         btn.textContent = 'สร้าง CLO ด้วย AI';
     }
@@ -1314,8 +1344,8 @@ function renderCLOPreview(result) {
     el.style.display = 'block';
 
     const levelColor = {
-        'Remember':'#6b7280','Understand':'#3b82f6','Apply':'#10b981',
-        'Analyze':'#f59e0b','Evaluate':'#ef4444','Create':'#8b5cf6'
+        'Remember':'var(--primary-blue)','Understand':'var(--primary-blue)','Apply':'var(--primary-blue)',
+        'Analyze':'var(--primary-blue)','Evaluate':'var(--primary-blue)','Create':'var(--primary-blue)'
     };
     const check = validateCLOs(result.clos || []);
     const flaggedMap = {};
@@ -1323,21 +1353,21 @@ function renderCLOPreview(result) {
 
     const coveredCount = check.coveredLevels.length;
     const allGood = check.missingLevels.length === 0 && check.flagged.length === 0;
-    const sumColor = allGood ? '#10b981' : (coveredCount >= 4 && check.flagged.length === 0 ? '#f59e0b' : '#ef4444');
+    const sumColor = allGood ? 'var(--success)' : (coveredCount >= 4 && check.flagged.length === 0 ? 'var(--warning)' : 'var(--danger)');
     const summaryHtml = `
-        <div style="background:${sumColor}1a;border:1px solid ${sumColor}55;border-radius:var(--radius-md);padding:10px 14px;margin-bottom:14px;font-size:0.82rem;">
-            <div style="font-weight:600;color:${sumColor};">${allGood ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>'} ครอบคลุม ${coveredCount}/6 ระดับ Bloom's Taxonomy</div>
+        <div style="background:color-mix(in srgb, ${sumColor} 10%, transparent);border:1px solid color-mix(in srgb, ${sumColor} 35%, transparent);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:14px;font-size:0.82rem;">
+            <div style="font-weight:600;color:${sumColor};">${allGood ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>'} ครอบคลุม ${coveredCount}/6 ระดับ Bloom's Taxonomy</div>
             ${check.missingLevels.length ? `<div style="color:var(--text-dim);margin-top:2px;">ยังไม่มีระดับ: ${check.missingLevels.join(', ')}</div>` : ''}
-            ${check.flagged.length ? `<div style="color:#f87171;margin-top:2px;">พบ ${check.flagged.length} ข้อที่อาจไม่สอดคล้องกัน (ดูป้าย <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ที่ข้อนั้นด้านล่าง)</div>` : ''}
+            ${check.flagged.length ? `<div style="color:var(--danger);margin-top:2px;">พบ ${check.flagged.length} ข้อที่อาจไม่สอดคล้องกัน (ดูป้าย <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ที่ข้อนั้นด้านล่าง)</div>` : ''}
         </div>`;
 
     const rows = (result.clos||[]).map((c,i) => {
-        const color = levelColor[c.level] || '#8b5cf6';
+        const color = levelColor[c.level] || 'var(--primary-blue)';
         const warn = flaggedMap[i];
-        return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start;">
-            <div style="background:${color};color:white;padding:3px 10px;border-radius:99px;font-size:var(--text-xs);font-weight:600;flex-shrink:0;margin-top:2px;">${c.id}</div>
+        return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start;">
+            <div style="background:${color};color:#fff;padding:3px 10px;border-radius:99px;font-size:var(--text-xs);font-weight:600;flex-shrink:0;margin-top:2px;">${c.id}</div>
             <div style="flex:1;">
-                <div style="font-size:0.88rem;color:#e2e8f0;margin-bottom:4px;">${snEscapeHtml(c.statement)}${warn ? ` <span title="${warn.join(' / ')}" style="color:#f87171;font-size:0.8rem;cursor:help;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ตรวจสอบ</span>` : ''}</div>
+                <div style="font-size:0.88rem;color:var(--text-main);margin-bottom:4px;">${snEscapeHtml(c.statement)}${warn ? ` <span title="${warn.join(' / ')}" style="color:var(--danger);font-size:0.8rem;cursor:help;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ตรวจสอบ</span>` : ''}</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                     <span style="font-size:0.72rem;background:var(--card-bg);border:1px solid var(--line);padding:2px 8px;border-radius:99px;color:var(--text-dim);">${c.level}</span>
                     <span style="font-size:0.72rem;background:var(--card-bg);border:1px solid var(--line);padding:2px 8px;border-radius:99px;color:var(--text-dim);">${c.actionVerb}</span>
@@ -1348,8 +1378,8 @@ function renderCLOPreview(result) {
     }).join('');
 
     el.innerHTML = `
-    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:var(--radius-lg);padding:20px;">
-        <div style="font-weight:600;color:#a78bfa;margin-bottom:14px;font-size:0.95rem;">
+    <div style="background:var(--active-lesson);border:1px solid var(--cc-accent-line);border-left:3px solid var(--primary-blue);border-radius:var(--radius-lg);padding:20px;">
+        <div style="font-weight:600;color:var(--cc-accent-text);margin-bottom:14px;font-size:0.95rem;">
             CLO สำหรับ "${result.courseName}" — ตรวจสอบก่อน Apply
         </div>
         ${summaryHtml}
@@ -1357,7 +1387,7 @@ function renderCLOPreview(result) {
         <div style="display:flex;gap:10px;">
             <button class="btn btn-ai" onclick="applyCLO()">Apply CLO ทั้งหมด</button>
             <button class="btn" onclick="document.getElementById('cloPreview').style.display='none'"
-                style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ปิด</button>
+                style="border:1px solid var(--line-strong);color:var(--text-main);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ปิด</button>
         </div>
     </div>`;
 }
@@ -1379,21 +1409,21 @@ function refreshCLOList(check) {
         const warn = flaggedMap[i];
         return `
     <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;" id="cloRow_${i}">
-        <div style="background:#8b5cf6;color:white;padding:4px 10px;border-radius:99px;font-size:var(--text-xs);font-weight:600;flex-shrink:0;margin-top:8px;">${c.id}</div>
+        <div style="background:var(--primary-blue);color:#fff;padding:4px 10px;border-radius:99px;font-size:var(--text-xs);font-weight:600;flex-shrink:0;margin-top:8px;">${c.id}</div>
         <div style="flex:1;">
             <input type="text" value="${snEscapeHtml(c.statement)}"
-                style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-sm);padding:8px 12px;color:white;font-size:0.85rem;box-sizing:border-box;"
+                style="width:100%;min-height:48px;background:var(--input-bg);border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:12px;color:var(--text-main);font-size:16px;box-sizing:border-box;"
                 onchange="cloItems[${i}].statement = this.value" placeholder="ข้อความ CLO">
-            ${warn ? `<div style="color:#f87171;font-size:var(--text-xs);margin-top:4px;" title="${warn.join(' / ')}"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ${warn[0]}</div>` : ''}
+            ${warn ? `<div style="color:var(--danger);font-size:var(--text-xs);margin-top:4px;" title="${warn.join(' / ')}"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span> ${warn[0]}</div>` : ''}
         </div>
         <select onchange="cloItems[${i}].level = this.value"
-            style="background:var(--input-bg);border:1px solid var(--line-strong);color:var(--text-main);padding:6px 8px;border-radius:var(--radius-sm);font-size:0.8rem;flex-shrink:0;">
+            style="background:var(--input-bg);border:1px solid var(--line-strong);color:var(--text-main);min-height:48px;padding:6px 8px;border-radius:var(--radius-sm);font-size:16px;flex-shrink:0;">
             ${BLOOM_LEVELS.map(l =>
                 `<option ${c.level===l?'selected':''}>${l}</option>`
             ).join('')}
         </select>
         <button aria-label="ลบ" onclick="removeCLO(${i})"
-            style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:6px 10px;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+            style="background:transparent;border:1px solid color-mix(in srgb, var(--danger) 45%, transparent);color:var(--danger);min-width:40px;min-height:40px;padding:6px 10px;justify-content:center;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
     </div>`;
     }).join('');
 }
@@ -1411,7 +1441,7 @@ window.applyCLO = function() {
     }
     document.getElementById('cloPreview').style.display = 'none';
     document.getElementById('cloResult').style.display = 'block';
-    document.getElementById('cloStatus').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> Apply แล้ว!';
+    document.getElementById('cloStatus').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> Apply แล้ว!';
     // scroll ไปที่ description
     descEl?.scrollIntoView({ behavior:'smooth', block:'center' });
 };
@@ -1504,7 +1534,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
             }
         }
 
-        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สร้างเสร็จแล้ว! ตรวจสอบก่อน Apply';
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สร้างเสร็จแล้ว! ตรวจสอบก่อน Apply';
         btn.disabled = false;
         btn.textContent = 'สร้างโครงสร้างคอร์สด้วย AI';
 
@@ -1512,7 +1542,7 @@ ${numHw > 0 ? `สร้างการบ้าน: ${numHw} งาน` : ''}
 
     } catch(e) {
         console.error('AI Outline error:', e);
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${snEscapeHtml(e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')}`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> ${snEscapeHtml(e.message || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')}`;
         btn.disabled = false;
         btn.textContent = 'สร้างโครงสร้างคอร์สด้วย AI';
     }
@@ -1523,19 +1553,19 @@ function renderOutlinePreview(outline) {
     previewEl.style.display = 'block';
 
     let html = `
-    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:var(--radius-lg);padding:20px;margin-top:12px;">
-        <div style="font-weight:600;color:#a78bfa;margin-bottom:16px;font-size:var(--text-base);">ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
+    <div style="background:var(--active-lesson);border:1px solid var(--cc-accent-line);border-left:3px solid var(--primary-blue);border-radius:var(--radius-lg);padding:20px;margin-top:12px;">
+        <div style="font-weight:600;color:var(--cc-accent-text);margin-bottom:16px;font-size:var(--text-base);">ตัวอย่างโครงสร้างที่ AI สร้าง — ตรวจสอบก่อน Apply</div>
 
-        <div style="background:rgba(255,255,255,0.04);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px;">
+        <div style="background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px;">
             <div style="font-size:var(--text-xs);color:var(--text-dim);margin-bottom:4px;">ชื่อคอร์สที่แนะนำ</div>
             <div style="font-weight:600;">${snEscapeHtml(outline.courseTitle || '')}</div>
             <div style="font-size:0.85rem;color:var(--text-dim);margin-top:4px;">${outline.courseDescription || ''}</div>
         </div>
 
-        <div style="font-size:0.82rem;color:#a78bfa;font-weight:600;margin-bottom:8px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> ${(outline.lessons||[]).length} บทเรียน</div>
+        <div style="font-size:0.82rem;color:var(--cc-accent-text);font-weight:600;margin-bottom:8px;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> ${(outline.lessons||[]).length} บทเรียน</div>
         ${(outline.lessons||[]).map((l,i) => `
-            <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                <div style="background:#8b5cf6;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);flex-shrink:0;">${i+1}</div>
+            <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
+                <div style="background:var(--primary-blue);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);flex-shrink:0;">${i+1}</div>
                 <div>
                     <div style="font-weight:500;">${snEscapeHtml(l.title)}</div>
                     <div style="font-size:0.8rem;color:var(--text-dim);">${snEscapeHtml(l.description)}</div>
@@ -1543,17 +1573,17 @@ function renderOutlinePreview(outline) {
             </div>`).join('')}
 
         ${(outline.quiz||[]).length > 0 ? `
-        <div style="font-size:0.82rem;color:#10b981;font-weight:600;margin:12px 0 8px;">${outline.quiz.length} ข้อ Quiz</div>
+        <div style="font-size:0.82rem;color:var(--cc-accent-text);font-weight:600;margin:12px 0 8px;">${outline.quiz.length} ข้อ Quiz</div>
         ${outline.quiz.slice(0,2).map((q,i) => `
-            <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.82rem;">
+            <div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:0.82rem;">
                 ${i+1}. ${snEscapeHtml(q.question)}
             </div>`).join('')}
         ${outline.quiz.length > 2 ? `<div style="font-size:0.78rem;color:var(--text-dim);padding-top:6px;">และอีก ${outline.quiz.length-2} ข้อ...</div>` : ''}` : ''}
 
         ${(outline.homework||[]).length > 0 ? `
-        <div style="font-size:0.82rem;color:#f59e0b;font-weight:600;margin:12px 0 8px;">${outline.homework.length} การบ้าน</div>
+        <div style="font-size:0.82rem;color:var(--cc-accent-text);font-weight:600;margin:12px 0 8px;">${outline.homework.length} การบ้าน</div>
         ${outline.homework.map(h => `
-            <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.82rem;">
+            <div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:0.82rem;">
                 ${snEscapeHtml(h.title)} — ${snEscapeHtml(h.description)}
             </div>`).join('')}` : ''}
 
@@ -1635,7 +1665,7 @@ window.applyOutline = async function(outlineStr) {
     }
 
     document.getElementById('aiOutlinePreview').style.display = 'none';
-    document.getElementById('aiOutlineStatus').innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> Apply แล้ว ${outline.lessons?.length||0} บท`;
+    document.getElementById('aiOutlineStatus').innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> Apply แล้ว ${outline.lessons?.length||0} บท`;
 
     // พาไปดูบทเรียนที่สร้างให้
     if (wizardMaxReached < 4) wizardMaxReached = 4;
@@ -1653,29 +1683,29 @@ window.addLesson = function() {
                 <button class="btn btn-danger" onclick="removeLesson('${lessonId}')">ลบบทเรียน</button>
             </div>
             <div class="form-group">
-                <label>ชื่อบทเรียน <span class="required">*</span></label>
-                <input type="text" class="form-control lesson-title" placeholder="เช่น ติดตั้ง Python">
+                <label for="${lessonId}-title">ชื่อบทเรียน <span class="required">*</span></label>
+                <input type="text" id="${lessonId}-title" class="form-control lesson-title" placeholder="เช่น ติดตั้ง Python">
             </div>
             <div class="form-group">
-                <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
-                <textarea class="form-control lesson-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
+                <label for="${lessonId}-desc">คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
+                <textarea id="${lessonId}-desc" class="form-control lesson-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ — ใส่ได้ถ้ามี)</label>
-                <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
+                <label for="${lessonId}-youtube"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ — ใส่ได้ถ้ามี)</label>
+                <input id="${lessonId}-youtube" type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ — แนบเพิ่มได้พร้อมวิดีโอ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ — แนบเพิ่มได้พร้อมวิดีโอ)</label>
                 <div id="uploadArea-${lessonId}">
                     <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lessonId}').click()">
-                        <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
+                        <div class="file-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></div>
                         <p>คลิกเพื่ออัพโหลดไฟล์ PDF</p>
                         <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                     </div>
                     <input type="file" id="lessonFileInput-${lessonId}" accept=".pdf,application/pdf" style="display:none;">
                     <div id="lessonFilePreview-${lessonId}"></div>
                 </div>
-                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ใส่วิดีโอ, เอกสาร, หรือทั้งสองอย่างก็ได้ แต่ต้องมีอย่างน้อย 1 อย่าง</small>
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ใส่วิดีโอ, เอกสาร, หรือทั้งสองอย่างก็ได้ แต่ต้องมีอย่างน้อย 1 อย่าง</small>
             </div>
 
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
@@ -1710,7 +1740,7 @@ function handleLessonFileUpload(lessonId, file) {
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button aria-label="ลบ" class="btn btn-danger" onclick="removeLessonFile('${lessonId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeLessonFile('${lessonId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 }
 
@@ -1747,7 +1777,7 @@ window.addSubtopicRow = function(lessonId, data = null) {
                 value="${(data?.title || '').replace(/"/g,'&quot;')}" style="flex:2;">
             <input type="text" class="form-control subtopic-note" placeholder="หมายเหตุ เช่น นาที 0-5 / หน้า 1-3 (ไม่บังคับ)"
                 value="${(data?.note || '').replace(/"/g,'&quot;')}" style="flex:1;">
-            <button aria-label="ลบ" type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`);
 };
 
@@ -1801,10 +1831,10 @@ window.generateSubtopicsWithAI = async function(lessonId) {
 
         clearSubtopics(lessonId);
         items.forEach(it => addSubtopicRow(lessonId, it));
-        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI แนะนำหัวข้อย่อยให้แล้ว ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI แนะนำหัวข้อย่อยให้แล้ว ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
     } catch (err) {
         console.error('generateSubtopicsWithAI error:', err);
-        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
+        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     }
 };
 
@@ -1853,17 +1883,17 @@ ${analyzed.text}`;
 
         clearSubtopics(lessonId);
         items.forEach(it => addSubtopicRow(lessonId, it));
-        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> แตกหัวข้อจากไฟล์ PDF ได้ ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> แตกหัวข้อจากไฟล์ PDF ได้ ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
     } catch (err) {
         console.error('extractSubtopicsFromPDF error:', err);
-        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
+        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     }
 };
 
 function getFileIcon(filename) {
     const ext = filename.split('.').pop().toLowerCase();
-    const icons = { 'pdf':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>','ppt':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','pptx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','doc':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','docx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','xls':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','xlsx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','jpg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','jpeg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','png':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' };
-    return icons[ext] || '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>';
+    const icons = { 'pdf':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>','ppt':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','pptx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','doc':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','docx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','xls':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','xlsx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','jpg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','jpeg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','png':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' };
+    return icons[ext] || '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>';
 }
 
 function detectFileType(filename) {
@@ -1901,27 +1931,27 @@ window.addQuizQuestion = function(data = null) {
             <div class="quiz-question-header">
                 <span class="quiz-question-number">ข้อที่ ${quizCounter}</span>
                 <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-                    <select class="form-control quiz-lesson-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" title="ผูกกับบทเรียน">
+                    <select class="form-control quiz-lesson-select" style="width:auto;padding:0.4rem 2.25rem 0.4rem 0.75rem;font-size:16px;" title="ผูกกับบทเรียน">
                         ${buildLessonOptionsHtml(data?.lessonIndex)}
                     </select>
-                    <select class="form-control quiz-type-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" onchange="onQuizTypeChange('${qId}')">
+                    <select class="form-control quiz-type-select" style="width:auto;padding:0.4rem 2.25rem 0.4rem 0.75rem;font-size:16px;" onchange="onQuizTypeChange('${qId}')">
                         <option value="multiple_choice">ปรนัยเลือกตอบ</option>
                         <option value="checkbox">เลือกได้หลายข้อ</option>
                         <option value="true_false">ถูก/ผิด</option>
                         <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
                     </select>
-                    <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
+                    <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:76px;padding:0.4rem 0.5rem;font-size:16px;" title="คะแนนข้อนี้">
                     <button aria-label="ลบ" class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.9rem;font-size:0.82rem;color:var(--text-dim);flex-wrap:wrap;">
-                <label style="margin:0;white-space:nowrap;font-size:0.82rem;">เปิดให้ทำวันที่:</label>
-                <input type="datetime-local" class="form-control quiz-release" style="width:auto;padding:0.35rem 0.6rem;font-size:0.82rem;" value="${data?.releaseAt || ''}">
+                <label for="${qId}-release" style="margin:0;white-space:nowrap;font-size:0.82rem;">เปิดให้ทำวันที่:</label>
+                <input type="datetime-local" id="${qId}-release" class="form-control quiz-release" style="width:auto;padding:0.4rem 0.6rem;font-size:16px;" value="${data?.releaseAt || ''}">
                 <span style="font-size:0.76rem;">เว้นว่าง = เปิดให้ทำได้ทันที</span>
             </div>
             <div class="form-group">
-                <label>คำถาม <span class="required">*</span></label>
-                <textarea class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question || ''}</textarea>
+                <label for="${qId}-question">คำถาม <span class="required">*</span></label>
+                <textarea id="${qId}-question" class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question || ''}</textarea>
             </div>
             ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>
@@ -1942,7 +1972,7 @@ function quizImageUploadHtml(qId, data) {
                     style="border:1.5px dashed var(--border-color);border-radius:var(--radius-sm);padding:0.6rem 1rem;
                     cursor:pointer;font-size:0.82rem;color:var(--text-dim);text-align:center;transition:border-color 0.15s;"
                     onmouseover="this.style.borderColor='var(--primary-blue)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
+                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
                 </div>
                 <input type="file" id="${qId}-image-input" accept="image/*" style="display:none;">
                 <input type="hidden" class="quiz-image-url" value="${data?.imageUrl || ''}">
@@ -1951,7 +1981,7 @@ function quizImageUploadHtml(qId, data) {
                         <img alt="รูปประกอบ" src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:var(--radius-sm);display:block;">
                         <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                             style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
-                            background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                            background:var(--bg-elevated);color:var(--danger);border:1px solid var(--danger);cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
                     </div>` : ''}</div>
             </div>`;
 }
@@ -1969,10 +1999,10 @@ async function handleQuizImageUpload(qId, file) {
                 <img alt="รูปประกอบ" src="${url}" style="max-width:220px;max-height:140px;border-radius:var(--radius-sm);display:block;">
                 <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
                     style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
-                    background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                    background:var(--bg-elevated);color:var(--danger);border:1px solid var(--danger);cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     } catch (e) {
-        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${snEscapeHtml(e.message)}</div>`;
+        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--danger);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${snEscapeHtml(e.message)}</div>`;
     }
 }
 
@@ -1989,8 +2019,8 @@ function renderQuizAnswerArea(qId, qType, data) {
     const correctMultiple = data?.correctMultiple || [];
     const explanationHtml = `
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>คำอธิบายเฉลย (ไม่บังคับ — โชว์ให้นักเรียนดูหลังทำ Quiz เสร็จ ช่วยให้เข้าใจว่าทำไมถูก/ผิด)</label>
-            <textarea class="form-control quiz-explanation" rows="2" placeholder="เช่น เพราะ...">${snEscapeHtml(data?.explanation || '')}</textarea>
+            <label for="${qId}-explanation">คำอธิบายเฉลย (ไม่บังคับ — โชว์ให้นักเรียนดูหลังทำ Quiz เสร็จ ช่วยให้เข้าใจว่าทำไมถูก/ผิด)</label>
+            <textarea id="${qId}-explanation" class="form-control quiz-explanation" rows="2" placeholder="เช่น เพราะ...">${snEscapeHtml(data?.explanation || '')}</textarea>
         </div>`;
 
     if (qType === 'true_false') {
@@ -2000,8 +2030,8 @@ function renderQuizAnswerArea(qId, qType, data) {
             <div class="quiz-choice-item"><span class="choice-label">B</span><input type="text" class="form-control choice-input" value="ผิด" readonly></div>
         </div>
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>เฉลย</label>
-            <select class="form-control quiz-correct">
+            <label for="${qId}-correct">เฉลย</label>
+            <select id="${qId}-correct" class="form-control quiz-correct">
                 <option value="A" ${correct==='A'?'selected':''}>A - ถูก</option>
                 <option value="B" ${correct==='B'?'selected':''}>B - ผิด</option>
             </select>
@@ -2029,8 +2059,8 @@ function renderQuizAnswerArea(qId, qType, data) {
     } else if (qType === 'short_answer') {
         area.innerHTML = `
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>คำตอบตัวอย่าง/เกณฑ์การให้คะแนน (สำหรับอาจารย์อ้างอิงตอนตรวจ ไม่บังคับ)</label>
-            <textarea class="form-control quiz-sample-answer" rows="2" placeholder="เช่น ต้องกล่าวถึง...">${data?.sampleAnswer || ''}</textarea>
+            <label for="${qId}-sample">คำตอบตัวอย่าง/เกณฑ์การให้คะแนน (สำหรับอาจารย์อ้างอิงตอนตรวจ ไม่บังคับ)</label>
+            <textarea id="${qId}-sample" class="form-control quiz-sample-answer" rows="2" placeholder="เช่น ต้องกล่าวถึง...">${data?.sampleAnswer || ''}</textarea>
         </div>
         <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.82rem;">คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
     } else {
@@ -2043,8 +2073,8 @@ function renderQuizAnswerArea(qId, qType, data) {
             </div>`).join('')}
         </div>
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>เฉลย (ตัวเลือกที่ถูกต้อง)</label>
-            <select class="form-control quiz-correct">
+            <label for="${qId}-correct">เฉลย (ตัวเลือกที่ถูกต้อง)</label>
+            <select id="${qId}-correct" class="form-control quiz-correct">
                 ${['A','B','C','D'].map(l => `<option value="${l}" ${correct===l?'selected':''}>${l}</option>`).join('')}
             </select>
         </div>
@@ -2075,19 +2105,19 @@ window.addFormQuestion = function(hwId, data = null) {
             <div class="quiz-question-header">
                 <span class="quiz-question-number">ข้อที่ ${qNum}</span>
                 <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-                    <select class="form-control quiz-type-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" onchange="onQuizTypeChange('${qId}')">
+                    <select class="form-control quiz-type-select" style="width:auto;padding:0.4rem 2.25rem 0.4rem 0.75rem;font-size:16px;" onchange="onQuizTypeChange('${qId}')">
                         <option value="multiple_choice">ปรนัยเลือกตอบ</option>
                         <option value="checkbox">เลือกได้หลายข้อ</option>
                         <option value="true_false">ถูก/ผิด</option>
                         <option value="short_answer">ตอบสั้น/เรียงความ (อาจารย์ตรวจ)</option>
                     </select>
-                    <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:64px;padding:0.4rem 0.5rem;font-size:0.85rem;" title="คะแนนข้อนี้">
+                    <input type="number" class="form-control quiz-points" min="1" value="${data?.points || 1}" style="width:76px;padding:0.4rem 0.5rem;font-size:16px;" title="คะแนนข้อนี้">
                     <button aria-label="ลบ" type="button" class="btn btn-danger" onclick="removeFormQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
             <div class="form-group">
-                <label>คำถาม <span class="required">*</span></label>
-                <textarea class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question || ''}</textarea>
+                <label for="${qId}-question">คำถาม <span class="required">*</span></label>
+                <textarea id="${qId}-question" class="form-control quiz-question-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question || ''}</textarea>
             </div>
             ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>
@@ -2250,12 +2280,12 @@ document.getElementById('hwSourceFileInput').addEventListener('change', function
     const file = e.target.files[0];
     if (!file) return;
     hwSourceFile = file;
-    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
+    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
     document.getElementById('hwSourceFilePreview').innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button aria-label="ลบ" class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -2330,12 +2360,12 @@ document.getElementById('courseDescFileInput').addEventListener('change', functi
     const file = e.target.files[0];
     if (!file) return;
     courseDescFile = file;
-    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
+    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
     document.getElementById('courseDescFilePreview').innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button aria-label="ลบ" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -2436,7 +2466,7 @@ window.copyHwHelpTemplate = async function() {
     try {
         await navigator.clipboard.writeText(text);
         const original = btn.textContent;
-        btn.innerHTML = 'คัดลอกแล้ว <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
+        btn.innerHTML = 'คัดลอกแล้ว <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
         setTimeout(() => { btn.textContent = original; }, 1800);
     } catch (e) {
         toast('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วคัดลอกเอง', 'error');
@@ -2615,19 +2645,19 @@ window.extractHomeworkWithAI = async function() {
                             <img alt="รูปประกอบ" src="${imgUrl}" style="max-width:220px;max-height:140px;border-radius:var(--radius-sm);display:block;">
                             <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${hwId}')"
                                 style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
-                                background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                                background:var(--bg-elevated);color:var(--danger);border:1px solid var(--danger);cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
                         </div>`;
                 }
             }
         });
 
         const imgCount = Object.keys(pageUrlMap).length;
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เพิ่มการบ้านให้แล้ว ${items.length} ข้อ${imgCount > 0 ? ` (แนบรูปภาพให้ ${imgCount} หน้า)` : ''} — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เพิ่มการบ้านให้แล้ว ${items.length} ข้อ${imgCount > 0 ? ` (แนบรูปภาพให้ ${imgCount} หน้า)` : ''} — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
         document.getElementById('homeworkList').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (err) {
         console.error('extractHomeworkWithAI error:', err);
-        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     } finally {
         btn.disabled = false;
         btn.textContent = 'ให้ AI แตกเป็นข้อๆ';
@@ -2649,8 +2679,8 @@ function rubricRowHtml(hwId, criterion, points) {
             <input type="text" class="form-control rubric-criterion" placeholder="เช่น ความถูกต้องของโค้ด" value="${escapeAttrCourse(criterion||'')}" style="flex:1;" oninput="updateRubricTotal('${hwId}')">
             <input type="number" class="form-control rubric-points" placeholder="คะแนน" min="0" value="${points??''}" style="width:100px;" oninput="updateRubricTotal('${hwId}')">
             <button aria-label="ลบ" type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
-                style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
-                width:32px;height:32px;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                style="background:transparent;border:1px solid color-mix(in srgb, var(--danger) 45%, transparent);color:var(--danger);
+                width:40px;height:40px;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 }
 
@@ -2691,7 +2721,7 @@ window.generateRubricWithAI = async function(hwId) {
     }
 
     status.classList.add('show');
-    status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI กำลังคิด Rubric...';
+    status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI กำลังคิด Rubric...';
 
     const prompt = `คุณเป็นผู้ช่วยอาจารย์ออกแบบเกณฑ์การให้คะแนน (Rubric) สำหรับการบ้านนี้
 ชื่อการบ้าน: ${title || '(ไม่ระบุ)'}
@@ -2717,10 +2747,10 @@ window.generateRubricWithAI = async function(hwId) {
         // ล้างของเดิมแล้วใส่ของใหม่ที่ AI เสนอ
         document.getElementById(`hw-rubric-rows-${hwId}`).innerHTML = '';
         items.forEach(it => addRubricRow(hwId, it.criterion || '', it.points || 0));
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI เสนอ Rubric ${items.length} หัวข้อให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI เสนอ Rubric ${items.length} หัวข้อให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ`;
     } catch (e) {
         console.error('generateRubricWithAI error:', e);
-        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + e.message;
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + e.message;
     }
 };
 
@@ -2733,32 +2763,32 @@ window.addHomework = function() {
             <div class="hw-item-header">
                 <span class="hw-number-badge">การบ้านที่ ${hwCounter}</span>
                 <div style="display:flex;gap:0.5rem;align-items:center;">
-                    <select class="form-control hw-lesson-select" style="width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" title="ผูกกับบทเรียน">
+                    <select class="form-control hw-lesson-select" style="width:auto;padding:0.4rem 2.25rem 0.4rem 0.75rem;font-size:16px;" title="ผูกกับบทเรียน">
                         ${buildLessonOptionsHtml('')}
                     </select>
                     <button aria-label="ลบ" class="btn btn-danger" onclick="removeHomework('${hwId}')">ลบ</button>
                 </div>
             </div>
             <div class="form-group">
-                <label>ชื่อการบ้าน <span class="required">*</span></label>
-                <input type="text" class="form-control hw-title" placeholder="เช่น ส่งโปรเจกต์ Python เบื้องต้น">
+                <label for="${hwId}-title">ชื่อการบ้าน <span class="required">*</span></label>
+                <input type="text" id="${hwId}-title" class="form-control hw-title" placeholder="เช่น ส่งโปรเจกต์ Python เบื้องต้น">
             </div>
             <div class="form-group">
-                <label>คำอธิบาย / โจทย์</label>
-                <textarea class="form-control hw-desc" rows="3" placeholder="อธิบายสิ่งที่นักเรียนต้องทำ..."></textarea>
+                <label for="${hwId}-desc">คำอธิบาย / โจทย์</label>
+                <textarea id="${hwId}-desc" class="form-control hw-desc" rows="3" placeholder="อธิบายสิ่งที่นักเรียนต้องทำ..."></textarea>
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>
-                <textarea class="form-control hw-grading-criteria" rows="3" placeholder="เช่น เน้นความถูกต้องของโค้ดเป็นหลัก ไม่หักคะแนนเรื่อง style, ต้องมี comment อธิบายทุกฟังก์ชันถึงจะได้คะแนนเต็ม, ถ้าไม่มี error handling หักคะแนน 20%..."></textarea>
+                <label for="${hwId}-criteria"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>
+                <textarea id="${hwId}-criteria" class="form-control hw-grading-criteria" rows="3" placeholder="เช่น เน้นความถูกต้องของโค้ดเป็นหลัก ไม่หักคะแนนเรื่อง style, ต้องมี comment อธิบายทุกฟังก์ชันถึงจะได้คะแนนเต็ม, ถ้าไม่มี error handling หักคะแนน 20%..."></textarea>
                 <small style="color:var(--text-dim);">เขียนได้อิสระเลยว่าอยากให้ AI เข้มงวด/หย่อนแค่ไหน เน้นอะไร — ระบบจะเอาไปประกอบเป็นคำสั่งให้ AI ใช้ตอนกดปุ่ม "ให้ AI ช่วยตรวจ" ในหน้าตรวจงาน</small>
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Rubric — เกณฑ์การให้คะแนนแยกหัวข้อ (ไม่บังคับ — นักเรียนเห็นได้)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Rubric — เกณฑ์การให้คะแนนแยกหัวข้อ (ไม่บังคับ — นักเรียนเห็นได้)</label>
                 <small style="color:var(--text-dim);display:block;margin-bottom:0.5rem;">ถ้าใส่ไว้ นักเรียนจะเห็นตารางนี้ก่อนทำ และตอนตรวจงานจะให้คะแนนแยกทีละหัวข้อแทนคะแนนรวมช่องเดียว</small>
                 <div id="hw-rubric-rows-${hwId}"></div>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;align-items:center;">
                     <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addRubricRow('${hwId}')">+ เพิ่มหัวข้อ</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="generateRubricWithAI('${hwId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI ช่วยสร้าง Rubric</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="generateRubricWithAI('${hwId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI ช่วยสร้าง Rubric</button>
                     <span id="hw-rubric-total-${hwId}" style="font-size:0.8rem;color:var(--text-dim);"></span>
                 </div>
                 <div id="hw-rubric-status-${hwId}" class="ai-loading-text"></div>
@@ -2766,17 +2796,17 @@ window.addHomework = function() {
             ${quizImageUploadHtml(hwId, null)}
             <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
                 <div class="form-group">
-                    <label>เปิดให้ทำวันที่ (ไม่บังคับ)</label>
-                    <input type="datetime-local" class="form-control hw-release">
+                    <label for="${hwId}-release">เปิดให้ทำวันที่ (ไม่บังคับ)</label>
+                    <input id="${hwId}-release" type="datetime-local" class="form-control hw-release">
                     <small>เว้นว่างไว้ = เปิดให้ทำได้ทันที</small>
                 </div>
                 <div class="form-group">
-                    <label>วันกำหนดส่ง (Deadline)</label>
-                    <input type="datetime-local" class="form-control hw-deadline">
+                    <label for="${hwId}-deadline">วันกำหนดส่ง (Deadline)</label>
+                    <input id="${hwId}-deadline" type="datetime-local" class="form-control hw-deadline">
                 </div>
                 <div class="form-group">
-                    <label>คะแนนเต็ม</label>
-                    <input type="number" class="form-control hw-maxscore" placeholder="เช่น 100" min="1" oninput="updateRubricTotal('${hwId}')">
+                    <label for="${hwId}-maxscore">คะแนนเต็ม</label>
+                    <input id="${hwId}-maxscore" type="number" class="form-control hw-maxscore" placeholder="เช่น 100" min="1" oninput="updateRubricTotal('${hwId}')">
                 </div>
             </div>
             <div class="form-group">
@@ -2789,9 +2819,9 @@ window.addHomework = function() {
                     <div class="hw-type-btn" onclick="setHwType('${hwId}','form',this)">แบบฟอร์มหลายคำถาม</div>
                 </div>
                 <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:none;margin-top:0.75rem;">
-                    <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
+                    <label for="hw-code-lang-${hwId}" style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
                     <select class="hw-code-lang" id="hw-code-lang-${hwId}" onchange="setHwCodeLang('${hwId}', this.value)"
-                        style="width:100%;padding:0.6rem;border-radius:var(--radius-sm);background:var(--input-bg);color:var(--text-main);border:1px solid var(--border-color);margin-top:0.4rem;">
+                        style="width:100%;min-height:48px;padding:0.6rem;font-size:16px;border-radius:var(--radius-sm);background:var(--input-bg);color:var(--text-main);border:1px solid var(--line-strong);margin-top:0.4rem;">
                         <option value="python">Python (รันในเบราว์เซอร์ได้)</option>
                         <option value="javascript">JavaScript (รันในเบราว์เซอร์ได้)</option>
                         <option value="html">HTML/CSS (แสดงผลในเบราว์เซอร์ได้)</option>
@@ -2959,7 +2989,7 @@ window.createCourse = async function() {
             progress.push({ name: 'รูปปกคอร์ส', status: 'กำลังอัพโหลด...', progress: 0 });
             updateProgress(progress);
             thumbnailUrl = await uploadToCloudinary(thumbnailFile, 'skillnest/thumbnails');
-            progress[0].status = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สำเร็จ';
+            progress[0].status = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> สำเร็จ';
             progress[0].progress = 100;
             updateProgress(progress);
         }
@@ -2986,7 +3016,7 @@ window.createCourse = async function() {
                 docUrl  = await uploadToCloudinary(lessonData.file, 'skillnest/lessons');
                 docType = detectFileType(lessonData.file.name);
             }
-            progress[i + (thumbnailFile ? 1 : 0)].status   = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึกแล้ว';
+            progress[i + (thumbnailFile ? 1 : 0)].status   = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> บันทึกแล้ว';
             progress[i + (thumbnailFile ? 1 : 0)].progress = 100;
             updateProgress(progress);
 
@@ -3091,10 +3121,10 @@ window.createCourse = async function() {
 
 // ============ TUTORIAL TOUR ============
 const _createCourseTourSteps = [
-    { title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ยินดีต้อนรับสู่การสร้างคอร์ส', text: 'ขั้นตอนสร้างคอร์สแบ่งเป็น 7 ขั้นตอนย่อย ทำทีละขั้น ย้อนกลับไปแก้ไขขั้นก่อนหน้าได้ตลอดเวลา ไปดูภาพรวมกันสั้นๆ ก่อนเริ่ม' },
+    { title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg></span> ยินดีต้อนรับสู่การสร้างคอร์ส', text: 'ขั้นตอนสร้างคอร์สแบ่งเป็น 7 ขั้นตอนย่อย ทำทีละขั้น ย้อนกลับไปแก้ไขขั้นก่อนหน้าได้ตลอดเวลา ไปดูภาพรวมกันสั้นๆ ก่อนเริ่ม' },
     { target: '#wizardProgress', title: '7 ขั้นตอนของการสร้างคอร์ส', text: 'ข้อมูลคอร์ส → รูปปก → ผู้ช่วย AI → บทเรียน → แบบทดสอบ → การบ้าน → ตรวจสอบ — คลิกที่ขั้นตอนไหนก็ได้ที่เคยผ่านมาแล้ว เพื่อย้อนกลับไปแก้ไข', placement: 'bottom' },
     { target: '#courseTitle', title: 'เริ่มจากข้อมูลพื้นฐาน', text: 'กรอกชื่อคอร์สและคำอธิบายที่นี่ก่อน — ถ้ามีไฟล์คำอธิบายรายวิชาอยู่แล้ว (PDF/รูปภาพ) เลื่อนลงไปหน่อย มีปุ่มให้ AI ช่วยดึงมาใส่ให้อัตโนมัติ', placement: 'bottom' },
-    { target: '.ai-gen-area', title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> มีผู้ช่วย AI อยู่แทบทุกขั้นตอน', text: 'กล่องสีม่วงแบบนี้จะโผล่มาในหลายขั้นตอน ให้ AI ช่วยสร้าง CLO, โครงคอร์ส, Quiz, หรือแตกหัวข้อการบ้านจากไฟล์ให้อัตโนมัติ ลองใช้ดูได้ ไม่บังคับ', placement: 'bottom' },
+    { target: '.ai-gen-area', title: '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> มีผู้ช่วย AI อยู่แทบทุกขั้นตอน', text: 'กล่องสีม่วงแบบนี้จะโผล่มาในหลายขั้นตอน ให้ AI ช่วยสร้าง CLO, โครงคอร์ส, Quiz, หรือแตกหัวข้อการบ้านจากไฟล์ให้อัตโนมัติ ลองใช้ดูได้ ไม่บังคับ', placement: 'bottom' },
 ];
 SkillNestTour.autoStart(_createCourseTourSteps, 'create-course');
 SkillNestTour.mountHelpButton(_createCourseTourSteps, 'create-course', 'ดูวิธีใช้งานหน้านี้อีกครั้ง');
