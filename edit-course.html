@@ -9,94 +9,142 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="shortcut icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anuphan:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Anuphan:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <script src="ui-feedback.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+
+        /* โทเคนเฉพาะหน้านี้ — คำนวณจากสีธีม ใช้ได้ทั้งธีมมืดและสว่าง */
+        :root {
+            --ec-accent-text: color-mix(in srgb, var(--primary-blue) 72%, var(--text-main));
+            --ec-accent-line: color-mix(in srgb, var(--primary-blue) 35%, transparent);
+            --ec-danger-text: color-mix(in srgb, var(--danger) 78%, var(--text-main));
+            --ec-glow: color-mix(in srgb, var(--primary-blue) 20%, transparent);
+            --ec-savebar-h: 88px;
+        }
+        :root[data-theme="light"] {
+            --ec-glow: color-mix(in srgb, var(--primary-blue) 10%, transparent);
+        }
+        /* ช่องที่ได้โฟกัสด้วยคีย์บอร์ดจะไม่ถูกแถบบันทึกด้านล่างบัง */
+        html { scroll-padding-bottom: calc(var(--ec-savebar-h) + 16px); }
+
         body {
-            background: radial-gradient(circle at 50% 0%, #1a1a4d 0%, #020418 60%);
+            background: var(--bg-color);
             color: var(--text-main); min-height:100vh; padding:2rem;
         }
         .container { max-width:1000px; margin:0 auto; }
 
+        /* หัวหน้า + แสงอินดิโกนิ่ง 1 จุด */
         .top-bar {
-            display:flex; justify-content:space-between; align-items:center;
-            margin-bottom:2rem; padding-bottom:1rem;
-            border-bottom:1px solid var(--border-color);
+            position:relative; isolation:isolate;
+            display:flex; justify-content:space-between; align-items:center; gap:1rem;
+            margin-bottom:1.5rem; padding-bottom:1rem;
+            border-bottom:1px solid var(--line);
         }
-        .page-title { font-size:1.6rem; font-weight:700; }
-        .page-title span { color:var(--primary-blue); }
+        .top-bar::before {
+            content:''; position:absolute; z-index:-1; pointer-events:none;
+            left:-80px; top:-140px; width:min(640px, 100%); height:340px;
+            background: radial-gradient(closest-side, var(--ec-glow), transparent);
+        }
+        .page-title { font-family:var(--font-display); font-size:1.6rem; font-weight:600; line-height:1.3; min-width:0; }
+        .page-title > .sn-icon { color:var(--primary-blue); }
+        .page-title span#pageCourseTitle { color:var(--ec-accent-text); }
         .btn-back {
-            color:var(--text-dim); text-decoration:none;
-            display:flex; align-items:center; gap:6px;
-            padding:0.5rem 1rem; border-radius:var(--radius-sm);
-            border:1px solid var(--border-color);
-            background:rgba(255,255,255,0.03); transition:0.2s;
+            color:var(--text-main); text-decoration:none; white-space:nowrap; flex-shrink:0;
+            display:inline-flex; align-items:center; gap:6px;
+            min-height:44px; padding:0.5rem 1rem; border-radius:var(--radius-md);
+            border:1px solid var(--line-strong);
+            background:var(--bg-elevated); transition: border-color .15s ease, background-color .15s ease;
         }
-        .btn-back:hover { color:white; border-color:var(--primary-blue); }
+        .btn-back:hover { color:var(--text-main); border-color:var(--primary-blue); }
 
         .section {
-            background: var(--card-bg); border-radius:var(--radius-lg);
+            background: var(--bg-elevated); border-radius:var(--radius-xl);
             padding:2rem; margin-bottom:2rem;
-            border:1px solid var(--border-color);
+            border:1px solid var(--line-strong);
+            box-shadow: var(--shadow-md);
         }
         .section-title {
-            font-size:1.2rem; font-weight:700; margin-bottom:1.5rem;
+            font-size:1.2rem; font-weight:600; margin-bottom:1.5rem;
             display:flex; align-items:center; gap:0.5rem;
         }
+        .section-title .sn-icon { color:var(--primary-blue); }
         .form-group { margin-bottom:1.5rem; }
         .form-group label {
-            display:block; margin-bottom:0.5rem; font-weight:500;
+            display:block; margin-bottom:0.5rem; font-weight:500; color:var(--text-main);
         }
-        .required { color:var(--danger-red); }
+        .form-group small { color:var(--text-dim); font-size:0.85rem; line-height:1.5; }
+        .required { color:var(--ec-danger-text); }
         .form-control {
-            width:100%; padding:0.75rem 1rem;
-            background:var(--input-bg); border:1px solid var(--border-color);
-            border-radius:var(--radius-sm); color:var(--text-main); font-size:var(--text-base); transition:0.3s;
+            width:100%; min-height:48px; padding:0.75rem 1rem;
+            background:var(--input-bg); border:1px solid var(--line-strong);
+            border-radius:var(--radius-md); color:var(--text-main);
+            font-family:inherit; font-size:1rem; line-height:1.5;
+            transition: border-color .15s ease, box-shadow .15s ease;
         }
-        .form-control:focus { outline:none; border-color:var(--primary-blue); background:rgba(59,130,246,0.05); }
+        .form-control::placeholder { color:var(--text-faint); }
+        .form-control:focus { outline:none; border-color:var(--primary-blue); box-shadow:var(--shadow-focus); }
+        .form-control[readonly] { color:var(--text-dim); background:var(--card-bg); }
         textarea.form-control { resize:vertical; min-height:100px; }
         .grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 
+        /* ช่องย่อยในหัวการ์ด (ผูกบท / ประเภท / คะแนน / วันเปิด) — สไตล์ inline ใน JS ตั้งให้เล็ก ทับให้ได้ 48px/16px */
+        .quiz-question-header .form-control,
+        .hw-item-header .form-control,
+        .quiz-item .quiz-release {
+            min-height:48px !important; font-size:1rem !important; padding:0.6rem 0.75rem !important;
+        }
+        .quiz-item .quiz-points { width:5.5rem !important; }
+
         /* Thumbnail */
         .file-upload-area {
-            border:2px dashed var(--border-color); border-radius:var(--radius-lg);
-            padding:2rem; text-align:center; background:var(--input-bg);
-            cursor:pointer; transition:0.3s;
+            border:2px dashed var(--line-strong); border-radius:var(--radius-lg);
+            padding:2rem; text-align:center; background:var(--bg-elevated);
+            cursor:pointer; transition: border-color .15s ease, background-color .15s ease;
         }
-        .file-upload-area:hover { border-color:var(--primary-blue); background:rgba(59,130,246,0.05); }
-        .file-upload-icon { font-size:3rem; margin-bottom:0.5rem; }
+        .file-upload-area:hover, .file-upload-area:focus-visible { border-color:var(--primary-blue); background:var(--active-lesson); }
+        .file-upload-area p { color:var(--text-main); }
+        .file-upload-icon { font-size:2.5rem; margin-bottom:0.5rem; color:var(--text-dim); }
+        .quiz-image-upload-area:focus-visible { border-color:var(--primary-blue) !important; }
         .file-preview {
             display:flex; align-items:center; gap:0.75rem;
-            padding:0.75rem; background:var(--input-bg); border-radius:var(--radius-sm); margin-top:0.5rem;
+            padding:0.75rem; background:var(--input-bg); border:1px solid var(--line);
+            border-radius:var(--radius-md); margin-top:0.5rem; overflow-wrap:anywhere;
         }
         .file-preview img { width:80px; height:80px; object-fit:cover; border-radius:var(--radius-sm); }
         .current-thumb {
             width:100%; border-radius:var(--radius-md); max-height:200px; object-fit:cover;
-            margin-bottom:1rem; border:1px solid var(--border-color);
+            margin-bottom:1rem; border:1px solid var(--line);
         }
 
-        /* Lessons */
+        /* Lessons — บทเดิม: ขอบซ้ายอินดิโกทึบ / บทใหม่: ขอบซ้ายเส้นประสีกลาง + ป้ายเส้นขอบ "บทเรียนใหม่" */
         .lesson-item {
-            background:var(--input-bg); border:1px solid var(--border-color);
+            background:var(--card-bg); border:1px solid var(--line-strong);
             border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem; position:relative;
         }
         .lesson-item.existing { border-left:3px solid var(--primary-blue); }
-        .lesson-item.new-lesson { border-left:3px solid var(--success-green); }
-        .lesson-header {
-            display:flex; justify-content:space-between;
-            align-items:center; margin-bottom:1rem;
+        .lesson-item.new-lesson { border-left:3px dashed var(--text-faint); }
+        .lesson-header, .quiz-question-header, .hw-item-header {
+            display:flex; justify-content:space-between; flex-wrap:wrap;
+            align-items:center; gap:0.75rem; margin-bottom:1rem;
         }
-        .lesson-number {
-            background:var(--primary-blue); color:white;
-            padding:0.25rem 0.75rem; border-radius:var(--radius-xl); font-size:0.85rem; font-weight:600;
+        /* ป้ายลำดับ บทที่ / ข้อที่ / การบ้านที่ — แบบกลางชุดเดียวกัน */
+        .lesson-number, .quiz-question-number, .hw-number-badge {
+            display:inline-flex; align-items:center; gap:0.35rem;
+            background:var(--card-hover); color:var(--text-main);
+            border:1px solid var(--line-strong);
+            padding:0.25rem 0.75rem; border-radius:var(--radius-full); font-size:0.9rem; font-weight:600;
         }
-        .lesson-number.new-badge { background:var(--success-green); }
+        .lesson-number.new-badge {
+            background:transparent; color:var(--text-main);
+            border:1px dashed var(--text-dim);
+        }
+        .lesson-number.new-badge .sn-icon { color:var(--ec-accent-text); }
         .existing-file-badge {
-            display:inline-flex; align-items:center; gap:0.5rem;
-            background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.25);
-            color:#60a5fa; padding:0.4rem 0.8rem; border-radius:var(--radius-sm); font-size:0.82rem;
+            display:inline-flex; align-items:center; gap:0.5rem; max-width:100%; overflow-wrap:anywhere;
+            background:var(--active-lesson); border:1px solid var(--ec-accent-line);
+            color:var(--ec-accent-text); padding:0.4rem 0.8rem; border-radius:var(--radius-md); font-size:0.9rem;
             margin-bottom:0.75rem;
         }
         .upload-method {
@@ -104,54 +152,62 @@
             gap:0.75rem; margin-top:0.5rem;
         }
         .method-option {
-            border:1px solid var(--border-color); border-radius:var(--radius-sm);
-            padding:0.75rem; text-align:center; cursor:pointer; transition:0.2s;
-            background:var(--input-bg); color:var(--text-dim); font-size:0.9rem;
+            border:1px solid var(--line-strong); border-radius:var(--radius-md);
+            padding:0.75rem; text-align:center; cursor:pointer; transition: border-color .15s ease;
+            background:var(--input-bg); color:var(--text-dim); font-size:0.95rem;
         }
-        .method-option:hover { border-color:var(--primary-blue); color:white; }
-        .method-option.active { border-color:var(--primary-blue); background:rgba(59,130,246,0.1); color:white; }
+        .method-option:hover { border-color:var(--primary-blue); color:var(--text-main); }
+        .method-option.active { border-color:var(--primary-blue); background:var(--active-lesson); color:var(--text-main); font-weight:600; }
         .method-icon { font-size:var(--text-2xl); margin-bottom:0.25rem; }
 
         /* Buttons */
         .btn {
-            padding:0.75rem 1.5rem; border:none; border-radius:var(--radius-sm);
-            font-weight:600; cursor:pointer; transition:0.3s; font-size:var(--text-base);
-            display:inline-flex; align-items:center; gap:0.5rem;
+            min-height:44px; padding:0.7rem 1.4rem; border:1px solid transparent; border-radius:var(--radius-md);
+            font-family:inherit; font-weight:600; cursor:pointer; font-size:var(--text-base); line-height:1.3;
+            display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+            transition: background-color .15s ease, border-color .15s ease, color .15s ease, filter .15s ease;
         }
-        .btn-primary { background:var(--primary-blue); color:white; }
-        .btn-primary:hover { background:#2563eb; }
-        .btn-success { background:var(--success-green); color:white; }
-        .btn-success:hover { background:#059669; }
+        .btn:disabled { opacity:0.6; cursor:progress; }
+        .btn-primary { background:var(--primary-2); border-color:var(--primary-2); color:#fff; }
+        .btn-primary:hover { filter:brightness(1.12); }
+        .btn-success { background:var(--success); border-color:var(--success); color:var(--bg-color); }
+        .btn-success:hover { filter:brightness(1.08); }
         .btn-danger {
-            background:rgba(239,68,68,0.15); color:#ef4444;
-            border:1px solid rgba(239,68,68,0.3); padding:0.4rem 0.8rem;
-            font-size:0.85rem; border-radius:var(--radius-sm); font-weight:500;
+            background:transparent; color:var(--ec-danger-text);
+            border:1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+            min-height:40px; padding:0.45rem 0.9rem;
+            font-size:0.9rem; font-weight:500;
         }
-        .btn-danger:hover { background:#ef4444; color:white; }
+        .btn-danger:hover { background:color-mix(in srgb, var(--danger) 10%, transparent); border-color:var(--danger); }
         .btn-outline {
-            background:transparent; color:var(--text-dim);
-            border:1px dashed var(--border-color);
+            background:transparent; color:var(--text-main);
+            border:1px dashed var(--line-strong);
         }
-        .btn-outline:hover { border-color:var(--primary-blue); color:white; }
-        .btn-warning { background:var(--warning); color:white; }
-        .btn-warning:hover { background:#d97706; }
+        .btn-outline:hover { border-color:var(--primary-blue); color:var(--ec-accent-text); background:var(--active-lesson); }
+        .btn-warning { background:transparent; color:var(--text-main); border-color:var(--line-strong); }
+        .btn-warning:hover { border-color:var(--primary-blue); }
         .btn-save {
-            background:var(--gradient-cta);
-            color:white; font-size:1.1rem; padding:1rem 3rem;
+            background:var(--primary-2); border-color:var(--primary-2);
+            color:#fff; font-size:1.05rem; min-height:52px; padding:0.85rem 2.5rem;
         }
+        .btn-save:hover { filter:brightness(1.12); }
+
+        /* แถบบันทึกติดขอบล่างจอ */
+        .save-bar {
+            position:sticky; bottom:0; z-index:50;
+            display:flex; justify-content:center;
+            margin:1rem -1rem 0; padding:0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+            background:var(--bg-color);
+            border-top:1px solid var(--line-strong);
+            border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        /* ถ้าหน้านี้มีปุ่ม "?" ของ tour.js (มุมล่างซ้าย) ในอนาคต เว้นที่ให้ไม่ทับกัน */
+        body:has(.sntour-help-fab) .save-bar { padding-left:88px; }
 
         /* Quiz */
         .quiz-item {
-            background:var(--input-bg); border:1px solid var(--border-color);
+            background:var(--card-bg); border:1px solid var(--line-strong);
             border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem;
-        }
-        .quiz-question-header {
-            display:flex; justify-content:space-between;
-            align-items:center; margin-bottom:1rem;
-        }
-        .quiz-question-number {
-            background:#8b5cf6; color:white;
-            padding:0.25rem 0.75rem; border-radius:var(--radius-xl); font-size:0.85rem; font-weight:600;
         }
         .quiz-choices {
             display:grid; grid-template-columns:1fr 1fr;
@@ -161,126 +217,160 @@
             display:flex; align-items:center; gap:0.5rem;
         }
         .choice-label {
-            background:rgba(255,255,255,0.1); border-radius:var(--radius-sm);
-            padding:0.3rem 0.6rem; font-weight:700; min-width:32px; text-align:center;
+            display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+            background:var(--card-hover); border:1px solid var(--line-strong); border-radius:var(--radius-md);
+            min-width:40px; min-height:40px; padding:0 0.6rem; font-weight:600; color:var(--text-main);
         }
 
-        /* AI Quiz */
+        /* AI area — พื้นอินดิโกจาง + ขอบซ้ายอินดิโก */
         .ai-gen-area {
-            background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.2);
+            background:var(--active-lesson); border:1px solid var(--ec-accent-line);
+            border-left:3px solid var(--primary-blue);
             border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1.5rem;
         }
-        .ai-gen-title { font-weight:700; color:#a78bfa; margin-bottom:1rem; font-size:var(--text-base); }
+        .ai-gen-title { display:flex; align-items:center; flex-wrap:wrap; gap:0.25rem; font-weight:600; color:var(--text-main); margin-bottom:1rem; font-size:1.05rem; }
+        .ai-gen-title > .sn-icon { color:var(--ec-accent-text); margin-right:0.25rem; }
         .ai-gen-row { display:grid; grid-template-columns:1fr auto auto; gap:0.75rem; align-items:end; }
-        .btn-ai { background:var(--gradient-ai); color:white; }
-        .ai-loading-text { display:none; color:var(--text-dim); font-size:0.9rem; margin-top:0.5rem; }
+        .btn-ai { background:var(--primary-2); border-color:var(--primary-2); color:#fff; }
+        .btn-ai:hover { filter:brightness(1.12); }
+        .ai-loading-text { display:none; color:var(--text-dim); font-size:0.95rem; margin-top:0.5rem; }
         .ai-loading-text.show { display:block; }
 
         /* Help ("?") button + template modal for correctly-formatted attachments */
         .hw-help-btn {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 22px; height: 22px; border-radius: 999px;
-            background: rgba(139,92,246,0.18); border: 1px solid rgba(139,92,246,0.4);
-            color: #a78bfa; font-size: 0.78rem; font-weight: 700; cursor: pointer;
-            flex-shrink: 0; line-height: 1; transition: 0.15s; margin-left: 0.5rem;
+            width: 32px; height: 32px; border-radius: var(--radius-full);
+            background: var(--bg-elevated); border: 1px solid var(--ec-accent-line);
+            color: var(--ec-accent-text); font-family:inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            flex-shrink: 0; line-height: 1; transition: border-color .15s ease; margin-left: 0.5rem;
         }
-        .hw-help-btn:hover { background: rgba(139,92,246,0.32); transform: translateY(-1px); }
+        .hw-help-btn:hover { border-color: var(--primary-blue); }
         .hw-help-overlay {
-            position: fixed; inset: 0; background: rgba(2,4,24,0.75);
-            backdrop-filter: blur(6px); z-index: 4000;
+            position: fixed; inset: 0; background: color-mix(in srgb, var(--bg-color) 85%, transparent);
+            z-index: 4000;
             display: none; align-items: center; justify-content: center; padding: 1rem;
         }
         .hw-help-overlay.show { display: flex; }
         .hw-help-modal {
-            background: var(--bg-elevated); border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg); width: 100%; max-width: 640px;
+            background: var(--bg-elevated); border: 1px solid var(--line-strong);
+            border-radius: var(--radius-xl); width: 100%; max-width: 640px;
             max-height: 88vh; overflow-y: auto; padding: 1.75rem;
+            box-shadow: var(--shadow-lg);
         }
-        .hw-help-modal h3 { font-size: 1.15rem; margin-bottom: 0.25rem; }
-        .hw-help-modal .hw-help-sub { color: var(--text-dim); font-size: 0.87rem; margin-bottom: 1.25rem; }
+        .hw-help-modal h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .hw-help-modal .hw-help-sub { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1.25rem; }
         .hw-help-section { margin-bottom: 1.25rem; }
-        .hw-help-section h4 { font-size: 0.92rem; margin-bottom: 0.5rem; }
-        .hw-help-good h4 { color: #10b981; }
-        .hw-help-bad h4 { color: #f87171; }
-        .hw-help-section ul { margin: 0; padding-left: 1.2rem; color: var(--text-main); font-size: 0.88rem; line-height: 1.75; }
+        .hw-help-section h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; display:flex; align-items:center; gap:0.4rem; }
+        .hw-help-good h4 { color: var(--text-main); }
+        .hw-help-good h4 .sn-icon { color: var(--success); }
+        .hw-help-bad h4 { color: var(--text-main); }
+        .hw-help-bad h4 .sn-icon { color: var(--danger); }
+        .hw-help-section ul { margin: 0; padding-left: 1.2rem; color: var(--text-main); font-size: 0.95rem; line-height: 1.75; }
         .hw-help-template {
-            background: var(--input-bg); border: 1px solid var(--border-color);
+            background: var(--input-bg); border: 1px solid var(--line-strong);
             border-radius: var(--radius-lg); padding: 1rem 1.1rem;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+            font-family: var(--font-mono); font-size: 0.9rem;
             color: var(--text-main); white-space: pre-wrap; line-height: 1.7;
         }
         .hw-help-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.75rem; }
         .hw-help-close {
-            position: sticky; top: 0; float: right; margin-top: -0.5rem;
-            background: none; border: none; color: var(--text-dim); font-size: 1.3rem;
-            cursor: pointer; line-height: 1;
+            position: sticky; top: 0; float: right; margin: -0.75rem -0.75rem 0 0.5rem;
+            width: 44px; height: 44px; display:inline-flex; align-items:center; justify-content:center;
+            background: var(--bg-elevated); border: 1px solid transparent; border-radius: var(--radius-md);
+            color: var(--text-dim); font-size: 1.5rem; cursor: pointer; line-height: 1;
         }
-        .hw-help-close:hover { color: var(--text-main); }
+        .hw-help-close:hover { color: var(--text-main); background: var(--card-hover); border-color: var(--line); }
 
         /* Homework */
         .hw-item {
-            background:var(--input-bg); border:1px solid var(--border-color);
+            background:var(--card-bg); border:1px solid var(--line-strong);
             border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem;
         }
-        .hw-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
-        .hw-number-badge {
-            background:var(--gradient-warning);
-            color:white; padding:0.25rem 0.75rem; border-radius:var(--radius-xl); font-size:0.85rem; font-weight:600;
-        }
-        .hw-type-selector { display:flex; gap:0.75rem; margin-top:0.75rem; }
+        .hw-type-selector { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.75rem; }
         .hw-type-btn {
-            flex:1; padding:0.6rem; border:1px solid var(--border-color);
-            border-radius:var(--radius-sm); background:var(--input-bg); color:var(--text-dim);
-            cursor:pointer; font-size:0.85rem; text-align:center; transition:0.2s;
+            appearance:none; -webkit-appearance:none; margin:0; font-family:inherit; line-height:1.3;
+            flex:1 1 9rem; min-height:44px; padding:0.6rem 0.75rem; border:1px solid var(--line-strong);
+            border-radius:var(--radius-md); background:var(--input-bg); color:var(--text-dim);
+            cursor:pointer; font-size:0.95rem; text-align:center;
+            display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;
+            transition: border-color .15s ease, background-color .15s ease, color .15s ease;
         }
-        .hw-type-btn.active { border-color:#f59e0b; background:rgba(245,158,11,0.15); color:white; }
+        .hw-type-btn:hover { border-color:var(--ec-accent-line); color:var(--text-main); }
+        .hw-type-btn.active { border-color:var(--primary-blue); background:var(--active-lesson); color:var(--text-main); font-weight:600; box-shadow: inset 0 0 0 1px var(--primary-blue); }
+        .hw-code-lang { min-height:48px; font-family:inherit; font-size:1rem !important; }
 
-        /* Tabs */
-        .edit-tabs { display:flex; gap:0; overflow-x:auto; scrollbar-width:none; border-bottom:2px solid var(--border-color); margin-bottom:1.5rem; }
-        .edit-tab { white-space:nowrap; flex-shrink:0;
-            padding:0.6rem 1.25rem; cursor:pointer; color:var(--text-dim);
-            border-bottom:2px solid transparent; margin-bottom:-2px; transition:0.2s; font-size:0.95rem;
+        /* Tabs — แท็บที่เลือก: สีอินดิโก + ขีดล่าง + ตัวหนา */
+        .edit-tabs { display:flex; gap:0; overflow-x:auto; scrollbar-width:none; border-bottom:1px solid var(--line-strong); margin-bottom:1.5rem; }
+        .edit-tab {
+            appearance:none; -webkit-appearance:none; background:transparent; border:0; margin:0 0 -1px;
+            font-family:inherit; line-height:1.3;
+            white-space:nowrap; flex-shrink:0; min-height:48px;
+            display:inline-flex; align-items:center; gap:0.4rem;
+            padding:0.6rem 1.1rem; cursor:pointer; color:var(--text-dim);
+            border-bottom:2px solid transparent; transition: color .15s ease, border-color .15s ease; font-size:1rem;
         }
-        .edit-tab:hover { color:white; }
-        .edit-tab.active { color:var(--primary-blue); border-bottom-color:var(--primary-blue); font-weight:600; }
+        .edit-tab:hover { color:var(--text-main); }
+        .edit-tab.active { color:var(--ec-accent-text); border-bottom-color:var(--primary-blue); font-weight:600; }
         .edit-tab-panel { display:none; }
         .edit-tab-panel.active { display:block; }
 
         /* Loading overlay */
         .loading-overlay {
-            position:fixed; inset:0; background:rgba(2,4,24,0.92);
-            backdrop-filter:blur(10px); z-index:9999;
+            position:fixed; inset:0; background:color-mix(in srgb, var(--bg-color) 92%, transparent);
+            z-index:9999;
             display:none; align-items:center; justify-content:center;
         }
         .loading-overlay.show { display:flex; }
         .loading-content { text-align:center; }
+        .loading-content h3 { font-weight:600; }
         .spinner {
-            width:50px; height:50px;
-            border:4px solid rgba(255,255,255,0.1);
-            border-top:4px solid var(--primary-blue);
+            width:44px; height:44px;
+            border:3px solid var(--line-strong);
+            border-top:3px solid var(--primary-blue);
             border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 1rem;
         }
         @keyframes spin { 100% { transform:rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.5s; } }
 
         .alert-info {
-            background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25);
-            border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#93c5fd;
+            background:var(--active-lesson); border:1px solid var(--ec-accent-line);
+            border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem; font-size:0.95rem; color:var(--text-main); line-height:1.6;
         }
+        .alert-info > .sn-icon:first-child { color:var(--ec-accent-text); }
         .alert-warning {
-            background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
-            border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:#fcd34d;
+            background:var(--card-bg); border:1px solid var(--line-strong); border-left:3px solid var(--text-dim);
+            border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem; font-size:0.95rem; color:var(--text-main); line-height:1.6;
         }
 
         @media (max-width:640px) { .grid { grid-template-columns:1fr; } .ai-gen-row { grid-template-columns:1fr; } }
         @media (max-width:640px) {
             body { padding: 1rem; }
-            .top-bar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+            .top-bar { align-items:flex-start; }
+            .page-title { font-size:1.35rem; }
             .edit-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
-            .edit-tab { white-space:nowrap; flex-shrink:0; white-space: nowrap; }
+            .edit-tab { padding:0.6rem 0.75rem; font-size:0.95rem; }
             .section { padding: 1.25rem; }
             .quiz-choices { grid-template-columns: 1fr; }
             .upload-method { grid-template-columns: 1fr; }
-            .lesson-item { padding: 1rem; }
+            .lesson-item, .quiz-item, .hw-item { padding: 1rem; }
+            /* แถว "เปิดให้ทำวันที่ / วันกำหนดส่ง / คะแนนเต็ม" ตั้ง 3 คอลัมน์แบบ inline — ทับให้เหลือคอลัมน์เดียว */
+            .hw-item .grid { grid-template-columns:1fr !important; gap:0; }
+            .ai-gen-area { padding:1rem; }
+            .ai-gen-area .btn-ai { width:100%; }
+            .ai-gen-area .btn-ai + small { flex-basis:100%; }
+            .quiz-question-header > div, .hw-item-header > div { width:100%; }
+            .quiz-question-header select, .hw-item-header select { flex:1 1 12rem; width:auto; min-width:0; }
+            .subtopic-row, .rubric-row { flex-wrap:wrap; }
+            .subtopic-row .subtopic-title, .rubric-row .rubric-criterion { flex:1 1 100% !important; }
+            .subtopic-row .subtopic-note { flex:1 1 0 !important; min-width:0; }
+            .save-bar { margin:1rem -1rem 0; }
+            .btn-save { width:100%; padding:0.85rem 1rem; }
+            .hw-help-modal { padding:1.25rem; }
+        }
+        /* จอแคบ: แท็บทั้ง 4 อยู่ในจอโดยไม่ต้องปัด (ซ่อนไอคอน แท็บที่เลือกยังมีขีดล่าง + ตัวหนา) */
+        @media (max-width:480px) {
+            .edit-tab { flex:1 1 auto; justify-content:center; padding:0.6rem 0.4rem; }
+            .edit-tab .sn-icon { display:none; }
         }
     </style>
 <script type="module" src="auth-guard.js"></script>
@@ -289,37 +379,37 @@
 <div class="container">
 
     <div class="top-bar">
-        <div class="page-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แก้ไขคอร์ส <span id="pageCourseTitle">...</span></div>
+        <div class="page-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> แก้ไขคอร์ส <span id="pageCourseTitle">...</span></div>
         <a href="manage-courses.html" class="btn-back">← กลับ</a>
     </div>
 
     <!-- Tab nav -->
     <div class="edit-tabs">
-        <div class="edit-tab active" onclick="switchEditTab('info',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ข้อมูลคอร์ส</div>
-        <div class="edit-tab" onclick="switchEditTab('lessons',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> บทเรียน</div>
-        <div class="edit-tab" onclick="switchEditTab('quiz',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 01-4.96.44A2.5 2.5 0 014 17.5v-1.26a2.5 2.5 0 01-1-4.44 2.5 2.5 0 011-4.44V6.5A2.5 2.5 0 017 4a2.5 2.5 0 012.5-2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44A2.5 2.5 0 0020 17.5v-1.26a2.5 2.5 0 001-4.44 2.5 2.5 0 00-1-4.44V6.5A2.5 2.5 0 0017 4a2.5 2.5 0 00-2.5-2z"/></svg></span> แบบทดสอบ</div>
-        <div class="edit-tab" onclick="switchEditTab('homework',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</div>
+        <button type="button" class="edit-tab active" onclick="switchEditTab('info',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ข้อมูลคอร์ส</button>
+        <button type="button" class="edit-tab" onclick="switchEditTab('lessons',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> บทเรียน</button>
+        <button type="button" class="edit-tab" onclick="switchEditTab('quiz',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 01-4.96.44A2.5 2.5 0 014 17.5v-1.26a2.5 2.5 0 01-1-4.44 2.5 2.5 0 011-4.44V6.5A2.5 2.5 0 017 4a2.5 2.5 0 012.5-2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44A2.5 2.5 0 0020 17.5v-1.26a2.5 2.5 0 001-4.44 2.5 2.5 0 00-1-4.44V6.5A2.5 2.5 0 0017 4a2.5 2.5 0 00-2.5-2z"/></svg></span> แบบทดสอบ</button>
+        <button type="button" class="edit-tab" onclick="switchEditTab('homework',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน</button>
     </div>
 
     <!-- TAB 1: ข้อมูลคอร์ส -->
     <div id="editTabInfo" class="edit-tab-panel active">
         <div class="section">
-            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ข้อมูลพื้นฐาน</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> ข้อมูลพื้นฐาน</h2>
             <div class="form-group">
-                <label>ชื่อคอร์ส <span class="required">*</span></label>
+                <label for="courseTitle">ชื่อคอร์ส <span class="required">*</span></label>
                 <input type="text" id="courseTitle" class="form-control" placeholder="ชื่อคอร์ส">
             </div>
             <div class="form-group">
-                <label>คำอธิบายคอร์ส <span class="required">*</span></label>
+                <label for="courseDescription">คำอธิบายคอร์ส <span class="required">*</span></label>
                 <textarea id="courseDescription" class="form-control" placeholder="คำอธิบาย..."></textarea>
             </div>
 
             <div class="ai-gen-area">
-                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> มีไฟล์คำอธิบายรายวิชาอยู่แล้ว? ให้ AI ดึงมาใส่ให้</div>
+                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> มีไฟล์คำอธิบายรายวิชาอยู่แล้ว? ให้ AI ดึงมาใส่ให้</div>
                 <div class="form-group" style="margin-bottom:0.75rem;">
                     <label>อัปโหลดไฟล์คำอธิบายรายวิชา (PDF หรือรูปภาพ — ไม่บังคับ)</label>
-                    <div class="file-upload-area" onclick="document.getElementById('courseDescFileInput').click()">
-                        <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
+                    <div class="file-upload-area" role="button" tabindex="0" onclick="document.getElementById('courseDescFileInput').click()">
+                        <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p>คลิกเพื่ออัปโหลดไฟล์คำอธิบายรายวิชา</p>
                         <small style="color:var(--text-dim);">รองรับ PDF และรูปภาพ (JPG, PNG)</small>
                     </div>
@@ -334,7 +424,7 @@
             </div>
             <div class="grid">
                 <div class="form-group">
-                    <label>หมวดหมู่ <span class="required">*</span></label>
+                    <label for="courseCategory">หมวดหมู่ <span class="required">*</span></label>
                     <select id="courseCategory" class="form-control">
                         <option value="">-- เลือกหมวดหมู่ --</option>
                         <option value="programming">การเขียนโปรแกรม</option>
@@ -346,7 +436,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>ระดับความยาก <span class="required">*</span></label>
+                    <label for="courseLevel">ระดับความยาก <span class="required">*</span></label>
                     <select id="courseLevel" class="form-control">
                         <option value="">-- เลือกระดับ --</option>
                         <option value="beginner">เริ่มต้น</option>
@@ -356,15 +446,15 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>ชื่อผู้สอน</label>
+                <label for="courseInstructor">ชื่อผู้สอน</label>
                 <input type="text" id="courseInstructor" class="form-control" placeholder="ชื่อผู้สอน">
             </div>
         </div>
         <div class="section">
-            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span> รูปปกคอร์ส</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span> รูปปกคอร์ส</h2>
             <div id="currentThumbWrap"></div>
-            <div class="file-upload-area" onclick="document.getElementById('thumbnailInput').click()">
-                <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span></div>
+            <div class="file-upload-area" role="button" tabindex="0" onclick="document.getElementById('thumbnailInput').click()">
+                <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span></div>
                 <p id="thumbUploadLabel">คลิกเพื่อเปลี่ยนรูปปก</p>
                 <small style="color:var(--text-dim);">รองรับ JPG, PNG, WEBP</small>
             </div>
@@ -376,9 +466,9 @@
     <!-- TAB 2: บทเรียน -->
     <div id="editTabLessons" class="edit-tab-panel">
         <div class="section">
-            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> บทเรียนทั้งหมด</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> บทเรียนทั้งหมด</h2>
             <div class="alert-info">
-                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> บทเรียนที่มีอยู่แล้ว (สีน้ำเงิน) ไฟล์เดิมจะถูกเก็บไว้เว้นแต่คุณเลือกไฟล์ใหม่แทน
+                <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> บทเรียนที่มีอยู่แล้ว (สีน้ำเงิน) ไฟล์เดิมจะถูกเก็บไว้เว้นแต่คุณเลือกไฟล์ใหม่แทน
             </div>
             <div id="lessonsList"></div>
             <button class="btn btn-outline" onclick="addLesson()" style="margin-top:0.5rem;">
@@ -390,16 +480,16 @@
     <!-- TAB 3: Quiz -->
     <div id="editTabQuiz" class="edit-tab-panel">
         <div class="section">
-            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 01-4.96.44A2.5 2.5 0 014 17.5v-1.26a2.5 2.5 0 01-1-4.44 2.5 2.5 0 011-4.44V6.5A2.5 2.5 0 017 4a2.5 2.5 0 012.5-2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44A2.5 2.5 0 0020 17.5v-1.26a2.5 2.5 0 001-4.44 2.5 2.5 0 00-1-4.44V6.5A2.5 2.5 0 0017 4a2.5 2.5 0 00-2.5-2z"/></svg></span> แบบทดสอบ (Quiz)</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 01-4.96.44A2.5 2.5 0 014 17.5v-1.26a2.5 2.5 0 01-1-4.44 2.5 2.5 0 011-4.44V6.5A2.5 2.5 0 017 4a2.5 2.5 0 012.5-2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44A2.5 2.5 0 0020 17.5v-1.26a2.5 2.5 0 001-4.44 2.5 2.5 0 00-1-4.44V6.5A2.5 2.5 0 0017 4a2.5 2.5 0 00-2.5-2z"/></svg></span> แบบทดสอบ (Quiz)</h2>
             <div class="ai-gen-area">
-                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> สร้าง Quiz ด้วย AI</div>
+                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> สร้าง Quiz ด้วย AI</div>
                 <div class="ai-gen-row">
                     <div class="form-group">
-                        <label>หัวข้อที่ต้องการสร้าง Quiz</label>
+                        <label for="aiQuizTopic">หัวข้อที่ต้องการสร้าง Quiz</label>
                         <input type="text" id="aiQuizTopic" class="form-control" placeholder="เช่น Python loops, การตลาดออนไลน์">
                     </div>
                     <div class="form-group" style="min-width:110px;">
-                        <label>จำนวนข้อ</label>
+                        <label for="aiQuizCount">จำนวนข้อ</label>
                         <select id="aiQuizCount" class="form-control">
                             <option value="3">3 ข้อ</option>
                             <option value="5" selected>5 ข้อ</option>
@@ -408,24 +498,24 @@
                     </div>
                 </div>
                 <div class="form-group" style="margin-top:0.75rem;">
-                    <label>ประเภทคำถาม (เลือกได้มากกว่า 1 แบบ — AI จะผสมสัดส่วนให้เอง)</label>
-                    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-                        <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                    <label id="aiQuizTypeLabel">ประเภทคำถาม (เลือกได้มากกว่า 1 แบบ — AI จะผสมสัดส่วนให้เอง)</label>
+                    <div style="display:flex;gap:0.5rem 1.25rem;flex-wrap:wrap;" role="group" aria-labelledby="aiQuizTypeLabel">
+                        <label style="display:flex;align-items:center;gap:0.5rem;min-height:44px;font-weight:400;color:var(--text-main);cursor:pointer;">
                             <input type="checkbox" class="ai-quiz-type-check" value="multiple_choice" checked> ปรนัย 4 ตัวเลือก
                         </label>
-                        <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                        <label style="display:flex;align-items:center;gap:0.5rem;min-height:44px;font-weight:400;color:var(--text-main);cursor:pointer;">
                             <input type="checkbox" class="ai-quiz-type-check" value="true_false"> ถูก/ผิด
                         </label>
-                        <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                        <label style="display:flex;align-items:center;gap:0.5rem;min-height:44px;font-weight:400;color:var(--text-main);cursor:pointer;">
                             <input type="checkbox" class="ai-quiz-type-check" value="checkbox"> เลือกได้หลายข้อ
                         </label>
-                        <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                        <label style="display:flex;align-items:center;gap:0.5rem;min-height:44px;font-weight:400;color:var(--text-main);cursor:pointer;">
                             <input type="checkbox" class="ai-quiz-type-check" value="short_answer"> ตอบสั้น/เรียงความ
                         </label>
                     </div>
                 </div>
-                <div style="display:flex; gap:0.75rem; align-items:center; margin-top:0.75rem;">
-                    <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> สร้างด้วย AI</button>
+                <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; margin-top:0.75rem;">
+                    <button class="btn btn-ai" id="btnGenQuiz" onclick="generateQuizWithAI()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> สร้างด้วย AI</button>
                     <small style="color:var(--text-dim);">ใช้ Claude AI สร้างโจทย์อัตโนมัติ</small>
                 </div>
                 <div id="aiLoadingText" class="ai-loading-text">AI กำลังสร้างแบบทดสอบ...</div>
@@ -438,16 +528,16 @@
     <!-- TAB 4: Homework -->
     <div id="editTabHomework" class="edit-tab-panel">
         <div class="section">
-            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน (Homework)</h2>
+            <h2 class="section-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> การบ้าน (Homework)</h2>
 
             <div class="ai-gen-area">
-                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ
+                <div class="ai-gen-title"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> ให้ AI แตกไฟล์การบ้านเป็นข้อๆ อัตโนมัติ
                     <button type="button" class="hw-help-btn" onclick="openHwHelpModal()" title="ตัวอย่างไฟล์ที่แนบได้ถูกต้อง" aria-label="ดูตัวอย่างการแนบไฟล์ที่ถูกต้อง">?</button>
                 </div>
                 <div class="form-group">
                     <label>อัปโหลดไฟล์ (PDF หรือรูปภาพโจทย์)</label>
-                    <div class="file-upload-area" onclick="document.getElementById('hwSourceFileInput').click()">
-                        <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
+                    <div class="file-upload-area" role="button" tabindex="0" onclick="document.getElementById('hwSourceFileInput').click()">
+                        <div class="file-upload-icon"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p>คลิกเพื่ออัปโหลดไฟล์การบ้าน</p>
                         <small style="color:var(--text-dim);">รองรับ PDF, Word (.docx) และรูปภาพ (JPG, PNG)</small>
                     </div>
@@ -455,11 +545,11 @@
                     <div id="hwSourceFilePreview"></div>
                 </div>
                 <div class="form-group">
-                    <label>หรือวางข้อความโจทย์ตรงนี้แทน</label>
+                    <label for="hwSourceText">หรือวางข้อความโจทย์ตรงนี้แทน</label>
                     <textarea id="hwSourceText" class="form-control" rows="4" placeholder="วางข้อความการบ้าน/โจทย์ที่นี่ (ถ้าไม่มีไฟล์)"></textarea>
                 </div>
-                <div style="display:flex; gap:0.75rem; align-items:center;">
-                    <button class="btn btn-ai" id="btnExtractHomework" onclick="extractHomeworkWithAI()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI แตกเป็นข้อๆ</button>
+                <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                    <button class="btn btn-ai" id="btnExtractHomework" onclick="extractHomeworkWithAI()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI แตกเป็นข้อๆ</button>
                     <small style="color:var(--text-dim);">AI จะเติมลงฟอร์มการบ้านด้านล่างให้ แก้ไขต่อได้ตามต้องการ</small>
                 </div>
                 <div id="hwExtractStatus" class="ai-loading-text"></div>
@@ -471,8 +561,8 @@
     </div>
 
     <!-- Save button (always visible) -->
-    <div style="text-align:center; margin-top:1rem; margin-bottom:3rem;">
-        <button class="btn btn-save" onclick="saveCourse()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></span> บันทึกการแก้ไข</button>
+    <div class="save-bar">
+        <button type="button" class="btn btn-save" onclick="saveCourse()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></span> บันทึกการแก้ไข</button>
     </div>
 
 </div>
@@ -488,13 +578,13 @@
 
 <!-- Homework attachment format help modal -->
 <div class="hw-help-overlay" id="hwHelpOverlay">
-    <div class="hw-help-modal">
+    <div class="hw-help-modal" role="dialog" aria-modal="true" aria-labelledby="hwHelpTitle">
         <button type="button" class="hw-help-close" onclick="closeHwHelpModal()" aria-label="ปิด">&times;</button>
-        <h3>ตัวอย่างไฟล์ที่แนบได้ถูกต้อง</h3>
+        <h3 id="hwHelpTitle">ตัวอย่างไฟล์ที่แนบได้ถูกต้อง</h3>
         <p class="hw-help-sub">จัดไฟล์ตามแนวทางนี้ก่อนอัปโหลด เพื่อให้ AI แตกข้อและดึงเนื้อหาได้แม่นยำขึ้น</p>
 
         <div class="hw-help-section hw-help-good">
-            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ควรทำ</h4>
+            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> ควรทำ</h4>
             <ul>
                 <li>ขึ้นต้นแต่ละข้อด้วยเลขข้อชัดเจน เช่น <b>"ข้อ 1."</b>, <b>"1)"</b> หรือ <b>"Question 1"</b></li>
                 <li>เว้นบรรทัดว่างคั่นระหว่างแต่ละข้อ เพื่อให้ AI แยกขอบเขตข้อได้ถูก</li>
@@ -506,7 +596,7 @@
         </div>
 
         <div class="hw-help-section hw-help-bad">
-            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ควรเลี่ยง</h4>
+            <h4><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span> ควรเลี่ยง</h4>
             <ul>
                 <li>เขียนหลายข้อติดกันเป็นย่อหน้าเดียวไม่มีเลขข้อคั่น</li>
                 <li>ไฟล์เอียง เบลอ หรือมีเงา/แสงสะท้อนทับตัวอักษร</li>
@@ -624,9 +714,9 @@ document.getElementById('thumbnailInput').addEventListener('change', function(e)
             <div class="file-preview">
                 <img src="${ev.target.result}" alt="New thumbnail">
                 <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button aria-label="ลบ" class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                <button aria-label="ลบ" class="btn btn-danger" onclick="removeThumbnail()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
-        document.getElementById('thumbUploadLabel').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เลือกรูปปกใหม่แล้ว';
+        document.getElementById('thumbUploadLabel').innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เลือกรูปปกใหม่แล้ว';
     };
     reader.readAsDataURL(file);
 });
@@ -654,7 +744,7 @@ function addExistingLesson(lesson, idx) {
     const src = getLessonSources(lesson);
     lessons.push({ id: lid, file: null, existingVideoUrl: src.videoUrl, existingDocUrl: src.docUrl, existingDocType: src.docType });
 
-    const docLabel = src.docUrl ? `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> เอกสารเดิม: ${src.docUrl.split('/').pop().substring(0,40)}` : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ยังไม่มีเอกสาร';
+    const docLabel = src.docUrl ? `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> เอกสารเดิม: ${src.docUrl.split('/').pop().substring(0,40)}` : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ยังไม่มีเอกสาร';
 
     const html = `
         <div class="lesson-item existing" id="${lid}">
@@ -663,41 +753,41 @@ function addExistingLesson(lesson, idx) {
                 <button class="btn btn-danger" onclick="removeLesson('${lid}')">ลบบทเรียน</button>
             </div>
             <div class="form-group">
-                <label>ชื่อบทเรียน <span class="required">*</span></label>
-                <input type="text" class="form-control lesson-title" value="${escapeAttr(lesson.title || '')}">
+                <label for="${lid}-title">ชื่อบทเรียน <span class="required">*</span></label>
+                <input type="text" class="form-control lesson-title" id="${lid}-title" value="${escapeAttr(lesson.title || '')}">
             </div>
             <div class="form-group">
-                <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
-                <textarea class="form-control lesson-desc" rows="2">${snEscapeHtml(lesson.description || '')}</textarea>
+                <label for="${lid}-desc">คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
+                <textarea class="form-control lesson-desc" id="${lid}-desc" rows="2">${snEscapeHtml(lesson.description || '')}</textarea>
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ)</label>
-                <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่" value="${escapeAttr(src.videoUrl)}">
+                <label for="${lid}-youtube"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ)</label>
+                <input type="text" class="form-control lesson-youtube-url" id="${lid}-youtube" placeholder="วาง YouTube URL ที่นี่" value="${escapeAttr(src.videoUrl)}">
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ)</label>
                 <div class="existing-file-badge">${docLabel}</div>
                 <div id="uploadArea-${lid}">
-                    <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                        <div class="file-upload-icon" style="font-size:var(--text-2xl);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
+                    <div class="file-upload-area" role="button" tabindex="0" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
+                        <div class="file-upload-icon" style="font-size:var(--text-2xl);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF ใหม่ (แทนที่ไฟล์เดิม)</p>
                         <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น — ปล่อยว่างไว้ถ้าไม่ต้องการเปลี่ยน</small>
                     </div>
                     <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
                     <div id="lessonFilePreview-${lid}"></div>
                 </div>
-                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
             </div>
 
-            <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span> หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
+            <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line);">
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span> หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> แตกหัวข้อจากไฟล์ PDF</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> แตกหัวข้อจากไฟล์ PDF</button>
                 </div>
                 <div id="subtopicStatus-${lid}" class="ai-loading-text"></div>
                 <div id="subtopicsList-${lid}"></div>
-                <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addSubtopicRow('${lid}')">+ เพิ่มหัวข้อย่อยเอง</button>
+                <button type="button" class="btn btn-outline" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="addSubtopicRow('${lid}')">+ เพิ่มหัวข้อย่อยเอง</button>
             </div>
         </div>`;
     document.getElementById('lessonsList').insertAdjacentHTML('beforeend', html);
@@ -713,44 +803,44 @@ window.addLesson = function() {
     const html = `
         <div class="lesson-item new-lesson" id="${lid}">
             <div class="lesson-header">
-                <span class="lesson-number new-badge"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> บทเรียนใหม่</span>
+                <span class="lesson-number new-badge"><span class="sn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> บทเรียนใหม่</span>
                 <button aria-label="ลบ" class="btn btn-danger" onclick="removeLesson('${lid}')">ลบ</button>
             </div>
             <div class="form-group">
-                <label>ชื่อบทเรียน <span class="required">*</span></label>
-                <input type="text" class="form-control lesson-title" placeholder="ชื่อบทเรียน">
+                <label for="${lid}-title">ชื่อบทเรียน <span class="required">*</span></label>
+                <input type="text" class="form-control lesson-title" id="${lid}-title" placeholder="ชื่อบทเรียน">
             </div>
             <div class="form-group">
-                <label>คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
-                <textarea class="form-control lesson-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
+                <label for="${lid}-desc">คำอธิบายบทเรียน (ไม่บังคับ — ใช้ช่วย AI แนะนำหัวข้อย่อยด้วย)</label>
+                <textarea class="form-control lesson-desc" id="${lid}-desc" rows="2" placeholder="สรุปคร่าวๆ ว่าบทนี้สอนอะไร"></textarea>
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ)</label>
-                <input type="text" class="form-control lesson-youtube-url" placeholder="วาง YouTube URL ที่นี่">
+                <label for="${lid}-youtube"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> วิดีโอ YouTube (ไม่บังคับ)</label>
+                <input type="text" class="form-control lesson-youtube-url" id="${lid}-youtube" placeholder="วาง YouTube URL ที่นี่">
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> เอกสารประกอบ PDF (ไม่บังคับ)</label>
                 <div id="uploadArea-${lid}">
-                    <div class="file-upload-area" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
-                        <div class="file-upload-icon" style="font-size:var(--text-2xl);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
+                    <div class="file-upload-area" role="button" tabindex="0" onclick="document.getElementById('lessonFileInput-${lid}').click()" style="padding:1rem;">
+                        <div class="file-upload-icon" style="font-size:var(--text-2xl);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span></div>
                         <p style="font-size:0.9rem;">คลิกเพื่ออัปโหลดไฟล์ PDF</p>
                         <small style="color:var(--text-dim);">รองรับเฉพาะไฟล์ PDF เท่านั้น</small>
                     </div>
                     <input type="file" id="lessonFileInput-${lid}" accept=".pdf,application/pdf" style="display:none;">
                     <div id="lessonFilePreview-${lid}"></div>
                 </div>
-                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
+                <small style="color:var(--text-dim);display:block;margin-top:0.4rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> ต้องมีวิดีโอหรือเอกสารอย่างน้อย 1 อย่าง</small>
             </div>
 
-            <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-color);">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span> หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
+            <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line);">
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span> หัวข้อย่อยในบทนี้ (สารบัญ — ไม่บังคับ)</label>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> แตกหัวข้อจากไฟล์ PDF ที่อัปโหลด</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="generateSubtopicsWithAI('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span> AI แนะนำหัวข้อย่อยจากชื่อ/คำอธิบาย</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="extractSubtopicsFromPDF('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span> แตกหัวข้อจากไฟล์ PDF ที่อัปโหลด</button>
                 </div>
                 <div id="subtopicStatus-${lid}" class="ai-loading-text"></div>
                 <div id="subtopicsList-${lid}"></div>
-                <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addSubtopicRow('${lid}')">+ เพิ่มหัวข้อย่อยเอง</button>
+                <button type="button" class="btn btn-outline" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="addSubtopicRow('${lid}')">+ เพิ่มหัวข้อย่อยเอง</button>
             </div>
         </div>`;
     document.getElementById('lessonsList').insertAdjacentHTML('beforeend', html);
@@ -774,7 +864,7 @@ function bindLessonFileInput(lid) {
             <div class="file-preview">
                 <div style="font-size:var(--text-2xl);">${getFileIcon(file.name)}</div>
                 <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-                <button aria-label="ลบ" class="btn btn-danger" onclick="removeLessonFile('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                <button aria-label="ลบ" class="btn btn-danger" onclick="removeLessonFile('${lid}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     });
 }
@@ -813,7 +903,7 @@ window.addSubtopicRow = function(lessonId, data = null) {
                 value="${escapeAttr(data?.title || '')}" style="flex:2;">
             <input type="text" class="form-control subtopic-note" placeholder="หมายเหตุ เช่น นาที 0-5 / หน้า 1-3 (ไม่บังคับ)"
                 value="${escapeAttr(data?.note || '')}" style="flex:1;">
-            <button aria-label="ลบ" type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" type="button" class="btn btn-danger" style="padding:0.5rem 0.8rem;" onclick="document.getElementById('${rowId}').remove()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`);
 };
 
@@ -866,10 +956,10 @@ window.generateSubtopicsWithAI = async function(lessonId) {
 
         clearSubtopics(lessonId);
         items.forEach(it => addSubtopicRow(lessonId, it));
-        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI แนะนำหัวข้อย่อยให้แล้ว ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI แนะนำหัวข้อย่อยให้แล้ว ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
     } catch (err) {
         console.error('generateSubtopicsWithAI error:', err);
-        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
+        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     }
 };
 
@@ -927,16 +1017,16 @@ ${analyzed.text}`;
 
         clearSubtopics(lessonId);
         items.forEach(it => addSubtopicRow(lessonId, it));
-        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> แตกหัวข้อจากไฟล์ PDF ได้ ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
+        statusEl.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> แตกหัวข้อจากไฟล์ PDF ได้ ${items.length} ข้อ — แก้ไข/ลบเพิ่มได้ตามต้องการ`;
     } catch (err) {
         console.error('extractSubtopicsFromPDF error:', err);
-        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
+        statusEl.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     }
 };
 
 function getFileIcon(name) {
     const ext = name.split('.').pop().toLowerCase();
-    return {'pdf':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>','ppt':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','pptx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','doc':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','docx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','xls':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','xlsx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','jpg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','jpeg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','png':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','mp4':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20l-3 5H5z"/><rect x="2" y="8" width="20" height="13"/></svg></span>','mov':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20l-3 5H5z"/><rect x="2" y="8" width="20" height="13"/></svg></span>'}[ext] || '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>';
+    return {'pdf':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>','ppt':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','pptx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span>','doc':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','docx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span>','xls':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','xlsx':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>','jpg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','jpeg':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','png':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>','mp4':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20l-3 5H5z"/><rect x="2" y="8" width="20" height="13"/></svg></span>','mov':'<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20l-3 5H5z"/><rect x="2" y="8" width="20" height="13"/></svg></span>'}[ext] || '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>';
 }
 function detectFileType(name) {
     const ext = name.split('.').pop().toLowerCase();
@@ -986,14 +1076,14 @@ window.addQuizQuestion = function(data = null) {
                     <button aria-label="ลบ" class="btn btn-danger" onclick="removeQuizQuestion('${qId}')">ลบ</button>
                 </div>
             </div>
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.9rem;font-size:0.82rem;color:var(--text-dim);flex-wrap:wrap;">
-                <label style="margin:0;white-space:nowrap;font-size:0.82rem;">เปิดให้ทำวันที่:</label>
-                <input type="datetime-local" class="form-control quiz-release" style="width:auto;padding:0.35rem 0.6rem;font-size:0.82rem;" value="${data?.releaseAt || ''}">
-                <span style="font-size:0.76rem;">เว้นว่าง = เปิดให้ทำได้ทันที</span>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.9rem;font-size:0.9rem;color:var(--text-dim);flex-wrap:wrap;">
+                <label for="${qId}-release" style="margin:0;white-space:nowrap;font-size:0.95rem;color:var(--text-main);">เปิดให้ทำวันที่:</label>
+                <input type="datetime-local" class="form-control quiz-release" id="${qId}-release" style="width:auto;padding:0.35rem 0.6rem;font-size:0.82rem;" value="${data?.releaseAt || ''}">
+                <span style="font-size:0.85rem;">เว้นว่าง = เปิดให้ทำได้ทันที</span>
             </div>
             <div class="form-group">
-                <label>คำถาม <span class="required">*</span></label>
-                <textarea class="form-control quiz-question-text" rows="2">${snEscapeHtml(data?.question || '')}</textarea>
+                <label for="${qId}-question">คำถาม <span class="required">*</span></label>
+                <textarea class="form-control quiz-question-text" id="${qId}-question" rows="2">${snEscapeHtml(data?.question || '')}</textarea>
             </div>
             ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>
@@ -1010,11 +1100,11 @@ function quizImageUploadHtml(qId, data) {
     return `
             <div class="form-group">
                 <label>รูปภาพประกอบคำถาม (ไม่บังคับ)</label>
-                <div class="quiz-image-upload-area" onclick="document.getElementById('${qId}-image-input').click()"
-                    style="border:1.5px dashed var(--border-color);border-radius:var(--radius-sm);padding:0.6rem 1rem;
-                    cursor:pointer;font-size:0.82rem;color:var(--text-dim);text-align:center;transition:border-color 0.15s;"
-                    onmouseover="this.style.borderColor='var(--primary-blue)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
+                <div class="quiz-image-upload-area" role="button" tabindex="0" onclick="document.getElementById('${qId}-image-input').click()"
+                    style="border:1.5px dashed var(--line-strong);border-radius:var(--radius-md);padding:0.75rem 1rem;min-height:48px;
+                    cursor:pointer;font-size:0.95rem;color:var(--text-dim);text-align:center;transition:border-color 0.15s;"
+                    onmouseover="this.style.borderColor='var(--primary-blue)'" onmouseout="this.style.borderColor='var(--line-strong)'">
+                    <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h3l2-3h8l2 3h3a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> คลิกเพื่อแนบรูปภาพประกอบคำถาม (เช่น diagram, กราฟ, ภาพประกอบ)
                 </div>
                 <input type="file" id="${qId}-image-input" accept="image/*" style="display:none;">
                 <input type="hidden" class="quiz-image-url" value="${data?.imageUrl || ''}">
@@ -1022,8 +1112,8 @@ function quizImageUploadHtml(qId, data) {
                     <div style="position:relative;display:inline-block;margin-top:0.6rem;">
                         <img alt="รูปประกอบ" src="${data.imageUrl}" style="max-width:220px;max-height:140px;border-radius:var(--radius-sm);display:block;">
                         <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
-                            style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
-                            background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                            style="position:absolute;top:-10px;right:-10px;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+                            background:var(--bg-elevated);color:var(--ec-danger-text);border:1px solid color-mix(in srgb,var(--danger) 45%,transparent);box-shadow:var(--shadow-sm);cursor:pointer;font-size:1rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
                     </div>` : ''}</div>
             </div>`;
 }
@@ -1032,7 +1122,7 @@ async function handleQuizImageUpload(qId, file) {
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast('กรุณาเลือกไฟล์รูปภาพเท่านั้นครับ', 'warning'); return; }
     const preview = document.getElementById(`${qId}-image-preview`);
-    preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-dim);">กำลังอัปโหลด...</div>`;
+    preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.9rem;color:var(--text-dim);">กำลังอัปโหลด...</div>`;
     try {
         const url = await uploadToCloudinary(file, 'skillnest/quiz-images');
         document.querySelector(`#${qId} .quiz-image-url`).value = url;
@@ -1040,11 +1130,11 @@ async function handleQuizImageUpload(qId, file) {
             <div style="position:relative;display:inline-block;margin-top:0.6rem;">
                 <img alt="รูปประกอบ" src="${url}" style="max-width:220px;max-height:140px;border-radius:var(--radius-sm);display:block;">
                 <button aria-label="ลบ" type="button" onclick="removeQuizQuestionImage('${qId}')"
-                    style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
-                    background:#ef4444;color:white;border:none;cursor:pointer;font-size:0.8rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                    style="position:absolute;top:-10px;right:-10px;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+                    background:var(--bg-elevated);color:var(--ec-danger-text);border:1px solid color-mix(in srgb,var(--danger) 45%,transparent);box-shadow:var(--shadow-sm);cursor:pointer;font-size:1rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
             </div>`;
     } catch (e) {
-        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.8rem;color:#f87171;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${snEscapeHtml(e.message)}</div>`;
+        preview.innerHTML = `<div style="margin-top:0.6rem;font-size:0.9rem;color:var(--ec-danger-text);"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> อัปโหลดไม่สำเร็จ: ${snEscapeHtml(e.message)}</div>`;
     }
 }
 
@@ -1061,19 +1151,19 @@ function renderQuizAnswerArea(qId, qType, data) {
     const correctMultiple = data?.correctMultiple || [];
     const explanationHtml = `
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>คำอธิบายเฉลย (ไม่บังคับ — โชว์ให้นักเรียนดูหลังทำ Quiz เสร็จ)</label>
-            <textarea class="form-control quiz-explanation" rows="2">${snEscapeHtml(data?.explanation || '')}</textarea>
+            <label for="${qId}-explanation">คำอธิบายเฉลย (ไม่บังคับ — โชว์ให้นักเรียนดูหลังทำ Quiz เสร็จ)</label>
+            <textarea class="form-control quiz-explanation" id="${qId}-explanation" rows="2">${snEscapeHtml(data?.explanation || '')}</textarea>
         </div>`;
 
     if (qType === 'true_false') {
         area.innerHTML = `
         <div class="quiz-choices" style="grid-template-columns:1fr 1fr;">
-            <div class="quiz-choice-item"><span class="choice-label">A</span><input type="text" class="form-control choice-input" value="ถูก" readonly></div>
-            <div class="quiz-choice-item"><span class="choice-label">B</span><input type="text" class="form-control choice-input" value="ผิด" readonly></div>
+            <div class="quiz-choice-item"><label class="choice-label" for="${qId}-choice-A">A</label><input type="text" class="form-control choice-input" id="${qId}-choice-A" value="ถูก" readonly></div>
+            <div class="quiz-choice-item"><label class="choice-label" for="${qId}-choice-B">B</label><input type="text" class="form-control choice-input" id="${qId}-choice-B" value="ผิด" readonly></div>
         </div>
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>เฉลย</label>
-            <select class="form-control quiz-correct">
+            <label for="${qId}-correct">เฉลย</label>
+            <select class="form-control quiz-correct" id="${qId}-correct">
                 <option value="A" ${correct==='A'?'selected':''}>A - ถูก</option>
                 <option value="B" ${correct==='B'?'selected':''}>B - ผิด</option>
             </select>
@@ -1084,15 +1174,15 @@ function renderQuizAnswerArea(qId, qType, data) {
         <div class="quiz-choices">
             ${['A','B','C','D'].map((l,i) => `
             <div class="quiz-choice-item">
-                <span class="choice-label">${l}</span>
-                <input type="text" class="form-control choice-input" placeholder="ตัวเลือก ${l}" value="${escapeAttr(choices[i]||'')}">
+                <label class="choice-label" for="${qId}-choice-${l}">${l}</label>
+                <input type="text" class="form-control choice-input" id="${qId}-choice-${l}" placeholder="ตัวเลือก ${l}" value="${escapeAttr(choices[i]||'')}">
             </div>`).join('')}
         </div>
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>เฉลย (เลือกได้มากกว่า 1 ข้อ)</label>
-            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <label id="${qId}-correct-multi-label">เฉลย (เลือกได้มากกว่า 1 ข้อ)</label>
+            <div style="display:flex;gap:0.5rem 1.25rem;flex-wrap:wrap;" role="group" aria-labelledby="${qId}-correct-multi-label">
                 ${['A','B','C','D'].map(l => `
-                <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;color:var(--text-main);">
+                <label style="display:flex;align-items:center;gap:0.5rem;min-height:44px;font-weight:400;color:var(--text-main);cursor:pointer;">
                     <input type="checkbox" class="quiz-correct-multi" value="${l}" ${correctMultiple.includes(l)?'checked':''}> ${l}
                 </label>`).join('')}
             </div>
@@ -1101,22 +1191,22 @@ function renderQuizAnswerArea(qId, qType, data) {
     } else if (qType === 'short_answer') {
         area.innerHTML = `
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>คำตอบตัวอย่าง/เกณฑ์การให้คะแนน (สำหรับอาจารย์อ้างอิง ไม่บังคับ)</label>
-            <textarea class="form-control quiz-sample-answer" rows="2">${data?.sampleAnswer || ''}</textarea>
+            <label for="${qId}-sample">คำตอบตัวอย่าง/เกณฑ์การให้คะแนน (สำหรับอาจารย์อ้างอิง ไม่บังคับ)</label>
+            <textarea class="form-control quiz-sample-answer" id="${qId}-sample" rows="2">${data?.sampleAnswer || ''}</textarea>
         </div>
-        <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.82rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
+        <div class="alert alert-info" style="margin-top:0.5rem;font-size:0.9rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> คำถามประเภทนี้ต้องให้อาจารย์ตรวจและให้คะแนนเองหลังนักเรียนส่งคำตอบ</div>`;
     } else {
         area.innerHTML = `
         <div class="quiz-choices">
             ${['A','B','C','D'].map((l,i) => `
             <div class="quiz-choice-item">
-                <span class="choice-label">${l}</span>
-                <input type="text" class="form-control choice-input" placeholder="ตัวเลือก ${l}" value="${escapeAttr(choices[i]||'')}">
+                <label class="choice-label" for="${qId}-choice-${l}">${l}</label>
+                <input type="text" class="form-control choice-input" id="${qId}-choice-${l}" placeholder="ตัวเลือก ${l}" value="${escapeAttr(choices[i]||'')}">
             </div>`).join('')}
         </div>
         <div class="form-group" style="margin-top:0.75rem;">
-            <label>เฉลย</label>
-            <select class="form-control quiz-correct">
+            <label for="${qId}-correct">เฉลย</label>
+            <select class="form-control quiz-correct" id="${qId}-correct">
                 ${['A','B','C','D'].map(l=>`<option value="${l}" ${correct===l?'selected':''}>${l}</option>`).join('')}
             </select>
         </div>
@@ -1270,8 +1360,8 @@ window.addFormQuestion = function(hwId, data = null) {
                 </div>
             </div>
             <div class="form-group">
-                <label>คำถาม <span class="required">*</span></label>
-                <textarea class="form-control quiz-question-text" rows="2">${snEscapeHtml(data?.question || '')}</textarea>
+                <label for="${qId}-question">คำถาม <span class="required">*</span></label>
+                <textarea class="form-control quiz-question-text" id="${qId}-question" rows="2">${snEscapeHtml(data?.question || '')}</textarea>
             </div>
             ${quizImageUploadHtml(qId, data)}
             <div class="quiz-answer-area" id="${qId}-answer-area"></div>
@@ -1307,7 +1397,7 @@ window.copyHwHelpTemplate = async function() {
     try {
         await navigator.clipboard.writeText(text);
         const original = btn.textContent;
-        btn.innerHTML = 'คัดลอกแล้ว <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
+        btn.innerHTML = 'คัดลอกแล้ว <span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
         setTimeout(() => { btn.textContent = original; }, 1800);
     } catch (e) {
         toast('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วคัดลอกเอง', 'error');
@@ -1324,12 +1414,12 @@ document.getElementById('hwSourceFileInput').addEventListener('change', function
     const file = e.target.files[0];
     if (!file) return;
     hwSourceFile = file;
-    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
+    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
     document.getElementById('hwSourceFilePreview').innerHTML = `
         <div class="file-preview">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button aria-label="ลบ" class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" class="btn btn-danger" onclick="removeHwSourceFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -1427,12 +1517,12 @@ document.getElementById('courseDescFileInput').addEventListener('change', functi
     const file = e.target.files[0];
     if (!file) return;
     courseDescFile = file;
-    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
+    const icon = file.type.startsWith('image/') ? '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>' : '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg></span>';
     document.getElementById('courseDescFilePreview').innerHTML = `
-        <div class="file-preview" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--input-bg,rgba(255,255,255,0.05));border-radius:var(--radius-sm);margin-top:0.5rem;">
+        <div class="file-preview" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--input-bg);border:1px solid var(--line);border-radius:var(--radius-md);margin-top:0.5rem;">
             <div style="font-size:2rem;">${icon}</div>
             <div style="flex:1;"><strong>${snEscapeHtml(file.name)}</strong><br><small>${(file.size/1024).toFixed(1)} KB</small></div>
-            <button aria-label="ลบ" type="button" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+            <button aria-label="ลบ" type="button" class="btn btn-danger" onclick="removeCourseDescFile()"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 });
 
@@ -1634,15 +1724,15 @@ window.extractHomeworkWithAI = async function() {
         });
 
         const imgCount = Object.keys(pageUrlMap).length;
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เพิ่มการบ้านให้แล้ว ${items.length} ข้อ${imgCount > 0 ? ` (แนบรูปภาพให้ ${imgCount} หน้า)` : ''} — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> เพิ่มการบ้านให้แล้ว ${items.length} ข้อ${imgCount > 0 ? ` (แนบรูปภาพให้ ${imgCount} หน้า)` : ''} — ตรวจสอบและแก้ไขด้านล่างได้เลย`;
         document.getElementById('homeworkList').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (err) {
         console.error('extractHomeworkWithAI error:', err);
-        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + err.message;
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI แตกเป็นข้อๆ';
+        btn.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI แตกเป็นข้อๆ';
     }
 };
 
@@ -1658,8 +1748,8 @@ function rubricRowHtml(hwId, criterion, points) {
             <input type="text" class="form-control rubric-criterion" placeholder="เช่น ความถูกต้องของโค้ด" value="${escapeAttr(criterion||'')}" style="flex:1;" oninput="updateRubricTotal('${hwId}')">
             <input type="number" class="form-control rubric-points" placeholder="คะแนน" min="0" value="${points??''}" style="width:100px;" oninput="updateRubricTotal('${hwId}')">
             <button aria-label="ลบ" type="button" onclick="document.getElementById('${rowId}').remove(); updateRubricTotal('${hwId}')"
-                style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;
-                width:32px;height:32px;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
+                style="background:transparent;border:1px solid color-mix(in srgb,var(--danger) 40%,transparent);color:var(--ec-danger-text);
+                width:44px;height:44px;border-radius:var(--radius-md);cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
         </div>`;
 }
 
@@ -1695,7 +1785,7 @@ window.generateRubricWithAI = async function(hwId) {
     }
 
     status.classList.add('show');
-    status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI กำลังคิด Rubric...';
+    status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> AI กำลังคิด Rubric...';
 
     const prompt = `คุณเป็นผู้ช่วยอาจารย์ออกแบบเกณฑ์การให้คะแนน (Rubric) สำหรับการบ้านนี้
 ชื่อการบ้าน: ${title || '(ไม่ระบุ)'}
@@ -1721,10 +1811,10 @@ window.generateRubricWithAI = async function(hwId) {
         // ล้างของเดิมแล้วใส่ของใหม่ที่ AI เสนอ
         document.getElementById(`hw-rubric-rows-${hwId}`).innerHTML = '';
         items.forEach(it => addRubricRow(hwId, it.criterion || '', it.points || 0));
-        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI เสนอ Rubric ${items.length} หัวข้อให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ`;
+        status.innerHTML = `<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span> AI เสนอ Rubric ${items.length} หัวข้อให้แล้ว — ตรวจสอบและแก้ไขได้ตามต้องการ`;
     } catch (e) {
         console.error('generateRubricWithAI error:', e);
-        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + e.message;
+        status.innerHTML = '<span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span> เกิดข้อผิดพลาด: ' + e.message;
     }
 };
 
@@ -1747,58 +1837,58 @@ window.addHomework = function(data = null) {
                 </div>
             </div>
             <div class="form-group">
-                <label>ชื่อการบ้าน <span class="required">*</span></label>
-                <input type="text" class="form-control hw-title" placeholder="ชื่อการบ้าน" value="${escapeAttr(data?.title||'')}">
+                <label for="${hwId}-title">ชื่อการบ้าน <span class="required">*</span></label>
+                <input type="text" class="form-control hw-title" id="${hwId}-title" placeholder="ชื่อการบ้าน" value="${escapeAttr(data?.title||'')}">
             </div>
             <div class="form-group">
-                <label>คำอธิบาย / โจทย์</label>
-                <textarea class="form-control hw-desc" rows="3">${snEscapeHtml(data?.description||'')}</textarea>
+                <label for="${hwId}-desc">คำอธิบาย / โจทย์</label>
+                <textarea class="form-control hw-desc" id="${hwId}-desc" rows="3">${snEscapeHtml(data?.description||'')}</textarea>
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>
-                <textarea class="form-control hw-grading-criteria" rows="3" placeholder="เช่น เน้นความถูกต้องของโค้ดเป็นหลัก ไม่หักคะแนนเรื่อง style, ต้องมี comment อธิบายทุกฟังก์ชันถึงจะได้คะแนนเต็ม...">${data?.gradingCriteria||''}</textarea>
+                <label for="${hwId}-criteria"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> เกณฑ์การให้คะแนน (ไม่บังคับ — ใช้ตอน AI ช่วยตรวจงานเท่านั้น นักเรียนไม่เห็น)</label>
+                <textarea class="form-control hw-grading-criteria" id="${hwId}-criteria" rows="3" placeholder="เช่น เน้นความถูกต้องของโค้ดเป็นหลัก ไม่หักคะแนนเรื่อง style, ต้องมี comment อธิบายทุกฟังก์ชันถึงจะได้คะแนนเต็ม...">${data?.gradingCriteria||''}</textarea>
                 <small style="color:var(--text-dim);">เขียนได้อิสระเลยว่าอยากให้ AI เข้มงวด/หย่อนแค่ไหน เน้นอะไร — ระบบจะเอาไปประกอบเป็นคำสั่งให้ AI ใช้ตอนกดปุ่ม "ให้ AI ช่วยตรวจ" ในหน้าตรวจงาน</small>
             </div>
             <div class="form-group">
-                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Rubric — เกณฑ์การให้คะแนนแยกหัวข้อ (ไม่บังคับ — นักเรียนเห็นได้)</label>
+                <label><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></span> Rubric — เกณฑ์การให้คะแนนแยกหัวข้อ (ไม่บังคับ — นักเรียนเห็นได้)</label>
                 <small style="color:var(--text-dim);display:block;margin-bottom:0.5rem;">ถ้าใส่ไว้ นักเรียนจะเห็นตารางนี้ก่อนทำ และตอนตรวจงานจะให้คะแนนแยกทีละหัวข้อแทนคะแนนรวมช่องเดียว</small>
                 <div id="hw-rubric-rows-${hwId}"></div>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;align-items:center;">
-                    <button type="button" class="btn btn-outline" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="addRubricRow('${hwId}')">+ เพิ่มหัวข้อ</button>
-                    <button type="button" class="btn btn-ai" style="font-size:0.82rem;padding:0.4rem 0.9rem;" onclick="generateRubricWithAI('${hwId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI ช่วยสร้าง Rubric</button>
-                    <span id="hw-rubric-total-${hwId}" style="font-size:0.8rem;color:var(--text-dim);"></span>
+                    <button type="button" class="btn btn-outline" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="addRubricRow('${hwId}')">+ เพิ่มหัวข้อ</button>
+                    <button type="button" class="btn btn-ai" style="font-size:0.9rem;padding:0.5rem 0.9rem;" onclick="generateRubricWithAI('${hwId}')"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg></span> ให้ AI ช่วยสร้าง Rubric</button>
+                    <span id="hw-rubric-total-${hwId}" style="font-size:0.9rem;color:var(--text-dim);"></span>
                 </div>
                 <div id="hw-rubric-status-${hwId}" class="ai-loading-text"></div>
             </div>
             ${quizImageUploadHtml(hwId, data)}
             <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
                 <div class="form-group">
-                    <label>เปิดให้ทำวันที่ (ไม่บังคับ)</label>
-                    <input type="datetime-local" class="form-control hw-release" value="${data?.releaseAt||''}">
+                    <label for="${hwId}-release">เปิดให้ทำวันที่ (ไม่บังคับ)</label>
+                    <input type="datetime-local" class="form-control hw-release" id="${hwId}-release" value="${data?.releaseAt||''}">
                     <small>เว้นว่างไว้ = เปิดให้ทำได้ทันที</small>
                 </div>
                 <div class="form-group">
-                    <label>วันกำหนดส่ง</label>
-                    <input type="datetime-local" class="form-control hw-deadline" value="${data?.deadline||''}">
+                    <label for="${hwId}-deadline">วันกำหนดส่ง</label>
+                    <input type="datetime-local" class="form-control hw-deadline" id="${hwId}-deadline" value="${data?.deadline||''}">
                 </div>
                 <div class="form-group">
-                    <label>คะแนนเต็ม</label>
-                    <input type="number" class="form-control hw-maxscore" placeholder="100" min="1" value="${data?.maxScore||100}" oninput="updateRubricTotal('${hwId}')">
+                    <label for="${hwId}-maxscore">คะแนนเต็ม</label>
+                    <input type="number" class="form-control hw-maxscore" id="${hwId}-maxscore" placeholder="100" min="1" value="${data?.maxScore||100}" oninput="updateRubricTotal('${hwId}')">
                 </div>
             </div>
             <div class="form-group">
-                <label>ประเภทการส่งงาน</label>
-                <div class="hw-type-selector">
-                    <div class="hw-type-btn ${typeActive('text')}" onclick="setHwType('${hwId}','text',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> พิมพ์ข้อความ</div>
-                    <div class="hw-type-btn ${typeActive('file')}" onclick="setHwType('${hwId}','file',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> อัปโหลดไฟล์</div>
-                    <div class="hw-type-btn ${typeActive('both')}" onclick="setHwType('${hwId}','both',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ทั้งสองแบบ</div>
-                    <div class="hw-type-btn ${typeActive('code')}" onclick="setHwType('${hwId}','code',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span> เขียนโค้ด (IDE)</div>
-                    <div class="hw-type-btn ${typeActive('form')}" onclick="setHwType('${hwId}','form',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> แบบฟอร์มหลายคำถาม</div>
+                <label id="${hwId}-type-label">ประเภทการส่งงาน</label>
+                <div class="hw-type-selector" role="group" aria-labelledby="${hwId}-type-label">
+                    <button type="button" class="hw-type-btn ${typeActive('text')}" onclick="setHwType('${hwId}','text',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span> พิมพ์ข้อความ</button>
+                    <button type="button" class="hw-type-btn ${typeActive('file')}" onclick="setHwType('${hwId}','file',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> อัปโหลดไฟล์</button>
+                    <button type="button" class="hw-type-btn ${typeActive('both')}" onclick="setHwType('${hwId}','both',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4Z"/></svg></span><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95L10.5 17.56a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span> ทั้งสองแบบ</button>
+                    <button type="button" class="hw-type-btn ${typeActive('code')}" onclick="setHwType('${hwId}','code',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span> เขียนโค้ด (IDE)</button>
+                    <button type="button" class="hw-type-btn ${typeActive('form')}" onclick="setHwType('${hwId}','form',this)"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></span> แบบฟอร์มหลายคำถาม</button>
                 </div>
                 <div class="hw-code-opts" id="hw-code-opts-${hwId}" style="display:${initType==='code'?'block':'none'};margin-top:0.75rem;">
-                    <label style="font-size:0.85rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
+                    <label for="hw-code-lang-${hwId}" style="font-size:0.95rem;">ภาษาโปรแกรม (สำหรับ IDE)</label>
                     <select class="hw-code-lang" id="hw-code-lang-${hwId}" onchange="setHwCodeLang('${hwId}', this.value)"
-                        style="width:100%;padding:0.6rem;border-radius:var(--radius-sm);background:var(--input-bg);color:var(--text-main);border:1px solid var(--border-color);margin-top:0.4rem;">
+                        style="width:100%;min-height:48px;padding:0.6rem 0.75rem;font-size:1rem;border-radius:var(--radius-md);background:var(--input-bg);color:var(--text-main);border:1px solid var(--line-strong);margin-top:0.4rem;">
                         <option value="python" ${(data?.codeLanguage||'python')==='python'?'selected':''}>Python (รันในเบราว์เซอร์ได้)</option>
                         <option value="javascript" ${data?.codeLanguage==='javascript'?'selected':''}>JavaScript (รันในเบราว์เซอร์ได้)</option>
                         <option value="html" ${data?.codeLanguage==='html'?'selected':''}>HTML/CSS (แสดงผลในเบราว์เซอร์ได้)</option>
@@ -1806,7 +1896,7 @@ window.addHomework = function(data = null) {
                     </select>
                 </div>
                 <div class="hw-form-opts" id="hw-form-opts-${hwId}" style="display:${initType==='form'?'block':'none'};margin-top:0.75rem;">
-                    <div class="alert alert-info" style="margin-bottom:1rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> แบบฟอร์มหลายคำถาม — นักเรียนทำทีละข้อแบบ Google Forms ข้อปรนัย/เลือกหลายข้อ/ถูกผิด ระบบตรวจให้อัตโนมัติ ส่วนข้อตอบสั้น/เรียงความ อาจารย์ต้องตรวจเองทีหลัง</div>
+                    <div class="alert alert-info" style="margin-bottom:1rem;"><span class="sn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.75V17h8v-2.25A7 7 0 0012 2z"/></svg></span> แบบฟอร์มหลายคำถาม — นักเรียนทำทีละข้อแบบ Google Forms ข้อปรนัย/เลือกหลายข้อ/ถูกผิด ระบบตรวจให้อัตโนมัติ ส่วนข้อตอบสั้น/เรียงความ อาจารย์ต้องตรวจเองทีหลัง</div>
                     <div id="hw-form-questions-${hwId}"></div>
                     <button type="button" class="btn btn-outline" onclick="addFormQuestion('${hwId}')">+ เพิ่มคำถามในฟอร์ม</button>
                 </div>
@@ -2109,6 +2199,82 @@ async function initEditCoursePage() {
 }
 
 initEditCoursePage();
+</script>
+<script>
+// ============ A11Y (เพิ่มเติมแยก ไม่แก้ฟังก์ชันเดิม) ============
+// 1) aria-pressed ของแท็บหลัก (.edit-tab) และประเภทการส่งงาน (.hw-type-btn) ตาม class .active
+// 2) พื้นที่อัปโหลด (role="button"): Enter / Space = คลิกเดิม
+// 3) หน้าต่างตัวอย่างไฟล์: ย้ายโฟกัสเข้า, วน Tab อยู่ข้างใน, คืนโฟกัสตอนปิด (Esc ใช้ตัวเดิมของหน้า)
+(function () {
+    function syncPressed(root) {
+        (root || document).querySelectorAll('.edit-tab, .hw-type-btn').forEach(function (b) {
+            b.setAttribute('aria-pressed', b.classList.contains('active') ? 'true' : 'false');
+        });
+    }
+    ['.edit-tabs', '#homeworkList'].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (!el) return;
+        new MutationObserver(function () { syncPressed(el); })
+            .observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    });
+    syncPressed();
+
+    document.addEventListener('keydown', function (e) {
+        var t = e.target;
+        if (!t || !t.matches || !t.matches('[role="button"].file-upload-area, [role="button"].quiz-image-upload-area')) return;
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            t.click();
+        }
+    });
+
+    var overlay = document.getElementById('hwHelpOverlay');
+    if (!overlay) return;
+    var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    var opener = null, inerted = [];
+    function focusables() {
+        return Array.prototype.filter.call(overlay.querySelectorAll(FOCUSABLE), function (el) {
+            return el.offsetWidth || el.offsetHeight || el.getClientRects().length;
+        });
+    }
+    function setBackgroundInert(on) {
+        if (on) {
+            inerted = Array.prototype.filter.call(document.body.children, function (el) {
+                return el !== overlay && el.tagName !== 'SCRIPT' && !el.inert;
+            });
+            inerted.forEach(function (el) { el.inert = true; });
+        } else {
+            inerted.forEach(function (el) { el.inert = false; });
+            inerted = [];
+        }
+    }
+    var isOpen = false;
+    new MutationObserver(function () {
+        var show = overlay.classList.contains('show');
+        if (show && !isOpen) {
+            isOpen = true;
+            opener = document.activeElement;
+            setBackgroundInert(true);
+            var first = focusables()[0];
+            if (first) first.focus();
+        } else if (!show && isOpen) {
+            isOpen = false;
+            setBackgroundInert(false);
+            if (opener && opener.isConnected) opener.focus();
+            opener = null;
+        }
+    }).observe(overlay, { attributes: true, attributeFilter: ['class'] });
+
+    document.addEventListener('keydown', function (e) {
+        if (!isOpen || e.key !== 'Tab') return;
+        var list = focusables();
+        if (!list.length) { e.preventDefault(); return; }
+        var first = list[0], last = list[list.length - 1], a = document.activeElement;
+        if (!overlay.contains(a)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+        else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+    });
+})();
 </script>
 <script src="theme-switcher.js"></script>
 <script type="module" src="app-nav.js"></script>
