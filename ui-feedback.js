@@ -163,9 +163,36 @@
         return html;
     }
 
+    /**
+     * emptyState({ icon, title, text, linkText, linkHref }) -> HTML string ของกล่อง "ยังไม่มีข้อมูล" แบบ .sn-empty-inline (theme.css)
+     * - icon: SVG ที่โค้ดเขียนเอง (ไม่ escape) — แสดงเมื่อส่งมาเท่านั้น
+     * - title/text/linkText/linkHref: escape ทั้งหมด
+     * - linkHref: รับเฉพาะลิงก์ภายในแบบ relative (เช่น "dashboard.html") ถ้าไม่ผ่านจะไม่แสดงลิงก์
+     */
+    function isInternalRelativeHref(href) {
+        if (typeof href !== 'string' || !href) return false;
+        if (/[\u0000- \u007F\\]/.test(href)) return false;   // ช่องว่าง/อักขระควบคุม/backslash
+        if (/^[a-z][a-z0-9+.\-]*:/i.test(href)) return false;     // มี scheme (javascript:, http:, data: ...)
+        if (href.charAt(0) === '/') return false;                  // "/..." และ "//host"
+        return true;
+    }
+
+    function emptyState(opts) {
+        const o = opts || {};
+        let html = '<div class="sn-empty-inline">';
+        if (o.icon) html += '<div class="sn-empty-icon" aria-hidden="true">' + o.icon + '</div>';
+        html += '<strong>' + escapeHtml(o.title || '') + '</strong>';
+        if (o.text) html += '<p>' + escapeHtml(o.text) + '</p>';
+        if (o.linkText && isInternalRelativeHref(o.linkHref)) {
+            html += '<a href="' + escapeHtml(o.linkHref) + '">' + escapeHtml(o.linkText) + '</a>';
+        }
+        return html + '</div>';
+    }
+
     window.toast = toast;
     window.confirmDialog = confirmDialog;
     window.snEscapeHtml = escapeHtml;
     window.skeletonRows = skeletonRows;
     window.skeletonCards = skeletonCards;
+    window.emptyState = emptyState;
 })();
